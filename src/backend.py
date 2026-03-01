@@ -5,34 +5,33 @@ from json_manager import JsonManager
 from input_manager import InputManager
 from pdfrw import PdfReader, PdfWriter
 
-
-
 class textToJSON():
-    def __init__(self, transcript_text, target_fields, json={}):
-        self.__transcript_text = transcript_text # str
-        self.__target_fields = target_fields # List, contains the template field.
-        self.__json = json # dictionary
+    def __init__(self, transcript_text, target_fields, json_data=None):
+        # Initialize internal variables
+        self.__transcript_text = transcript_text  # Raw string from transcription
+        self.__target_fields = target_fields      # List of fields to extract
+        self.__json = json_data if json_data is not None else {}
+        
+        # Validate input types before processing
         self.type_check_all()
+        # Start the extraction process
         self.main_loop()
 
-    
     def type_check_all(self):
-        if type(self.__transcript_text) != str:
-            raise TypeError(f"ERROR in textToJSON() ->\
-                Transcript must be text. Input:\n\ttranscript_text: {self.__transcript_text}")
-        elif type(self.__target_fields) != list:  
-            raise TypeError(f"ERROR in textToJSON() ->\
-                Target fields must be a list. Input:\n\ttarget_fields: {self.__target_fields}")
+        """ Validates that inputs are of the correct data type. """
+        if not isinstance(self.__transcript_text, str):
+            raise TypeError(f"ERROR in textToJSON() -> Transcript must be text. Received: {type(self.__transcript_text)}")
+        if not isinstance(self.__target_fields, list):
+            raise TypeError(f"ERROR in textToJSON() -> Target fields must be a list. Received: {type(self.__target_fields)}")
 
-   
     def build_prompt(self, current_field):
         """ 
-            This method is in charge of the prompt engineering. It creates a specific prompt for each target field. 
-            @params: current_field -> represents the current element of the json that is being prompted.
+        Creates a structured prompt for the LLM to extract specific information.
+        @params: current_field -> The specific JSON key the AI needs to find.
         """
         prompt = f""" 
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
+            You are an AI assistant designed to help fill out JSON files with information extracted from transcribed voice recordings. 
             You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
             only a single string containing the identified value for the JSON field. 
             If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
@@ -43,117 +42,111 @@ class textToJSON():
             
             TEXT: {self.__transcript_text}
             """
-
         return prompt
 
-    def main_loop(self): #FUTURE -> Refactor this to its own class
+    def main_loop(self):
+        """ Iterates through all target fields and requests data from the local LLM. """
         for field in self.__target_fields:
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
+            
+            # Configure Ollama URL (defaulting to localhost if env var is not set)
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False # don't really know why --> look into this later.
+                "stream": False
             }
 
-            response = requests.post(ollama_url, json=payload)
+            try:
+                response = requests.post(ollama_url, json=payload)
+                response.raise_for_status()
+                
+                # Parse LLM response
+                json_data = response.json()
+                parsed_response = json_data['response']
+                
+                # Update the internal JSON dictionary with the new value
+                self.add_response_to_json(field, parsed_response)
+            except Exception as e:
+                print(f"\t[ERROR]: Failed to get response for field '{field}': {e}")
 
-            # parse response
-            json_data = response.json()
-            parsed_response = json_data['response']
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
-            
+        # Logging the final structured data
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
         print(json.dumps(self.__json, indent=2))
         print("--------- extracted data ---------")
 
-        return None
-
     def add_response_to_json(self, field, value):
         """ 
-            this method adds the following value under the specified field, 
-            or under a new field if the field doesn't exist, to the json dict 
+        Safely adds a value to the JSON dictionary. 
+        Converts existing entries to lists to handle multiple values for a single field.
         """
+        # Clean the input value
         value = value.strip().replace('"', '')
         parsed_value = None
-        plural = False
- 
+
+        # Set to None if value is missing (-1)
         if value != "-1":
-            parsed_value = value       
+            parsed_value = value 
         
+        # Handle cases where the LLM returns multiple values separated by ';'
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
-            plural = True
 
-
-        if field in self.__json.keys():
-            # If it's already a list, we add it. Otherwise, we convert it into a list.
+        # Logic to prevent AttributeError: ensure field is always handled as a list
+        if field in self.__json:
             if isinstance(self.__json[field], list):
                 self.__json[field].append(parsed_value)
             else:
+                # Convert existing string to list before appending
                 self.__json[field] = [self.__json[field], parsed_value]
         else: 
-            # We always initialize it as a list to avoid errors on the next turn.
+            # Initialize as a list for consistency
             self.__json[field] = [parsed_value]
-        return
 
     def handle_plural_values(self, plural_value):
-        """ 
-            This method handles plural values.
-            Takes in strings of the form 'value1; value2; value3; ...; valueN' 
-            returns a list with the respective values -> [value1, value2, value3, ..., valueN]
-        """
+        """ Splits a string of values into a clean Python list. """
         if ";" not in plural_value:
-            raise ValueError(f"Value is not plural, doesn't have ; separator, Value: {plural_value}")
+            raise ValueError(f"Value is not plural: {plural_value}")
         
-        print(f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]...")
-        values = plural_value.split(";")
-        
-        # Remove trailing leading whitespace
-        for i in range(len(values)):
-            current = i+1 
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
-
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
+        print(f"\t[LOG]: Formatting plural values for JSON: {plural_value}")
+        values = [v.strip() for v in plural_value.split(";")]
+        print(f"\t[LOG]: Resulting list: {values}")
         
         return values
-        
 
     def get_data(self):
+        """ Returns the final extracted JSON dictionary. """
         return self.__json
 
 class Fill():
     def __init__(self):
         pass
     
-    def fill_form(user_input: str, definitions: list, pdf_form: str):
+    @staticmethod
+    def fill_form(user_input, definitions, pdf_form):
         """
-        Fill a PDF form with values from user_input using testToJSON.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Fills a PDF form by mapping LLM-extracted data to form widgets.
+        Includes logic to format lists into clean strings for PDF display.
         """
-
         output_pdf = pdf_form[:-4] + "_filled.pdf"
 
-        # Generate dictionary of answers from your original function 
+        # Process the input text and get structured JSON
         t2j = textToJSON(user_input, definitions)
-        textbox_answers = t2j.get_data()  # This is a dictionary
+        textbox_answers = t2j.get_data() 
 
+        # Extract values as a list for ordered filling
         answers_list = list(textbox_answers.values())
 
-        # Read PDF 
+        # Load the PDF template
         pdf = PdfReader(pdf_form)
 
-        # Loop through pages 
+        # Process each page in the PDF
         for page in pdf.pages:
             if page.Annots:
+                # Sort annotations by position (top-to-bottom) to match field descriptions
                 sorted_annots = sorted(
                     page.Annots,
                     key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
@@ -161,18 +154,28 @@ class Fill():
 
                 i = 0
                 for annot in sorted_annots:
+                    # Identify form fields (Widgets)
                     if annot.Subtype == '/Widget' and annot.T:
-                        field_name = annot.T[1:-1]
-                        
                         if i < len(answers_list):
-                            annot.V = f'{answers_list[i]}'
+                            current_val = answers_list[i]
+                            
+                            # CLEANING LOGIC: Convert lists to comma-separated strings
+                            # This removes brackets [] and quotes '' from the PDF output
+                            if isinstance(current_val, list):
+                                clean_list = [str(v) for v in current_val if v is not None]
+                                display_text = ", ".join(clean_list)
+                            else:
+                                display_text = str(current_val) if current_val is not None else ""
+
+                            # Set the field value (V) and clear appearance (AP) for refresh
+                            annot.V = f'{display_text}'
                             annot.AP = None
                             i += 1
                         else:
-                            # Stop if we run out of answers
                             break 
 
+        # Save the filled PDF
         PdfWriter().write(output_pdf, pdf)
+        print(f"✅ Process Complete. Output saved to: {output_pdf}")
         
-        # Your main.py expects this function to return the path
         return output_pdf
