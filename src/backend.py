@@ -93,10 +93,14 @@ class textToJSON():
 
 
         if field in self.__json.keys():
-            self.__json[field].append(parsed_value)
+            # If it's already a list, we add it. Otherwise, we convert it into a list.
+            if isinstance(self.__json[field], list):
+                self.__json[field].append(parsed_value)
+            else:
+                self.__json[field] = [self.__json[field], parsed_value]
         else: 
-            self.__json[field] = parsed_value
-                
+            # We always initialize it as a list to avoid errors on the next turn.
+            self.__json[field] = [parsed_value]
         return
 
     def handle_plural_values(self, plural_value):
