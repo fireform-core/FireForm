@@ -131,5 +131,95 @@ class LLM:
 
         return values
 
+    def build_batch_prompt(self):
+        """
+        Builds a single prompt that asks the LLM to extract ALL target fields
+        at once and return them as a JSON object.
+        This replaces N sequential API calls with a single round-trip.
+        """
+        fields_list = json.dumps(list(self._target_fields.keys()), indent=2)
+        prompt = f"""
+SYSTEM PROMPT:
+You are an AI assistant that extracts structured data from incident transcriptions.
+Extract values for ALL of the following JSON fields from the text below.
+Return ONLY a valid JSON object with no extra explanation, commentary, or markdown fences.
+If a field is plural and multiple values exist in the text, use a list of strings.
+If a value cannot be found in the text, use null.
+
+FIELDS TO EXTRACT:
+{fields_list}
+
+TEXT:
+{self._transcript_text}
+
+OUTPUT FORMAT:
+{{
+  "field_name": "extracted value or null",
+  ...
+}}
+"""
+        return prompt
+
+    def main_loop_batch(self):
+        """
+        Single-call extraction — replaces the N sequential calls in main_loop().
+        Sends one prompt containing all target fields and parses the JSON response.
+        Falls back to main_loop() if the LLM does not return valid JSON.
+        """
+        prompt = self.build_batch_prompt()
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+
+        payload = {
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False,
+        }
+
+        try:
+            response = requests.post(ollama_url, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Could not connect to Ollama at {ollama_url}. "
+                "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Ollama returned an error: {e}")
+
+        raw = response.json()["response"].strip()
+
+        # Strip markdown code fences if the model wrapped the output
+        if raw.startswith("```"):
+            parts = raw.split("```")
+            # parts[1] is the fenced block; drop a leading "json" language tag if present
+            raw = parts[1].lstrip("json").strip()
+
+        try:
+            extracted = json.loads(raw)
+        except json.JSONDecodeError as e:
+            print(
+                f"\t[WARN] main_loop_batch: LLM did not return valid JSON ({e}). "
+                "Falling back to sequential main_loop()."
+            )
+            return self.main_loop()
+
+        # Populate self._json using the existing add_response_to_json logic
+        for field in self._target_fields.keys():
+            value = extracted.get(field)
+            if value is None:
+                self.add_response_to_json(field, "-1")
+            elif isinstance(value, list):
+                self.add_response_to_json(field, "; ".join(str(v) for v in value))
+            else:
+                self.add_response_to_json(field, str(value))
+
+        print("----------------------------------")
+        print("\t[LOG] Resulting JSON created from the input text (batch mode):")
+        print(json.dumps(self._json, indent=2))
+        print("--------- extracted data ---------")
+
+        return self
+
     def get_data(self):
         return self._json
