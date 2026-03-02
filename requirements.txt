@@ -10,3 +10,6 @@ pytest
 httpx
 numpy<2
 ollama
+pypdf
+faster-whisper
+pytest-cov
