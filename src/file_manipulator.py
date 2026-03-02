@@ -1,7 +1,6 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
 
 
 class FileManipulator:
@@ -12,7 +11,9 @@ class FileManipulator:
     def create_template(self, pdf_path: str):
         """
         By using commonforms, we create an editable .pdf template and we store it.
+        Lazy import prevents ultralytics/YOLO from loading during test collection.
         """
+        from commonforms import prepare_form  # lazy import
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path
