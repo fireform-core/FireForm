@@ -1,15 +1,22 @@
 import json
 import os
 import requests
-
+import hashlib
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
-        if json is None:
-            json = {}
-        self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+    def __init__(self, transcript_text=None, target_fields=None, json_data=None):
+        if json_data is None:
+            json_data = {}
+        self._transcript_text = transcript_text
+        self._target_fields = target_fields if target_fields is not None else []
+        self._json = json_data
+
+        if self._transcript_text:
+            self._session_id = hashlib.md5(self._transcript_text.encode()).hexdigest()
+            self._state_file = f".fireform_state_{self._session_id}.json"
+        else:
+            self._session_id = "default"
+            self._state_file = ".fireform_state_default.json"
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -22,6 +29,23 @@ class LLM:
                 f"ERROR in LLM() attributes ->\
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
             )
+    
+    def load_state(self):
+        if os.path.exists(self._state_file):
+            print(f"\t[LOG] Found existing state file. Resuming previous session...")
+            try:
+                with open(self._state_file, 'r') as f:
+                    self._json = json.load(f)
+            except json.JSONDecodeError:
+                self._json = {}
+
+    def save_state(self):
+        with open(self._state_file, 'w') as f:
+            json.dump(self._json, f, indent=2)
+
+    def clear_state(self):
+        if os.path.exists(self._state_file):
+            os.remove(self._state_file)
 
     def build_prompt(self, current_field):
         """
@@ -45,18 +69,22 @@ class LLM:
         return prompt
 
     def main_loop(self):
-        # self.type_check_all()
-        for field in self._target_fields.keys():
+        self.load_state()
+
+        fields_to_process = []
+        for field in self._target_fields:
+            if field not in self._json:
+                fields_to_process.append(field)
+
+        for field in fields_to_process:
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,
             }
 
             try:
@@ -70,16 +98,18 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
-            # parse response
             json_data = response.json()
             parsed_response = json_data["response"]
-            # print(parsed_response)
+            
             self.add_response_to_json(field, parsed_response)
+            self.save_state()
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
         print(json.dumps(self._json, indent=2))
         print("--------- extracted data ---------")
+
+        self.clear_state()
 
         return self
 
