@@ -9,8 +9,23 @@ class Filler:
 
     def fill_form(self, pdf_form: str, llm: LLM):
         """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Fill a PDF form using values extracted by the LLM.
+
+        Contract:
+            - ``llm._transcript_text`` must be set by the caller before passing
+              the LLM instance here.
+            - ``llm._target_fields`` must be set by the caller before passing
+              the LLM instance here.
+            - Extraction is triggered internally via ``main_loop_batch()``,
+              which falls back to the sequential ``main_loop()`` if the model
+              returns invalid JSON.
+            - Fields are filled top-to-bottom, left-to-right based on their
+              position in the PDF (sorted by Rect coordinates).
+
+        :param pdf_form:  Absolute or relative path to the fillable PDF template.
+        :param llm:       A configured :class:`~src.llm.LLM` instance with
+                          ``_transcript_text`` and ``_target_fields`` set.
+        :returns:         Path to the newly written filled PDF file.
         """
         output_pdf = (
             pdf_form[:-4]
