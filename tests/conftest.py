@@ -27,8 +27,17 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
-@pytest.fixture(scope="session", autouse=True)
-def create_test_db():
+@pytest.fixture(autouse=True)
+def reset_db():
+    """
+    Wipe and recreate all tables before every test.
+
+    Previously the DB was created once per session (scope="session"), meaning
+    rows written by one test persisted into the next. This caused tests to
+    depend on execution order and fail when run in isolation or in a different
+    order. Resetting per-test guarantees full isolation.
+    """
+    SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     yield
     SQLModel.metadata.drop_all(engine)
