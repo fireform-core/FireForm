@@ -1,4 +1,4 @@
-.PHONY: help build up down logs shell exec pull-model test clean fireform
+.PHONY: help build up down logs shell exec pull-model test test-local test-cov clean fireform
 
 help:
 	@printf '%s\n' \
@@ -19,7 +19,9 @@ help:
 	@echo "make shell        - Open Python shell in app container"
 	@echo "make exec         - Execute Python script in container"
 	@echo "make pull-model   - Pull Mistral model into Ollama"
-	@echo "make test         - Run tests"
+	@echo "make test         - Run tests inside Docker container"
+	@echo "make test-local   - Run tests locally without Docker"
+	@echo "make test-cov     - Run tests locally with coverage report"
 	@echo "make clean        - Remove containers"
 	@echo "make super-clean  - [CAUTION] Use carefully. Cleans up ALL stopped  containers, networks, build cache..."
 
@@ -56,6 +58,12 @@ pull-model:
 
 test:
 	docker compose exec app python3 -m pytest tests/ -v
+
+test-local:
+	python3 -m pytest tests/ -v
+
+test-cov:
+	python3 -m pytest tests/ --cov=api --cov=src --cov-report=term-missing
 
 clean:
 	docker compose down -v
