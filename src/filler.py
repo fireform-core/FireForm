@@ -19,8 +19,11 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
+        # Generate dictionary of answers from your original function.
+        # main_loop_batch() extracts all fields in a single LLM call instead of
+        # one call per field, significantly reducing latency for large forms.
+        # Falls back to the sequential main_loop() if the LLM returns invalid JSON.
+        t2j = llm.main_loop_batch()
         textbox_answers = t2j.get_data()  # This is a dictionary
 
         answers_list = list(textbox_answers.values())
