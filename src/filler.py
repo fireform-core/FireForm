@@ -1,7 +1,6 @@
-from pdfrw import PdfReader, PdfWriter
+from pdfrw import PdfReader, PdfWriter, PdfName
 from src.llm import LLM
 from datetime import datetime
-
 
 class Filler:
     def __init__(self):
@@ -39,11 +38,26 @@ class Filler:
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
-                            annot.AP = None
+                            val = str(answers_list[i])
+                            
+                            # CHECKBOX / RADIO BUTTON LOGIC
+                            if annot.FT == "/Btn":
+                                if val == "Yes":
+                                    # Set both value and Appearance State to 'Yes' or 'On'
+                                    # Most PDFs use /Yes, but some use /On. /Yes is the safest default.
+                                    annot.V = PdfName("Yes")
+                                    annot.AS = PdfName("Yes")
+                                else:
+                                    annot.V = PdfName("Off")
+                                    annot.AS = PdfName("Off")
+                            
+                            # STANDARD TEXT BOX LOGIC
+                            else:
+                                annot.V = f"{val}"
+                                annot.AP = None  # Refresh appearance for text
+                            
                             i += 1
                         else:
-                            # Stop if we run out of answers
                             break
 
         PdfWriter().write(output_pdf, pdf)
