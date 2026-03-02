@@ -5,14 +5,13 @@ def test_create_template(client):
         "fields": {
             "Employee's name": "string",
             "Employee's job title": "string",
-            "Employee's department supervisor": "string",
-            "Employee's phone number": "string",
-            "Employee's email": "string",
-            "Signature": "string",
-            "Date": "string",
         },
     }
 
     response = client.post("/templates/create", json=payload)
-
     assert response.status_code == 200
+
+    body = response.json()
+    assert body["id"] is not None
+    assert body["name"] == "Template 1"
+    assert body["fields"] == payload["fields"]
