@@ -223,3 +223,109 @@ OUTPUT FORMAT:
 
     def get_data(self):
         return self._json
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # Async extraction API
+    # ──────────────────────────────────────────────────────────────────────────
+
+    async def _async_extract_one(self, client, field: str, prompt: str) -> tuple[str, str | None]:
+        """
+        Internal helper: POST one prompt to Ollama via an existing httpx.AsyncClient.
+        Returns (field, extracted_value_or_None).
+        """
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        payload = {"model": "mistral", "prompt": prompt, "stream": False}
+
+        resp = await client.post(ollama_url, json=payload)
+        resp.raise_for_status()
+        raw = resp.json()["response"].strip().replace('"', "").strip()
+        if raw in ("-1", ""):
+            return field, None
+        return field, raw
+
+    def _build_targeted_prompt(self, field: str) -> str:
+        """
+        Builds a tight, single-field prompt for the retry pass.
+        More constrained than build_prompt() to force the model to focus.
+        """
+        return (
+            f"You are extracting a single specific field from an incident transcript.\n"
+            f"Field to find: {field}\n"
+            f"Transcript: {self._transcript_text}\n"
+            f"Return ONLY the plain string value. If the field is not mentioned at all, return -1."
+        )
+
+    async def async_extract_all_streaming(self):
+        """
+        Async generator that runs extraction in two passes and yields a progress event
+        dict for every field as soon as it completes — the caller does not wait for
+        the full batch before receiving data.
+
+        Pass 1 — all fields issued concurrently via asyncio.as_completed.
+                  Confidence is "high" if a value was found, "low" if null.
+
+        Pass 2 — null fields re-submitted with a tighter, single-field prompt.
+                  Confidence is "medium" for values recovered in this pass.
+
+        After the generator is exhausted, self._json is fully populated so that
+        a downstream Filler can call fill_form_with_data() without re-running the LLM.
+
+        Yields dicts with keys: field, value, confidence ("high"|"medium"|"low"), phase ("initial"|"retry").
+        """
+        import asyncio
+        import httpx
+
+        results: dict[str, str | None] = {}
+        confidence: dict[str, str] = {}
+
+        async with httpx.AsyncClient(timeout=120.0) as client:
+
+            # ── Pass 1: all fields concurrently ─────────────────────────────
+            tasks = [
+                asyncio.create_task(
+                    self._async_extract_one(client, field, self.build_prompt(field))
+                )
+                for field in self._target_fields.keys()
+            ]
+
+            for completed in asyncio.as_completed(tasks):
+                field, value = await completed
+                results[field] = value
+                confidence[field] = "high" if value is not None else "low"
+                yield {
+                    "field": field,
+                    "value": value,
+                    "confidence": confidence[field],
+                    "phase": "initial",
+                }
+
+            # ── Pass 2: targeted retry for null fields ───────────────────────
+            null_fields = [f for f, v in results.items() if v is None]
+            if null_fields:
+                retry_tasks = [
+                    asyncio.create_task(
+                        self._async_extract_one(client, f, self._build_targeted_prompt(f))
+                    )
+                    for f in null_fields
+                ]
+                for completed in asyncio.as_completed(retry_tasks):
+                    field, value = await completed
+                    if value is not None:
+                        results[field] = value
+                        confidence[field] = "medium"
+                    yield {
+                        "field": field,
+                        "value": value,
+                        "confidence": confidence[field],
+                        "phase": "retry",
+                    }
+
+        # Populate self._json so Filler.fill_form_with_data() can use it
+        for field, value in results.items():
+            self._json[field] = value
+
+        print("----------------------------------")
+        print("\t[LOG] Async streaming extraction complete:")
+        print(json.dumps(self._json, indent=2))
+        print("--------- extracted data ---------")
