@@ -10,3 +10,7 @@ pytest
 httpx
 numpy<2
 ollama
+anyio[asyncio]
+faster-whisper
+pypdf
+pytest-cov
