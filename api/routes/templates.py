@@ -8,9 +8,15 @@ from src.controller import Controller
 
 router = APIRouter(prefix="/templates", tags=["templates"])
 
+
 @router.post("/create", response_model=TemplateResponse)
 def create(template: TemplateCreate, db: Session = Depends(get_db)):
     controller = Controller()
     template_path = controller.create_template(template.pdf_path)
-    tpl = Template(**template.model_dump(exclude={"pdf_path"}), pdf_path=template_path)
+
+    tpl = Template(
+        **template.model_dump(exclude={"pdf_path"}),
+        pdf_path=template_path,
+    )
+
     return create_template(db, tpl)
