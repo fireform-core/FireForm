@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class TemplateCreate(BaseModel):
     name: str
@@ -6,10 +6,9 @@ class TemplateCreate(BaseModel):
     fields: dict
 
 class TemplateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     pdf_path: str
     fields: dict
-
-    class Config:
-        from_attributes = True
