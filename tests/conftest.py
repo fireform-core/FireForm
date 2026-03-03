@@ -6,7 +6,7 @@ import pytest
 
 from api.main import app
 from api.deps import get_db
-from api.db.models import Template, FormSubmission
+from api.db.models import Template, FormSubmission, FillJob, BatchSubmission
 
 # In-memory SQLite database for tests
 TEST_DATABASE_URL = "sqlite://"
