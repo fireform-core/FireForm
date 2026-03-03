@@ -31,9 +31,23 @@ class FileManipulator:
 
         print("[3] Starting extraction and PDF filling process...")
         try:
+            # --- PRIVACY INTERCEPTION START ---
+            privacy = PrivacyManager()
+            safe_input = privacy.tokenize(user_input)
+            
             self.llm._target_fields = fields
-            self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            self.llm._transcript_text = safe_input
+            
+            # Execute LLM here
+            self.llm.main_loop()
+            tokenized_dict = self.llm.get_data()
+            
+            # Unmask data back to real values
+            real_data_dict = privacy.detokenize(tokenized_dict)
+            # --- PRIVACY INTERCEPTION END ---
+
+            # Pass the unmasked dictionary to the filler
+            output_name = self.filler.fill_form(pdf_form=pdf_form_path, manual_data=real_data_dict)
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
@@ -43,5 +57,4 @@ class FileManipulator:
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
             raise e
