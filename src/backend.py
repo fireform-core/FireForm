@@ -8,10 +8,10 @@ from pdfrw import PdfReader, PdfWriter
 
 
 class textToJSON():
-    def __init__(self, transcript_text, target_fields, json={}):
+    def __init__(self, transcript_text, target_fields, json=None):
         self.__transcript_text = transcript_text # str
         self.__target_fields = target_fields # List, contains the template field.
-        self.__json = json # dictionary
+        self.__json = json if json is not None else {} # dictionary
         self.type_check_all()
         self.main_loop()
 
@@ -63,8 +63,9 @@ class textToJSON():
             response = requests.post(ollama_url, json=payload)
 
             # parse response
+            response.raise_for_status()
             json_data = response.json()
-            parsed_response = json_data['response']
+            parsed_response = json_data.get('response', None)
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
             
@@ -112,12 +113,7 @@ class textToJSON():
         values = plural_value.split(";")
         
         # Remove trailing leading whitespace
-        for i in range(len(values)):
-            current = i+1 
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
-
+        values = [v.strip() for v in values]
         print(f"\t[LOG]: Resulting formatted list of values: {values}")
         
         return values
