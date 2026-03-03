@@ -2,7 +2,7 @@ import os
 from src.filler import Filler
 from src.llm import LLM
 from commonforms import prepare_form
-
+from src.privacy import PrivacyManager
 
 class FileManipulator:
     def __init__(self):
