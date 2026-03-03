@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from api.deps import get_db
 from api.schemas.forms import FormFill, FormFillResponse
-from api.db.repositories import create_form, get_template
+from api.db.repositories import create_form, get_template, get_form_submission
 from api.db.models import FormSubmission
 from api.errors.base import AppError
 from src.controller import Controller
@@ -21,5 +21,13 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
 
     submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
     return create_form(db, submission)
+
+
+@router.get("/{submission_id}", response_model=FormFillResponse)
+def get_form_submission_by_id(submission_id: int, db: Session = Depends(get_db)):
+    submission = get_form_submission(db, submission_id)
+    if submission is None:
+        raise HTTPException(status_code=404, detail="Form submission not found")
+    return submission
 
 
