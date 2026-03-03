@@ -17,3 +17,7 @@ def create_form(session: Session, form: FormSubmission) -> FormSubmission:
     session.commit()
     session.refresh(form)
     return form
+
+
+def get_form_submission(session: Session, submission_id: int) -> FormSubmission | None:
+    return session.get(FormSubmission, submission_id)
