@@ -1,71 +1,69 @@
 import os
-from backend import Fill  
-from commonforms import prepare_form 
-from pypdf import PdfReader
 from pathlib import Path
 from typing import Union
+from backend import Fill  
 
-def input_fields(num_fields: int):
-    fields = []
-    for i in range(num_fields):
-        field = input(f"Enter description for field {i + 1}: ")
-        fields.append(field)
-    return fields
-
-def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Union[str, os.PathLike]):
+def run_dynamic_report_process(user_input: str, input_path: Path, output_path: Path):
     """
-    This function is called by the frontend server.
-    It receives the raw data, runs the PDF filling logic,
-    and returns the path to the newly created file.
+    Main entry point to run the AI-driven dynamic report generation.
+    Exports the final PDF to the specified output path (src/outputs/).
     """
     
-    print("[1] Received request from frontend.")
-    print(f"[2] PDF template path: {pdf_form_path}")
-    
-    # Normalize Path/PathLike to a plain string for downstream code
-    pdf_form_path = os.fspath(pdf_form_path)
-    
-    if not os.path.exists(pdf_form_path):
-        print(f"Error: PDF template not found at {pdf_form_path}")
-        return None # Or raise an exception
+    print(f"[1] Received request for dynamic report generation.")
+    print(f"[2] Analyzing transcript text (Length: {len(user_input)} characters)...")
 
-    print("[3] Starting extraction and PDF filling process...")
     try:
-        output_name = Fill.fill_form(
+        # We pass the full path string to the backend
+        generated_file = Fill.fill_form(
             user_input=user_input,
-            definitions=definitions,
-            pdf_form=pdf_form_path
+            input_path=input_path,
+            output_filename=str(output_path)
         )
         
         print("\n----------------------------------")
         print(f"✅ Process Complete.")
-        print(f"Output saved to: {output_name}")
+        print(f"Dynamic Report saved to: {generated_file}")
         
-        return output_name
+        return generated_file
         
     except Exception as e:
-        print(f"An error occurred during PDF generation: {e}")
-        # Re-raise the exception so the frontend can handle it
+        print(f"[ERROR] An error occurred during PDF generation: {e}")
         raise e
 
 
 if __name__ == "__main__":
+    # 1. Setup base directory and input file path
     BASE_DIR = Path(__file__).resolve().parent
-    file = BASE_DIR / "inputs" / "file.pdf"
-    prepared_pdf = BASE_DIR / "temp_outfile.pdf"
+    INPUT_FILE_PATH = BASE_DIR / "inputs" / "input.txt"
+
+    # 2. Define and create the output directory (src/outputs)
+    OUTPUT_DIR = BASE_DIR / "outputs"
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True) # Creates folder if it doesn't exist
     
-    #file = "/Users/vincentharkins/Desktop/FireForm/src/inputs/file.pdf"
-    user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-    descriptions = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
-    prepare_form(str(file), str(prepared_pdf))
+    # Full path for the output PDF
+    FINAL_OUTPUT_PATH = OUTPUT_DIR / "dynamic_extraction_result.pdf"
+
+    print("--- Starting FireForm Dynamic Mode ---")
     
-    reader = PdfReader(prepared_pdf)
-    fields = reader.get_fields()
-    if(fields):
-        num_fields = len(fields)
+    # 3. Dynamic Loading: Read the content from the input.txt file
+    if INPUT_FILE_PATH.exists():
+        try:
+            with open(INPUT_FILE_PATH, "r", encoding="utf-8") as f:
+                dynamic_content = f.read().strip()
+            
+            if not dynamic_content:
+                print(f"[WARNING] The file {INPUT_FILE_PATH} is empty. Please add some text.")
+            else:
+                print(f"[LOG] Successfully loaded dynamic text from: {INPUT_FILE_PATH}")
+                
+                # 4. Run the process using the file's content and the new output path
+                run_dynamic_report_process(
+                    user_input=dynamic_content, 
+                    input_path=INPUT_FILE_PATH,
+                    output_path=FINAL_OUTPUT_PATH
+                )
+        except Exception as e:
+            print(f"[ERROR] Could not read the file: {e}")
     else:
-        num_fields = 0
-        
-    descriptions = input_fields(num_fields) # Uncomment to edit fields
-    
-    run_pdf_fill_process(user_input, descriptions, str(file))
+        print(f"[ERROR] Input file NOT FOUND at: {INPUT_FILE_PATH}")
+        print("Please create the 'src/inputs/input.txt' file and add your transcript.")

@@ -2,4 +2,5 @@ requests
 pdfrw
 flask
 commonforms
+fpdf2
 
