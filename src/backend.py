@@ -102,11 +102,15 @@ class textToJSON():
             parsed_value = self.handle_plural_values(value)
             plural = True
 
-
-        if field in self.__json.keys():
-            self.__json[field].append(parsed_value)
-        else: 
-            self.__json[field] = parsed_value
+        if parsed_value is not None:
+            if field in self.__json.keys():
+                existing = self.__json[field]
+                if isinstance(existing, list):
+                    existing.append(parsed_value)
+                else:
+                    self.__json[field] = [existing, parsed_value]
+            else:
+                self.__json[field] = parsed_value
                 
         return
 
