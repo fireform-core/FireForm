@@ -9,15 +9,20 @@ class Filler:
 
     def fill_form(self, pdf_form: str, llm: LLM):
         """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Fill a PDF form with values from user_input using LLM safely.
         """
-        output_pdf = (
-            pdf_form[:-4]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-            + "_filled.pdf"
-        )
+        from pathlib import Path
+        
+        # 1. Sanitize the path to block traversal attacks
+        safe_name = Path(pdf_form).stem 
+        
+        # 2. Ensure a secure output directory exists
+        output_dir = Path("outputs")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 3. Safely construct the final path
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_pdf = str(output_dir / f"{safe_name}_{timestamp}_filled.pdf")
 
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
