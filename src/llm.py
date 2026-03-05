@@ -46,17 +46,23 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
+
+        # Resolve host and model once outside the loop — they are constant
+        # for the entire request and there is no need to re-read env vars
+        # on every field iteration.
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        # OLLAMA_MODEL lets operators swap models (llama3, phi3, etc.) via environment
+        # variable without touching source code. Defaults to "mistral" for compatibility.
+        ollama_model = os.getenv("OLLAMA_MODEL", "mistral")
+
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
-                "model": "mistral",
+                "model": ollama_model,
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,
             }
 
             try:

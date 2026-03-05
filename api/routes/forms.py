@@ -9,17 +9,25 @@ from src.controller import Controller
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
+
 @router.post("/fill", response_model=FormFillResponse)
 def fill_form(form: FormFill, db: Session = Depends(get_db)):
-    if not get_template(db, form.template_id):
+    # Single DB hit — store the result and reuse it.
+    # Previously get_template() was called twice (once to check, once to fetch),
+    # which doubled the DB round-trips for every request.
+    fetched_template = get_template(db, form.template_id)
+    if not fetched_template:
         raise AppError("Template not found", status_code=404)
 
-    fetched_template = get_template(db, form.template_id)
-
-    controller = Controller()
-    path = controller.fill_form(user_input=form.input_text, fields=fetched_template.fields, pdf_form_path=fetched_template.pdf_path)
+    try:
+        controller = Controller()
+        path = controller.fill_form(
+            user_input=form.input_text,
+            fields=fetched_template.fields,
+            pdf_form_path=fetched_template.pdf_path,
+        )
+    except FileNotFoundError as e:
+        raise AppError(str(e), status_code=422)
 
     submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
     return create_form(db, submission)
-
-
