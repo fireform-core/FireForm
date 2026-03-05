@@ -7,10 +7,31 @@ class Filler:
     def __init__(self):
         pass
 
+    @staticmethod
+    def _decode_pdf_field_name(annot_T) -> str:
+        """
+        pdfrw stores field names as PDF string objects like b'(Employee Name)' or '(date)'.
+        This helper strips the surrounding parentheses to get the plain field name string.
+        """
+        raw = str(annot_T)
+        if raw.startswith("(") and raw.endswith(")"):
+            return raw[1:-1]
+        return raw
+
     def fill_form(self, pdf_form: str, llm: LLM):
         """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Fill a PDF form with values extracted by the LLM.
+
+        Matching strategy: field-name-based (not positional).
+
+        For every Widget annotation in the PDF we read annot.T (the PDF field name),
+        look that name up directly in the LLM-produced answers dict, and write the
+        matched value.  This is safe regardless of annotation order because we never
+        rely on position/index to pair a value with a field.
+
+        If the PDF field name has no match in the LLM result we leave it blank
+        rather than silently writing a wrong value.  Plural answers (lists) are
+        joined with '; ' so the field stays human-readable.
         """
         output_pdf = (
             pdf_form[:-4]
@@ -19,34 +40,54 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()  # This is a dictionary
+        # Run the LLM extraction pipeline → {field_name: value | list | None}
+        answers: dict = llm.main_loop().get_data()
 
-        answers_list = list(textbox_answers.values())
+        print(f"\t[LOG] Filler received {len(answers)} answer(s) from LLM.")
+
+        # Build a lowercase-keyed lookup so minor capitalisation differences
+        # between the stored template and the PDF's own field labels don't block a match.
+        normalised_answers = {k.lower().strip(): v for k, v in answers.items()}
+
+        unmatched_pdf_fields = []
 
         # Read PDF
         pdf = PdfReader(pdf_form)
 
-        # Loop through pages
         for page in pdf.pages:
-            if page.Annots:
-                sorted_annots = sorted(
-                    page.Annots, key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
-                )
+            if not page.Annots:
+                continue
 
-                i = 0
-                for annot in sorted_annots:
-                    if annot.Subtype == "/Widget" and annot.T:
-                        if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
-                            annot.AP = None
-                            i += 1
-                        else:
-                            # Stop if we run out of answers
-                            break
+            for annot in page.Annots:
+                if annot.Subtype != "/Widget" or not annot.T:
+                    continue
+
+                pdf_field_name = self._decode_pdf_field_name(annot.T)
+                lookup_key = pdf_field_name.lower().strip()
+
+                if lookup_key in normalised_answers:
+                    raw_value = normalised_answers[lookup_key]
+
+                    if raw_value is None:
+                        # LLM could not find the value — write empty string, not "None"
+                        annot.V = ""
+                    elif isinstance(raw_value, list):
+                        # Plural values (e.g. multiple engines) → join for readability
+                        annot.V = "; ".join(str(v) for v in raw_value if v is not None)
+                    else:
+                        annot.V = str(raw_value)
+
+                    # Clear the pre-rendered appearance stream so the viewer
+                    # re-renders with the new value.
+                    annot.AP = None
+                else:
+                    unmatched_pdf_fields.append(pdf_field_name)
+
+        if unmatched_pdf_fields:
+            print(
+                f"\t[WARN] {len(unmatched_pdf_fields)} PDF field(s) had no matching "
+                f"LLM answer and were left blank: {unmatched_pdf_fields}"
+            )
 
         PdfWriter().write(output_pdf, pdf)
-
-        # Your main.py expects this function to return the path
         return output_pdf
