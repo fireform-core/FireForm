@@ -23,21 +23,23 @@ class LLM:
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
             )
 
-    def build_prompt(self, current_field):
+    def build_prompt(self, fields_list):
         """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
+        This method is in charge of the prompt engineering. It creates a specific prompt for all target fields combined.
         """
+        import json
+        fields_json = json.dumps(fields_list)
         prompt = f""" 
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
+            You are an AI assistant designed to help fill out json files with information extracted from transcribed voice recordings. 
+            You will receive the transcription and a list of JSON field names whose values you have to identify in the context. 
+            Return ONLY a valid JSON object where the keys are the field names and the values are the extracted strings.
+            If a field name implies multiple values, and you identify more than one possible value in the text, return both separated by a ";".
             If you don't identify the value in the provided text, return "-1".
+            Do not include any formatting, markdown, or chat outside of the JSON object.
             ---
             DATA:
-            Target JSON field to find in text: {current_field}
+            Target JSON fields to find in text: {fields_json}
             
             TEXT: {self._transcript_text}
             """
@@ -45,36 +47,47 @@ class LLM:
         return prompt
 
     def main_loop(self):
-        # self.type_check_all()
-        for field in self._target_fields.keys():
-            prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
+        # We extract all field names into a list
+        fields_list = list(self._target_fields.keys())
+        prompt = self.build_prompt(fields_list)
+        
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
 
-            payload = {
-                "model": "mistral",
-                "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
-            }
+        payload = {
+            "model": "llama3",
+            "prompt": prompt,
+            "stream": False,
+            "format": "json",  # Force Ollama to return structured JSON
+        }
 
-            try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
-            except requests.exceptions.ConnectionError:
-                raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
-                )
-            except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
+        try:
+            print(f"\t[LOG] Sending 1 batch request to Ollama for {len(fields_list)} fields...")
+            response = requests.post(ollama_url, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Could not connect to Ollama at {ollama_url}. "
+                "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Ollama returned an error: {e}")
 
-            # parse response
-            json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
+        # parse response
+        json_data = response.json()
+        parsed_response = json_data["response"]
+        
+        import json
+        try:
+            extracted_data = json.loads(parsed_response)
+        except json.JSONDecodeError:
+            print(f"\t[ERROR] Could not parse Ollama response as JSON: {parsed_response}")
+            extracted_data = {}
+
+        # Add each extracted value to our internal _json using the existing method
+        for field in fields_list:
+            value = str(extracted_data.get(field, "-1"))
+            self.add_response_to_json(field, value)
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
