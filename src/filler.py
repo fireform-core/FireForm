@@ -7,9 +7,9 @@ class Filler:
     def __init__(self):
         pass
 
-    def fill_form(self, pdf_form: str, llm: LLM):
+    def fill_form(self, pdf_form: str, answers: dict):
         """
-        Fill a PDF form with values from user_input using LLM.
+        Fill a PDF form with values from answers dictionary.
         Fields are filled in the visual order (top-to-bottom, left-to-right).
         """
         output_pdf = (
@@ -19,11 +19,7 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()  # This is a dictionary
-
-        answers_list = list(textbox_answers.values())
+        answers_list = list(answers.values())
 
         # Read PDF
         pdf = PdfReader(pdf_form)

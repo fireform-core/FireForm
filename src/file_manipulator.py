@@ -17,23 +17,28 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def extract_data(self, user_input: str, fields: dict, existing_data: dict = None):
         """
-        It receives the raw data, runs the PDF filling logic,
-        and returns the path to the newly created file.
+        Runs LLM to extract data. Returns extracted_data and missing_fields.
         """
-        print("[1] Received request from frontend.")
-        print(f"[2] PDF template path: {pdf_form_path}")
+        print("[1] Starting extraction process...")
+        if existing_data is None:
+            existing_data = {}
+        
+        llm = LLM(transcript_text=user_input, target_fields=fields, json=existing_data)
+        llm.main_loop()
+        return llm.get_data(), llm.get_missing_fields()
 
+    def fill_pdf(self, answers: dict, pdf_form_path: str):
+        """
+        Receives extracted data and fills the PDF.
+        """
+        print(f"[2] Filling PDF template: {pdf_form_path}")
         if not os.path.exists(pdf_form_path):
-            print(f"Error: PDF template not found at {pdf_form_path}")
-            return None  # Or raise an exception
+            raise FileNotFoundError(f"PDF template not found at {pdf_form_path}")
 
-        print("[3] Starting extraction and PDF filling process...")
         try:
-            self.llm._target_fields = fields
-            self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            output_name = self.filler.fill_form(pdf_form=pdf_form_path, answers=answers)
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
@@ -43,5 +48,4 @@ class FileManipulator:
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
             raise e

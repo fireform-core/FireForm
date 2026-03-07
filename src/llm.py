@@ -10,6 +10,7 @@ class LLM:
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
         self._json = json  # dictionary
+        self._missing_fields = []
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -72,8 +73,9 @@ class LLM:
 
             # parse response
             json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
+            parsed_response = json_data["response"].strip()
+            if parsed_response.replace('"', "") == "-1":
+                self._missing_fields.append(field)
             self.add_response_to_json(field, parsed_response)
 
         print("----------------------------------")
@@ -133,3 +135,6 @@ class LLM:
 
     def get_data(self):
         return self._json
+
+    def get_missing_fields(self):
+        return self._missing_fields
