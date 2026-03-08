@@ -20,6 +20,8 @@ The result is hours of time saved per shift, per firefighter.
 ### ✨ Key Features
 - **Agnostic:** Works with any department's existing fillable PDF forms.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
+- **📍 NLP Geotagging:** Automatically extracts location descriptions (e.g., "North of the beach") and converts them into GPS coordinates.
+- **🗺️ Map Integration:** Dynamically embeds a static map image of the incident location directly into the final PDF report.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
 
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
