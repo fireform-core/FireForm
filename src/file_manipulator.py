@@ -31,9 +31,31 @@ class FileManipulator:
 
         print("[3] Starting extraction and PDF filling process...")
         try:
-            self.llm._target_fields = fields
+            # Add implicit Location Summary field to extract for Geotagging (Issue #108)
+            mapping_fields = {f: None for f in fields}
+            mapping_fields["Location Summary"] = None
+            
+            self.llm._target_fields = mapping_fields
             self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            
+            # The filler fills the PDF based on the LLM's final state
+            # It will ignore "Location Summary" if the PDF doesn't have a matching visual field index,
+            # but we can intercept it here for map generation.
+            self.llm.main_loop()
+            
+            extracted_data = self.llm.get_data()
+            location_text = extracted_data.get("Location Summary")
+            
+            map_image_path = None
+            if location_text and location_text != "-1":
+                from src.geocoder import Geotagger
+                geotagger = Geotagger()
+                coords = geotagger.get_coordinates(location_text)
+                if coords:
+                    lat, lon = coords
+                    map_image_path = geotagger.generate_map_image(lat, lon)
+            
+            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm, map_image_path=map_image_path)
 
             print("\n----------------------------------")
             print("✅ Process Complete.")

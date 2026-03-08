@@ -10,3 +10,9 @@ pytest
 httpx
 numpy<2
 ollama
+deep-translator
+langdetect
+geopy
+staticmap
+PyMuPDF
+Pillow
