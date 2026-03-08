@@ -8,5 +8,7 @@ pydantic
 sqlmodel
 pytest
 httpx
-numpy<2
+numpy>=1.24.0,<3
 ollama
+pypdf
+python-multipart
