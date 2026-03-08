@@ -21,8 +21,21 @@ The result is hours of time saved per shift, per firefighter.
 - **Agnostic:** Works with any department's existing fillable PDF forms.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
+- **🌍 Multilingual:** Automatically detects and translates non-English inputs (French, Arabic, Spanish, and more) to English before processing, ensuring the output PDF is always in standardized English regardless of the responder's language.
 
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
+
+## 🌍 Multilingual Support
+
+FireForm is used by first responders across UN international missions. Responders may record voice notes in their native language. FireForm automatically handles this:
+
+1. **Language detection** — the input language is detected automatically (e.g. French, Arabic, Spanish).
+2. **Translation** — non-English text is translated to English before the AI processes it.
+3. **Consistent output** — the final PDF is always generated in English, keeping the Master Schema consistent across all missions.
+
+**Supported languages:** Any language supported by Google Translate (100+ languages), including French, Arabic, Spanish, Portuguese, and more.
+
+> **Note:** Translation uses the `deep-translator` library (Google Translate backend). No API key is required for typical usage volumes.
 
 ## 🤝 Code of Conduct
 
