@@ -35,6 +35,7 @@ class LLM:
             only a single string containing the identified value for the JSON field. 
             If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
             If you don't identify the value in the provided text, return "-1".
+            Note: The following text has been pre-translated to English from the original input language to ensure consistency.
             ---
             DATA:
             Target JSON field to find in text: {current_field}

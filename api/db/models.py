@@ -15,4 +15,6 @@ class FormSubmission(SQLModel, table=True):
     template_id: int
     input_text: str
     output_pdf_path: str
+    # BCP-47 language code detected from the raw input (e.g. "fr", "ar", "en")
+    detected_language: str | None = Field(default=None)
     created_at: datetime = Field(default_factory=datetime.utcnow)

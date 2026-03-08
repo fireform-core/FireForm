@@ -1,6 +1,7 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
+from src.translator import Translator
 from commonforms import prepare_form
 
 
@@ -16,6 +17,34 @@ class FileManipulator:
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path
+
+    def extract_data(self, user_input: str, fields: dict, existing_data: dict = None):
+        """
+        Translates the raw user input to English (if needed), then runs the LLM
+        to extract data from the translated text.
+
+        Returns:
+            extracted_data (dict): Extracted field values.
+            missing_fields (list): Fields that could not be extracted.
+            detected_language (str): BCP-47 code of the source language
+                (e.g. "fr", "ar", "en").
+        """
+        print("[1] Starting extraction process...")
+        if existing_data is None:
+            existing_data = {}
+
+        # --- Translation step (Issue #107) ---
+        translator = Translator()
+        translated_input, detected_language = translator.translate_to_english(user_input)
+        if detected_language != "en":
+            print(
+                f"[TRANSLATION] Detected language: '{detected_language}'. "
+                "Input translated to English before LLM processing."
+            )
+
+        llm = LLM(transcript_text=translated_input, target_fields=fields, json=existing_data)
+        llm.main_loop()
+        return llm.get_data(), detected_language
 
     def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
         """
