@@ -3,3 +3,4 @@
 venv
 .venv
 *.db
+src/inputs/*.pdf
