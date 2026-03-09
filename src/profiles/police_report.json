@@ -1,0 +1,22 @@
+{
+  "department": "Police Department",
+  "description": "Standard police incident report for criminal incidents, traffic accidents, and public safety events",
+  "fields": {
+    "Officer Name": "textbox_0_0",
+    "Badge Number": "textbox_0_1",
+    "Incident Location": "textbox_0_2",
+    "Incident Date": "textbox_0_3",
+    "Incident Time": "textbox_0_4",
+    "Case Number": "textbox_0_5",
+    "Incident Type": "textbox_0_6",
+    "Suspect Name": "textbox_0_7",
+    "Suspect Description": "textbox_0_8",
+    "Victim Name": "textbox_0_9",
+    "Witness Names": "textbox_0_10",
+    "Property Involved": "textbox_0_11",
+    "Evidence Collected": "textbox_0_12",
+    "Incident Narrative": "textbox_0_13",
+    "Follow-up Required": "textbox_0_14"
+  },
+  "example_transcript": "Officer Johnson, badge 2187, responding to burglary at 123 Main Street on March 10th at 02:15. Case number 2026-0310-001. Suspect described as male, approximately 6 feet tall, wearing dark clothing. Victim is Sarah Chen. Witnesses include neighbor Tom Wilson. Stolen property includes laptop and jewelry. Fingerprints collected from window frame. Forced entry through rear window. Follow-up investigation required."
+}

@@ -21,6 +21,7 @@ The result is hours of time saved per shift, per firefighter.
 - **Agnostic:** Works with any department's existing fillable PDF forms.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
+- **Department Profiles:** Pre-built field mappings for Fire, Police, and EMS forms enable accurate extraction out-of-the-box.
 
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
 

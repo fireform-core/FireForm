@@ -46,6 +46,24 @@ make clean        # Remove all containers and volumes
 ```
 * You can see this list at any time by running `make help`.
 
+## Department Profiles in Docker
+Department profiles are automatically included in the Docker container. All three pre-built profiles (Fire Department, Police Report, EMS Medical) are available immediately:
+
+```bash
+# Start containers
+make up
+
+# Profiles are available at /app/src/profiles/ inside the container
+make shell
+ls /app/src/profiles/
+# Output: fire_department.json  police_report.json  ems_medical.json
+
+# Use profiles via API (container must be running)
+curl http://localhost:8000/profiles/
+```
+
+No additional configuration is needed - profiles work out of the box in Docker.
+
 ## Debugging
 For debugging with LLMs it's really useful to attach the logs.
 * You can obtain the logs using `make logs` or `docker compose logs`.

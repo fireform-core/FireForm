@@ -4,12 +4,13 @@ import requests
 
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
+    def __init__(self, transcript_text=None, target_fields=None, json=None, use_profile_labels=False):
         if json is None:
             json = {}
         self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
+        self._target_fields = target_fields  # Dict or List, contains the template fields
         self._json = json  # dictionary
+        self._use_profile_labels = use_profile_labels  # bool, whether to use human-readable labels
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -28,7 +29,27 @@ class LLM:
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
         @params: current_field -> represents the current element of the json that is being prompted.
         """
-        prompt = f""" 
+        # Enhanced prompt when using profile labels with human-readable field names
+        if self._use_profile_labels:
+            prompt = f""" 
+            SYSTEM PROMPT:
+            You are an AI assistant designed to help fill out forms with information extracted from transcribed voice recordings. 
+            You will receive the transcription and a human-readable field label that describes what information to extract.
+            
+            INSTRUCTIONS:
+            - Return ONLY the extracted value as a single string
+            - If the field name is plural and you identify multiple values, return them separated by ";"
+            - If you cannot find the information in the text, return "-1"
+            - Be precise and extract only the relevant information for the specified field
+            - Do not include explanations or additional text
+            
+            FIELD TO EXTRACT: {current_field}
+            
+            TRANSCRIPT: {self._transcript_text}
+            """
+        else:
+            # Original prompt for non-profile mode
+            prompt = f""" 
             SYSTEM PROMPT:
             You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
             You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
@@ -46,7 +67,14 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        
+        # Handle both dict and list formats for target_fields
+        if isinstance(self._target_fields, dict):
+            fields_to_process = self._target_fields.keys()
+        else:
+            fields_to_process = self._target_fields
+            
+        for field in fields_to_process:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"

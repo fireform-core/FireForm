@@ -1,0 +1,22 @@
+{
+  "department": "Emergency Medical Services",
+  "description": "EMS patient care report for medical emergencies, trauma incidents, and patient transport",
+  "fields": {
+    "Paramedic Name": "textbox_0_0",
+    "Certification Number": "textbox_0_1",
+    "Incident Location": "textbox_0_2",
+    "Call Date": "textbox_0_3",
+    "Call Time": "textbox_0_4",
+    "Patient Name": "textbox_0_5",
+    "Patient Age": "textbox_0_6",
+    "Patient Gender": "textbox_0_7",
+    "Chief Complaint": "textbox_0_8",
+    "Vital Signs": "textbox_0_9",
+    "Medical History": "textbox_0_10",
+    "Medications": "textbox_0_11",
+    "Treatment Provided": "textbox_0_12",
+    "Transport Destination": "textbox_0_13",
+    "Patient Condition": "textbox_0_14"
+  },
+  "example_transcript": "Paramedic Rodriguez, certification EMT-P-5523, responding to medical emergency at 456 Oak Avenue on March 10th at 09:45. Patient is Robert Martinez, 67-year-old male. Chief complaint: chest pain and shortness of breath. Vitals: BP 160/95, pulse 110, respirations 22, oxygen saturation 92%. History of hypertension and diabetes. Current medications include metformin and lisinopril. Administered oxygen at 4 liters, established IV access, gave aspirin 324mg. Transported to County General Hospital. Patient stable but requires cardiac evaluation."
+}
