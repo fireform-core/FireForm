@@ -1,6 +1,23 @@
 import json
 import os
+import re
 import requests
+
+
+# ── Field-type patterns for schema validation ─────────────────────────────────
+FIELD_PATTERNS = {
+    "phone":      re.compile(r"[\d\s\-\+\(\)\.]{7,20}"),
+    "email":      re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+"),
+    "date":       re.compile(r"\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|\d{4}[\/\-]\d{2}[\/\-]\d{2}"),
+    "id":         re.compile(r"[A-Z0-9\-]{3,}"),
+}
+
+FIELD_TYPE_HINTS = {
+    "phone":  ["phone", "tel", "contact", "number"],
+    "email":  ["email", "mail"],
+    "date":   ["date", "time", "when", "dob"],
+    "id":     ["id", "badge", "sid", "identifier", "emp"],
+}
 
 
 class LLM:
@@ -14,6 +31,7 @@ class LLM:
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # dict or list
         self._json = json  # dictionary
+        self._validation_warnings = []  # list of validation issues found
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -26,6 +44,90 @@ class LLM:
                 f"ERROR in LLM() attributes ->\
                 Target fields must be a list or dict. Input:\n\ttarget_fields: {self._target_fields}"
             )
+
+    def validate_extracted_fields(self) -> list:
+        """
+        Schema validation — checks extracted values match expected field types.
+
+        Validates:
+        - Phone numbers contain digits in expected format
+        - Emails contain @ and a domain
+        - Dates match common date patterns
+        - No field value exceeds 500 chars (hallucination indicator)
+        - No field is suspiciously repeated across multiple fields
+
+        Returns a list of warning strings. Empty list = all valid.
+        Never raises — validation issues are warnings, not hard failures.
+
+        Closes Issue #114.
+        """
+        warnings = []
+        values_seen = {}  # track repeated values across fields
+
+        for field, value in self._json.items():
+            if value is None:
+                continue
+
+            str_value = str(value).strip()
+            field_lower = field.lower()
+
+            # ── 1. Length check — long values suggest hallucination ──────────
+            if len(str_value) > 500:
+                warnings.append(
+                    f"[SCHEMA] '{field}': value suspiciously long "
+                    f"({len(str_value)} chars) — possible hallucination"
+                )
+
+            # ── 2. Repeated value check — same value in 3+ fields = hallucination ──
+            if str_value not in values_seen:
+                values_seen[str_value] = []
+            values_seen[str_value].append(field)
+
+            # ── 3. Field-type pattern validation ─────────────────────────────
+            detected_type = None
+            for ftype, hints in FIELD_TYPE_HINTS.items():
+                if any(hint in field_lower for hint in hints):
+                    detected_type = ftype
+                    break
+
+            if detected_type and detected_type in FIELD_PATTERNS:
+                pattern = FIELD_PATTERNS[detected_type]
+                if not pattern.search(str_value):
+                    warnings.append(
+                        f"[SCHEMA] '{field}': expected {detected_type} format, "
+                        f"got '{str_value}' — may be incorrectly extracted"
+                    )
+
+            # ── 4. Email-specific check ───────────────────────────────────────
+            if "email" in field_lower and value is not None:
+                if "@" not in str_value:
+                    warnings.append(
+                        f"[SCHEMA] '{field}': value '{str_value}' does not "
+                        f"look like a valid email address"
+                    )
+
+        # ── 5. Global repeated-value check ───────────────────────────────────
+        for val, fields in values_seen.items():
+            if len(fields) >= 3:
+                warnings.append(
+                    f"[SCHEMA] Possible hallucination — value '{val}' "
+                    f"appears in {len(fields)} fields: {fields}"
+                )
+
+        self._validation_warnings = warnings
+
+        if warnings:
+            print("\t[SCHEMA VALIDATION] Issues found:")
+            for w in warnings:
+                print(f"\t  {w}")
+        else:
+            print("\t[SCHEMA VALIDATION] All fields passed validation ✓")
+
+        return warnings
+
+    def get_validation_warnings(self) -> list:
+        """Return validation warnings from last validate_extracted_fields() call."""
+        return self._validation_warnings
 
     def build_batch_prompt(self) -> str:
         """
@@ -146,6 +248,7 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
         """
         Single batch Ollama call — extracts ALL fields in one request.
         Falls back to per-field extraction if JSON parsing fails.
+        Runs schema validation after extraction.
         Fixes Issue #196 (O(N) → O(1) LLM calls).
         """
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
@@ -197,6 +300,9 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
             print("\t[WARN] Batch JSON parse failed — falling back to per-field extraction")
             self._json = {}
             self._fallback_per_field(ollama_url, field_keys)
+
+        # ── Schema validation ─────────────────────────────────────
+        self.validate_extracted_fields()
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
