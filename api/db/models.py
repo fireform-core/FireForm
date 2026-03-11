@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON
 from datetime import datetime
+from typing import Optional
 
 class Template(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -15,4 +16,5 @@ class FormSubmission(SQLModel, table=True):
     template_id: int
     input_text: str
     output_pdf_path: str
+    needs_review: Optional[dict] = Field(default=None, sa_column=Column(JSON))
     created_at: datetime = Field(default_factory=datetime.utcnow)
