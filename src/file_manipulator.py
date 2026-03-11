@@ -18,7 +18,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, profile_name: str = None):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, profile_name: str = None, use_batch_processing: bool = True):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
@@ -28,6 +28,7 @@ class FileManipulator:
             fields: List or dict of field definitions
             pdf_form_path: Path to the PDF template
             profile_name: Optional department profile name (e.g., 'fire_department')
+            use_batch_processing: Whether to use O(1) batch processing (default: True)
         """
         print("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
@@ -56,6 +57,9 @@ class FileManipulator:
             self.llm._target_fields = fields
             self.llm._use_profile_labels = False
 
+        # Set batch processing mode
+        self.llm._use_batch_processing = use_batch_processing
+        
         print("[5] Starting extraction and PDF filling process...")
         try:
             self.llm._transcript_text = user_input

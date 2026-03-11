@@ -21,7 +21,8 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
         user_input=form.input_text, 
         fields=fetched_template.fields, 
         pdf_form_path=fetched_template.pdf_path,
-        profile_name=form.profile_name
+        profile_name=form.profile_name,
+        use_batch_processing=form.use_batch_processing
     )
 
     submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
