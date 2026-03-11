@@ -17,10 +17,16 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, use_batch_processing: bool = True):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
+        
+        Args:
+            user_input: The transcript text to extract information from
+            fields: List or dict of field definitions
+            pdf_form_path: Path to the PDF template
+            use_batch_processing: Whether to use O(1) batch processing (default: True)
         """
         print("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
@@ -29,6 +35,9 @@ class FileManipulator:
             print(f"Error: PDF template not found at {pdf_form_path}")
             return None  # Or raise an exception
 
+        # Set batch processing mode
+        self.llm._use_batch_processing = use_batch_processing
+        
         print("[3] Starting extraction and PDF filling process...")
         try:
             self.llm._target_fields = fields
