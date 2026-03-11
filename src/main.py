@@ -3,6 +3,9 @@ from typing import Union
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
+from logger import setup_logger
+
+logger = setup_logger(__name__)
 
 def input_fields(num_fields: int):
     fields = []
@@ -18,17 +21,17 @@ def run_pdf_fill_process(user_input: str, definitions: Union[dict, list], pdf_fo
     and returns the path to the newly created file.
     """
     
-    print("[1] Received request from frontend.")
-    print(f"[2] PDF template path: {pdf_form_path}")
+    logger.info("Received request from frontend.")
+    logger.info("PDF template path: %s", pdf_form_path)
     
     # Normalize Path/PathLike to a plain string for downstream code
     pdf_form_path = os.fspath(pdf_form_path)
     
     if not os.path.exists(pdf_form_path):
-        print(f"Error: PDF template not found at {pdf_form_path}")
+        logger.error("PDF template not found at %s", pdf_form_path)
         return None # Or raise an exception
 
-    print("[3] Starting extraction and PDF filling process...")
+    logger.info("Starting extraction and PDF filling process...")
     try:
         controller = Controller()
         output_name = controller.fill_form(
@@ -37,14 +40,12 @@ def run_pdf_fill_process(user_input: str, definitions: Union[dict, list], pdf_fo
             pdf_form_path=pdf_form_path
         )
         
-        print("\n----------------------------------")
-        print(f"✅ Process Complete.")
-        print(f"Output saved to: {output_name}")
+        logger.info("Process complete. Output saved to: %s", output_name)
         
         return output_name
         
     except Exception as e:
-        print(f"An error occurred during PDF generation: {e}")
+        logger.exception("An error occurred during PDF generation: %s", e)
         # Re-raise the exception so the frontend can handle it
         raise e
 

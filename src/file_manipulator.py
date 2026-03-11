@@ -1,7 +1,10 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
+from src.logger import setup_logger
 from commonforms import prepare_form
+
+logger = setup_logger(__name__)
 
 
 class FileManipulator:
@@ -22,26 +25,23 @@ class FileManipulator:
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
         """
-        print("[1] Received request from frontend.")
-        print(f"[2] PDF template path: {pdf_form_path}")
+        logger.info("Received request from frontend.")
+        logger.info("PDF template path: %s", pdf_form_path)
 
         if not os.path.exists(pdf_form_path):
-            print(f"Error: PDF template not found at {pdf_form_path}")
+            logger.error("PDF template not found at %s", pdf_form_path)
             return None  # Or raise an exception
 
-        print("[3] Starting extraction and PDF filling process...")
+        logger.info("Starting extraction and PDF filling process...")
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
             output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
 
-            print("\n----------------------------------")
-            print("✅ Process Complete.")
-            print(f"Output saved to: {output_name}")
+            logger.info("Process complete. Output saved to: %s", output_name)
 
             return output_name
 
         except Exception as e:
-            print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
+            logger.exception("An error occurred during PDF generation: %s", e)
             raise e
