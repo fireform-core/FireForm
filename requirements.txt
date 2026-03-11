@@ -11,3 +11,4 @@ httpx
 numpy<2
 ollama
 python-multipart
+pypdf
