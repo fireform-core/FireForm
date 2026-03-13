@@ -17,3 +17,9 @@ def create_form(session: Session, form: FormSubmission) -> FormSubmission:
     session.commit()
     session.refresh(form)
     return form
+
+def get_all_templates(session: Session, limit: int = 100, offset: int = 0) -> list[Template]:
+    return session.exec(select(Template).offset(offset).limit(limit)).all()
+
+def get_form(session: Session, submission_id: int) -> FormSubmission | None:
+    return session.get(FormSubmission, submission_id)
