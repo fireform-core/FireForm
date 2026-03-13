@@ -177,7 +177,8 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
         _start = time.time()
 
         try:
-            response = requests.post(ollama_url, json=payload, timeout=30)
+            timeout = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+            response = requests.post(ollama_url, json=payload, timeout=timeout)
             response.raise_for_status()
             _elapsed = time.time() - _start
             print(f"[LOG] Ollama responded in {_elapsed:.2f}s")
@@ -185,6 +186,11 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
             raise ConnectionError(
                 f"Could not connect to Ollama at {ollama_url}. "
                 "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.Timeout:
+            raise RuntimeError(
+                f"Ollama timed out after {timeout}s. "
+                "Try increasing the OLLAMA_TIMEOUT environment variable."
             )
         except requests.exceptions.HTTPError as e:
             raise RuntimeError(f"Ollama returned an error: {e}")
