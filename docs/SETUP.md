@@ -11,7 +11,7 @@ This guide walks you through setting up FireForm for local development on Window
 | **Docker Compose** | 2.0+ | Included with Docker Desktop |
 | **Ollama** | Latest | [ollama.com/download](https://ollama.com/download) |
 | **Git** | Any | [git-scm.com](https://git-scm.com/) |
-| **Make** | Any | See [Installing Make](#installing-make) below |
+| **Make** | Any | Included on Linux/macOS. Windows: install via [chocolatey](https://community.chocolatey.org/packages/make) (`choco install make`) or [GnuWin32](https://gnuwin32.sourceforge.net/packages/make.htm) |
 
 ---
 
@@ -33,7 +33,7 @@ cd FireForm
 make build
 ```
 
-This builds the `fireform-app` container (Python 3.11-slim) and pulls the `ollama/ollama:latest` image.
+This builds the `fireform-app` container image from the Dockerfile (Python 3.11-slim base). The Ollama image will be pulled automatically in the next step.
 
 ### Step 3 — Start Containers
 
@@ -42,8 +42,10 @@ make up
 ```
 
 This starts two containers:
-- `fireform-app` — the FastAPI backend (port `8000`)
-- `fireform-ollama` — the Ollama LLM server (port `11434`)
+- `fireform-app` — runs the FastAPI backend via Uvicorn (mapped to host port `8000`)
+- `fireform-ollama` — the Ollama LLM server (mapped to host port `11434`)
+
+> **Note:** The `docker-compose.yml` starts Uvicorn automatically with `--reload`. If port `8000` is not accessible, see the [Port 8000 troubleshooting section](#port-8000-not-accessible-from-host) below.
 
 ### Step 4 — Pull the LLM Model
 
@@ -61,11 +63,11 @@ This downloads the Mistral model (~4 GB) into the Ollama container. This only ne
 # Check containers are running
 docker compose ps
 
-# Check the API is responding
-curl http://localhost:8000/docs
+# Check the API is responding (should return JSON)
+curl http://localhost:8000/
 ```
 
-Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser. You should see the Swagger UI.
+Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser to see the Swagger UI.
 
 ### Useful Docker Commands
 
@@ -324,4 +326,4 @@ Voice Memo / Text Input
  JSON      Filled PDF
 ```
 
-For more details, see the docstrings in `src/controller.py`, `src/file_manipulator.py`, `src/llm.py`, and `src/filler.py`.
+For more details, see `src/controller.py`, `src/file_manipulator.py`, `src/llm.py`, and `src/filler.py`.

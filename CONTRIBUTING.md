@@ -100,8 +100,8 @@ ollama pull mistral
 Once the API is running, verify it:
 
 ```bash
-# Should return {"detail":"Not Found"} or a health response
-curl http://localhost:8000/docs
+# Should return {"detail":"Not Found"}
+curl http://localhost:8000/
 ```
 
 Then open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser to see the Swagger UI.
@@ -113,10 +113,10 @@ Then open [http://localhost:8000/docs](http://localhost:8000/docs) in your brows
 python -m pytest tests/ -v
 
 # Docker
-make test
+docker compose exec app python3 -m pytest tests/ -v
 ```
 
-> **Note:** The `make test` command currently points to `src/test/`. The main test directory is `tests/` at the project root. When running locally, always use `python -m pytest tests/ -v`.
+> **Note:** The `make test` Makefile target currently points to `src/test/`. To run the test suite under `tests/` from Docker, use the explicit command shown above.
 
 ## 🌿 Branch Naming Convention
 
