@@ -50,3 +50,35 @@ class Filler:
 
         # Your main.py expects this function to return the path
         return output_pdf
+
+    def fill_form_with_data(self, pdf_form: str, data: dict) -> str:
+        """
+        Fill a PDF form with a pre-extracted data dictionary.
+        Used by batch endpoint — NO LLM call made here.
+        Matches fields by their exact PDF annotation key (T field).
+
+        This is the deterministic filling path:
+          extracted_json → subset per template → fill PDF
+        No hallucination risk — pure Python key matching.
+        """
+        output_pdf = (
+            pdf_form[:-4]
+            + "_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + "_filled.pdf"
+        )
+
+        pdf = PdfReader(pdf_form)
+
+        for page in pdf.pages:
+            if page.Annots:
+                for annot in page.Annots:
+                    if annot.Subtype == "/Widget" and annot.T:
+                        # Get the clean field key (strip pdfrw parentheses)
+                        field_key = annot.T.strip("()")
+                        if field_key in data and data[field_key] is not None:
+                            annot.V = f"{data[field_key]}"
+                            annot.AP = None
+
+        PdfWriter().write(output_pdf, pdf)
+        return output_pdf
