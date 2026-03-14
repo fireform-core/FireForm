@@ -12,7 +12,8 @@ Returns a MappingResult with matched values, warnings, and a printable report.
 """
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import Optional
 
 
 @dataclass
@@ -74,7 +75,7 @@ class SemanticMapper:
     FUZZY_THRESHOLD = 0.35          # Jaccard threshold for a fuzzy hit
     AMBIGUITY_MARGIN = 0.05         # Scores within this of the top are ambiguous
 
-    def __init__(self, template_config: dict = None):
+    def __init__(self, template_config: Optional[dict] = None):
         cfg = template_config or {}
         self._explicit: dict  = cfg.get("field_mappings", {})  # json_key → pdf_field
         self._aliases: dict   = cfg.get("aliases", {})         # json_key → [alias…]

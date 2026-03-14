@@ -1,5 +1,6 @@
+from typing import Any, Optional
+
 from pdfrw import PdfReader, PdfWriter
-from src.llm import LLM
 from src.semantic_mapper import SemanticMapper
 from datetime import datetime
 
@@ -8,7 +9,7 @@ class Filler:
     def __init__(self):
         pass
 
-    def fill_form(self, pdf_form: str, llm: LLM, template_config: dict = None):
+    def fill_form(self, pdf_form: str, llm: Any, template_config: Optional[dict] = None):
         """
         Fill a PDF form with values extracted by LLM.
 
@@ -43,7 +44,7 @@ class Filler:
         ordered_annots = []
         pdf_field_names = []
 
-        for page in pdf.pages:
+        for page in (pdf.pages or []):  # type: ignore[operator]
             if page.Annots:
                 sorted_annots = sorted(
                     page.Annots, key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
