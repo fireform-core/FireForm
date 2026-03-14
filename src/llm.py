@@ -45,6 +45,7 @@ class LLM:
         return prompt
 
     def main_loop(self):
+        print("[LLM] Starting field extraction pipeline")
         # self.type_check_all()
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
@@ -58,10 +59,33 @@ class LLM:
                 "prompt": prompt,
                 "stream": False,  # don't really know why --> look into this later.
             }
-
+            print(f"[LLM] Extracting field: {field}")
             try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
+                MAX_RETRIES = 3
+                TIMEOUT_SECONDS = 30
+
+                response = None
+
+                for attempt in range(MAX_RETRIES):
+                    try:
+                        response = requests.post(
+                            ollama_url,
+                            json=payload,
+                            timeout=TIMEOUT_SECONDS
+                        )
+                        response.raise_for_status()
+                        break
+
+                    except requests.exceptions.Timeout:
+                        print(f"[LLM] Timeout contacting Ollama (attempt {attempt+1}/{MAX_RETRIES})")
+
+                        if attempt == MAX_RETRIES - 1:
+                            raise RuntimeError("LLM request timed out after multiple retries")
+
+                    except requests.exceptions.ConnectionError:
+                        raise RuntimeError(
+                            f"Could not connect to Ollama at {ollama_url}. Ensure the server is running."
+                        )
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
@@ -73,6 +97,13 @@ class LLM:
             # parse response
             json_data = response.json()
             parsed_response = json_data["response"]
+            parsed_response = parsed_response.strip()
+
+            if parsed_response.startswith("```"):
+                parsed_response = parsed_response.strip("`")
+
+            if parsed_response.startswith("json"):
+                parsed_response = parsed_response[4:]
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 
@@ -91,7 +122,7 @@ class LLM:
         value = value.strip().replace('"', "")
         parsed_value = None
 
-        if value != "-1":
+        if value != "-1" and value != "":
             parsed_value = value
 
         if ";" in value:
