@@ -11,7 +11,7 @@ class JsonManager():
         except FileNotFoundError:
             print(f"Warning: File not found at {path_to_file}. Returning empty list.")
             data = []
-        except json.DecodeError:
+        except json.JSONDecodeError:
             raise IOError(f"JSON file at {path_to_file} is corrupted.")
         
         return data
