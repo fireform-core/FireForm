@@ -97,6 +97,18 @@ html.light .theme-toggle::after{transform:translateX(16px);background:var(--embe
 .tpl-name{font-family:var(--mono);font-size:0.72rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
 .tpl-date{font-family:var(--mono);font-size:0.58rem;color:var(--dim);flex-shrink:0;}
 .tpl-empty{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-align:center;padding:20px;border:1px dashed var(--border);border-radius:8px;line-height:1.6;}
+.tpl-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-size:0.55rem;}
+.tpl-item.active .tpl-check{background:var(--fire);border-color:var(--fire);color:white;}
+.mode-toggle{display:flex;gap:6px;margin-bottom:12px;}
+.mode-btn{flex:1;padding:6px;border-radius:6px;font-family:var(--mono);font-size:0.6rem;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;}
+.mode-btn.active{background:rgba(255,69,0,0.08);border-color:rgba(255,69,0,0.3);color:var(--ember);}
+.sel-count{font-family:var(--mono);font-size:0.62rem;color:var(--ember);margin-top:8px;min-height:16px;}
+.batch-results{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.batch-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:0.68rem;}
+.batch-item.ok{background:rgba(61,186,111,0.04);border:1px solid rgba(61,186,111,0.15);}
+.batch-item.fail{background:rgba(224,82,82,0.04);border:1px solid rgba(224,82,82,0.15);}
+.batch-item-name{color:var(--text);flex:1;}
+.batch-item-err{color:#EF9A9A;font-size:0.6rem;margin-right:10px;}
 
 .main{display:flex;flex-direction:column;overflow-y:auto;}
 
@@ -216,9 +228,14 @@ textarea::placeholder{color:var(--dim);font-style:italic;}
     </div>
     <div class="sidebar-block" style="flex:1">
       <div class="block-label">Saved Templates</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeSingle" onclick="setMode('single')">SINGLE</button>
+        <button class="mode-btn" id="modeBatch" onclick="setMode('batch')">BATCH</button>
+      </div>
       <div class="template-list" id="tplList">
         <div class="tpl-empty">No templates yet.<br/>Upload one above to begin.</div>
       </div>
+      <div class="sel-count" id="selCount"></div>
     </div>
   </aside>
 
@@ -236,7 +253,7 @@ textarea::placeholder{color:var(--dim);font-style:italic;}
       </div>
       <div class="step-item" id="step2">
         <div class="step-num">2</div>
-        <div class="step-info"><div class="step-title">Select Template</div><div class="step-desc">Choose from saved forms</div></div>
+        <div class="step-info"><div class="step-title">Select Template(s)</div><div class="step-desc">Single or multi-agency batch</div></div>
       </div>
       <div class="step-item" id="step3">
         <div class="step-num">3</div>
@@ -268,10 +285,11 @@ textarea::placeholder{color:var(--dim);font-style:italic;}
         </div>
         <div class="result-success" id="resSuccess">
           <div class="success-header">
-            <div class="success-title">✓ FORM FILLED SUCCESSFULLY</div>
-            <a class="btn-dl" id="dlLink" href="#" target="_blank">⬇ Download PDF</a>
+            <div class="success-title" id="successTitle">✓ FORM FILLED SUCCESSFULLY</div>
+            <a class="btn-dl" id="dlLink" href="#" target="_blank" style="display:none">⬇ Download PDF</a>
           </div>
           <div class="success-meta" id="resMeta"></div>
+          <div class="batch-results" id="batchResults"></div>
         </div>
         <div class="result-error" id="resError"></div>
       </div>
@@ -291,7 +309,7 @@ textarea::placeholder{color:var(--dim);font-style:italic;}
 
 <script>
 const API='http://localhost:8000';
-let selectedTplId=null,selectedTplName='',history=[];
+let selectedTplId=null, selectedTplName='', selectedIds=new Set(), mode='single', history=[];
 
 async function checkAPI(){
   try{
@@ -305,6 +323,19 @@ function setAPI(online){
   document.getElementById('apiIndicator').className='api-indicator '+(online?'online':'offline');
 }
 
+function setMode(m){
+  mode=m;
+  selectedTplId=null; selectedTplName=''; selectedIds=new Set();
+  document.getElementById('modeSingle').classList.toggle('active', m==='single');
+  document.getElementById('modeBatch').classList.toggle('active', m==='batch');
+  document.getElementById('selCount').textContent='';
+  const b=document.getElementById('tplBadge');
+  b.className='selected-tpl none';
+  b.textContent=m==='batch'?'\u2190 Check multiple templates for batch fill':'\u2190 Select a template from the sidebar';
+  updateFillBtn();
+  loadTemplates();
+}
+
 async function loadTemplates(){
   try{
     const r=await fetch(`${API}/templates`);
@@ -313,6 +344,7 @@ async function loadTemplates(){
     renderTemplates(Array.isArray(data)?data:[]);
   }catch{}
 }
+
 function renderTemplates(list){
   const el=document.getElementById('tplList');
   if(!list.length){
@@ -320,28 +352,54 @@ function renderTemplates(list){
     return;
   }
   document.getElementById('step1').classList.add('done');
-  el.innerHTML=list.map(t=>{
-    const date=t.created_at?new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
-    return `<button class="tpl-item ${selectedTplId===t.id?'active':''}" onclick="selectTemplate(${t.id},'${t.name.replace(/'/g,"\\'")}')">
-      <div class="tpl-dot"></div>
-      <div class="tpl-name">${t.name}</div>
-      <div class="tpl-date">${date}</div>
-    </button>`;
-  }).join('');
+  if(mode==='single'){
+    el.innerHTML=list.map(t=>{
+      const date=t.created_at?new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
+      return `<button class="tpl-item ${selectedTplId===t.id?'active':''}" onclick="selectTemplate(${t.id},'${t.name.replace(/'/g,"\\'")}')">
+        <div class="tpl-dot"></div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-date">${date}</div>
+      </button>`;
+    }).join('');
+  } else {
+    el.innerHTML=list.map(t=>{
+      const date=t.created_at?new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
+      const active=selectedIds.has(t.id)?'active':'';
+      const check=selectedIds.has(t.id)?'\u2713':'';
+      return `<button class="tpl-item ${active}" onclick="toggleTemplate(${t.id},'${t.name.replace(/'/g,"\\'")}')">
+        <div class="tpl-check">${check}</div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-date">${date}</div>
+      </button>`;
+    }).join('');
+  }
 }
+
 function selectTemplate(id,name){
-  selectedTplId=id;selectedTplName=name;
+  selectedTplId=id; selectedTplName=name;
   loadTemplates();
   const b=document.getElementById('tplBadge');
-  b.className='selected-tpl set';b.textContent=`📋 ${name}`;
+  b.className='selected-tpl set'; b.textContent=`\ud83d\udccb ${name}`;
   document.getElementById('step2').classList.add('done');
   updateFillBtn();
+}
+
+function toggleTemplate(id,name){
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const count=selectedIds.size;
+  document.getElementById('selCount').textContent=count>0?`${count} template${count>1?'s':''} selected`:'';
+  const b=document.getElementById('tplBadge');
+  if(count===0){ b.className='selected-tpl none'; b.textContent='\u2190 Check multiple templates for batch fill'; }
+  else { b.className='selected-tpl set'; b.textContent=`\ud83d\udccb ${count} template${count>1?'s':''} selected for batch`; }
+  if(count>0) document.getElementById('step2').classList.add('done');
+  updateFillBtn(); loadTemplates();
 }
 
 function onFileChosen(input){
   if(input.files.length>0){
     const ch=document.getElementById('fileChosen');
-    ch.textContent='✓ '+input.files[0].name;
+    ch.textContent='\u2713 '+input.files[0].name;
     ch.style.display='block';
     document.getElementById('uploadZone').querySelector('.upload-zone-text').style.display='none';
     document.getElementById('btnSave').disabled=false;
@@ -371,96 +429,136 @@ async function saveTemplate(){
     const r=await fetch(`${API}/templates/create`,{method:'POST',body:fd});
     const data=await r.json();
     if(r.ok){
-      msg.style.color='var(--green)';msg.textContent=`✓ Saved as "${data.name||name}"`;
+      msg.style.color='var(--green)';msg.textContent=`\u2713 Saved as "${data.name||name}"`;
       document.getElementById('tplName').value='';
       document.getElementById('pdfInput').value='';
       document.getElementById('fileChosen').style.display='none';
       document.getElementById('uploadZone').querySelector('.upload-zone-text').style.display='block';
       btn.disabled=true;
       await loadTemplates();
-      if(data.id)selectTemplate(data.id,data.name||name);
+      if(data.id&&mode==='single') selectTemplate(data.id,data.name||name);
     }else{
-      msg.style.color='var(--red)';msg.textContent='✗ '+(data.detail||data.error||'Save failed');
+      msg.style.color='var(--red)';msg.textContent='\u2717 '+(data.detail||data.error||'Save failed');
       btn.disabled=false;
     }
   }catch{
-    msg.style.color='var(--red)';msg.textContent='✗ Cannot reach API';
+    msg.style.color='var(--red)';msg.textContent='\u2717 Cannot reach API';
     btn.disabled=false;
   }
 }
 
 function onTextInput(el){
   document.getElementById('charCount').textContent=el.value.length+' chars';
-  if(el.value.trim().length>10)document.getElementById('step3').classList.add('done');
+  if(el.value.trim().length>10) document.getElementById('step3').classList.add('done');
   updateFillBtn();
 }
 function updateFillBtn(){
   const hasText=document.getElementById('incidentText').value.trim().length>10;
-  document.getElementById('btnFill').disabled=!(hasText&&selectedTplId!==null);
+  const hasTemplate=(mode==='single'&&selectedTplId!==null)||(mode==='batch'&&selectedIds.size>0);
+  document.getElementById('btnFill').disabled=!(hasText&&hasTemplate);
+  document.getElementById('btnFill').textContent=
+    (mode==='batch'&&selectedIds.size>1)?`\u26a1 FILL ${selectedIds.size} FORMS`:'\u26a1 FILL FORM';
 }
 function resetResults(){
   ['resLoading','resSuccess','resError'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('batchResults').innerHTML='';
+  document.getElementById('dlLink').style.display='none';
+}
+
+async function fillSingle(text){
+  const r=await fetch(`${API}/forms/fill`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({template_id:selectedTplId,input_text:text})
+  });
+  const data=await r.json();
+  if(r.ok){
+    document.getElementById('successTitle').textContent='\u2713 FORM FILLED SUCCESSFULLY';
+    const dl=document.getElementById('dlLink');
+    dl.href=`${API}/forms/download/${data.id}`;
+    dl.style.display='inline-flex';
+    document.getElementById('resMeta').textContent=
+      `Submission #${data.id} \u00b7 Template: ${selectedTplName} \u00b7 ${new Date().toLocaleTimeString()}`;
+    document.getElementById('resSuccess').classList.add('show');
+    document.getElementById('step4').classList.add('done');
+    addHistory(text,data.id,selectedTplName);
+  }else{
+    document.getElementById('resError').textContent='\u2717 '+(data.detail||data.error||JSON.stringify(data));
+    document.getElementById('resError').classList.add('show');
+  }
+}
+
+async function fillBatch(text){
+  const ids=Array.from(selectedIds);
+  const r=await fetch(`${API}/forms/fill/batch`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({template_ids:ids,input_text:text})
+  });
+  const data=await r.json();
+  if(r.ok){
+    const {total,succeeded,failed,results}=data;
+    document.getElementById('successTitle').textContent=
+      `\u2713 BATCH COMPLETE \u2014 ${succeeded}/${total} FILLED`;
+    document.getElementById('resMeta').textContent=
+      `${succeeded} succeeded \u00b7 ${failed} failed \u00b7 ${new Date().toLocaleTimeString()}`;
+    document.getElementById('batchResults').innerHTML=results.map(res=>
+      res.success
+        ?`<div class="batch-item ok"><span class="batch-item-name">\ud83d\udccb ${res.template_name}</span><a class="btn-dl" href="${API}${res.download_url}" target="_blank">\u2b07 Download</a></div>`
+        :`<div class="batch-item fail"><span class="batch-item-name">\ud83d\udccb ${res.template_name}</span><span class="batch-item-err">${res.error||'Failed'}</span></div>`
+    ).join('');
+    document.getElementById('resSuccess').classList.add('show');
+    document.getElementById('step4').classList.add('done');
+    results.filter(r=>r.success).forEach(res=>addHistory(text,res.submission_id,res.template_name));
+  }else{
+    document.getElementById('resError').textContent='\u2717 '+(data.detail||data.error||JSON.stringify(data));
+    document.getElementById('resError').classList.add('show');
+  }
 }
 
 async function fillForm(){
   const text=document.getElementById('incidentText').value.trim();
-  if(!text||!selectedTplId)return;
+  if(!text)return;
   resetResults();
   document.getElementById('btnFill').disabled=true;
+  const lm=document.querySelector('.loading-msg');
+  lm.innerHTML=(mode==='batch'&&selectedIds.size>1)
+    ?`<b>Mistral</b> is filling ${selectedIds.size} forms in one pass...`
+    :`<b>Mistral</b> is extracting data and filling your form...`;
   document.getElementById('resLoading').classList.add('show');
   try{
-    const r=await fetch(`${API}/forms/fill`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({template_id:selectedTplId,input_text:text})
-    });
-    const data=await r.json();
-    document.getElementById('resLoading').classList.remove('show');
-    if(r.ok){
-      document.getElementById('dlLink').href=`${API}/forms/download/${data.id}`;
-      document.getElementById('resMeta').textContent=
-        `Submission #${data.id} · Template: ${selectedTplName} · ${new Date().toLocaleTimeString()}`;
-      document.getElementById('resSuccess').classList.add('show');
-      document.getElementById('step4').classList.add('done');
-      addHistory(text,data.id);
-    }else{
-      document.getElementById('resError').textContent='✗ '+(data.detail||data.error||JSON.stringify(data));
-      document.getElementById('resError').classList.add('show');
-    }
+    if(mode==='batch'&&selectedIds.size>1) await fillBatch(text);
+    else await fillSingle(text);
   }catch{
-    document.getElementById('resLoading').classList.remove('show');
-    document.getElementById('resError').textContent='✗ Cannot reach API. Make sure uvicorn and ollama are both running.';
+    document.getElementById('resError').textContent='\u2717 Cannot reach API. Make sure uvicorn and ollama are both running.';
     document.getElementById('resError').classList.add('show');
   }finally{
+    document.getElementById('resLoading').classList.remove('show');
     document.getElementById('btnFill').disabled=false;
   }
 }
 
-function addHistory(text,id){
-  history.unshift({text,id,time:new Date().toLocaleTimeString()});
+function addHistory(text,id,tplName){
+  history.unshift({text,id,tplName,time:new Date().toLocaleTimeString()});
   document.getElementById('histCount').textContent=history.length+' submission'+(history.length!==1?'s':'');
   document.getElementById('histList').innerHTML=history.map(h=>`
     <div class="history-item">
       <div class="h-time">${h.time}</div>
-      <div class="h-text">${h.text.substring(0,90)}${h.text.length>90?'…':''}</div>
+      <div class="h-text">${h.text.substring(0,90)}${h.text.length>90?'\u2026':''}</div>
       <div class="h-badge">FILLED #${h.id}</div>
     </div>`).join('');
 }
 
-checkAPI();loadTemplates();
+checkAPI(); loadTemplates();
 setInterval(checkAPI,8000);
 setInterval(loadTemplates,15000);
 
-// ── Theme Toggle ──────────────────────────────────────────
 function toggleTheme(){
   const isLight=document.documentElement.classList.toggle('light');
-  document.getElementById('themeIcon').textContent=isLight?'☀️':'🌙';
-  localStorage.setItem('ff-theme', isLight?'light':'dark');
+  document.getElementById('themeIcon').textContent=isLight?'\u2600\ufe0f':'\ud83c\udf19';
+  localStorage.setItem('ff-theme',isLight?'light':'dark');
 }
-// Restore saved preference
 if(localStorage.getItem('ff-theme')==='light'){
   document.documentElement.classList.add('light');
-  document.getElementById('themeIcon').textContent='☀️';
+  document.getElementById('themeIcon').textContent='\u2600\ufe0f';
 }
 </script>
 </body>
