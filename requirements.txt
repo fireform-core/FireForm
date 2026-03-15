@@ -1,5 +1,6 @@
 requests
 pdfrw
+pypdf
 flask
 commonforms
 fastapi
