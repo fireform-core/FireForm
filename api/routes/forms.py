@@ -19,7 +19,7 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
     controller = Controller()
     path = controller.fill_form(user_input=form.input_text, fields=fetched_template.fields, pdf_form_path=fetched_template.pdf_path, model=form.model)
 
-    submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
+    submission = FormSubmission(**form.model_dump(exclude={"model"}), output_pdf_path=path)
     return create_form(db, submission)
 
 

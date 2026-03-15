@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlmodel import Session, select
 from api.db.models import Template, FormSubmission
 
@@ -8,7 +9,7 @@ def create_template(session: Session, template: Template) -> Template:
     session.refresh(template)
     return template
 
-def get_template(session: Session, template_id: int) -> Template | None:
+def get_template(session: Session, template_id: int) -> Optional[Template]:
     return session.get(Template, template_id)
 
 # Forms

@@ -49,6 +49,7 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
+        print(f"\t[LOG] Using model: {self._model}")
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
             # print(prompt)
