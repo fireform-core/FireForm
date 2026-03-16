@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-
+from src.utils.normalizer import normalize_date
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -46,7 +46,7 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -82,27 +82,29 @@ class LLM:
         print("--------- extracted data ---------")
 
         return self
-
-    def add_response_to_json(self, field, value):
-        """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
-        """
+    
+    def add_response_to_json(self, field, value) -> None:
         value = value.strip().replace('"', "")
-        parsed_value = None
+        parsed_value = value
 
-        if value != "-1":
+        # Check if the field is a date field (case-insensitive check)
+        if "date" in field.lower() or "time" in field.lower():
+            parsed_value = normalize_date(value)
+        elif value != "-1":
             parsed_value = value
 
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
-            self._json[field].append(parsed_value)
+            # If it's a list, append; if not, turn it into one
+            if isinstance(self._json[field], list):
+                self._json[field].append(parsed_value)
+            else:
+                self._json[field] = [self._json[field], parsed_value]
         else:
             self._json[field] = parsed_value
-
-        return
+        
 
     def handle_plural_values(self, plural_value):
         """
