@@ -4,26 +4,14 @@ import requests
 
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
+    def __init__(self, transcript_text: str = None, target_fields: list = None, json: dict = None) -> None:
         if json is None:
             json = {}
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
         self._json = json  # dictionary
 
-    def type_check_all(self):
-        if type(self._transcript_text) is not str:
-            raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Transcript must be text. Input:\n\ttranscript_text: {self._transcript_text}"
-            )
-        elif type(self._target_fields) is not list:
-            raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
-            )
-
-    def build_prompt(self, current_field):
+    def build_prompt(self, current_field: str) -> str:
         """
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
         @params: current_field -> represents the current element of the json that is being prompted.
@@ -44,9 +32,8 @@ class LLM:
 
         return prompt
 
-    def main_loop(self):
-        # self.type_check_all()
-        for field in self._target_fields.keys():
+    def main_loop(self) -> 'LLM':
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -83,7 +70,7 @@ class LLM:
 
         return self
 
-    def add_response_to_json(self, field, value):
+    def add_response_to_json(self, field: str, value: str) -> None:
         """
         this method adds the following value under the specified field,
         or under a new field if the field doesn't exist, to the json dict
@@ -104,7 +91,7 @@ class LLM:
 
         return
 
-    def handle_plural_values(self, plural_value):
+    def handle_plural_values(self, plural_value: str) -> list:
         """
         This method handles plural values.
         Takes in strings of the form 'value1; value2; value3; ...; valueN'
@@ -131,5 +118,5 @@ class LLM:
 
         return values
 
-    def get_data(self):
+    def get_data(self) -> dict:
         return self._json
