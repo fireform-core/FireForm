@@ -1,6 +1,7 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
+from api.errors.base import LLMUnavailableError
 from commonforms import prepare_form
 
 
@@ -41,7 +42,9 @@ class FileManipulator:
 
             return output_name
 
+        except ConnectionError as e:
+            # Wrap low-level connection errors in a domain-specific error
+            raise LLMUnavailableError(str(e))
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
-            raise e
+            raise

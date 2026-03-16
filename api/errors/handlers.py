@@ -2,6 +2,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from api.errors.base import AppError
 
+
 def register_exception_handlers(app):
     @app.exception_handler(AppError)
     async def app_error_handler(request: Request, exc: AppError):
