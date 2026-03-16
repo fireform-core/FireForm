@@ -44,14 +44,20 @@ class LLM:
 
         return prompt
 
+    def _get_ollama_url(self) -> str:
+        """
+        Resolve the Ollama base URL from environment.
+        Defaults to a local instance if OLLAMA_HOST is not set.
+        """
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        return f"{ollama_host}/api/generate"
+
     def main_loop(self):
         # self.type_check_all()
+        ollama_url = self._get_ollama_url()
+
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
                 "model": "mistral",
@@ -63,9 +69,15 @@ class LLM:
                 response = requests.post(ollama_url, json=payload)
                 response.raise_for_status()
             except requests.exceptions.ConnectionError:
+                ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
                 raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
+                    "Could not connect to the Ollama LLM backend.\n"
+                    f"- Attempted URL: {ollama_url}\n"
+                    f"- Current OLLAMA_HOST: {ollama_host}\n"
+                    "Troubleshooting steps:\n"
+                    "  1) Ensure the Ollama server is running (e.g. `ollama serve`).\n"
+                    "  2) Ensure the `mistral` model is available (`ollama pull mistral`).\n"
+                    "  3) If running in Docker or remotely, verify the OLLAMA_HOST address."
                 )
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
@@ -73,7 +85,6 @@ class LLM:
             # parse response
             json_data = response.json()
             parsed_response = json_data["response"]
-            # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 
         print("----------------------------------")
