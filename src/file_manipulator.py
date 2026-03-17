@@ -17,7 +17,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    async def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
@@ -33,7 +33,7 @@ class FileManipulator:
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            output_name = await self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
