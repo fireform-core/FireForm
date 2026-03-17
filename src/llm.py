@@ -1,26 +1,29 @@
 import json
 import os
-import requests
+import httpx
+import logging
+from src.core.orchestrator import orchestrator
 
+logger = logging.getLogger(__name__)
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
-        if json is None:
-            json = {}
+    def __init__(self, transcript_text=None, target_fields=None, json_data=None):
+        if json_data is None:
+            json_data = {}
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+        self._json = json_data  # dictionary
 
     def type_check_all(self):
-        if type(self._transcript_text) is not str:
+        if not isinstance(self._transcript_text, str):
             raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Transcript must be text. Input:\n\ttranscript_text: {self._transcript_text}"
+                f"ERROR in LLM() attributes -> "
+                f"Transcript must be text. Input:\n\ttranscript_text: {self._transcript_text}"
             )
-        elif type(self._target_fields) is not list:
+        elif not isinstance(self._target_fields, dict):
             raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
+                f"ERROR in LLM() attributes -> "
+                f"Target fields must be a dictionary. Input:\n\ttarget_fields: {self._target_fields}"
             )
 
     def build_prompt(self, current_field):
@@ -44,37 +47,40 @@ class LLM:
 
         return prompt
 
-    def main_loop(self):
+    async def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
-            prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
 
-            payload = {
-                "model": "mistral",
-                "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
-            }
+        async with httpx.AsyncClient() as client:
+            for field in self._target_fields.keys():
+                prompt = self.build_prompt(field)
+                payload = {
+                    "model": "mistral",
+                    "prompt": prompt,
+                    "stream": False,
+                }
 
-            try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
-            except requests.exceptions.ConnectionError:
-                raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
-                )
-            except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
-
-            # parse response
-            json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
+                # VRAM Orchestration: Ensure serial hardware access
+                async with orchestrator.lock:
+                    try:
+                        response = await client.post(ollama_url, json=payload, timeout=60.0)
+                        response.raise_for_status()
+                        json_data = response.json()
+                        parsed_response = json_data["response"]
+                        self.add_response_to_json(field, parsed_response)
+                    except (httpx.ConnectError, httpx.TimeoutException, httpx.RequestError) as e:
+                        logger.error(f"Transport error connecting to Ollama at {ollama_url}: {e}")
+                        raise ConnectionError(
+                            f"Could not connect to Ollama at {ollama_url}. "
+                            "Please ensure Ollama is running and accessible."
+                        )
+                    except httpx.HTTPStatusError as e:
+                        logger.error(f"Ollama returned an error: {e}")
+                        raise RuntimeError(f"Ollama returned an error: {e}")
+                    except Exception as e:
+                        logger.error(f"Unexpected error during LLM extraction: {e}")
+                        raise
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -98,11 +104,14 @@ class LLM:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
-            self._json[field].append(parsed_value)
+            # If it's already a list, append. If not, make it a list or just overwrite?
+            # Original code used .append() which assumes it's a list.
+            if isinstance(self._json[field], list):
+                self._json[field].append(parsed_value)
+            else:
+                self._json[field] = parsed_value # or [self._json[field], parsed_value]
         else:
             self._json[field] = parsed_value
-
-        return
 
     def handle_plural_values(self, plural_value):
         """
@@ -118,14 +127,7 @@ class LLM:
         print(
             f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
         )
-        values = plural_value.split(";")
-
-        # Remove trailing leading whitespace
-        for i in range(len(values)):
-            current = i + 1
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
+        values = [v.strip() for v in plural_value.split(";")]
 
         print(f"\t[LOG]: Resulting formatted list of values: {values}")
 

@@ -11,6 +11,9 @@ def create_template(session: Session, template: Template) -> Template:
 def get_template(session: Session, template_id: int) -> Template | None:
     return session.get(Template, template_id)
 
+def get_templates(session: Session) -> list[Template]:
+    return session.exec(select(Template)).all()
+
 # Forms
 def create_form(session: Session, form: FormSubmission) -> FormSubmission:
     session.add(form)
