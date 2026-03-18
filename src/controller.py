@@ -1,5 +1,4 @@
 from typing import List, Dict, Any
-
 from src.file_manipulator import FileManipulator
 from src.timeline_extractor import TimelineExtractor
 
@@ -7,11 +6,7 @@ from src.timeline_extractor import TimelineExtractor
 class Controller:
     """
     Controller layer for FireForm.
-
-    Responsible for orchestrating the processing pipeline:
-    - Receiving user input
-    - Extracting timeline information
-    - Passing processed data to FileManipulator
+    Responsible for orchestrating the processing pipeline.
     """
 
     def __init__(self) -> None:
@@ -25,17 +20,14 @@ class Controller:
         pdf_form_path: str
     ) -> Dict[str, Any]:
 
-        # Extract timeline
         timeline = self.timeline_extractor.extract_timeline(user_input)
 
-        # Run original FireForm pipeline
         result = self.file_manipulator.fill_form(
             user_input,
             fields,
             pdf_form_path
         )
 
-        # Attach timeline
         if isinstance(result, dict):
             result["timeline"] = timeline
 
