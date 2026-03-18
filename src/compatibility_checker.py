@@ -169,6 +169,7 @@ class CompatibilityChecker:
                 not x[1].compatible,  # Compatible templates first
                 len(x[1].missing_fields),  # Fewer missing fields
                 len(x[1].type_mismatches),  # Fewer type mismatches
+                x[0],  # Deterministic tie-breaker: template_id
             ),
         )
         
