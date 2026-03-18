@@ -39,7 +39,12 @@ class Filler:
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
+                            text_value = f"{answers_list[i]}"
+                            if len(text_value) > 20:
+                                # '/Helv 0 Tf' means Helvetica font, 0 size (auto)
+                                annot.DA = '/Helv 0 Tf 0 g' 
+                            
+                            annot.V = text_value
                             annot.AP = None
                             i += 1
                         else:
