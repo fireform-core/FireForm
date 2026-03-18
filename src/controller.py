@@ -24,33 +24,22 @@ class Controller:
         fields: List[str],
         pdf_form_path: str
     ) -> Dict[str, Any]:
-        """
-        Process the user input and fill the PDF form.
 
-        Steps:
-        1. Extract timeline events from the incident narrative
-        2. Pass the original data to FileManipulator for form filling
-        3. Attach timeline data to the result for downstream use
-        """
-
-        # Extract timeline from incident text
+        # Extract timeline
         timeline = self.timeline_extractor.extract_timeline(user_input)
 
-        # Call existing FireForm pipeline
+        # Run original FireForm pipeline
         result = self.file_manipulator.fill_form(
             user_input,
             fields,
             pdf_form_path
         )
 
-        # Attach timeline to the result if possible
+        # Attach timeline
         if isinstance(result, dict):
             result["timeline"] = timeline
 
         return result
 
     def create_template(self, pdf_path: str) -> Dict[str, Any]:
-        """
-        Generate a template from the provided PDF form.
-        """
         return self.file_manipulator.create_template(pdf_path)
