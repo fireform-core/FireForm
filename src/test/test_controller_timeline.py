@@ -1,5 +1,4 @@
 import pytest
-from api.main import app
 from unittest.mock import MagicMock
 from src.controller import Controller
 
