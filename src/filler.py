@@ -1,11 +1,59 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
+from src.compatibility_checker import CompatibilityChecker
+from src.template_schema import TemplateRegistry
 from datetime import datetime
+from typing import Optional
 
 
 class Filler:
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        template_registry: Optional[TemplateRegistry] = None,
+    ):
+        self.template_registry = template_registry
+        self.compatibility_checker = (
+            CompatibilityChecker(template_registry)
+            if template_registry
+            else None
+        )
+
+    def check_compatibility_before_fill(
+        self,
+        template_id: str,
+        extracted_data: dict,
+    ) -> dict:
+        """Check if extracted data is compatible with a template before filling.
+        
+        Args:
+            template_id: ID of the template to check against.
+            extracted_data: Extracted field data to validate.
+            
+        Returns:
+            Compatibility report dict with status and details.
+            
+        Raises:
+            ValueError: If no template registry is configured or template not found.
+        """
+        if not self.compatibility_checker:
+            raise ValueError("Template registry not configured in Filler instance")
+        
+        report = self.compatibility_checker.check_compatibility(
+            template_id,
+            extracted_data,
+        )
+        
+        return {
+            "compatible": report.compatible,
+            "missing_fields": sorted(report.missing_fields),
+            "extra_fields": sorted(report.extra_fields),
+            "unmapped_fields": sorted(report.unmapped_fields),
+            "type_mismatches": report.type_mismatches,
+            "dependency_violations": report.dependency_violations,
+            "warnings": report.warnings,
+            "matched_fields": sorted(report.matched_fields),
+            "summary": report.summary(),
+        }
 
     def fill_form(self, pdf_form: str, llm: LLM):
         """
