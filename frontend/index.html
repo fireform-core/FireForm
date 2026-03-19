@@ -142,6 +142,17 @@ textarea:focus{border-color:rgba(255,69,0,0.35);box-shadow:0 0 0 4px rgba(255,69
 textarea::placeholder{color:var(--dim);font-style:italic;}
 
 .action-row{display:flex;align-items:center;gap:20px;margin-top:28px;}
+.voice-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.btn-mic{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all 0.2s;flex-shrink:0;}
+.btn-mic:hover{border-color:var(--fire);color:var(--fire);background:rgba(255,69,0,0.05);}
+.btn-mic.recording{border-color:var(--red);color:var(--red);background:rgba(224,82,82,0.08);animation:micPulse 1s ease-in-out infinite;}
+.voice-status{font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.voice-status.active{color:var(--red);}
+.voice-status.done{color:var(--green);}
+.transcribe-loading{display:none;align-items:center;gap:8px;font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.transcribe-loading.show{display:flex;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,82,82,0.4)}50%{box-shadow:0 0 0 8px rgba(224,82,82,0)}}
+
 .btn-fill{padding:14px 40px;background:linear-gradient(135deg,var(--fire),var(--ember));border:none;border-radius:8px;color:white;font-family:var(--display);font-size:1.15rem;letter-spacing:2.5px;cursor:pointer;transition:all 0.2s;box-shadow:0 3px 24px rgba(255,69,0,0.25);position:relative;overflow:hidden;white-space:nowrap;}
 .btn-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 60%);}
 .btn-fill:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 36px rgba(255,69,0,0.4);}
@@ -270,6 +281,13 @@ textarea::placeholder{color:var(--dim);font-style:italic;}
       <div class="field-label">
         <span>Incident Description <span class="req">*</span></span>
         <span class="char-count" id="charCount">0 chars</span>
+      </div>
+      <div class="voice-row">
+        <button class="btn-mic" id="btnMic" onclick="toggleRecording()" title="Record voice — click to start/stop">🎤</button>
+        <div>
+          <div class="voice-status" id="voiceStatus">Click mic to record incident report</div>
+          <div class="transcribe-loading" id="transcribeLoading"><div class="spinner"></div><span>Transcribing audio...</span></div>
+        </div>
       </div>
       <textarea id="incidentText"
         placeholder="Officer Hernandez responding to a structure fire at 742 Evergreen Terrace. Two occupants evacuated safely. Minor smoke inhalation treated on scene by EMS. Unit 7 on scene 14:32, cleared 16:45. Handed off to Deputy Martinez..."
@@ -545,6 +563,80 @@ function addHistory(text,id,tplName){
       <div class="h-text">${h.text.substring(0,90)}${h.text.length>90?'\u2026':''}</div>
       <div class="h-badge">FILLED #${h.id}</div>
     </div>`).join('');
+}
+
+
+// ── Voice Recording ───────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+async function toggleRecording(){
+  if(isRecording) stopRecording();
+  else await startRecording();
+}
+
+async function startRecording(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = handleRecordingStop;
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('btnMic').classList.add('recording');
+    document.getElementById('btnMic').textContent = '⏹';
+    document.getElementById('voiceStatus').textContent = 'Recording... click to stop';
+    document.getElementById('voiceStatus').className = 'voice-status active';
+  }catch(err){
+    document.getElementById('voiceStatus').textContent = '✗ Microphone access denied';
+    document.getElementById('voiceStatus').className = 'voice-status';
+  }
+}
+
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    document.getElementById('btnMic').classList.remove('recording');
+    document.getElementById('btnMic').textContent = '🎤';
+    document.getElementById('voiceStatus').textContent = 'Processing...';
+  }
+}
+
+async function handleRecordingStop(){
+  const blob = new Blob(audioChunks, {type:'audio/webm'});
+  const formData = new FormData();
+  formData.append('file', blob, 'recording.webm');
+
+  document.getElementById('transcribeLoading').classList.add('show');
+  document.getElementById('voiceStatus').textContent = '';
+
+  try{
+    const r = await fetch(`${API}/transcribe`, {method:'POST', body:formData});
+    const data = await r.json();
+    document.getElementById('transcribeLoading').classList.remove('show');
+
+    if(r.ok && data.transcript){
+      const textarea = document.getElementById('incidentText');
+      textarea.value = data.transcript;
+      onTextInput(textarea);
+      document.getElementById('voiceStatus').textContent =
+        `\u2713 Transcribed (${data.duration_seconds}s, lang: ${data.language})`;
+      document.getElementById('voiceStatus').className = 'voice-status done';
+    } else {
+      document.getElementById('voiceStatus').textContent =
+        '\u2717 Transcription failed — type manually';
+      document.getElementById('voiceStatus').className = 'voice-status';
+    }
+  }catch(err){
+    document.getElementById('transcribeLoading').classList.remove('show');
+    document.getElementById('voiceStatus').textContent =
+      '\u2717 Cannot reach API';
+    document.getElementById('voiceStatus').className = 'voice-status';
+  }
 }
 
 checkAPI(); loadTemplates();

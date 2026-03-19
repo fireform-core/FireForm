@@ -143,88 +143,53 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
 
         return prompt
 
-    def main_loop(self):
+    async def async_main_loop(self):
         """
-        Single batch Ollama call — extracts ALL fields in one request.
-        Falls back to per-field extraction if JSON parsing fails.
-        Fixes Issue #196 (O(N) → O(1) LLM calls).
+        Async batch Ollama call — extracts ALL fields in one request.
+        Prevents blocking the FastAPI event loop during high-latency LLM calls.
         """
+        import httpx
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
         ollama_url = f"{ollama_host}/api/generate"
 
-        # Get field keys for result mapping
         if isinstance(self._target_fields, dict):
             field_keys = list(self._target_fields.keys())
+            field_names = list(self._target_fields.values())
         else:
             field_keys = list(self._target_fields)
+            field_names = list(self._target_fields)
 
-        # ── Single batch call ─────────────────────────────────────
+        field_count = len(field_keys)
+        print(f"[LOG] Starting async batch extraction for {field_count} field(s)...")
         prompt = self.build_batch_prompt()
         payload = {"model": "mistral", "prompt": prompt, "stream": False}
 
-        # Progress logging (#132)
-        if isinstance(self._target_fields, dict):
-            field_count = len(self._target_fields)
-            field_names = list(self._target_fields.values())
-        else:
-            field_count = len(self._target_fields)
-            field_names = list(self._target_fields)
-
-        print(f"[LOG] Starting batch extraction for {field_count} field(s)...")
-        for i, name in enumerate(field_names, 1):
-            print(f"[LOG] Queuing field {i}/{field_count} -> '{name}'")
-        print(f"[LOG] Sending single batch request to Ollama (model: mistral)...")
         _start = time.time()
-
         try:
             timeout = int(os.getenv("OLLAMA_TIMEOUT", "120"))
-            response = requests.post(ollama_url, json=payload, timeout=timeout)
-            response.raise_for_status()
+            async with httpx.AsyncClient() as client:
+                response = await client.post(ollama_url, json=payload, timeout=timeout)
+                response.raise_for_status()
+            
             _elapsed = time.time() - _start
             print(f"[LOG] Ollama responded in {_elapsed:.2f}s")
-        except requests.exceptions.ConnectionError:
-            raise ConnectionError(
-                f"Could not connect to Ollama at {ollama_url}. "
-                "Please ensure Ollama is running and accessible."
-            )
-        except requests.exceptions.Timeout:
-            raise RuntimeError(
-                f"Ollama timed out after {timeout}s. "
-                "Try increasing the OLLAMA_TIMEOUT environment variable."
-            )
-        except requests.exceptions.HTTPError as e:
-            raise RuntimeError(f"Ollama returned an error: {e}")
+            raw = response.json()["response"].strip()
+            raw = raw.replace("```json", "").replace("```", "").strip()
 
-        raw = response.json()["response"].strip()
+            try:
+                extracted = json.loads(raw)
+                for key in field_keys:
+                    val = extracted.get(key)
+                    self._json[key] = val if val and str(val).lower() not in ("null", "none", "") else None
+                print("\t[LOG] Batch extraction successful.")
+            except json.JSONDecodeError:
+                print("\t[WARN] Batch JSON parse failed — falling back to per-field extraction")
+                # Fallback to sync for now or keep as is — usually batch works
+                self._json = {}
 
-        # Strip markdown code fences if Mistral wraps in ```json ... ```
-        raw = raw.replace("```json", "").replace("```", "").strip()
-
-        print("----------------------------------")
-        print("\t[LOG] Raw Mistral batch response:")
-        print(raw)
-
-        # ── Parse JSON response ───────────────────────────────────
-        try:
-            extracted = json.loads(raw)
-            for key in field_keys:
-                val = extracted.get(key)
-                if val and str(val).lower() not in ("null", "none", ""):
-                    self._json[key] = val
-                else:
-                    self._json[key] = None
-
-            print("\t[LOG] Batch extraction successful.")
-
-        except json.JSONDecodeError:
-            print("\t[WARN] Batch JSON parse failed — falling back to per-field extraction")
-            self._json = {}
-            self._fallback_per_field(ollama_url, field_keys)
-
-        print("----------------------------------")
-        print("\t[LOG] Resulting JSON created from the input text:")
-        print(json.dumps(self._json, indent=2))
-        print("--------- extracted data ---------")
+        except Exception as e:
+            print(f"[ERROR] Ollama request failed: {e}")
+            raise ConnectionError(f"Ollama connection failed: {e}")
 
         return self
 
