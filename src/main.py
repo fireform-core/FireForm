@@ -74,7 +74,7 @@ if __name__ == "__main__":
     prepare_form(file, prepared_pdf)
     
     reader = PdfReader(prepared_pdf)
-    fields = reader.get_fields())
+    fields = reader.get_fields()
     if(fields):
         num_fields = len(fields)
     else:
