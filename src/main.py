@@ -1,3 +1,4 @@
+from typing import Union
 import os
 # from backend import Fill  
 from commonforms import prepare_form 
@@ -50,7 +51,7 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 
 # if __name__ == "__main__":
 #     file = "./src/inputs/file.pdf"
-#     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
+#     user_input = open("./src/inputs/input.txt").read().strip()
 #     fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
 #     prepared_pdf = "temp_outfile.pdf"
 #     prepare_form(file, prepared_pdf)
@@ -67,7 +68,7 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
-    user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
+    user_input = open("./src/inputs/input.txt").read().strip()
     fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
     prepared_pdf = "temp_outfile.pdf"
     prepare_form(file, prepared_pdf)
