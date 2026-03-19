@@ -45,8 +45,18 @@ class LLM:
         return prompt
 
     def main_loop(self):
+        # --- NEW: REAL-TIME SEVERITY SCAN ---
+        trigger_words = ["gun", "heart attack", "trapped", "hazmat", "cardiac", "shooter", "fire"]
+        transcript_lower = self._transcript_text.lower()
+        
+        for word in trigger_words:
+            if word in transcript_lower:
+                print(f"🚨 [URGENT]: High-severity keyword detected -> '{word}'")
+                self._json["SEVERITY_FLAG"] = "HIGH"
+                break
+        # ------------------------------------
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
