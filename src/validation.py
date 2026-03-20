@@ -1,13 +1,11 @@
+from src.schema import REQUIRED_FIELDS
+
 def validate_extracted_data(data: dict) -> bool:
-    """
-    Basic validation for extracted form data.
-    Ensures required fields are present and non-empty.
-    """
-
-    required_fields = ["patient_name", "age", "diagnosis"]
-
-    for field in required_fields:
-        if field not in data or not data[field]:
+    for field, field_type in REQUIRED_FIELDS.items():
+        if field not in data:
             return False
-
+        if not isinstance(data[field], field_type):
+            return False
+        if data[field] in ["", None]:
+            return False
     return True
