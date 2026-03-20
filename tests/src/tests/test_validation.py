@@ -1,28 +1,19 @@
-import pytest
-from src.validation import validate_extracted_data
-
-
 def test_valid_data():
     data = {
-        "patient_name": "John Doe",
-        "age": 30,
-        "diagnosis": "Flu"
+        "incident_type": "Fire",
+        "location": "Downtown",
+        "incident_time": "2026-03-20 10:00",
+        "units_involved": ["Unit1", "Unit2"],
+        "summary": "Fire contained"
     }
     assert validate_extracted_data(data) == True
 
-
-def test_missing_field():
+def test_wrong_type():
     data = {
-        "patient_name": "John Doe",
-        "age": 30
-    }
-    assert validate_extracted_data(data) == False
-
-
-def test_empty_field():
-    data = {
-        "patient_name": "",
-        "age": 30,
-        "diagnosis": "Flu"
+        "incident_type": "Fire",
+        "location": "Downtown",
+        "incident_time": "2026-03-20 10:00",
+        "units_involved": "Unit1",  # should be list
+        "summary": "Fire contained"
     }
     assert validate_extracted_data(data) == False
