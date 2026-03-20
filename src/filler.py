@@ -1,5 +1,4 @@
 from pdfrw import PdfReader, PdfWriter
-from src.llm import LLM
 from datetime import datetime
 
 
@@ -7,10 +6,24 @@ class Filler:
     def __init__(self):
         pass
 
-    def fill_form(self, pdf_form: str, llm: LLM):
+    def fill_form(self, pdf_form: str, data: dict) -> str:
         """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Fill a PDF form with pre-extracted, validated field values.
+
+        Separation of concerns: this class is responsible only for writing
+        data to a PDF. LLM extraction and validation are handled upstream
+        by FileManipulator before this method is called.
+
+        Fields are written in visual order (top-to-bottom, left-to-right)
+        to match the annotation layout of the source PDF.
+
+        Args:
+            pdf_form: Absolute or relative path to the fillable PDF template.
+            data: Pre-extracted and validated field values. Values are written
+                  positionally in the order they appear in the dict.
+
+        Returns:
+            Path to the newly written, filled PDF file.
         """
         output_pdf = (
             pdf_form[:-4]
@@ -19,16 +32,10 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()  # This is a dictionary
+        answers_list = list(data.values())
 
-        answers_list = list(textbox_answers.values())
-
-        # Read PDF
         pdf = PdfReader(pdf_form)
 
-        # Loop through pages
         for page in pdf.pages:
             if page.Annots:
                 sorted_annots = sorted(
@@ -43,10 +50,7 @@ class Filler:
                             annot.AP = None
                             i += 1
                         else:
-                            # Stop if we run out of answers
                             break
 
         PdfWriter().write(output_pdf, pdf)
-
-        # Your main.py expects this function to return the path
         return output_pdf

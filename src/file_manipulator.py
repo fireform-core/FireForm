@@ -1,6 +1,7 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
+from src.validator import validate_incident
 from commonforms import prepare_form
 
 
@@ -17,31 +18,58 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str) -> str:
         """
-        It receives the raw data, runs the PDF filling logic,
-        and returns the path to the newly created file.
+        Orchestrates the full extract → validate → fill pipeline.
+
+        Steps:
+            1. Run LLM extraction to convert raw incident text into a
+               structured field dict.
+            2. Validate the extracted dict before touching any PDF.
+               Raises ``ValueError`` if required incident fields are
+               missing or empty.
+            3. Pass validated data to the Filler to produce the output PDF.
+
+        Args:
+            user_input: Free-form incident description (voice transcript or
+                        typed text).
+            fields:     Template field schema passed to the LLM as extraction
+                        targets.
+            pdf_form_path: Path to the fillable PDF template.
+
+        Returns:
+            Path to the filled output PDF.
+
+        Raises:
+            FileNotFoundError: If the PDF template does not exist.
+            ValueError: If extracted incident data fails validation.
         """
         print("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
 
         if not os.path.exists(pdf_form_path):
-            print(f"Error: PDF template not found at {pdf_form_path}")
-            return None  # Or raise an exception
+            raise FileNotFoundError(
+                f"PDF template not found: {pdf_form_path}"
+            )
 
-        print("[3] Starting extraction and PDF filling process...")
-        try:
-            self.llm._target_fields = fields
-            self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+        print("[3] Running LLM extraction...")
+        self.llm._target_fields = fields
+        self.llm._transcript_text = user_input
+        extracted = self.llm.main_loop().get_data()
 
-            print("\n----------------------------------")
-            print("✅ Process Complete.")
-            print(f"Output saved to: {output_name}")
+        print("[4] Validating extracted incident data...")
+        errors = validate_incident(extracted)
+        if errors:
+            raise ValueError(
+                "Extracted incident data failed validation:\n"
+                + "\n".join(f"  - {e}" for e in errors)
+            )
 
-            return output_name
+        print("[5] Filling PDF with validated data...")
+        output_name = self.filler.fill_form(pdf_form=pdf_form_path, data=extracted)
 
-        except Exception as e:
-            print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
-            raise e
+        print("\n----------------------------------")
+        print("✅ Process Complete.")
+        print(f"Output saved to: {output_name}")
+
+        return output_name
