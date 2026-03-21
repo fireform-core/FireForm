@@ -1,4 +1,4 @@
-from pdfrw import PdfReader, PdfWriter
+from pdfrw import PdfReader, PdfWriter, PdfDict, PdfName
 from src.llm import LLM
 from datetime import datetime
 
@@ -45,7 +45,12 @@ class Filler:
                         else:
                             # Stop if we run out of answers
                             break
-
+ # --- NEW: Metadata Scrubbing ---
+        # Create a proper PdfDict instead of a plain {}
+        pdf.Info = PdfDict() 
+        
+        # Wrap the key in PdfName so the writer recognizes it
+        pdf.Info[PdfName("Title")] = "FireForm Auto-Generated Report"
         PdfWriter().write(output_pdf, pdf)
 
         # Your main.py expects this function to return the path
