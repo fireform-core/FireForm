@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Filler:
     def __init__(self):
-        pass
+        self._template_cache = {}
 
     def fill_form(self, pdf_form: str, llm: LLM):
         """
@@ -24,9 +24,17 @@ class Filler:
         textbox_answers = t2j.get_data()  # This is a dictionary
 
         answers_list = list(textbox_answers.values())
-
-        # Read PDF
-        pdf = PdfReader(pdf_form)
+        # --- NEW: CACHING LOGIC ---
+        if pdf_form not in self._template_cache:
+            print(f"[LOG] Template Cache Miss, parsing new PDF for {pdf_form}...")
+            # Read the file from the hard drive once and store it in RAM
+            with open(pdf_form, "rb") as f:
+                self._template_cache[pdf_form] = f.read()
+        else:
+            print(f"[LOG] Template Cache Hit! Reusing memory for {pdf_form}...")
+        
+        # Load PDF instantly from RAM instead of hitting the slow hard drive
+        pdf = PdfReader(fdata=self._template_cache[pdf_form])
 
         # Loop through pages
         for page in pdf.pages:
