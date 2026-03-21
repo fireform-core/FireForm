@@ -1,4 +1,14 @@
-def test_create_template(client):
+import pytest
+
+
+def test_create_template(client, monkeypatch):
+    # Patch at the usage site: api.routes.templates imports Controller
+    monkeypatch.setattr(
+        "api.routes.templates.Controller.create_template",
+        lambda _self, _pdf_path: "src/inputs/file_template.pdf",
+        raising=True,
+    )
+
     payload = {
         "name": "Template 1",
         "pdf_path": "src/inputs/file.pdf",
