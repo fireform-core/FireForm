@@ -1,25 +1,90 @@
+from unittest.mock import patch
+
+
 def test_submit_form(client):
-    pass
-    # First create a template
-    # form_payload = {
-    #     "template_id": 3,
-    #     "input_text": "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005",
-    # }
+    template_payload = {
+        "name": "Test Template",
+        "pdf_path": "sample.pdf",
+        "fields": {
+            "name": {},
+            "job_title": {},
+            "email": {}
+        }
+    }
 
-    # template_res = client.post("/templates/", json=template_payload)
-    # template_id = template_res.json()["id"]
+    with patch("src.controller.Controller.create_template", return_value="template.pdf"), \
+         patch("src.controller.Controller.fill_form", return_value="output.pdf"):
 
-    # # Submit a form
-    # form_payload = {
-    #     "template_id": template_id,
-    #     "data": {"rating": 5, "comment": "Great service"},
-    # }
+        template_res = client.post("/templates/create", json=template_payload)
+        assert template_res.status_code == 200
 
-    # response = client.post("/forms/", json=form_payload)
+        template_id = template_res.json()["id"]
 
-    # assert response.status_code == 200
+        form_payload = {
+            "template_id": template_id,
+            "input_text": "John Doe is a managing director. Email is john@example.com."
+        }
 
-    # data = response.json()
-    # assert data["id"] is not None
-    # assert data["template_id"] == template_id
-    # assert data["data"] == form_payload["data"]
+        response = client.post("/forms/fill", json=form_payload)
+
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["template_id"] == template_id
+        assert "output_pdf_path" in data
+
+
+def test_submit_form_empty_input(client):
+    template_payload = {
+        "name": "Test Template",
+        "pdf_path": "sample.pdf",
+        "fields": {
+            "name": {}
+        }
+    }
+
+    with patch("src.controller.Controller.create_template", return_value="template.pdf"):
+
+        template_res = client.post("/templates/create", json=template_payload)
+        template_id = template_res.json()["id"]
+
+        response = client.post("/forms/fill", json={
+            "template_id": template_id,
+            "input_text": ""
+        })
+
+        assert response.status_code == 400
+        assert "Input text cannot be empty" in response.text
+
+
+def test_submit_form_invalid_template(client):
+    response = client.post("/forms/fill", json={
+        "template_id": -1,
+        "input_text": "Some valid text"
+    })
+
+    assert response.status_code == 400
+
+
+def test_submit_form_long_input(client):
+    long_text = "a" * 6000
+
+    template_payload = {
+        "name": "Test Template",
+        "pdf_path": "sample.pdf",
+        "fields": {
+            "name": {}
+        }
+    }
+
+    with patch("src.controller.Controller.create_template", return_value="template.pdf"):
+
+        template_res = client.post("/templates/create", json=template_payload)
+        template_id = template_res.json()["id"]
+
+        response = client.post("/forms/fill", json={
+            "template_id": template_id,
+            "input_text": long_text
+        })
+
+        assert response.status_code == 400
