@@ -45,7 +45,7 @@ class LLM:
         return prompt
 
     def main_loop(self):
-        # self.type_check_all()
+        self.type_check_all()
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
             # print(prompt)
@@ -54,13 +54,13 @@ class LLM:
             ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
-                "model": "mistral",
+                "model" : os.getenv("OLLAMA_MODEL", "mistral"),
                 "prompt": prompt,
                 "stream": False,  # don't really know why --> look into this later.
             }
 
             try:
-                response = requests.post(ollama_url, json=payload)
+                response = requests.post(ollama_url, json=payload, timeout=30)
                 response.raise_for_status()
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
@@ -72,7 +72,7 @@ class LLM:
 
             # parse response
             json_data = response.json()
-            parsed_response = json_data["response"]
+            parsed_response = json_data.get("response", "")
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 

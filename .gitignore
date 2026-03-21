@@ -3,3 +3,5 @@
 venv
 .venv
 *.db
+faiss_index.bin
+incidents.pkl
