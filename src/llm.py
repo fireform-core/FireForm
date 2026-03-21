@@ -104,7 +104,7 @@ class LLM:
 
         return
 
-    def handle_plural_values(self, plural_value):
+    def handle_plural_values(self, plural_value: str) -> list[str]:
         """
         This method handles plural values.
         Takes in strings of the form 'value1; value2; value3; ...; valueN'
@@ -116,16 +116,10 @@ class LLM:
             )
 
         print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
+            f"\t[LOG]: Formatting plural values for JSON, [For input {plural_value}]..."
         )
-        values = plural_value.split(";")
 
-        # Remove trailing leading whitespace
-        for i in range(len(values)):
-            current = i + 1
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
+        values = [v.strip() for v in plural_value.split(";") if v.strip()]
 
         print(f"\t[LOG]: Resulting formatted list of values: {values}")
 
