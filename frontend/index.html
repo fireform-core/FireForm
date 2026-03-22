@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FireForm — Report Once, File Everywhere</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --fire:#FF4500;--ember:#FF7320;--gold:#FFAA00;
+  --night:#0C0C0E;--surface:#141416;--raised:#1E1E22;
+  --border:#2C2C32;--border2:#3A3A42;
+  --text:#EDE8DF;--muted:#666670;--dim:#444450;
+  --green:#3DBA6F;--red:#E05252;
+  --display:'Bebas Neue',sans-serif;
+  --body:'Syne',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html.light{
+  --night:#F5F2ED;--surface:#EDEAE4;--raised:#E4E0D8;
+  --border:#D4CFC6;--border2:#C4BDB2;
+  --text:#1A1814;--muted:#7A7570;--dim:#A09A92;
+}
+html{scroll-behavior:smooth}
+body{background:var(--night);color:var(--text);font-family:var(--body);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;}
+.blob1,.blob2{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0;}
+.blob1{width:600px;height:600px;background:rgba(255,69,0,0.06);top:-200px;left:-200px;}
+.blob2{width:500px;height:500px;background:rgba(255,115,32,0.04);bottom:-100px;right:-100px;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(12,12,14,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 40px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+html.light nav{background:rgba(245,242,237,0.9);}
+.nav-logo{display:flex;align-items:center;gap:12px;}
+.nav-flame{width:32px;height:32px;background:linear-gradient(145deg,var(--fire),var(--ember));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 20px rgba(255,69,0,0.35);animation:flamePulse 3s ease-in-out infinite;}
+.nav-title{font-family:var(--display);font-size:1.6rem;letter-spacing:3px;line-height:1;}
+.nav-right{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.theme-toggle{
+  width:36px;height:20px;
+  background:var(--raised);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  cursor:pointer;
+  position:relative;
+  transition:all 0.3s;
+  flex-shrink:0;
+}
+.theme-toggle::after{
+  content:'';
+  position:absolute;
+  width:14px;height:14px;
+  border-radius:50%;
+  background:var(--muted);
+  top:2px;left:2px;
+  transition:all 0.3s;
+}
+html.light .theme-toggle{background:rgba(255,115,32,0.1);border-color:rgba(255,115,32,0.3);}
+html.light .theme-toggle::after{transform:translateX(16px);background:var(--ember);}
+.theme-icon{font-size:0.8rem;line-height:1;}
+.api-indicator{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;transition:border-color 0.3s;}
+.api-indicator.online{border-color:rgba(61,186,111,0.3);}
+.api-indicator.offline{border-color:rgba(224,82,82,0.3);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--dim);transition:all 0.3s;}
+.dot.online{background:var(--green);box-shadow:0 0 8px rgba(61,186,111,0.6);}
+.dot.offline{background:var(--red);}
+
+.app{position:relative;z-index:1;display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 56px);}
+
+.sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;max-height:calc(100vh - 56px);position:sticky;top:56px;}
+.sidebar-block{padding:28px 24px;border-bottom:1px solid var(--border);}
+.block-label{font-family:var(--mono);font-size:0.58rem;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.block-label::before{content:'';width:16px;height:1px;background:var(--fire);flex-shrink:0;}
+
+.upload-zone{position:relative;border:1.5px dashed var(--border2);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.01);overflow:hidden;}
+.upload-zone:hover,.upload-zone.dragover{border-color:rgba(255,69,0,0.5);background:rgba(255,69,0,0.03);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-zone-icon{font-size:2rem;margin-bottom:10px;display:block;}
+.upload-zone-text{font-family:var(--mono);font-size:0.72rem;color:var(--muted);line-height:1.6;}
+.upload-zone-text b{color:var(--ember);font-weight:500;}
+.file-chosen{margin-top:10px;font-family:var(--mono);font-size:0.68rem;color:var(--green);display:none;}
+
+.input-field{width:100%;background:var(--raised);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:0.78rem;padding:10px 14px;outline:none;transition:border-color 0.2s;margin-top:10px;}
+.input-field:focus{border-color:rgba(255,69,0,0.4);}
+.input-field::placeholder{color:var(--dim);}
+
+.btn{width:100%;margin-top:10px;padding:11px;border-radius:8px;font-family:var(--mono);font-size:0.72rem;letter-spacing:1px;cursor:pointer;transition:all 0.2s;border:1px solid var(--border2);background:transparent;color:var(--text);}
+.btn:hover:not(:disabled){border-color:var(--ember);color:var(--ember);background:rgba(255,115,32,0.04);}
+.btn:disabled{opacity:0.35;cursor:not-allowed;}
+.save-msg{font-family:var(--mono);font-size:0.64rem;min-height:18px;margin-top:8px;color:var(--muted);}
+
+.template-list{display:flex;flex-direction:column;gap:6px;}
+.tpl-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all 0.15s;background:transparent;width:100%;text-align:left;}
+.tpl-item:hover,.tpl-item.active{border-color:rgba(255,69,0,0.3);background:rgba(255,69,0,0.03);}
+.tpl-item.active{border-color:var(--fire);}
+.tpl-dot{width:6px;height:6px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:background 0.2s;}
+.tpl-item.active .tpl-dot{background:var(--fire);}
+.tpl-name{font-family:var(--mono);font-size:0.72rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+.tpl-date{font-family:var(--mono);font-size:0.58rem;color:var(--dim);flex-shrink:0;}
+.tpl-empty{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-align:center;padding:20px;border:1px dashed var(--border);border-radius:8px;line-height:1.6;}
+.tpl-check{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--border2);flex-shrink:0;transition:all 0.15s;display:flex;align-items:center;justify-content:center;font-size:0.55rem;}
+.tpl-item.active .tpl-check{background:var(--fire);border-color:var(--fire);color:white;}
+.mode-toggle{display:flex;gap:6px;margin-bottom:12px;}
+.mode-btn{flex:1;padding:6px;border-radius:6px;font-family:var(--mono);font-size:0.6rem;letter-spacing:1px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.15s;}
+.mode-btn.active{background:rgba(255,69,0,0.08);border-color:rgba(255,69,0,0.3);color:var(--ember);}
+.sel-count{font-family:var(--mono);font-size:0.62rem;color:var(--ember);margin-top:8px;min-height:16px;}
+.batch-results{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.batch-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:0.68rem;}
+.batch-item.ok{background:rgba(61,186,111,0.04);border:1px solid rgba(61,186,111,0.15);}
+.batch-item.fail{background:rgba(224,82,82,0.04);border:1px solid rgba(224,82,82,0.15);}
+.batch-item-name{color:var(--text);flex:1;}
+.batch-item-err{color:#EF9A9A;font-size:0.6rem;margin-right:10px;}
+
+.main{display:flex;flex-direction:column;overflow-y:auto;}
+
+.hero{padding:52px 52px 36px;border-bottom:1px solid var(--border);animation:slideUp 0.5s ease both;}
+.hero-tag{font-family:var(--mono);font-size:0.62rem;letter-spacing:2.5px;color:var(--fire);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.hero-tag::after{content:'';flex:1;max-width:80px;height:1px;background:linear-gradient(90deg,var(--fire),transparent);}
+.hero-h1{font-family:var(--display);font-size:clamp(3.5rem,7vw,6.5rem);letter-spacing:2px;line-height:0.9;margin-bottom:18px;}
+.hero-h1 .outline{color:transparent;-webkit-text-stroke:1.5px rgba(255,69,0,0.4);}
+.hero-p{font-size:0.88rem;color:var(--muted);max-width:500px;line-height:1.7;}
+
+.steps-bar{display:flex;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.step-item{flex:1;padding:16px 20px;border-right:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.step-item:last-child{border-right:none;}
+.step-num{width:28px;height:28px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.65rem;color:var(--muted);flex-shrink:0;transition:all 0.3s;}
+.step-item.done .step-num{background:rgba(255,69,0,0.1);border-color:rgba(255,69,0,0.4);color:var(--fire);}
+.step-info{flex:1;}
+.step-title{font-size:0.78rem;font-weight:600;margin-bottom:2px;}
+.step-desc{font-family:var(--mono);font-size:0.62rem;color:var(--muted);}
+
+.form-area{padding:40px 52px;flex:1;animation:slideUp 0.5s 0.1s ease both;}
+.selected-tpl{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:6px;font-family:var(--mono);font-size:0.68rem;margin-bottom:24px;}
+.selected-tpl.none{background:rgba(255,255,255,0.02);border:1px solid var(--border);color:var(--muted);}
+.selected-tpl.set{background:rgba(255,69,0,0.06);border:1px solid rgba(255,69,0,0.2);color:var(--ember);}
+
+.field-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.field-label .req{color:var(--fire);}
+.char-count{font-family:var(--mono);font-size:0.62rem;color:var(--dim);}
+
+textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--body);font-size:0.92rem;line-height:1.8;padding:20px;resize:vertical;min-height:200px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
+textarea:focus{border-color:rgba(255,69,0,0.35);box-shadow:0 0 0 4px rgba(255,69,0,0.05);}
+textarea::placeholder{color:var(--dim);font-style:italic;}
+
+.action-row{display:flex;align-items:center;gap:20px;margin-top:28px;}
+.voice-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.btn-mic{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all 0.2s;flex-shrink:0;}
+.btn-mic:hover{border-color:var(--fire);color:var(--fire);background:rgba(255,69,0,0.05);}
+.btn-mic.recording{border-color:var(--red);color:var(--red);background:rgba(224,82,82,0.08);animation:micPulse 1s ease-in-out infinite;}
+.voice-status{font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.voice-status.active{color:var(--red);}
+.voice-status.done{color:var(--green);}
+.transcribe-loading{display:none;align-items:center;gap:8px;font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+.transcribe-loading.show{display:flex;}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(224,82,82,0.4)}50%{box-shadow:0 0 0 8px rgba(224,82,82,0)}}
+
+.btn-fill{padding:14px 40px;background:linear-gradient(135deg,var(--fire),var(--ember));border:none;border-radius:8px;color:white;font-family:var(--display);font-size:1.15rem;letter-spacing:2.5px;cursor:pointer;transition:all 0.2s;box-shadow:0 3px 24px rgba(255,69,0,0.25);position:relative;overflow:hidden;white-space:nowrap;}
+.btn-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.08) 0%,transparent 60%);}
+.btn-fill:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 36px rgba(255,69,0,0.4);}
+.btn-fill:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.fill-hint{font-family:var(--mono);font-size:0.63rem;color:var(--muted);line-height:1.6;}
+.fill-hint span{color:var(--green);}
+
+.result{margin-top:28px;}
+.result-loading{display:none;align-items:center;gap:14px;padding:18px 22px;background:var(--raised);border:1px solid var(--border);border-radius:10px;}
+.result-loading.show{display:flex;}
+.spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--fire);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0;}
+.loading-msg{font-family:var(--mono);font-size:0.72rem;color:var(--muted);}
+.loading-msg b{color:var(--ember);}
+
+.result-success{display:none;padding:20px 24px;background:rgba(61,186,111,0.04);border:1px solid rgba(61,186,111,0.15);border-radius:10px;}
+.result-success.show{display:block;}
+.success-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.success-title{font-family:var(--mono);font-size:0.72rem;color:var(--green);letter-spacing:1px;}
+.btn-dl{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:rgba(61,186,111,0.08);border:1px solid rgba(61,186,111,0.2);border-radius:6px;color:var(--green);font-family:var(--mono);font-size:0.7rem;cursor:pointer;text-decoration:none;transition:all 0.2s;}
+.btn-dl:hover{background:rgba(61,186,111,0.15);}
+.success-meta{font-family:var(--mono);font-size:0.64rem;color:var(--dim);}
+
+.result-error{display:none;padding:16px 20px;background:rgba(224,82,82,0.04);border:1px solid rgba(224,82,82,0.15);border-radius:10px;font-family:var(--mono);font-size:0.72rem;color:#EF9A9A;line-height:1.6;}
+.result-error.show{display:block;}
+
+.history-section{padding:32px 52px 48px;border-top:1px solid var(--border);animation:slideUp 0.5s 0.2s ease both;}
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.history-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+.history-count{font-family:var(--mono);font-size:0.6rem;color:var(--dim);background:var(--raised);border:1px solid var(--border);padding:2px 8px;border-radius:4px;}
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.history-item{display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:16px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:0.68rem;transition:border-color 0.2s;}
+.history-item:hover{border-color:var(--border2);}
+.h-time{color:var(--dim);}
+.h-text{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.h-badge{background:rgba(61,186,111,0.08);border:1px solid rgba(61,186,111,0.15);color:var(--green);padding:2px 8px;border-radius:4px;font-size:0.6rem;white-space:nowrap;}
+.history-empty{font-family:var(--mono);font-size:0.7rem;color:var(--muted);font-style:italic;}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes flamePulse{0%,100%{box-shadow:0 0 20px rgba(255,69,0,0.35)}50%{box-shadow:0 0 32px rgba(255,69,0,0.6)}}
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:static;max-height:none;border-right:none;border-bottom:1px solid var(--border);}
+  .hero,.form-area,.history-section{padding:28px 24px;}
+  .steps-bar{flex-direction:column;}
+  .step-item{border-right:none;border-bottom:1px solid var(--border);}
+  nav{padding:0 20px;}
+}
+</style>
+</head>
+<body>
+<div class="blob1"></div>
+<div class="blob2"></div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-flame">🔥</div>
+    <div class="nav-title">FIREFORM</div>
+  </div>
+  <div class="nav-right">
+    <span class="theme-icon" id="themeIcon">🌙</span>
+    <div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode"></div>
+    <div class="api-indicator" id="apiIndicator">
+      <div class="dot" id="apiDot"></div>
+      <span id="apiLabel">checking...</span>
+    </div>
+  </div>
+</nav>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-block">
+      <div class="block-label">Upload Template</div>
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="pdfInput" accept=".pdf" onchange="onFileChosen(this)"/>
+        <span class="upload-zone-icon">📄</span>
+        <div class="upload-zone-text"><b>Click to upload</b> or drag & drop<br/>Any fillable PDF form</div>
+        <div class="file-chosen" id="fileChosen"></div>
+      </div>
+      <input class="input-field" id="tplName" type="text" placeholder="Template name (e.g. Cal Fire Incident)"/>
+      <button class="btn" id="btnSave" onclick="saveTemplate()" disabled>SAVE TEMPLATE →</button>
+      <div class="save-msg" id="saveMsg"></div>
+    </div>
+    <div class="sidebar-block" style="flex:1">
+      <div class="block-label">Saved Templates</div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeSingle" onclick="setMode('single')">SINGLE</button>
+        <button class="mode-btn" id="modeBatch" onclick="setMode('batch')">BATCH</button>
+      </div>
+      <div class="template-list" id="tplList">
+        <div class="tpl-empty">No templates yet.<br/>Upload one above to begin.</div>
+      </div>
+      <div class="sel-count" id="selCount"></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="hero">
+      <div class="hero-tag">UN Digital Public Good · GSoC 2026</div>
+      <h1 class="hero-h1">REPORT<br/><span class="outline">ONCE.</span></h1>
+      <p class="hero-p">Describe any incident in plain language. FireForm uses a locally-running AI to extract every relevant detail and auto-fill all required agency forms — instantly and privately.</p>
+    </div>
+
+    <div class="steps-bar">
+      <div class="step-item" id="step1">
+        <div class="step-num">1</div>
+        <div class="step-info"><div class="step-title">Upload Template</div><div class="step-desc">Any fillable PDF form</div></div>
+      </div>
+      <div class="step-item" id="step2">
+        <div class="step-num">2</div>
+        <div class="step-info"><div class="step-title">Select Template(s)</div><div class="step-desc">Single or multi-agency batch</div></div>
+      </div>
+      <div class="step-item" id="step3">
+        <div class="step-num">3</div>
+        <div class="step-info"><div class="step-title">Describe Incident</div><div class="step-desc">Plain language report</div></div>
+      </div>
+      <div class="step-item" id="step4">
+        <div class="step-num">4</div>
+        <div class="step-info"><div class="step-title">Download PDF</div><div class="step-desc">All fields auto-filled</div></div>
+      </div>
+    </div>
+
+    <div class="form-area">
+      <div class="selected-tpl none" id="tplBadge">← Select a template from the sidebar</div>
+      <div class="field-label">
+        <span>Incident Description <span class="req">*</span></span>
+        <span class="char-count" id="charCount">0 chars</span>
+      </div>
+      <div class="voice-row">
+        <button class="btn-mic" id="btnMic" onclick="toggleRecording()" title="Record voice — click to start/stop">🎤</button>
+        <div>
+          <div class="voice-status" id="voiceStatus">Click mic to record incident report</div>
+          <div class="transcribe-loading" id="transcribeLoading"><div class="spinner"></div><span>Transcribing audio...</span></div>
+        </div>
+      </div>
+      <textarea id="incidentText"
+        placeholder="Officer Hernandez responding to a structure fire at 742 Evergreen Terrace. Two occupants evacuated safely. Minor smoke inhalation treated on scene by EMS. Unit 7 on scene 14:32, cleared 16:45. Handed off to Deputy Martinez..."
+        oninput="onTextInput(this)"></textarea>
+      <div class="action-row">
+        <button class="btn-fill" id="btnFill" onclick="fillForm()" disabled>⚡ FILL FORM</button>
+        <div class="fill-hint">Runs via <span>Ollama locally.</span><br/>No data leaves your machine.</div>
+      </div>
+      <div class="result">
+        <div class="result-loading" id="resLoading">
+          <div class="spinner"></div>
+          <div class="loading-msg"><b>Mistral</b> is extracting data and filling your form...</div>
+        </div>
+        <div class="result-success" id="resSuccess">
+          <div class="success-header">
+            <div class="success-title" id="successTitle">✓ FORM FILLED SUCCESSFULLY</div>
+            <a class="btn-dl" id="dlLink" href="#" target="_blank" style="display:none">⬇ Download PDF</a>
+          </div>
+          <div class="success-meta" id="resMeta"></div>
+          <div class="batch-results" id="batchResults"></div>
+        </div>
+        <div class="result-error" id="resError"></div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <div class="history-header">
+        <div class="history-label">Session History</div>
+        <div class="history-count" id="histCount">0 submissions</div>
+      </div>
+      <div class="history-list" id="histList">
+        <div class="history-empty">No submissions yet this session.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='http://localhost:8000';
+let selectedTplId=null, selectedTplName='', selectedIds=new Set(), mode='single', history=[];
+
+async function checkAPI(){
+  try{
+    const r=await fetch(`${API}/templates`,{signal:AbortSignal.timeout(3000)});
+    setAPI(r.ok||r.status===200);
+  }catch{setAPI(false);}
+}
+function setAPI(online){
+  document.getElementById('apiDot').className='dot '+(online?'online':'offline');
+  document.getElementById('apiLabel').textContent=online?'api online':'api offline — run uvicorn';
+  document.getElementById('apiIndicator').className='api-indicator '+(online?'online':'offline');
+}
+
+function setMode(m){
+  mode=m;
+  selectedTplId=null; selectedTplName=''; selectedIds=new Set();
+  document.getElementById('modeSingle').classList.toggle('active', m==='single');
+  document.getElementById('modeBatch').classList.toggle('active', m==='batch');
+  document.getElementById('selCount').textContent='';
+  const b=document.getElementById('tplBadge');
+  b.className='selected-tpl none';
+  b.textContent=m==='batch'?'\u2190 Check multiple templates for batch fill':'\u2190 Select a template from the sidebar';
+  updateFillBtn();
+  loadTemplates();
+}
+
+async function loadTemplates(){
+  try{
+    const r=await fetch(`${API}/templates`);
+    if(!r.ok)return;
+    const data=await r.json();
+    renderTemplates(Array.isArray(data)?data:[]);
+  }catch{}
+}
+
+function renderTemplates(list){
+  const el=document.getElementById('tplList');
+  if(!list.length){
+    el.innerHTML='<div class="tpl-empty">No templates yet.<br/>Upload one above to begin.</div>';
+    return;
+  }
+  document.getElementById('step1').classList.add('done');
+  if(mode==='single'){
+    el.innerHTML=list.map(t=>{
+      const date=t.created_at?new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
+      return `<button class="tpl-item ${selectedTplId===t.id?'active':''}" onclick="selectTemplate(${t.id},'${t.name.replace(/'/g,"\\'")}')">
+        <div class="tpl-dot"></div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-date">${date}</div>
+      </button>`;
+    }).join('');
+  } else {
+    el.innerHTML=list.map(t=>{
+      const date=t.created_at?new Date(t.created_at).toLocaleDateString('en',{month:'short',day:'numeric'}):'';
+      const active=selectedIds.has(t.id)?'active':'';
+      const check=selectedIds.has(t.id)?'\u2713':'';
+      return `<button class="tpl-item ${active}" onclick="toggleTemplate(${t.id},'${t.name.replace(/'/g,"\\'")}')">
+        <div class="tpl-check">${check}</div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-date">${date}</div>
+      </button>`;
+    }).join('');
+  }
+}
+
+function selectTemplate(id,name){
+  selectedTplId=id; selectedTplName=name;
+  loadTemplates();
+  const b=document.getElementById('tplBadge');
+  b.className='selected-tpl set'; b.textContent=`\ud83d\udccb ${name}`;
+  document.getElementById('step2').classList.add('done');
+  updateFillBtn();
+}
+
+function toggleTemplate(id,name){
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  const count=selectedIds.size;
+  document.getElementById('selCount').textContent=count>0?`${count} template${count>1?'s':''} selected`:'';
+  const b=document.getElementById('tplBadge');
+  if(count===0){ b.className='selected-tpl none'; b.textContent='\u2190 Check multiple templates for batch fill'; }
+  else { b.className='selected-tpl set'; b.textContent=`\ud83d\udccb ${count} template${count>1?'s':''} selected for batch`; }
+  if(count>0) document.getElementById('step2').classList.add('done');
+  updateFillBtn(); loadTemplates();
+}
+
+function onFileChosen(input){
+  if(input.files.length>0){
+    const ch=document.getElementById('fileChosen');
+    ch.textContent='\u2713 '+input.files[0].name;
+    ch.style.display='block';
+    document.getElementById('uploadZone').querySelector('.upload-zone-text').style.display='none';
+    document.getElementById('btnSave').disabled=false;
+  }
+}
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+zone.addEventListener('drop',e=>{
+  e.preventDefault();zone.classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file?.name.endsWith('.pdf')){
+    const input=document.getElementById('pdfInput');
+    const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;
+    onFileChosen(input);
+  }
+});
+
+async function saveTemplate(){
+  const file=document.getElementById('pdfInput').files[0];
+  const name=document.getElementById('tplName').value.trim()||file?.name.replace('.pdf','')||'Untitled';
+  if(!file)return;
+  const btn=document.getElementById('btnSave'),msg=document.getElementById('saveMsg');
+  btn.disabled=true;msg.style.color='var(--muted)';msg.textContent='Saving...';
+  const fd=new FormData();fd.append('file',file);fd.append('name',name);
+  try{
+    const r=await fetch(`${API}/templates/create`,{method:'POST',body:fd});
+    const data=await r.json();
+    if(r.ok){
+      msg.style.color='var(--green)';msg.textContent=`\u2713 Saved as "${data.name||name}"`;
+      document.getElementById('tplName').value='';
+      document.getElementById('pdfInput').value='';
+      document.getElementById('fileChosen').style.display='none';
+      document.getElementById('uploadZone').querySelector('.upload-zone-text').style.display='block';
+      btn.disabled=true;
+      await loadTemplates();
+      if(data.id&&mode==='single') selectTemplate(data.id,data.name||name);
+    }else{
+      msg.style.color='var(--red)';msg.textContent='\u2717 '+(data.detail||data.error||'Save failed');
+      btn.disabled=false;
+    }
+  }catch{
+    msg.style.color='var(--red)';msg.textContent='\u2717 Cannot reach API';
+    btn.disabled=false;
+  }
+}
+
+function onTextInput(el){
+  document.getElementById('charCount').textContent=el.value.length+' chars';
+  if(el.value.trim().length>10) document.getElementById('step3').classList.add('done');
+  updateFillBtn();
+}
+function updateFillBtn(){
+  const hasText=document.getElementById('incidentText').value.trim().length>10;
+  const hasTemplate=(mode==='single'&&selectedTplId!==null)||(mode==='batch'&&selectedIds.size>0);
+  document.getElementById('btnFill').disabled=!(hasText&&hasTemplate);
+  document.getElementById('btnFill').textContent=
+    (mode==='batch'&&selectedIds.size>1)?`\u26a1 FILL ${selectedIds.size} FORMS`:'\u26a1 FILL FORM';
+}
+function resetResults(){
+  ['resLoading','resSuccess','resError'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('batchResults').innerHTML='';
+  document.getElementById('dlLink').style.display='none';
+}
+
+async function fillSingle(text){
+  const r=await fetch(`${API}/forms/fill`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({template_id:selectedTplId,input_text:text})
+  });
+  const data=await r.json();
+  if(r.ok){
+    document.getElementById('successTitle').textContent='\u2713 FORM FILLED SUCCESSFULLY';
+    const dl=document.getElementById('dlLink');
+    dl.href=`${API}/forms/download/${data.id}`;
+    dl.style.display='inline-flex';
+    document.getElementById('resMeta').textContent=
+      `Submission #${data.id} \u00b7 Template: ${selectedTplName} \u00b7 ${new Date().toLocaleTimeString()}`;
+    document.getElementById('resSuccess').classList.add('show');
+    document.getElementById('step4').classList.add('done');
+    addHistory(text,data.id,selectedTplName);
+  }else{
+    document.getElementById('resError').textContent='\u2717 '+(data.detail||data.error||JSON.stringify(data));
+    document.getElementById('resError').classList.add('show');
+  }
+}
+
+async function fillBatch(text){
+  const ids=Array.from(selectedIds);
+  const r=await fetch(`${API}/forms/fill/batch`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({template_ids:ids,input_text:text})
+  });
+  const data=await r.json();
+  if(r.ok){
+    const {total,succeeded,failed,results}=data;
+    document.getElementById('successTitle').textContent=
+      `\u2713 BATCH COMPLETE \u2014 ${succeeded}/${total} FILLED`;
+    document.getElementById('resMeta').textContent=
+      `${succeeded} succeeded \u00b7 ${failed} failed \u00b7 ${new Date().toLocaleTimeString()}`;
+    document.getElementById('batchResults').innerHTML=results.map(res=>
+      res.success
+        ?`<div class="batch-item ok"><span class="batch-item-name">\ud83d\udccb ${res.template_name}</span><a class="btn-dl" href="${API}${res.download_url}" target="_blank">\u2b07 Download</a></div>`
+        :`<div class="batch-item fail"><span class="batch-item-name">\ud83d\udccb ${res.template_name}</span><span class="batch-item-err">${res.error||'Failed'}</span></div>`
+    ).join('');
+    document.getElementById('resSuccess').classList.add('show');
+    document.getElementById('step4').classList.add('done');
+    results.filter(r=>r.success).forEach(res=>addHistory(text,res.submission_id,res.template_name));
+  }else{
+    document.getElementById('resError').textContent='\u2717 '+(data.detail||data.error||JSON.stringify(data));
+    document.getElementById('resError').classList.add('show');
+  }
+}
+
+async function fillForm(){
+  const text=document.getElementById('incidentText').value.trim();
+  if(!text)return;
+  resetResults();
+  document.getElementById('btnFill').disabled=true;
+  const lm=document.querySelector('.loading-msg');
+  lm.innerHTML=(mode==='batch'&&selectedIds.size>1)
+    ?`<b>Mistral</b> is filling ${selectedIds.size} forms in one pass...`
+    :`<b>Mistral</b> is extracting data and filling your form...`;
+  document.getElementById('resLoading').classList.add('show');
+  try{
+    if(mode==='batch'&&selectedIds.size>1) await fillBatch(text);
+    else await fillSingle(text);
+  }catch{
+    document.getElementById('resError').textContent='\u2717 Cannot reach API. Make sure uvicorn and ollama are both running.';
+    document.getElementById('resError').classList.add('show');
+  }finally{
+    document.getElementById('resLoading').classList.remove('show');
+    document.getElementById('btnFill').disabled=false;
+  }
+}
+
+function addHistory(text,id,tplName){
+  history.unshift({text,id,tplName,time:new Date().toLocaleTimeString()});
+  document.getElementById('histCount').textContent=history.length+' submission'+(history.length!==1?'s':'');
+  document.getElementById('histList').innerHTML=history.map(h=>`
+    <div class="history-item">
+      <div class="h-time">${h.time}</div>
+      <div class="h-text">${h.text.substring(0,90)}${h.text.length>90?'\u2026':''}</div>
+      <div class="h-badge">FILLED #${h.id}</div>
+    </div>`).join('');
+}
+
+
+// ── Voice Recording ───────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+async function toggleRecording(){
+  if(isRecording) stopRecording();
+  else await startRecording();
+}
+
+async function startRecording(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if(e.data.size>0) audioChunks.push(e.data); };
+    mediaRecorder.onstop = handleRecordingStop;
+    mediaRecorder.start();
+    isRecording = true;
+    document.getElementById('btnMic').classList.add('recording');
+    document.getElementById('btnMic').textContent = '⏹';
+    document.getElementById('voiceStatus').textContent = 'Recording... click to stop';
+    document.getElementById('voiceStatus').className = 'voice-status active';
+  }catch(err){
+    document.getElementById('voiceStatus').textContent = '✗ Microphone access denied';
+    document.getElementById('voiceStatus').className = 'voice-status';
+  }
+}
+
+function stopRecording(){
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+    mediaRecorder.stop();
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    isRecording = false;
+    document.getElementById('btnMic').classList.remove('recording');
+    document.getElementById('btnMic').textContent = '🎤';
+    document.getElementById('voiceStatus').textContent = 'Processing...';
+  }
+}
+
+async function handleRecordingStop(){
+  const blob = new Blob(audioChunks, {type:'audio/webm'});
+  const formData = new FormData();
+  formData.append('file', blob, 'recording.webm');
+
+  document.getElementById('transcribeLoading').classList.add('show');
+  document.getElementById('voiceStatus').textContent = '';
+
+  try{
+    const r = await fetch(`${API}/transcribe`, {method:'POST', body:formData});
+    const data = await r.json();
+    document.getElementById('transcribeLoading').classList.remove('show');
+
+    if(r.ok && data.transcript){
+      const textarea = document.getElementById('incidentText');
+      textarea.value = data.transcript;
+      onTextInput(textarea);
+      document.getElementById('voiceStatus').textContent =
+        `\u2713 Transcribed (${data.duration_seconds}s, lang: ${data.language})`;
+      document.getElementById('voiceStatus').className = 'voice-status done';
+    } else {
+      document.getElementById('voiceStatus').textContent =
+        '\u2717 Transcription failed — type manually';
+      document.getElementById('voiceStatus').className = 'voice-status';
+    }
+  }catch(err){
+    document.getElementById('transcribeLoading').classList.remove('show');
+    document.getElementById('voiceStatus').textContent =
+      '\u2717 Cannot reach API';
+    document.getElementById('voiceStatus').className = 'voice-status';
+  }
+}
+
+checkAPI(); loadTemplates();
+setInterval(checkAPI,8000);
+setInterval(loadTemplates,15000);
+
+function toggleTheme(){
+  const isLight=document.documentElement.classList.toggle('light');
+  document.getElementById('themeIcon').textContent=isLight?'\u2600\ufe0f':'\ud83c\udf19';
+  localStorage.setItem('ff-theme',isLight?'light':'dark');
+}
+if(localStorage.getItem('ff-theme')==='light'){
+  document.documentElement.classList.add('light');
+  document.getElementById('themeIcon').textContent='\u2600\ufe0f';
+}
+</script>
+</body>
+</html>
