@@ -273,6 +273,141 @@ set OLLAMA_HOST=http://your-server:11434     # Windows
 
 ---
 
+
+---
+
+## 📱 PWA Mobile Companion (Field Capture)
+
+FireForm includes an offline-first Progressive Web App at `/mobile` that lets first responders capture incident data in the field — no internet required.
+
+> **Current Status:** The PWA is a working proof of concept. The long-term goal is a fully native mobile app. The PWA approach is the current implementation while the native app is in development.
+
+---
+
+### How It Works
+
+```
+At the scene (no WiFi):
+  Officer opens PWA on phone
+  Records voice, types notes, captures GPS
+  Saves draft — stored on device
+
+Back at station (WiFi restored):
+  PWA detects connection automatically
+  Draft syncs to station server
+  Audio transcribed, PDF filled
+  Officer downloads completed forms
+```
+
+---
+
+### Setup — Running PWA on Your Network
+
+**Step 1 — Start the API server exposed to your network:**
+```cmd
+uvicorn api.main:app --host 0.0.0.0 --reload
+```
+
+**Step 2 — Find your PC's local IP:**
+```cmd
+ipconfig
+```
+Look for `IPv4 Address` under your WiFi adapter — e.g. `192.168.1.105`
+
+**Step 3 — Open on mobile (same WiFi):**
+```
+http://192.168.1.105:8000/mobile
+```
+
+This works for basic text capture and drafts. However, **microphone and GPS require HTTPS** — this is a browser security requirement, not a FireForm limitation.
+
+---
+
+### Enabling Microphone and GPS — ngrok (Recommended for Demo)
+
+[ngrok](https://ngrok.com) creates a secure HTTPS tunnel to your local server. This is the recommended approach for demo and testing purposes.
+
+**Install ngrok:**
+1. Download from https://ngrok.com/download
+2. Create a free account at https://dashboard.ngrok.com/signup
+3. Copy your authtoken from the dashboard
+4. Run: `ngrok config add-authtoken YOUR_TOKEN`
+
+**Start the tunnel:**
+```cmd
+# Terminal 1 — API server
+uvicorn api.main:app --host 0.0.0.0 --reload
+
+# Terminal 2 — ngrok tunnel
+ngrok http 8000
+```
+
+ngrok will show a URL like:
+```
+Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
+```
+
+**Open on mobile:**
+```
+https://abc123.ngrok-free.app/mobile
+```
+
+Now microphone ✅, GPS ✅, and PWA install ✅ all work.
+
+> **Note:** Free ngrok sessions expire after a few hours and the URL changes on restart. For persistent access during a demo session, keep both terminals running.
+
+---
+
+### Installing as an App on Android
+
+1. Open the ngrok HTTPS URL in Chrome on your Android device
+2. Tap the three-dot menu → **Add to Home Screen**
+3. Tap **Install**
+
+The app now appears as an icon on your home screen and opens in standalone mode (no browser bar).
+
+---
+
+### Installing as an App on iOS
+
+1. Open the ngrok HTTPS URL in Safari on your iPhone/iPad
+2. Tap the Share button → **Add to Home Screen**
+3. Tap **Add**
+
+---
+
+### Offline Behaviour After Install
+
+Once installed via HTTPS, the Service Worker caches the app shell. After the first visit:
+- The app opens even with zero internet
+- Drafts save to IndexedDB on the device
+- GPS works (satellite-based, no internet needed)
+- Voice records and stores locally
+- Everything syncs automatically when WiFi is restored
+
+---
+
+### Production Deployment — Station Network
+
+For real station deployment, replace ngrok with a self-signed SSL certificate on the station PC:
+
+```bash
+# Generate self-signed certificate (Linux/Mac)
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
+
+# Start uvicorn with SSL
+uvicorn api.main:app --host 0.0.0.0 --ssl-keyfile key.pem --ssl-certfile cert.pem
+```
+
+Officers connect via station WiFi:
+```
+https://STATION_PC_IP:8000/mobile
+```
+
+All data stays on-premise. No external services. No cloud.
+
+---
+
 ## 🐳 Docker (Coming Soon)
 
 Docker support is in progress. See [docker.md](docker.md) for current status.
