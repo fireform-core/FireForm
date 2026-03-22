@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Set Python path so imports work correctly
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app
 
 # Keep container running for interactive use
 CMD ["tail", "-f", "/dev/null"]

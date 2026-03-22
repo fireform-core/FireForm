@@ -17,7 +17,10 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
     fetched_template = get_template(db, form.template_id)
 
     controller = Controller()
-    path = controller.fill_form(user_input=form.input_text, fields=fetched_template.fields, pdf_form_path=fetched_template.pdf_path)
+    try:
+        path = controller.fill_form(user_input=form.input_text, fields=fetched_template.fields, pdf_form_path=fetched_template.pdf_path)
+    except FileNotFoundError:
+        raise AppError("Template PDF file not found on disk", status_code=404)
 
     submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
     return create_form(db, submission)

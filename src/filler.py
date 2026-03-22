@@ -1,3 +1,4 @@
+import os
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
 from datetime import datetime
@@ -12,12 +13,8 @@ class Filler:
         Fill a PDF form with values from user_input using LLM.
         Fields are filled in the visual order (top-to-bottom, left-to-right).
         """
-        output_pdf = (
-            pdf_form[:-4]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-            + "_filled.pdf"
-        )
+        base, _ = os.path.splitext(pdf_form)
+        output_pdf = base + "_" + datetime.now().strftime("%Y%m%d_%H%M%S") + "_filled.pdf"
 
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
@@ -29,13 +26,13 @@ class Filler:
         pdf = PdfReader(pdf_form)
 
         # Loop through pages
+        i = 0
         for page in pdf.pages:
             if page.Annots:
                 sorted_annots = sorted(
                     page.Annots, key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
                 )
 
-                i = 0
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
