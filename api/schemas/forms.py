@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 class FormFill(BaseModel):
     template_id: int
@@ -6,9 +6,10 @@ class FormFill(BaseModel):
 
 
 class FormFillResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     template_id: int
     input_text: str
     output_pdf_path: str
+
+    class Config:
+        from_attributes = True

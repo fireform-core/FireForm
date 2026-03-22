@@ -60,17 +60,12 @@ class LLM:
             }
 
             try:
-                response = requests.post(ollama_url, json=payload, timeout=60)
+                response = requests.post(ollama_url, json=payload)
                 response.raise_for_status()
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
                     "Please ensure Ollama is running and accessible."
-                )
-            except requests.exceptions.Timeout:
-                raise TimeoutError(
-                    f"Ollama request timed out after 60 seconds at {ollama_url}. "
-                    "The model may be overloaded or unavailable."
                 )
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
@@ -102,11 +97,8 @@ class LLM:
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
 
-        if field in self._json:
-            existing = self._json[field]
-            if not isinstance(existing, list):
-                existing = [existing]
-            self._json[field] = existing + [parsed_value]
+        if field in self._json.keys():
+            self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
 
