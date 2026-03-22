@@ -26,8 +26,7 @@ class FileManipulator:
         print(f"[2] PDF template path: {pdf_form_path}")
 
         if not os.path.exists(pdf_form_path):
-            print(f"Error: PDF template not found at {pdf_form_path}")
-            return None  # Or raise an exception
+            raise FileNotFoundError(f"PDF template not found at {pdf_form_path}")
 
         print("[3] Starting extraction and PDF filling process...")
         try:
