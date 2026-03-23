@@ -98,7 +98,12 @@ class LLM:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
-            self._json[field].append(parsed_value)
+            if type(self._json[field]) is not list:
+                self._json[field] = [self._json[field]]
+            if type(parsed_value) is list:
+                self._json[field].extend(parsed_value)
+            else:
+                self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
 
