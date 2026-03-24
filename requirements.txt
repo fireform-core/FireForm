@@ -10,3 +10,4 @@ pytest
 httpx
 numpy<2
 ollama
+pyyaml
