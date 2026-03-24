@@ -29,6 +29,8 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app/src
       - OLLAMA_HOST=http://ollama:11434
+    ports:
+      - "8000:8000"
     networks:
       - fireform-network
     stdin_open: true
