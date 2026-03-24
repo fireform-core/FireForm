@@ -1,7 +1,6 @@
 import os
 import logging
 from typing import Union
-from commonforms import prepare_form 
 from pypdf import PdfReader
 from .controller import Controller
 
@@ -59,6 +58,8 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 
 
 if __name__ == "__main__":
+    from commonforms import prepare_form
+    
     file = "./src/inputs/file.pdf"
     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
     fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]

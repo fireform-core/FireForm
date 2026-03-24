@@ -1,5 +1,9 @@
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 import re
+import os
+from pathlib import Path
+import urllib.parse
+import unicodedata
 
 class TemplateCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -16,11 +20,6 @@ class TemplateCreate(BaseModel):
     @field_validator('pdf_path')
     @classmethod
     def validate_pdf_path(cls, v):
-        import os
-        from pathlib import Path
-        import urllib.parse
-        import unicodedata
-        
         if not v or not v.strip():
             raise ValueError('PDF path cannot be empty')
         

@@ -178,6 +178,7 @@ class LLM:
                     timer.cancel()
                 except Exception as e:
                     logger.debug(f"Failed to cancel timer: {e}")
+                    # Don't raise - cleanup should be best effort
         
         # Check for suspicious patterns
         suspicious_found = False
