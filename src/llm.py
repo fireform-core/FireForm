@@ -28,6 +28,16 @@ SCRIPT_PATTERNS = [
     re.compile(r'on\w+\s*=', re.IGNORECASE),
 ]
 
+# XSS patterns for input sanitization
+XSS_PATTERNS = [
+    re.compile(r'<\s*script\b', re.IGNORECASE),
+    re.compile(r'<\s*iframe\b', re.IGNORECASE),
+    re.compile(r'<\s*object\b', re.IGNORECASE),
+    re.compile(r'<\s*embed\b', re.IGNORECASE),
+    re.compile(r'javascript\s*:', re.IGNORECASE),
+    re.compile(r'on\w+\s*=', re.IGNORECASE),
+]
+
 logger = logging.getLogger(__name__)
 
 
@@ -111,7 +121,7 @@ class LLM:
             start_time = time.time()
             
             try:
-                # Use NFC instead of NFKC to prevent compatibility attacks
+                # Normalize using NFC to prevent compatibility attacks
                 text = unicodedata.normalize('NFC', text)
                 
                 # Check timeout periodically to avoid race conditions
@@ -126,7 +136,7 @@ class LLM:
                 
                 # Single URL decode only
                 decoded = urllib.parse.unquote(text)
-                if len(decoded) < len(text) * 0.5:  # Prevent excessive compression
+                if len(decoded) < len(text) * 0.5:
                     logger.warning("Suspicious URL encoding detected")
                     return "User input has been sanitized for security reasons."
                 text = decoded
@@ -138,7 +148,7 @@ class LLM:
                 
                 # HTML unescape with caution
                 unescaped = html.unescape(text)
-                if len(unescaped) > len(text) * 3:  # Prevent entity expansion attacks
+                if len(unescaped) > len(text) * 3:
                     logger.warning("Suspicious HTML entity expansion detected")
                     return "User input has been sanitized for security reasons."
                 text = unescaped
@@ -149,14 +159,12 @@ class LLM:
                     return "User input has been sanitized for security reasons."
                     
             except (ValueError, TypeError, AttributeError) as e:
-                # Check timeout before re-raising
                 if time.time() - start_time > 1.8 or timeout_occurred[0]:
                     logger.warning("Processing timeout during exception handling")
                     return "User input has been sanitized for security reasons."
                 logger.warning(f"Input processing error: {e}", exc_info=True)
                 raise ValueError("Input processing failed") from e
             except Exception as e:
-                # Check timeout before re-raising
                 if time.time() - start_time > 1.8 or timeout_occurred[0]:
                     logger.warning("Processing timeout during exception handling")
                     return "User input has been sanitized for security reasons."
@@ -172,7 +180,7 @@ class LLM:
             # Continue with original text
             text = original_text
         finally:
-            # Always cancel the timer to prevent resource leaks
+            # Cancel timer to prevent resource leaks
             if timer is not None:
                 try:
                     timer.cancel()
@@ -183,14 +191,22 @@ class LLM:
         # Check for suspicious patterns
         suspicious_found = False
         
-        # Check original text
-        for pattern in DANGEROUS_PROMPT_PATTERNS:
-            if pattern.search(original_text):
+        # Check for XSS patterns first
+        for pattern in XSS_PATTERNS:
+            if pattern.search(original_text) or pattern.search(text):
                 suspicious_found = True
-                logger.warning("Suspicious pattern detected in input")
+                logger.warning("XSS pattern detected in input")
                 break
         
-        # Check processed text
+        # Check original text for prompt injection
+        if not suspicious_found:
+            for pattern in DANGEROUS_PROMPT_PATTERNS:
+                if pattern.search(original_text):
+                    suspicious_found = True
+                    logger.warning("Suspicious pattern detected in input")
+                    break
+        
+        # Check processed text for prompt injection
         if not suspicious_found:
             for pattern in DANGEROUS_PROMPT_PATTERNS:
                 if pattern.search(text):
@@ -271,7 +287,7 @@ class LLM:
         session.mount('https://', adapter)
         
         processed_fields = 0
-        max_fields_per_session = 10  # Prevent excessive API calls
+        max_fields_per_session = 10
         
         try:
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
@@ -312,7 +328,6 @@ class LLM:
                     )
                     response.raise_for_status()
                     
-                    # Check response size before processing
                     content_length = response.headers.get('content-length')
                     if content_length:
                         try:
@@ -432,7 +447,7 @@ class LLM:
             logger.error(f"Critical error in main_loop: {e}", exc_info=True)
             raise RuntimeError("LLM processing failed") from e
         finally:
-            # Always close the session to prevent connection leaks
+            # Close session to prevent connection leaks
             try:
                 session.close()
             except Exception:

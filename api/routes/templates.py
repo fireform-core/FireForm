@@ -30,7 +30,6 @@ def create(template: TemplateCreate, db: Session = Depends(get_db)):
             resolved_path = pdf_path.resolve()
             base_dir = Path(BASE_UPLOADS_DIR).resolve()
             
-            # Ensure the resolved path is within the base uploads directory
             if not str(resolved_path).startswith(str(base_dir)):
                 logger.error(f"Path traversal attempt detected: {template.pdf_path}")
                 raise HTTPException(status_code=403, detail="Access denied: path outside allowed directory")

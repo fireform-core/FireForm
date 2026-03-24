@@ -84,7 +84,7 @@ class Filler:
             # Initialize field processing variables
             field_index = 0
             total_fields_filled = 0
-            max_fields_to_process = min(len(answers_list), 1000)  # Prevent infinite processing
+            max_fields_to_process = min(len(answers_list), 1000)
 
             # Read PDF with proper resource management
             try:
@@ -95,7 +95,7 @@ class Filler:
                     if not pdf_reader.pages:
                         raise ValueError("PDF has no pages")
                     
-                    if len(pdf_reader.pages) > 100:  # Prevent processing huge PDFs
+                    if len(pdf_reader.pages) > 100:
                         raise ValueError("PDF has too many pages (max 100)")
 
                     # Create writer for output
@@ -152,7 +152,6 @@ class Filler:
 
             # Write PDF with proper resource management
             try:
-                # Avoid file collision with proper error handling
                 final_output_pdf = self._get_unique_filename(output_pdf)
                 temp_files.append(final_output_pdf)
                 

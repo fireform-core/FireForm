@@ -62,7 +62,6 @@ class TemplateCreate(BaseModel):
         original_v = v
         try:
             v = urllib.parse.unquote(v)
-            # Prevent excessive decoding
             if len(v) < len(original_v) * 0.3:
                 raise ValueError('Suspicious path encoding detected')
         except ValueError:
@@ -115,6 +114,11 @@ class TemplateCreate(BaseModel):
             filename = Path(normalized).name
             if not filename:  # Empty filename
                 raise ValueError('Empty filename detected')
+            
+            # Check for empty base name (e.g., ".pdf" with no actual name)
+            base_name_check = filename.rsplit('.', 1)[0] if '.' in filename else filename
+            if not base_name_check or base_name_check == '.' or base_name_check == '':
+                raise ValueError('Invalid filename: empty base name')
             
             # Check for reserved names (case-insensitive, handle edge cases)
             filename_upper = filename.upper()

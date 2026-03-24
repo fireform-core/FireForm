@@ -110,6 +110,8 @@ PROMPT_INJECTION_PATTERN = re.compile(
 )
 
 class FormFill(BaseModel):
+    model_config = ConfigDict(strict=True)  # Disable type coercion for security
+    
     template_id: int = Field(..., gt=0, le=2147483647)
     input_text: str = Field(..., min_length=1, max_length=50000)
 
@@ -118,6 +120,9 @@ class FormFill(BaseModel):
     def validate_template_id(cls, v):
         if v is None:
             raise ValueError('Template ID cannot be null')
+        # Check boolean before int since bool is a subclass of int
+        if isinstance(v, bool):
+            raise ValueError('Template ID cannot be a boolean')
         if not isinstance(v, int):
             raise ValueError('Template ID must be an integer')
         return v
@@ -135,7 +140,6 @@ class FormFill(BaseModel):
         if len(v) > 50000:
             raise ValueError('Input text too long')
         
-        # Check for dangerous content before normalization
         if DANGEROUS_CONTENT_PATTERN.search(v):
             raise ValueError('Potentially dangerous content detected')
         
@@ -144,8 +148,16 @@ class FormFill(BaseModel):
         if any(char in v for char in invisible_chars):
             raise ValueError('Invisible or zero-width characters detected')
         
-        # Check for homograph attacks (optimized)
-        suspicious_chars = {'і', 'ο', 'О', 'а', 'е', 'р', 'с', 'х'}  # Use set for O(1) lookup
+        # Enhanced homograph attack detection
+        # Check for common Cyrillic/Greek lookalikes mixed with Latin
+        suspicious_chars = {
+            # Cyrillic lookalikes
+            'а', 'е', 'і', 'о', 'р', 'с', 'у', 'х', 'ѕ',  # Cyrillic lowercase
+            'А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'Х',  # Cyrillic uppercase
+            # Greek lookalikes
+            'Α', 'Β', 'Ε', 'Ζ', 'Η', 'Ι', 'Κ', 'Μ', 'Ν', 'Ο', 'Ρ', 'Τ', 'Υ', 'Χ',  # Greek uppercase
+            'α', 'ε', 'ι', 'ν', 'ο', 'ρ', 'τ', 'υ', 'ω',  # Greek lowercase
+        }
         
         # Single pass check for mixed scripts
         has_latin = False
@@ -170,11 +182,9 @@ class FormFill(BaseModel):
         
         # Unicode normalization with strict expansion protection
         try:
-            # Use NFC instead of NFKC to prevent compatibility attacks
             normalized = unicodedata.normalize('NFC', v)
             
-            # Check for suspicious Unicode patterns before normalization
-            # Detect combining character attacks (many combining chars per base char)
+            # Detect combining character attacks
             combining_chars = sum(1 for c in v if unicodedata.combining(c))
             base_chars = len(v) - combining_chars
             if base_chars > 0 and combining_chars / base_chars > 0.5:  # More than 0.5 combining per base
