@@ -1,0 +1,21 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title">PDF Viewer</h3>
+      <a class="btn btn-sm btn-outline-secondary" href="/admin/pdf-browser">Back to Reader</a>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-2">
+        Submission #{{ submission.id }} | Template ID: {{ submission.template_id }} | Created: {{ submission.created_at }}
+      </p>
+      <p class="mb-3">
+        <a class="btn btn-sm btn-primary" href="{{ pdf_url }}" target="_blank">Open Raw PDF</a>
+      </p>
+      <iframe src="{{ pdf_url }}" style="width:100%; min-height:72vh; border:1px solid var(--ff-panel-border); border-radius:10px;"></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}

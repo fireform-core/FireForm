@@ -6,6 +6,7 @@ fastapi
 uvicorn
 pydantic
 sqlmodel
+sqladmin
 pytest
 httpx
 numpy<2

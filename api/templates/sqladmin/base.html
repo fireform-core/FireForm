@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/tabler.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/tabler-icons.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/fontawesome.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/select2.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/flatpickr.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('admin:statics', path='css/main.css') }}">
+  {% if admin.favicon_url %}
+  <link rel="icon" href="{{ admin.favicon_url }}">
+  {% endif %}
+  <script>
+    (function () {
+      var stored = localStorage.getItem('adminTheme');
+      var theme = null;
+      if (stored) {
+        try {
+          var parsed = JSON.parse(stored);
+          if (parsed === 'dark' || parsed === 'light') {
+            theme = parsed;
+          }
+        } catch (e) {
+          if (stored === 'dark' || stored === 'light') {
+            theme = stored;
+          }
+        }
+      }
+      if (!theme) {
+        theme = localStorage.getItem('fireform-admin-theme');
+      }
+      if (!theme) {
+        theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <style>
+    :root {
+      --ff-font: "Inter", "Segoe UI", Roboto, sans-serif;
+      --ff-sidebar-bg: #0f1b30;
+      --ff-sidebar-border: #22324b;
+      --ff-sidebar-text: #dbe7ff;
+      --ff-sidebar-hover: #1a2c4a;
+      --ff-sidebar-active: #19355f;
+      --ff-body-bg: #f2f6fb;
+      --ff-panel-bg: #ffffff;
+      --ff-panel-border: #dbe5f3;
+      --ff-text: #122138;
+      --ff-muted: #627899;
+      --ff-brand: #16b59a;
+      --ff-brand-strong: #0e9a84;
+      --ff-focus: rgba(22, 181, 154, 0.35);
+      --ff-table-header: #f6f9ff;
+    }
+
+    html[data-theme="dark"] {
+      --ff-sidebar-bg: #0a1220;
+      --ff-sidebar-border: #1e2e49;
+      --ff-sidebar-text: #b8c8e6;
+      --ff-sidebar-hover: #14233c;
+      --ff-sidebar-active: #1c3558;
+      --ff-body-bg: #0b1221;
+      --ff-panel-bg: #131d31;
+      --ff-panel-border: #243451;
+      --ff-text: #e8f0ff;
+      --ff-muted: #9eb2d3;
+      --ff-brand: #39d5b4;
+      --ff-brand-strong: #26c4a3;
+      --ff-focus: rgba(57, 213, 180, 0.35);
+      --ff-table-header: #17243a;
+    }
+
+    body {
+      font-family: var(--ff-font);
+      color: var(--ff-text);
+      background:
+        radial-gradient(52rem 52rem at 102% -8%, rgba(57, 213, 180, 0.12), transparent 45%),
+        radial-gradient(56rem 56rem at -10% -20%, rgba(23, 112, 255, 0.14), transparent 52%),
+        var(--ff-body-bg);
+    }
+
+    .navbar-vertical.navbar-dark {
+      background: linear-gradient(180deg, var(--ff-sidebar-bg), #091223 68%);
+      border-right: 1px solid var(--ff-sidebar-border);
+    }
+
+    .navbar-vertical .nav-link {
+      border-radius: 10px;
+      color: var(--ff-sidebar-text) !important;
+      margin: 2px 4px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .navbar-vertical .nav-link:hover {
+      background: var(--ff-sidebar-hover);
+      color: #f7fbff !important;
+      transform: translateX(2px);
+    }
+
+    .navbar-vertical .nav-link.active,
+    .navbar-vertical .nav-link[aria-expanded="true"] {
+      background: var(--ff-sidebar-active);
+      color: #ffffff !important;
+      box-shadow: inset 0 0 0 1px rgba(92, 178, 255, 0.24);
+    }
+
+    .navbar-brand h3 {
+      color: #f4fbff;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .page-wrapper,
+    .page-body {
+      background: transparent;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--ff-panel-bg), color-mix(in srgb, var(--ff-panel-bg) 82%, transparent));
+      border: 1px solid var(--ff-panel-border);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(6, 16, 30, 0.08);
+    }
+
+    .table {
+      color: var(--ff-text);
+      border-color: var(--ff-panel-border);
+    }
+
+    .table thead th {
+      background: var(--ff-table-header);
+      border-bottom-color: var(--ff-panel-border);
+      color: var(--ff-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .table td,
+    .table th {
+      border-color: var(--ff-panel-border);
+    }
+
+    .form-control,
+    .form-select,
+    .form-check-input {
+      background-color: var(--ff-panel-bg);
+      color: var(--ff-text);
+      border-color: var(--ff-panel-border);
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .btn:focus {
+      border-color: var(--ff-brand);
+      box-shadow: 0 0 0 0.2rem var(--ff-focus);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, var(--ff-brand), var(--ff-brand-strong));
+      border: none;
+    }
+
+    .text-muted,
+    .text-secondary,
+    .page-pretitle {
+      color: var(--ff-muted) !important;
+    }
+
+    .page-title {
+      color: var(--ff-text);
+      font-weight: 700;
+    }
+
+    .btn-icon .fa {
+      margin-right: 6px;
+    }
+  </style>
+  {% block head %}
+  {% endblock %}
+  <title>{{ admin.title }}</title>
+</head>
+
+<body>
+  {% block body %}
+  <main>
+    {% block main %}
+    {% endblock %}
+  </main>
+  {% endblock %}
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/jquery.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/tabler.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/popper.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/bootstrap.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/select2.full.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/flatpickr.min.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('admin:statics', path='js/main.js') }}"></script>
+  <script>
+    (function () {
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('fireform-admin-theme', theme);
+        localStorage.setItem('color-theme', theme);
+        localStorage.setItem('adminTheme', JSON.stringify(theme));
+      }
+
+      var themeToggle = document.getElementById('theme-toggle') || document.getElementById('themeToggle');
+      if (themeToggle && !themeToggle.dataset.ffBound) {
+        themeToggle.dataset.ffBound = '1';
+        themeToggle.addEventListener('click', function () {
+          var current = document.documentElement.getAttribute('data-theme') || 'light';
+          setTheme(current === 'dark' ? 'light' : 'dark');
+        });
+      }
+    })();
+  </script>
+  {% block tail %}
+  {% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title">PDF Reader</h3>
+      <span class="text-muted">{{ submissions|length }} item(s)</span>
+    </div>
+    <div class="card-body">
+      <p class="text-muted">Recent generated outputs from simulation/API submissions.</p>
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Template ID</th>
+              <th>Created</th>
+              <th>Output Path</th>
+              <th class="text-end">Open</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if submissions %}
+              {% for sub in submissions %}
+              <tr>
+                <td>{{ sub.id }}</td>
+                <td>{{ sub.template_id }}</td>
+                <td>{{ sub.created_at }}</td>
+                <td><code>{{ sub.output_pdf_path }}</code></td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-primary" href="/admin/pdf-viewer/{{ sub.id }}">Open Viewer</a>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-muted">No submissions yet. Run a simulation first.</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

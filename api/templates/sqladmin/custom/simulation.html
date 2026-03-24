@@ -1,0 +1,56 @@
+{% extends "sqladmin/layout.html" %}
+
+{% block content %}
+<div class="col-12">
+  {% if message %}
+  <div class="alert {% if message_class == 'ok' %}alert-success{% else %}alert-danger{% endif %}" role="alert">
+    {{ message }}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Simulation Runner</h3>
+    </div>
+    <div class="card-body">
+      <p class="text-muted mb-3">Run end-to-end extraction and PDF filling from a single narrative transcript.</p>
+
+      <form method="post" action="/admin/simulation">
+        <div class="mb-3">
+          <label for="template_id" class="form-label">Template</label>
+          <select id="template_id" name="template_id" class="form-select" required>
+            <option value="">Select template</option>
+            {% for tpl in templates %}
+            <option value="{{ tpl.id }}" {% if selected_template_id == (tpl.id|string) %}selected{% endif %}>
+              #{{ tpl.id }} - {{ tpl.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="input_text" class="form-label">Incident Transcript</label>
+          <textarea id="input_text" name="input_text" class="form-control" rows="10" required placeholder="Describe the incident details, names, contacts, and timeline...">{{ input_text }}</textarea>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center">
+          <button class="btn btn-primary" type="submit">Run Simulation</button>
+          <a class="btn btn-outline-secondary" href="/admin/pdf-browser">Open PDF Reader</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if process_log %}
+  <div class="card mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3 class="card-title mb-0">Execution Log</h3>
+      <span class="text-muted small">Latest simulation run</span>
+    </div>
+    <div class="card-body">
+      <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.85rem; max-height: 360px; overflow: auto;">{{ process_log }}</pre>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
