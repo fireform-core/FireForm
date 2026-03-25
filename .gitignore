@@ -3,3 +3,10 @@
 venv
 .venv
 *.db
+
+
+fireform.db-shm
+fireform.db-wal
+src/inputs/file_template*.pdf
+src/inputs/file_template.pdf
+temp_outfile.pdf
