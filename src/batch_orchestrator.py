@@ -7,7 +7,8 @@ from datetime import datetime
 from typing import Any, Callable
 from zipfile import ZIP_DEFLATED, ZipFile
 
-from src.evidence_model import FieldEvidence, FieldEvidenceReport
+from src.conflict_detector import ConflictCandidate, ConflictDetector
+from src.evidence_model import FieldEvidenceReport
 
 
 @dataclass
@@ -152,6 +153,7 @@ class BatchOrchestrator:
         matched_fields: set[str] = set()
         type_mismatches: dict[str, str] = {}
         field_evidence: dict[str, FieldEvidenceReport] = {}
+        conflicts: list[dict[str, Any]] = []
 
         normalized_template_tokens: set[str] = set()
 
@@ -161,13 +163,55 @@ class BatchOrchestrator:
             candidate_tokens = [BatchOrchestrator._normalize_key(name) for name in candidate_names]
             normalized_template_tokens.update(candidate_tokens)
 
-            matched_key = next(
-                (token for token in candidate_tokens if token in normalized_record),
-                None,
-            )
+            direct_token = BatchOrchestrator._normalize_key(field_name)
+            raw_candidates: list[ConflictCandidate] = []
+
+            if direct_token in normalized_record:
+                raw_candidates.append(
+                    ConflictCandidate(
+                        source_id="incident_record",
+                        method="direct",
+                        value=normalized_record[direct_token],
+                        confidence=1.0,
+                    )
+                )
+
+            for alias in aliases:
+                alias_token = BatchOrchestrator._normalize_key(alias)
+                if alias_token in normalized_record:
+                    raw_candidates.append(
+                        ConflictCandidate(
+                            source_id="incident_record",
+                            method="inferred_alias",
+                            value=normalized_record[alias_token],
+                            confidence=0.95,
+                        )
+                    )
+
+            if isinstance(field_meta, dict) and "default" in field_meta:
+                raw_candidates.append(
+                    ConflictCandidate(
+                        source_id="template_default",
+                        method="default",
+                        value=field_meta.get("default"),
+                        confidence=0.5,
+                    )
+                )
+
+            selected_candidate = ConflictDetector.select_candidate(raw_candidates)
+            matched_key = direct_token if direct_token in normalized_record else None
+            if matched_key is None and selected_candidate and selected_candidate.method == "inferred_alias":
+                matched_key = next(
+                    (
+                        BatchOrchestrator._normalize_key(alias)
+                        for alias in aliases
+                        if BatchOrchestrator._normalize_key(alias) in normalized_record
+                    ),
+                    None,
+                )
 
             required = BatchOrchestrator._infer_required(field_meta)
-            if matched_key is None:
+            if selected_candidate is None:
                 if required:
                     missing_fields.add(field_name)
                 # Record evidence for unmatched field
@@ -183,25 +227,28 @@ class BatchOrchestrator:
 
             matched_fields.add(field_name)
             expected_type = BatchOrchestrator._infer_field_type(field_meta)
-            value = normalized_record[matched_key]
+            value = selected_candidate.value
             issue = BatchOrchestrator._validate_value_type(expected_type, value)
             if issue:
                 type_mismatches[field_name] = issue
-
-            # Determine if match was direct or via alias
-            is_direct_match = BatchOrchestrator._normalize_key(field_name) == matched_key
-            method = "direct" if is_direct_match else "inferred_alias"
-            confidence = 1.0 if is_direct_match else 0.95
 
             # Record evidence for matched field
             field_evidence[field_name] = FieldEvidenceReport(
                 field_name=field_name,
                 matched=True,
-                source_id="incident_record",
-                method=method,
-                confidence=confidence,
-                evidence_count=1,
+                source_id=selected_candidate.source_id,
+                method=selected_candidate.method,
+                confidence=selected_candidate.confidence,
+                evidence_count=len(raw_candidates),
             )
+
+            conflict = ConflictDetector.detect_conflict(
+                field_name=field_name,
+                candidates=raw_candidates,
+                selected=selected_candidate,
+            )
+            if conflict:
+                conflicts.append(conflict.to_dict())
 
         extra_fields = {
             original
@@ -226,6 +273,7 @@ class BatchOrchestrator:
             "dependency_violations": [],
             "warnings": warnings,
             "matched_fields": sorted(matched_fields),
+            "conflicts": conflicts,
             "field_evidence": {
                 field_name: evidence.model_dump()
                 for field_name, evidence in field_evidence.items()
