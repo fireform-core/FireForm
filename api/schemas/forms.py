@@ -26,6 +26,21 @@ class FieldEvidenceMetadata(BaseModel):
     evidence_count: int
 
 
+class ConflictCandidateMetadata(BaseModel):
+    source_id: str
+    method: str
+    value: str | int | float | bool | None
+    confidence: float
+
+
+class ConflictRecordMetadata(BaseModel):
+    field_name: str
+    candidates: list[ConflictCandidateMetadata]
+    selected_source: str
+    selected_value: str | int | float | bool | None
+    selected_method: str
+
+
 class BatchTemplateMappingReport(BaseModel):
     compatible: bool
     missing_fields: list[str]
@@ -35,6 +50,7 @@ class BatchTemplateMappingReport(BaseModel):
     dependency_violations: list[list[str] | tuple[str, str]]
     warnings: list[str]
     matched_fields: list[str]
+    conflicts: list[ConflictRecordMetadata] | None = None
     field_evidence: dict[str, FieldEvidenceMetadata] | None = None
 
 
