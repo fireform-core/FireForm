@@ -7,6 +7,8 @@ from datetime import datetime
 from typing import Any, Callable
 from zipfile import ZIP_DEFLATED, ZipFile
 
+from src.evidence_model import FieldEvidence, FieldEvidenceReport
+
 
 @dataclass
 class BatchTemplateResult:
@@ -149,6 +151,7 @@ class BatchOrchestrator:
         missing_fields: set[str] = set()
         matched_fields: set[str] = set()
         type_mismatches: dict[str, str] = {}
+        field_evidence: dict[str, FieldEvidenceReport] = {}
 
         normalized_template_tokens: set[str] = set()
 
@@ -167,6 +170,15 @@ class BatchOrchestrator:
             if matched_key is None:
                 if required:
                     missing_fields.add(field_name)
+                # Record evidence for unmatched field
+                field_evidence[field_name] = FieldEvidenceReport(
+                    field_name=field_name,
+                    matched=False,
+                    source_id="none",
+                    method="none",
+                    confidence=0.0,
+                    evidence_count=0,
+                )
                 continue
 
             matched_fields.add(field_name)
@@ -175,6 +187,21 @@ class BatchOrchestrator:
             issue = BatchOrchestrator._validate_value_type(expected_type, value)
             if issue:
                 type_mismatches[field_name] = issue
+
+            # Determine if match was direct or via alias
+            is_direct_match = BatchOrchestrator._normalize_key(field_name) == matched_key
+            method = "direct" if is_direct_match else "inferred_alias"
+            confidence = 1.0 if is_direct_match else 0.95
+
+            # Record evidence for matched field
+            field_evidence[field_name] = FieldEvidenceReport(
+                field_name=field_name,
+                matched=True,
+                source_id="incident_record",
+                method=method,
+                confidence=confidence,
+                evidence_count=1,
+            )
 
         extra_fields = {
             original
@@ -199,6 +226,10 @@ class BatchOrchestrator:
             "dependency_violations": [],
             "warnings": warnings,
             "matched_fields": sorted(matched_fields),
+            "field_evidence": {
+                field_name: evidence.model_dump()
+                for field_name, evidence in field_evidence.items()
+            },
         }
 
     @staticmethod

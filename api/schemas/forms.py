@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class FormFill(BaseModel):
     template_id: int
     input_text: str
@@ -15,6 +16,16 @@ class FormFillResponse(BaseModel):
         from_attributes = True
 
 
+class FieldEvidenceMetadata(BaseModel):
+    """Evidence metadata for a single field."""
+    field_name: str
+    matched: bool
+    source_id: str
+    method: str
+    confidence: float
+    evidence_count: int
+
+
 class BatchTemplateMappingReport(BaseModel):
     compatible: bool
     missing_fields: list[str]
@@ -24,6 +35,7 @@ class BatchTemplateMappingReport(BaseModel):
     dependency_violations: list[list[str] | tuple[str, str]]
     warnings: list[str]
     matched_fields: list[str]
+    field_evidence: dict[str, FieldEvidenceMetadata] | None = None
 
 
 class BatchTemplateResult(BaseModel):
