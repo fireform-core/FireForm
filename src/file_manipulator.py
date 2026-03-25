@@ -1,18 +1,21 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
+from src.batch_orchestrator import BatchOrchestrator
 
 
 class FileManipulator:
     def __init__(self):
         self.filler = Filler()
         self.llm = LLM()
+        self.batch_orchestrator = BatchOrchestrator(self.filler.fill_form_from_record)
 
     def create_template(self, pdf_path: str):
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        from commonforms import prepare_form
+
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path
@@ -45,3 +48,13 @@ class FileManipulator:
             print(f"An error occurred during PDF generation: {e}")
             # Re-raise the exception so the frontend can handle it
             raise e
+
+    def fill_multiple_forms(self, incident_record: dict, templates: list):
+        """Fill multiple templates from one structured incident record."""
+        print("[BATCH] Received request for multi-document generation.")
+        print(f"[BATCH] Templates requested: {len(templates)}")
+
+        return self.batch_orchestrator.run_batch(
+            incident_record=incident_record,
+            templates=templates,
+        )
