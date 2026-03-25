@@ -9,3 +9,6 @@ class Controller:
     
     def create_template(self, pdf_path: str):
         return self.file_manipulator.create_template(pdf_path)
+
+    def fill_multiple_forms(self, incident_record: dict, templates: list):
+        return self.file_manipulator.fill_multiple_forms(incident_record, templates)
