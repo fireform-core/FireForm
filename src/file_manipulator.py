@@ -38,11 +38,20 @@ class FileManipulator:
             self.llm._transcript_text = user_input
             output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
 
+            from src.utils.validation import requires_review
+
+            extracted_data = self.llm.get_data()
+
+            review_flag = requires_review(
+                 extracted_data,
+                  fields.keys()
+         )
+
             print("\n----------------------------------")
             print("✅ Process Complete.")
             print(f"Output saved to: {output_name}")
 
-            return output_name
+            return output_name , review_flag
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
