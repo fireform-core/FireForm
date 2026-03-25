@@ -107,3 +107,77 @@ def test_fill_batch_endpoint_missing_template(client, monkeypatch):
     response = client.post("/forms/fill-batch", json=payload)
 
     assert response.status_code == 404
+
+
+def test_fill_batch_endpoint_includes_conflicts(client, monkeypatch):
+    templates = [
+        SimpleNamespace(id=1, name="Conflict Form", pdf_path="conflict.pdf", fields={"incident_id": "text"}),
+    ]
+
+    def fake_get_templates_by_ids(db, template_ids):
+        return templates
+
+    def fake_fill_multiple_forms(self, incident_record, templates):
+        return {
+            "batch_id": "batch_conflict_001",
+            "total_templates": 1,
+            "successful_count": 1,
+            "failed_count": 0,
+            "package_zip_path": "src/outputs/batches/batch_conflict_001.zip",
+            "results": [
+                {
+                    "template_id": 1,
+                    "template_name": "Conflict Form",
+                    "status": "success",
+                    "output_pdf_path": "conflict_filled.pdf",
+                    "error": None,
+                    "mapping_report": {
+                        "compatible": True,
+                        "missing_fields": [],
+                        "extra_fields": [],
+                        "unmapped_fields": [],
+                        "type_mismatches": {},
+                        "dependency_violations": [],
+                        "warnings": [],
+                        "matched_fields": ["incident_id"],
+                        "conflicts": [
+                            {
+                                "field_name": "incident_id",
+                                "candidates": [
+                                    {
+                                        "source_id": "incident_record",
+                                        "method": "direct",
+                                        "value": "INC-42",
+                                        "confidence": 1.0,
+                                    },
+                                    {
+                                        "source_id": "incident_record",
+                                        "method": "inferred_alias",
+                                        "value": "INC-43",
+                                        "confidence": 0.95,
+                                    },
+                                ],
+                                "selected_source": "incident_record",
+                                "selected_value": "INC-42",
+                                "selected_method": "direct",
+                            }
+                        ],
+                    },
+                }
+            ],
+        }
+
+    monkeypatch.setattr(forms_route, "get_templates_by_ids", fake_get_templates_by_ids)
+    monkeypatch.setattr(forms_route.Controller, "fill_multiple_forms", fake_fill_multiple_forms)
+
+    payload = {
+        "template_ids": [1],
+        "incident_record": {"incident_id": "INC-42", "incident_number": "INC-43"},
+    }
+    response = client.post("/forms/fill-batch", json=payload)
+
+    assert response.status_code == 200
+    body = response.json()
+    conflicts = body["results"][0]["mapping_report"]["conflicts"]
+    assert len(conflicts) == 1
+    assert conflicts[0]["selected_method"] == "direct"
