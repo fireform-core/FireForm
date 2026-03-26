@@ -36,4 +36,5 @@ def create_test_db():
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    # Return HTTP error bodies (e.g. 500 from global handler) instead of re-raising.
+    return TestClient(app, raise_server_exceptions=False)

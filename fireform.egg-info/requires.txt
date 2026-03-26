@@ -1,6 +1,6 @@
 requests
-typer>=0.12,<1
-tenacity>=8,<9
+typer<1,>=0.12
+tenacity<9,>=8
 pdfrw
 flask
 commonforms
@@ -8,7 +8,4 @@ fastapi
 uvicorn
 pydantic
 sqlmodel
-pytest
 httpx
-numpy<2
-ollama
