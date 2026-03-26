@@ -1,9 +1,34 @@
 import json
 import os
 import requests
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+
+# Ollama HTTP API: transient failures and explicit timeouts
+OLLAMA_REQUEST_TIMEOUT = 10
+OLLAMA_MAX_ATTEMPTS = 5
+_RETRYABLE_HTTP_STATUSES = frozenset({500, 502, 503, 504})
+
+
+def _should_retry_ollama(exc: BaseException) -> bool:
+    if isinstance(exc, (requests.exceptions.ConnectionError, requests.exceptions.Timeout)):
+        return True
+    if isinstance(exc, requests.exceptions.HTTPError):
+        resp = getattr(exc, "response", None)
+        if resp is not None and resp.status_code in _RETRYABLE_HTTP_STATUSES:
+            return True
+    return False
 
 
 class LLM:
+    """
+    Drives field-by-field extraction via the Ollama `/api/generate` endpoint.
+
+    Network calls use explicit timeouts, exponential backoff retries (up to
+    OLLAMA_MAX_ATTEMPTS) for connection errors, timeouts, and HTTP 5xx responses
+    (500, 502, 503, 504). Other HTTP errors fail immediately. Parsed values are
+    merged with `add_response_to_json` only after a successful response body parse.
+    """
+
     def __init__(self, transcript_text=None, target_fields=None, json=None):
         if json is None:
             json = {}
@@ -44,12 +69,34 @@ class LLM:
 
         return prompt
 
+    @retry(
+        stop=stop_after_attempt(OLLAMA_MAX_ATTEMPTS),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception(_should_retry_ollama),
+        reraise=True,
+    )
+    def _post_ollama_generate(self, ollama_url: str, payload: dict) -> requests.Response:
+        response = requests.post(
+            ollama_url,
+            json=payload,
+            timeout=OLLAMA_REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+        return response
+
     def main_loop(self):
+        """
+        For each target field, call Ollama with retries on transient failures,
+        a bounded request timeout, and strict parsing before updating `_json`.
+
+        On failure, raises ConnectionError for unreachable hosts, RuntimeError for
+        timeouts and HTTP errors (with status in the message), or RuntimeError for
+        invalid JSON or missing `response` content—without calling
+        `add_response_to_json` for that field.
+        """
         # self.type_check_all()
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
@@ -60,20 +107,51 @@ class LLM:
             }
 
             try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
-            except requests.exceptions.ConnectionError:
+                response = self._post_ollama_generate(ollama_url, payload)
+            except requests.exceptions.ConnectionError as e:
                 raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
+                    f"Could not connect to Ollama at {ollama_url} after "
+                    f"{OLLAMA_MAX_ATTEMPTS} attempt(s). "
                     "Please ensure Ollama is running and accessible."
-                )
+                ) from e
+            except requests.exceptions.Timeout as e:
+                raise RuntimeError(
+                    f"Ollama connection timed out after {OLLAMA_REQUEST_TIMEOUT}s "
+                    f"(url: {ollama_url}). The service may be overloaded or hung."
+                ) from e
             except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
+                resp = getattr(e, "response", None)
+                if resp is not None:
+                    code = resp.status_code
+                    reason = (getattr(resp, "reason", None) or "").strip()
+                    reason_part = f" {reason}" if reason else ""
+                    raise RuntimeError(
+                        f"Ollama returned HTTP {code}{reason_part} for {ollama_url}"
+                    ) from e
+                raise RuntimeError(
+                    f"Ollama returned an HTTP error for {ollama_url}: {e}"
+                ) from e
 
-            # parse response
-            json_data = response.json()
+            try:
+                json_data = response.json()
+            except json.JSONDecodeError as e:
+                raise RuntimeError(
+                    f"Ollama returned invalid JSON at {ollama_url}: {e}"
+                ) from e
+
+            if "response" not in json_data:
+                raise RuntimeError(
+                    f"Ollama JSON response missing 'response' key at {ollama_url}. "
+                    f"Keys present: {list(json_data.keys())}"
+                )
+
             parsed_response = json_data["response"]
-            # print(parsed_response)
+            if not isinstance(parsed_response, str):
+                raise RuntimeError(
+                    f"Ollama 'response' field must be a string at {ollama_url}, "
+                    f"got {type(parsed_response).__name__}"
+                )
+
             self.add_response_to_json(field, parsed_response)
 
         print("----------------------------------")
