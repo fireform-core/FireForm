@@ -1,4 +1,5 @@
 requests
+tenacity>=8,<9
 pdfrw
 flask
 commonforms
