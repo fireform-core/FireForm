@@ -173,9 +173,19 @@ class Filler:
     def __init__(self):
         pass
 
-    def fill_form(self, pdf_form: str, llm: LLM):
+    def fill_form(
+        self,
+        pdf_form: str,
+        llm: LLM,
+        *,
+        skip_extraction: bool = False,
+        output_pdf: Optional[str] = None,
+    ):
         """
-        Run the LLM pipeline, then write answers into the PDF template.
+        Run the LLM pipeline (unless ``skip_extraction``), then write answers into the PDF template.
+
+        When ``skip_extraction`` is True, ``llm.get_data()`` is used as-is (e.g. JSON
+        preloaded into ``LLM``); Ollama is not called.
 
         Uses ``llm._target_fields`` when present to choose validation rules by
         field name. Index ``i`` aligns the sorted PDF widgets (global order across
@@ -186,15 +196,19 @@ class Filler:
         numbers may be coerced from numeric strings; overly long text is
         truncated. Sentinel ``-1`` or empty strings skip the field.
         """
-        output_pdf = (
-            pdf_form[:-4]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-            + "_filled.pdf"
-        )
+        if output_pdf:
+            out_path = output_pdf
+        else:
+            out_path = (
+                pdf_form[:-4]
+                + "_"
+                + datetime.now().strftime("%Y%m%d_%H%M%S")
+                + "_filled.pdf"
+            )
 
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()
+        if not skip_extraction:
+            llm.main_loop()
+        textbox_answers = llm.get_data()
         field_keys = list(textbox_answers.keys())
         answers_list = list(textbox_answers.values())
 
@@ -267,6 +281,6 @@ class Filler:
 
                         i += 1
 
-        PdfWriter().write(output_pdf, pdf)
+        PdfWriter().write(out_path, pdf)
 
-        return output_pdf
+        return out_path
