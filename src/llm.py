@@ -132,3 +132,44 @@ class LLM:
 
     def get_data(self):
         return self._json
+    
+
+
+
+def extract_structured(self):
+    schema_fields = list(self._target_fields.keys())
+
+    prompt = f"""
+Extract structured JSON for these fields:
+{schema_fields}
+
+Text:
+{self._transcript_text}
+
+Return only JSON.
+"""
+
+    ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+    ollama_url = f"{ollama_host}/api/generate"
+
+    payload = {
+        "model": "mistral",
+        "prompt": prompt,
+        "stream": False
+    }
+
+    response = requests.post(ollama_url, json=payload)
+    response.raise_for_status()
+
+    json_data = response.json()
+    return json_data["response"]
+
+
+def extract_structured_safe(self):
+    try:
+        raw = self.extract_structured()
+        parsed = json.loads(raw)
+        self._json = parsed
+        return True
+    except Exception:
+        return False

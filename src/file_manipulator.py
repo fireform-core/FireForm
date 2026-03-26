@@ -36,22 +36,32 @@ class FileManipulator:
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+
+            success = self.llm.extract_structured_safe()
+
+            if not success:
+                print("Structured extraction failed → fallback to old extraction")
+                self.llm.main_loop()
+
+            output_name = self.filler.fill_form(
+                pdf_form=pdf_form_path,
+                llm=self.llm
+            )
 
             from src.utils.validation import requires_review
 
             extracted_data = self.llm.get_data()
 
             review_flag = requires_review(
-                 extracted_data,
-                  fields.keys()
-         )
+                extracted_data,
+                fields.keys()
+            )
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
             print(f"Output saved to: {output_name}")
 
-            return output_name , review_flag
+            return output_name, review_flag
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
