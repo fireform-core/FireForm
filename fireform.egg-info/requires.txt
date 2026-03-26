@@ -1,0 +1,11 @@
+requests
+typer<1,>=0.12
+tenacity<9,>=8
+pdfrw
+flask
+commonforms
+fastapi
+uvicorn
+pydantic
+sqlmodel
+httpx
