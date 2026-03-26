@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fireform"
+version = "0.1.0"
+description = "FireForm — digital paperwork automation for first responders"
+readme = "README.md"
+requires-python = ">=3.10"
+# Minimal runtime deps for the CLI and API import path. Use `pip install -r requirements.txt`
+# for the full stack (includes numpy, ollama, pytest, etc.).
+dependencies = [
+    "requests",
+    "typer>=0.12,<1",
+    "tenacity>=8,<9",
+    "pdfrw",
+    "flask",
+    "commonforms",
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "sqlmodel",
+    "httpx",
+]
+
+[project.scripts]
+fireform = "src.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "api*"]
