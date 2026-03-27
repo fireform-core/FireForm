@@ -1,25 +1,36 @@
 def test_submit_form(client):
-    pass
-    # First create a template
-    # form_payload = {
-    #     "template_id": 3,
-    #     "input_text": "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005",
-    # }
+    from unittest.mock import patch, MagicMock
 
-    # template_res = client.post("/templates/", json=template_payload)
-    # template_id = template_res.json()["id"]
+    # Step 1: create a template to get a valid template_id
+    template_payload = {
+        "name": "Test Form",
+        "pdf_path": "src/inputs/file.pdf",
+        "fields": {
+            "name": "string",
+            "date": "string",
+        },
+    }
+    template_res = client.post("/templates/create", json=template_payload)
+    assert template_res.status_code == 200
+    template_id = template_res.json()["id"]
 
-    # # Submit a form
-    # form_payload = {
-    #     "template_id": template_id,
-    #     "data": {"rating": 5, "comment": "Great service"},
-    # }
+    # Step 2: submit a form fill request — mock Controller to avoid hitting Ollama
+    fake_output_path = "src/outputs/file_20240101_120000_filled.pdf"
+    form_payload = {
+        "template_id": template_id,
+        "input_text": "Employee name is John Doe. Date is 01/01/2024.",
+    }
 
-    # response = client.post("/forms/", json=form_payload)
+    with patch("api.routes.forms.Controller") as MockController:
+        mock_ctrl = MagicMock()
+        mock_ctrl.fill_form.return_value = fake_output_path
+        MockController.return_value = mock_ctrl
 
-    # assert response.status_code == 200
+        response = client.post("/forms/fill", json=form_payload)
 
-    # data = response.json()
-    # assert data["id"] is not None
-    # assert data["template_id"] == template_id
-    # assert data["data"] == form_payload["data"]
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] is not None
+    assert data["template_id"] == template_id
+    assert data["input_text"] == form_payload["input_text"]
+    assert data["output_pdf_path"] == fake_output_path

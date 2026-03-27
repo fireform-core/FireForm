@@ -1,0 +1,32 @@
+# Employee Incident Report — sample template
+# PDF source: src/inputs/file.pdf
+# Field names verified via pdfrw field inspection.
+#
+# This is the sample form shipped with the repo for development and testing.
+# Real agency templates (Cal Fire FIRESCOPE, EMS, law enforcement) will be
+# added in Phase 2, Week 5 (tasks P2-6 through P2-8).
+
+name: "Employee Incident Report"
+pdf_path: "src/inputs/file_template.pdf"
+
+fields:
+  - pdf_field_name: "NAME/SID"
+    json_path: "supervisor"
+
+  - pdf_field_name: "JobTitle"
+    json_path: "incident_type"
+
+  - pdf_field_name: "Department"
+    json_path: "agency_id"
+
+  - pdf_field_name: "Phone Number"
+    json_path: "location_address"
+
+  - pdf_field_name: "email"
+    json_path: "narrative"
+
+  - pdf_field_name: "Date7_af_date"
+    json_path: "incident_date"
+
+  - pdf_field_name: "signature"
+    json_path: "supervisor"

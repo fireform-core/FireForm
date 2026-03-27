@@ -1,16 +1,35 @@
-from pdfrw import PdfReader, PdfWriter
-from src.llm import LLM
+from __future__ import annotations
+
+import logging
 from datetime import datetime
+from typing import Any
+
+from pdfrw import PdfReader, PdfWriter
+
+logger = logging.getLogger(__name__)
 
 
 class Filler:
-    def __init__(self):
-        pass
+    """
+    Fills a PDF form using a named field mapping produced by TemplateMapper.
 
-    def fill_form(self, pdf_form: str, llm: LLM):
+    Replaces the old positional approach (answers_list[i]) with an explicit
+    {pdf_field_name: value} dict so every value lands in the correct field
+    regardless of visual order or page layout.
+    """
+
+    def fill_form(self, pdf_form: str, field_values: dict[str, Any]) -> str:
         """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        Write field_values into the PDF at pdf_form and save to a timestamped path.
+
+        Parameters
+        ----------
+        pdf_form:     Path to the fillable PDF template.
+        field_values: {pdf_field_name: value} produced by TemplateMapper.resolve().
+
+        Returns
+        -------
+        Path to the newly written filled PDF.
         """
         output_pdf = (
             pdf_form[:-4]
@@ -19,34 +38,37 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()  # This is a dictionary
-
-        answers_list = list(textbox_answers.values())
-
-        # Read PDF
         pdf = PdfReader(pdf_form)
+        filled_count = 0
 
-        # Loop through pages
         for page in pdf.pages:
-            if page.Annots:
-                sorted_annots = sorted(
-                    page.Annots, key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
-                )
+            if not page.Annots:
+                continue
+            for annot in page.Annots:
+                if annot.Subtype != "/Widget" or not annot.T:
+                    continue
 
-                i = 0
-                for annot in sorted_annots:
-                    if annot.Subtype == "/Widget" and annot.T:
-                        if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
-                            annot.AP = None
-                            i += 1
-                        else:
-                            # Stop if we run out of answers
-                            break
+                field_name = self._field_name(annot.T)
+                if field_name in field_values:
+                    annot.V = str(field_values[field_name])
+                    annot.AP = None
+                    filled_count += 1
+                else:
+                    logger.debug("PDF field %r has no mapped value — left blank", field_name)
 
+        logger.info("Filled %d / %d mapped fields in %s", filled_count, len(field_values), pdf_form)
         PdfWriter().write(output_pdf, pdf)
-
-        # Your main.py expects this function to return the path
         return output_pdf
+
+    # -------------------------------------------------------------------------
+    # Helpers
+    # -------------------------------------------------------------------------
+
+    @staticmethod
+    def _field_name(annot_t) -> str:
+        """
+        Extract the plain field name string from a pdfrw PdfString.
+        pdfrw wraps PDF literal strings in parentheses, e.g. '(FieldName)'.
+        """
+        raw = str(annot_t)
+        return raw[1:-1] if raw.startswith("(") and raw.endswith(")") else raw
