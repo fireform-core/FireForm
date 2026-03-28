@@ -12,9 +12,16 @@ import pytest
 from src.validator import (
     validate_incident,
     validate_incident_strict,
+    validate_transcript,
+    validate_transcript_strict,
+    validate_template_fields,
+    validate_all_inputs,
     IncidentValidator,
+    TranscriptValidator,
     ValidationError,
     ValidationResult,
+    ValidationException,
+    ErrorSeverity,
 )
 from src.filler import FormValidationError
 
@@ -327,3 +334,233 @@ class TestEdgeCases:
         }
         errors = validate_incident(data)
         assert errors == []
+
+
+class TestTranscriptValidation:
+    """Tests for transcript/user input validation."""
+
+    def test_valid_transcript_returns_empty_list(self):
+        """Valid transcript should return no errors."""
+        transcript = "Fire reported at 123 Main Street at 14:30. Two victims rescued by Engine 5."
+        errors = validate_transcript(transcript)
+        assert errors == []
+
+    def test_empty_transcript_returns_error(self):
+        """Empty transcript should return error."""
+        errors = validate_transcript("")
+        assert len(errors) > 0
+        assert any("empty" in e.lower() for e in errors)
+
+    def test_whitespace_only_transcript_returns_error(self):
+        """Whitespace-only transcript should return error."""
+        errors = validate_transcript("   \t\n   ")
+        assert len(errors) > 0
+
+    def test_none_transcript_returns_error(self):
+        """None transcript should return error."""
+        errors = validate_transcript(None)
+        assert len(errors) > 0
+
+    def test_non_string_transcript_returns_error(self):
+        """Non-string transcript should return type error."""
+        errors = validate_transcript(12345)
+        assert len(errors) > 0
+        assert any("string" in e.lower() for e in errors)
+
+    def test_short_transcript_returns_error(self):
+        """Very short transcript should return error."""
+        errors = validate_transcript("Hi")
+        assert len(errors) > 0
+        assert any("short" in e.lower() for e in errors)
+
+    def test_minimum_valid_length_passes(self):
+        """Transcript at minimum length should pass."""
+        transcript = "Fire at 123"  # 11 chars > 10 min
+        errors = validate_transcript(transcript)
+        assert errors == []
+
+
+class TestTranscriptValidatorStrict:
+    """Tests for strict transcript validation with warnings."""
+
+    def test_returns_validation_result(self):
+        """Should return ValidationResult instance."""
+        result = validate_transcript_strict("Test transcript content here")
+        assert isinstance(result, ValidationResult)
+
+    def test_non_incident_content_returns_warning(self):
+        """Non-incident content should generate warning, not error."""
+        transcript = "The weather is nice today and I went shopping at the mall"
+        result = validate_transcript_strict(transcript)
+
+        # Should still be valid (warnings don't block)
+        assert result.is_valid is True
+        # Should have warnings about content
+        assert len(result.warnings) > 0
+
+    def test_incident_content_no_warning(self):
+        """Incident-related content should not generate content warning."""
+        transcript = "Fire emergency reported at location 123 Main St with 2 victims"
+        result = validate_transcript_strict(transcript)
+
+        assert result.is_valid is True
+        content_warnings = [w for w in result.warnings if "incident" in w.message.lower()]
+        assert len(content_warnings) == 0
+
+
+class TestTranscriptValidator:
+    """Tests for the TranscriptValidator class."""
+
+    def test_incident_keyword_detection(self):
+        """Should detect incident-related keywords."""
+        validator = TranscriptValidator()
+
+        assert validator._contains_incident_keywords("There was a fire at the building")
+        assert validator._contains_incident_keywords("Emergency response needed")
+        assert validator._contains_incident_keywords("Accident reported on highway")
+        assert validator._contains_incident_keywords("Victim found at scene")
+        assert not validator._contains_incident_keywords("Nice weather today")
+        assert not validator._contains_incident_keywords("Going to the store")
+
+
+class TestTemplateFieldValidation:
+    """Tests for template field configuration validation."""
+
+    def test_valid_dict_fields(self):
+        """Valid dict fields should return empty error list."""
+        fields = {"incident_type": "", "location": "", "time": ""}
+        errors = validate_template_fields(fields)
+        assert errors == []
+
+    def test_valid_list_fields(self):
+        """Valid list fields should return empty error list."""
+        fields = ["incident_type", "location", "time"]
+        errors = validate_template_fields(fields)
+        assert errors == []
+
+    def test_none_fields_returns_error(self):
+        """None fields should return error."""
+        errors = validate_template_fields(None)
+        assert len(errors) > 0
+
+    def test_empty_dict_returns_error(self):
+        """Empty dict should return error."""
+        errors = validate_template_fields({})
+        assert len(errors) > 0
+
+    def test_empty_list_returns_error(self):
+        """Empty list should return error."""
+        errors = validate_template_fields([])
+        assert len(errors) > 0
+
+    def test_invalid_type_returns_error(self):
+        """Invalid type should return error."""
+        errors = validate_template_fields("not a dict or list")
+        assert len(errors) > 0
+
+
+class TestValidateAllInputs:
+    """Tests for the combined validation function."""
+
+    def test_returns_validation_result(self):
+        """Should return ValidationResult instance."""
+        result = validate_all_inputs(
+            transcript="Fire at location with emergency response",
+            fields={"field1": "val"},
+            pdf_path="test.pdf"
+        )
+        assert isinstance(result, ValidationResult)
+
+    def test_invalid_transcript_fails(self):
+        """Invalid transcript should cause failure."""
+        result = validate_all_inputs(
+            transcript="",
+            fields={"field1": "val"},
+            pdf_path="test.pdf"
+        )
+        assert result.is_valid is False
+        assert any("transcript" in e.field for e in result.errors)
+
+    def test_invalid_fields_fails(self):
+        """Invalid fields should cause failure."""
+        result = validate_all_inputs(
+            transcript="Valid transcript with enough content for processing",
+            fields=None,
+            pdf_path="test.pdf"
+        )
+        assert result.is_valid is False
+        assert any("fields" in e.field for e in result.errors)
+
+
+class TestValidationResult:
+    """Tests for ValidationResult class functionality."""
+
+    def test_raise_if_invalid_raises_exception(self):
+        """Should raise ValidationException when invalid."""
+        error = ValidationError(
+            field="test",
+            message="Test error",
+            error_type="test_error"
+        )
+        result = ValidationResult(is_valid=False, errors=[error])
+
+        with pytest.raises(ValidationException):
+            result.raise_if_invalid()
+
+    def test_raise_if_invalid_silent_when_valid(self):
+        """Should not raise when valid."""
+        result = ValidationResult(is_valid=True, errors=[])
+        result.raise_if_invalid()  # Should not raise
+
+    def test_get_all_messages_includes_warnings(self):
+        """Should include both errors and warnings."""
+        error = ValidationError(field="e", message="Error msg", error_type="err")
+        warning = ValidationError(
+            field="w",
+            message="Warning msg",
+            error_type="warn",
+            severity=ErrorSeverity.WARNING
+        )
+        result = ValidationResult(
+            is_valid=False,
+            errors=[error],
+            warnings=[warning]
+        )
+
+        messages = result.get_all_messages()
+        assert "Error msg" in messages
+        assert "Warning msg" in messages
+
+
+class TestValidationException:
+    """Tests for ValidationException class."""
+
+    def test_exception_contains_errors(self):
+        """Exception should contain error list."""
+        errors = [
+            ValidationError(field="f1", message="Error 1", error_type="test"),
+            ValidationError(field="f2", message="Error 2", error_type="test")
+        ]
+        exc = ValidationException(errors=errors)
+        assert len(exc.errors) == 2
+
+    def test_to_dict_serialization(self):
+        """Should serialize to dict."""
+        errors = [ValidationError(field="f", message="Msg", error_type="t")]
+        exc = ValidationException(errors=errors, message="Test failure")
+
+        result = exc.to_dict()
+        assert result["message"] == "Test failure"
+        assert len(result["errors"]) == 1
+
+    def test_get_error_messages(self):
+        """Should return list of error messages."""
+        errors = [
+            ValidationError(field="f1", message="First error", error_type="t"),
+            ValidationError(field="f2", message="Second error", error_type="t")
+        ]
+        exc = ValidationException(errors=errors)
+
+        messages = exc.get_error_messages()
+        assert "First error" in messages
+        assert "Second error" in messages
