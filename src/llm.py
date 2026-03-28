@@ -97,8 +97,12 @@ class LLM:
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            if isinstance(self._json[field], list):
+                self._json[field].append(parsed_value)
+            else:
+        # Convert existing value to list
+                self._json[field] = [self._json[field], parsed_value]
         else:
             self._json[field] = parsed_value
 
