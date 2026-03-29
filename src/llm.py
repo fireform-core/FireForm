@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import requests
 from requests.exceptions import Timeout, RequestException
 
@@ -28,17 +29,17 @@ class LLM:
             )
 
     def build_prompt(self, current_field):
-        prompt = f""" 
+        prompt = f"""
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
+            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings.
+            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return
+            only a single string containing the identified value for the JSON field.
             If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
             If you don't identify the value in the provided text, return "-1".
             ---
             DATA:
             Target JSON field to find in text: {current_field}
-            
+
             TEXT: {self._transcript_text}
             """
         return prompt
@@ -87,14 +88,20 @@ class LLM:
                 self.add_response_to_json(field, parsed_response)
                 logger.info(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
+        # ── NEW: build confidence-scored result ──
+        extraction_result = self.build_extraction_result()
         logger.info("----------------------------------")
-        logger.info("Resulting JSON created from the input text:")
-        logger.info(json.dumps(self._json, indent=2))
+        logger.info("Resulting JSON with confidence scores:")
+        logger.info(json.dumps(extraction_result, indent=2))
         logger.info("--------- extracted data ---------")
 
         return self
 
     def add_response_to_json(self, field, value):
+        """
+        Adds the value under the specified field.
+        Existing PR #337 fix preserved — handles non-list fields safely.
+        """
         value = value.strip().replace('"', "")
         parsed_value = None
 
@@ -128,6 +135,71 @@ class LLM:
 
         logger.info(f"Resulting formatted list of values: {values}")
         return values
+
+    def _compute_field_confidence(self, value) -> float:
+        """
+        Heuristic confidence scoring for an extracted field value.
+        Returns a float between 0.0 and 1.0.
+        """
+        if value is None or value == "" or value == "-1":
+            return 0.0
+        if isinstance(value, list):
+            return 0.85 if len(value) > 0 else 0.0
+        if isinstance(value, str):
+            vague_patterns = [
+                r"not (specified|mentioned|provided|found|available)",
+                r"^n/?a$",
+                r"^\?+$",
+                r"^unknown$"
+            ]
+            for pattern in vague_patterns:
+                if re.search(pattern, value.strip(), re.IGNORECASE):
+                    return 0.2
+            if len(value.strip()) < 3:
+                return 0.3
+            return 0.9
+        return 0.8
+
+    def build_extraction_result(self) -> dict:
+        """
+        Wraps each extracted field with a confidence score.
+        Adds top-level _meta block with requires_review flag
+        when any field confidence is below threshold.
+        """
+        CONFIDENCE_THRESHOLD = 0.5
+        result = {}
+        low_confidence_fields = []
+
+        for field, value in self._json.items():
+            score = self._compute_field_confidence(value)
+            result[field] = {
+                "value": value,
+                "confidence": round(score, 2)
+            }
+            if score < CONFIDENCE_THRESHOLD:
+                low_confidence_fields.append(field)
+
+        total_fields = len(self._json)
+        overall = (
+            round(sum(result[f]["confidence"] for f in result) / total_fields, 2)
+            if total_fields > 0 else 0.0
+        )
+
+        result["_meta"] = {
+            "requires_review": len(low_confidence_fields) > 0,
+            "low_confidence_fields": low_confidence_fields,
+            "overall_confidence": overall
+        }
+
+        if result["_meta"]["requires_review"]:
+            logger.warning(
+                "Extraction requires human review. Low confidence fields: %s",
+                low_confidence_fields
+            )
+        else:
+            logger.info("Extraction complete. All fields passed confidence threshold.")
+
+        return result
 
     def get_data(self):
         return self._json
