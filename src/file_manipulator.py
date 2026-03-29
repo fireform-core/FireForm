@@ -1,7 +1,6 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
 
 
 class FileManipulator:
@@ -13,6 +12,14 @@ class FileManipulator:
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        try:
+            from commonforms import prepare_form
+        except ImportError as exc:
+            raise RuntimeError(
+                "Template creation requires optional AI dependencies. "
+                "Install them with `pip install -r requirements-ai.txt`."
+            ) from exc
+
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path

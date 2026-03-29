@@ -1,0 +1,3 @@
+commonforms
+numpy<2
+ollama

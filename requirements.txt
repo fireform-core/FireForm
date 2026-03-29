@@ -1,12 +1,1 @@
-requests
-pdfrw
-flask
-commonforms
-fastapi
-uvicorn
-pydantic
-sqlmodel
-pytest
-httpx
-numpy<2
-ollama
+.
