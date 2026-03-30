@@ -2,4 +2,12 @@
 .idea
 venv
 .venv
-*.db
+*.dbsrc/inputs/*.pdf
+src/outputs/*.pdf
+src/inputs/*.pdf
+src/outputs/*.pdf
+fireform.db 
+*.bak 
+ngrok.exe 
+out.txt 
+benchmark_proof.py 
