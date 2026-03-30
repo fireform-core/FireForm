@@ -301,3 +301,164 @@ pip install pypdf
 
 **Tests fail with `ModuleNotFoundError: No module named 'api'`**
 - Use `python -m pytest` instead of `pytest`
+
+---
+
+## 🗄️ Master Incident Data Lake
+
+FireForm now ships with a persistent **Master Incident Data Lake** — a foundational backend architecture that decouples voice extraction from rigid single-PDF workflows, enabling the *"Record Once. Report Everywhere."* paradigm.
+
+### What is the Data Lake?
+
+Instead of extracting from a transcript → filling one PDF → discarding all data, FireForm now:
+
+1. Extracts **all spoken intelligence** into a permanent, schema-less JSON record linked to a unique **Incident ID** (`INC-YYYY-MMDD-HHMM`).
+2. Stores it in the database — independently of any PDF template.
+3. Lets any officer, at any time, generate a filled PDF for **any registered agency template** from that same stored record — with zero new LLM calls.
+
+```
+Old approach:
+  Transcript → LLM → PDF → ❌ Data discarded
+
+Master Data Lake approach:
+  Transcript → LLM → Master JSON (persisted) → PDF A
+                                               → PDF B
+                                               → PDF C  (any template, any time)
+```
+
+---
+
+### Data Lake Workflow
+
+#### Step 1 — Record an Incident
+
+Enter your incident description in the text box and click **"Save to Data Lake"** (or use the API directly):
+
+```
+POST /incidents/extract?input_text=<transcript>&incident_id=<optional>
+```
+
+If no `incident_id` is provided, one is auto-generated. A unique Incident ID is returned:
+
+```json
+{
+  "incident_id": "INC-2026-0401-0912",
+  "status": "created",
+  "fields_extracted": 7
+}
+```
+
+> **Tip:** Copy and save your Incident ID. You will need it to append data or generate PDFs.
+
+---
+
+#### Step 2 — Append Data (Collaborative Reporting)
+
+Multiple officers can contribute to the same incident record by passing the same `incident_id`:
+
+```
+POST /incidents/extract?input_text=<new transcript>&incident_id=INC-2026-0401-0912
+```
+
+FireForm's **Collaborative Consensus Merge** engine handles conflicts intelligently:
+
+| Scenario | Behaviour |
+|----------|-----------|
+| New officer sends `null` for a field that already has data | Existing value is **protected** (not overwritten) |
+| New officer adds a field not previously seen | Field is **added** to the Data Lake |
+| Both officers mention `Notes` or `Description` | Values are **appended** with a timestamped `[UPDATE]` tag |
+| New officer corrects a non-null field with a new value | Value is **updated** |
+
+The response will include `"status": "merged"`.
+
+---
+
+#### Step 3 — Generate a PDF for Any Agency Template
+
+Once the incident is stored, generate a filled PDF for any uploaded template:
+
+```
+POST /incidents/{incident_id}/generate/{template_id}
+```
+
+Example:
+```
+POST /incidents/INC-2026-0401-0912/generate/3
+```
+
+FireForm maps the stored Data Lake JSON to the selected template's fields and returns a download link:
+
+```json
+{
+  "incident_id": "INC-2026-0401-0912",
+  "template_name": "Fire Department Report",
+  "submission_id": 12,
+  "download_url": "/forms/download/12",
+  "fields_matched": 6,
+  "fields_total": 8
+}
+```
+
+You can call this endpoint multiple times with different `template_id` values — one incident record, unlimited reports.
+
+---
+
+#### Step 4 — Inspect the Data Lake
+
+Retrieve the full raw master JSON at any time:
+
+```
+GET /incidents/{incident_id}
+```
+
+List all stored incidents:
+
+```
+GET /incidents
+```
+
+---
+
+### Data Lake API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/incidents/extract` | Extract transcript → store in Data Lake |
+| `GET`  | `/incidents` | List all stored incidents |
+| `GET`  | `/incidents/{id}` | Retrieve full master JSON for one incident |
+| `POST` | `/incidents/{id}/generate/{template_id}` | Generate a PDF from stored data |
+
+---
+
+### Environment Variables (Updated)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_HOST` | `http://localhost:11434` | Ollama server URL |
+| `OLLAMA_TIMEOUT` | `300` | LLM request timeout in seconds (increase for slow hardware) |
+
+To customise:
+```bash
+export OLLAMA_HOST=http://your-server:11434    # Linux/Mac
+export OLLAMA_TIMEOUT=300                       # Linux/Mac
+
+set OLLAMA_HOST=http://your-server:11434       # Windows
+set OLLAMA_TIMEOUT=300                          # Windows
+```
+
+---
+
+### Running Data Lake Tests
+
+The Data Lake test suite uses an in-memory SQLite database and mocks the LLM — **no Ollama instance required**:
+
+```bash
+python -m pytest tests/test_incidents.py -v
+```
+
+Expected output: **13 passed**
+
+Full test suite:
+```bash
+python -m pytest tests/ -v
+```

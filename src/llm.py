@@ -30,11 +30,27 @@ class LLM:
 
     def build_batch_prompt(self) -> str:
         """
-        Build a single prompt that extracts ALL fields at once.
-        Sends human-readable labels as context so Mistral understands
-        what each internal field name means.
-        Fixes Issue #196 — reduces N Ollama calls to 1.
+        Build a single prompt that extracts fields at once.
+        Supports BOTH template-guided and pure schema-less dynamic extraction!
         """
+        if not self._target_fields:
+            # PURE SCHEMA-LESS: No templates exist, purely ad-hoc extraction!
+            prompt = f"""You are an advanced data extraction engine.
+Extract every meaningful piece of information from the transcript below.
+
+RULES:
+1. Return ONLY a valid JSON object — no explanation, no markdown, no extra text
+2. You MUST dynamically invent descriptive JSON keys for every critical detail (e.g. "Injuries", "Weapons", "SuspectName", "Location").
+3. Always pair the invented key with its exact value from the transcript.
+4. For multiple values, use a semicolon-separated string: "Name1; Name2"
+
+TRANSCRIPT:
+{self._transcript_text}
+
+JSON:"""
+            return prompt
+
+        # TEMPLATE-GUIDED + DYNAMIC EXTRACTION
         if isinstance(self._target_fields, dict):
             fields_lines = "\n".join(
                 f'  "{k}": null  // {v if v and v != k else k}'
@@ -61,6 +77,7 @@ RULES:
 5. Never invent or guess values not present in the transcript
 6. For multiple values (e.g. multiple victims), use a semicolon-separated string: "Name1; Name2"
 7. Distinguish roles carefully: Officer/Employee is NOT the same as Victim or Suspect
+8. IMPORTANT: You MUST recursively extract any other critical details found in the transcript by inventing your own descriptive JSON keys (e.g. "Weapon": "Glock", "Injury": "Broken Leg").
 
 TRANSCRIPT:
 {self._transcript_text}
@@ -162,11 +179,11 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
         field_count = len(field_keys)
         print(f"[LOG] Starting async batch extraction for {field_count} field(s)...")
         prompt = self.build_batch_prompt()
-        payload = {"model": "mistral", "prompt": prompt, "stream": False}
+        payload = {"model": "mistral", "prompt": prompt, "stream": False, "format": "json"}
 
         _start = time.time()
         try:
-            timeout = int(os.getenv("OLLAMA_TIMEOUT", "120"))
+            timeout = int(os.getenv("OLLAMA_TIMEOUT", "300"))
             async with httpx.AsyncClient() as client:
                 response = await client.post(ollama_url, json=payload, timeout=timeout)
                 response.raise_for_status()
@@ -178,9 +195,19 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
 
             try:
                 extracted = json.loads(raw)
+                
+                # 1. First extract explicit keys mapped from templates
                 for key in field_keys:
                     val = extracted.get(key)
                     self._json[key] = val if val and str(val).lower() not in ("null", "none", "") else None
+                    
+                # 2. Fully Dynamic Schema-less Extension: 
+                # Accept EVERY OTHER valid key the LLM invented!
+                for key, val in extracted.items():
+                    if key not in field_keys:
+                        if val and str(val).lower() not in ("null", "none", ""):
+                            self._json[key] = val
+                            
                 print("\t[LOG] Batch extraction successful.")
             except json.JSONDecodeError:
                 print("\t[WARN] Batch JSON parse failed — falling back to per-field extraction")

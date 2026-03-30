@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from api.routes import templates, forms, transcribe
+from api.routes import templates, forms, transcribe, incidents
 from api.errors.base import AppError
 from typing import Union
 import os
@@ -26,7 +26,7 @@ def app_error_handler(request: Request, exc: AppError):
 app.include_router(templates.router)
 app.include_router(forms.router)
 app.include_router(transcribe.router)
+app.include_router(incidents.router)
 
-# Serve mobile PWA at /mobile
 if os.path.exists("mobile"):
     app.mount("/mobile", StaticFiles(directory="mobile", html=True), name="mobile")
