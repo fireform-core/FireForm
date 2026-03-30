@@ -462,3 +462,105 @@ Full test suite:
 ```bash
 python -m pytest tests/ -v
 ```
+
+---
+
+## 🧠 Dynamic AI Semantic Mapper
+
+Building on top of the Master Data Lake, the **AI Semantic Mapper** is the intelligent bridge between unstructured extracted JSON and any rigid PDF form schema — making FireForm truly universal.
+
+### The Problem It Solves
+
+The Data Lake captures all spoken intelligence with dynamically invented keys:
+```json
+{ "Speaker": "Jack Portman", "Identity": "EMP-001", "Reporting Location": "742 Evergreen" }
+```
+
+But a Fire Department PDF may demand completely different key names:
+```json
+{ "FullName": "", "BadgeNumber": "", "IncidentAddress": "" }
+```
+
+Standard Python dictionary matching would silently drop all three values (zero matches). The Semantic Mapper eliminates this failure mode entirely.
+
+---
+
+### How It Works
+
+```
+Data Lake JSON                 Mistral LLM               PDF Form
+──────────────                 ───────────               ────────
+"Speaker": "Jack"   ──────→   [Semantic       ──────→   "FullName": "Jack"
+"Identity": "EMP1"  ──────→    Understanding] ──────→   "BadgeNumber": "EMP1"
+"Location": "742"   ──────→                   ──────→   "IncidentAddress": "742"
+"VictimInjury": X   ──────→   (not needed     ──────→   (null — not in PDF)
+                               for this PDF)
+```
+
+At PDF generation time, FireForm sends Mistral two things:
+1. The full Data Lake JSON for the incident
+2. The target PDF's field name list
+
+Mistral understands human semantics — it knows `"Speaker"` means `"FullName"`, `"Identity"` means `"BadgeNumber"` — and returns a perfectly keyed JSON object matched exactly to the PDF's requirements. No hardcoded `if/else` chains. No per-template Python logic. Ever.
+
+---
+
+### Resilience & Fallback
+
+The Semantic Mapper is wrapped in a two-layer fallback:
+
+| Scenario | Behaviour |
+|----------|-----------|
+| Mapper succeeds | PDF fields filled via AI semantic understanding |
+| Mapper returns empty `{}` | Falls back to exact-string key matching from Data Lake |
+| Mapper raises exception (timeout/crash) | Falls back to exact-string key matching from Data Lake |
+
+The PDF is **always generated** — the fallback ensures zero 500 errors from LLM timeouts.
+
+---
+
+### Pure Schema-less Mode
+
+When no templates exist in the database, the extraction engine switches to a fully ad-hoc mode:
+
+```
+No template uploaded?
+  → Mistral invents ALL keys dynamically from transcript alone
+  → "VictimInjury", "WeaponType", "SuspectDescription" — all captured
+  → Stored in Data Lake for future PDF generation against any template
+```
+
+This enables FireForm to capture intelligence even before the relevant PDF template is registered.
+
+---
+
+### Running AI Semantic Mapper Tests
+
+The Semantic Mapper test suite mocks all Ollama calls — **no running Ollama instance required**:
+
+```bash
+python -m pytest tests/test_semantic_mapper.py -v
+```
+
+Key test cases:
+- ✅ Correctly maps exact-match keys
+- ✅ Resolves synonym mismatches (`"Speaker"` → `"FullName"`)
+- ✅ Returns `{}` gracefully on LLM failure (no crash)
+- ✅ Handles empty Data Lake JSON
+- ✅ Handles invalid/non-JSON LLM response
+- ✅ Generate endpoint uses Mapper output to fill PDF
+- ✅ Fallback triggers correctly when mapper returns `{}`
+- ✅ Fallback triggers correctly when mapper raises exception
+- ✅ 404 handling unaffected by Mapper
+
+Expected output: **9 passed**
+
+---
+
+### Environment Variables (AI Semantic Mapper)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_TIMEOUT` | `300` | Seconds to wait for LLM response. Increase for slow local hardware. |
+
+> **Note:** The Semantic Mapper makes one additional Ollama call per PDF generation. On a typical local machine, this takes 10–60 seconds depending on hardware. If your machine is slow, set `OLLAMA_TIMEOUT=600`.

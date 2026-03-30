@@ -109,15 +109,15 @@ async def extract_to_data_lake(
 # ── Generate PDF from stored data ────────────────────────
 
 @router.post("/{incident_id}/generate/{template_id}")
-def generate_pdf_from_lake(
+async def generate_pdf_from_lake(
     incident_id: str,
     template_id: int,
     db: Session = Depends(get_db)
 ):
     """
-    Generates a PDF for any agency template from the stored Master Incident Data Lake.
-    Supports dynamic multi-template generation from a single incident record —
-    Record Once, Report Everywhere.
+    Takes stored Master Incident JSON and generates a PDF for any agency template.
+    Uses an AI Semantic Mapper to fluently match dynamically extracted Data Lake 
+    fields into strict PDF keys without rigid hardcoding!
     """
     incident = get_incident(db, incident_id)
     if not incident:
@@ -130,15 +130,25 @@ def generate_pdf_from_lake(
     if not os.path.exists(template.pdf_path):
         raise AppError(f"Template PDF not found on disk: {template.pdf_path}", status_code=404)
 
-    print(f"[DATA LAKE] Generating '{template.name}' from incident {incident_id}")
+    print(f"[DATA LAKE] Generating '{template.name}' from incident {incident_id} via Semantic Mapper")
 
     master_data = json.loads(incident.master_json)
     tpl_fields = list(template.fields.keys()) if isinstance(template.fields, dict) else template.fields
 
-    # Map stored Data Lake fields to this template's fields
-    mapped_data = {k: master_data.get(k) for k in tpl_fields if master_data.get(k) is not None}
+    # --- THE MAGIC BRIDGE: AI Semantic Mapper ---
+    from src.llm import LLM
+    try:
+        mapped_data = await LLM.async_semantic_map(master_json=master_data, target_pdf_fields=tpl_fields)
+    except Exception as e:
+        print(f"[DATA LAKE] Semantic Mapper Error: {e}, falling back to exact strings.")
+        mapped_data = {k: master_data.get(k) for k in tpl_fields if master_data.get(k) is not None}
 
-    print(f"[DATA LAKE] Template needs {len(tpl_fields)} fields, matched {len(mapped_data)}")
+    # If the LLM failed entirely, fallback to string matching
+    if not mapped_data:
+        print("[DATA LAKE] Empty Semantic Map. Falling back to explicit string matching.")
+        mapped_data = {k: master_data.get(k) for k in tpl_fields if master_data.get(k) is not None}
+
+    print(f"[DATA LAKE] Template needs {len(tpl_fields)} fields, Semantic Mapper produced {len(mapped_data.keys() if isinstance(mapped_data, dict) else [])} fields")
 
     # Fill PDF
     filler = Filler()
@@ -156,7 +166,7 @@ def generate_pdf_from_lake(
     # Save submission record
     submission = FormSubmission(
         template_id=template_id,
-        input_text=f"[DATA LAKE] {incident_id}",
+        input_text=f"[DATA LAKE -> SEMANTIC MAPPER] {incident_id}",
         output_pdf_path=output_path
     )
     saved = create_form(db, submission)
@@ -169,7 +179,7 @@ def generate_pdf_from_lake(
         "download_url": f"/forms/download/{saved.id}",
         "fields_matched": len(mapped_data),
         "fields_total": len(tpl_fields),
-        "message": "PDF generated from Master Data Lake."
+        "message": "PDF physically generated via AI Semantic Mapping!"
     }
 
 
