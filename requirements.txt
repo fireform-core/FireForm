@@ -1,12 +1,36 @@
-requests
-pdfrw
-flask
-commonforms
-fastapi
-uvicorn
-pydantic
-sqlmodel
-pytest
-httpx
-numpy<2
-ollama
+# Web Framework
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+
+# Data Validation & Serialization
+pydantic==2.7.1
+pydantic-settings==2.2.1
+
+# LLM & Extraction
+instructor==1.2.6
+openai==1.30.1
+
+# Vector DB / Embeddings
+chromadb==0.5.0
+sentence-transformers==3.0.1
+numpy==1.26.4
+aiohttp==3.9.5
+
+# PDF Processing
+pdfrw==0.4
+PyMuPDF==1.24.4
+
+# Security / Crypto
+cryptography==42.0.7
+bcrypt==4.1.2
+
+# DB & Caching
+SQLAlchemy==2.0.30
+psycopg2-binary==2.9.9
+redis==5.0.4
+
+# Testing
+pytest==8.2.0
+pytest-asyncio==0.23.6
+httpx==0.27.0
