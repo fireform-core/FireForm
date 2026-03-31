@@ -27,7 +27,7 @@ services:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/src
+      - PYTHONPATH=/app:/app/src
       - OLLAMA_HOST=http://ollama:11434
     networks:
       - fireform-network

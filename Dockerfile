@@ -1,6 +1,10 @@
 
 FROM python:3.11-slim
 
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglib2.0-0
+
 WORKDIR /app
 
 # Install system dependencies
@@ -16,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Set Python path so imports work correctly
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app:/app/src
 
 # Keep container running for interactive use
 CMD ["tail", "-f", "/dev/null"]
