@@ -9,11 +9,12 @@ services:
     networks:
       - fireform-network
     healthcheck:
-      test: ["CMD-SHELL", "ollama ps"]
+      # Fix — curl the Ollama API tags endpoint, "ollama ps" is unreliable as a healthcheck
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 30s
+      retries: 5
+      start_period: 40s
 
   app:
     build:
@@ -23,16 +24,19 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
+    # Fix #224 — expose port so API is reachable at http://localhost:8000
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/src
+      # Fix #118 #116 — correct PYTHONPATH to project root
+      - PYTHONPATH=/app
       - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_TIMEOUT=300
     networks:
       - fireform-network
-    stdin_open: true
-    tty: true
 
 volumes:
   ollama_data:
