@@ -55,7 +55,7 @@ pull-model:
 	docker compose exec ollama ollama pull mistral
 
 test:
-	docker compose exec app python3 -m pytest src/test/
+	docker compose exec app python3 -m pytest tests/
 
 clean:
 	docker compose down -v
