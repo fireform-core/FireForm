@@ -11,3 +11,4 @@ httpx
 numpy<2
 ollama
 faster-whisper
+python-multipart

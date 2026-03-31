@@ -8,13 +8,9 @@ services:
       - ollama_data:/root/.ollama
     networks:
       - fireform-network
-    healthcheck:
-      # Fix — curl the Ollama API tags endpoint, "ollama ps" is unreliable as a healthcheck
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+    # Note: ollama/ollama image does not include curl or wget,
+    # so healthcheck is handled at the app level via OLLAMA_TIMEOUT
+    restart: unless-stopped
 
   app:
     build:
@@ -22,8 +18,7 @@ services:
       dockerfile: Dockerfile
     container_name: fireform-app
     depends_on:
-      ollama:
-        condition: service_healthy
+      - ollama
     # Fix #224 — expose port so API is reachable at http://localhost:8000
     ports:
       - "8000:8000"
