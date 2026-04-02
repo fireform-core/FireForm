@@ -115,3 +115,25 @@ def update_incident_json(db, incident_id: str, new_data: dict, new_transcript: s
     db.commit()
     db.refresh(incident)
     return incident
+
+
+# ── Vision Coordinates ────────────────────────────────────────
+
+from api.db.models import FormFieldCoordinates
+
+def create_field_coordinates(db: Session, coords: list[FormFieldCoordinates]) -> list[FormFieldCoordinates]:
+    for coord in coords:
+        db.add(coord)
+    db.commit()
+    for coord in coords:
+        db.refresh(coord)
+    return coords
+
+
+def get_template_coordinates(db: Session, template_id: int) -> list[FormFieldCoordinates]:
+    from sqlmodel import select
+    return db.exec(
+        select(FormFieldCoordinates).where(
+            FormFieldCoordinates.template_id == template_id
+        )
+    ).all()

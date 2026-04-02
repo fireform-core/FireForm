@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON
+from typing import Optional
 from datetime import datetime
 
 class Template(SQLModel, table=True):
@@ -17,13 +18,6 @@ class FormSubmission(SQLModel, table=True):
     output_pdf_path: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-# ADD THIS TO api/db/models.py
-# (append to existing file — don't replace)
-
-from sqlmodel import SQLModel, Field
-from typing import Optional
-from datetime import datetime
-
 
 class IncidentMasterData(SQLModel, table=True):
     """
@@ -40,3 +34,20 @@ class IncidentMasterData(SQLModel, table=True):
     officer_notes: Optional[str] = None         # additional context
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class FormFieldCoordinates(SQLModel, table=True):
+    """
+    Stores visual field positions detected by the vision model for a given template.
+    Coordinates are stored as percentages (0-100) of the page dimensions.
+    """
+    id: int | None = Field(default=None, primary_key=True)
+    template_id: int = Field(foreign_key="template.id", index=True)
+    field_label: str                        # e.g. "patient_name", "incident_date"
+    page_number: int = Field(default=0)     # 0-indexed PDF page
+    x: float                                # % from left edge (0–100)
+    y: float                                # % from top edge (0–100)
+    width: float                            # % of page width
+    height: float                           # % of page height
+    field_type: str = Field(default="text") # "text", "checkbox", "image"
+    scanned_at: datetime = Field(default_factory=datetime.utcnow)

@@ -275,3 +275,63 @@ class Filler:
         print("\nlog extracted successfully")
         print(f"along with what it extracted accordingly, pdf file : {output_pdf}")
         return output_pdf
+
+    def fill_static_pdf(self, pdf_form: str, coordinates: list, data: dict) -> str:
+        """
+        Uses PyMuPDF to draw text directly onto absolute pixel coordinates
+        for static (non-fillable) forms.
+        coordinates: list of FormFieldCoordinates (from DB)
+        data: dictionary of extracted values (from Data Lake)
+        """
+        import fitz  # PyMuPDF
+        import os
+
+        output_pdf = (
+            pdf_form[:-4]
+            + "_"
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + "_static_filled.pdf"
+        )
+        
+        doc = fitz.open(pdf_form)
+
+        # Draw each field
+        for coord in coordinates:
+            # Match data (case-insensitive fallback)
+            raw_val = data.get(coord.field_label)
+            if raw_val is None:
+                for k, v in data.items():
+                    if k.lower() == coord.field_label.lower():
+                        raw_val = v
+                        break
+                        
+            if raw_val is None or str(raw_val).strip() == "":
+                continue
+                
+            val_str = str(raw_val).strip()
+
+            if coord.page_number < len(doc):
+                page = doc[coord.page_number]
+                page_rect = page.rect
+                
+                # Convert percentages (0-100) to actual PDF points
+                x_pts = (coord.x / 100.0) * page_rect.width
+                y_pts = (coord.y / 100.0) * page_rect.height
+                w_pts = (coord.width / 100.0) * page_rect.width
+                h_pts = (coord.height / 100.0) * page_rect.height
+                
+                rect = fitz.Rect(x_pts, y_pts, x_pts + w_pts, y_pts + h_pts)
+
+                if coord.field_type == "text":
+                    # fitz.TEXT_ALIGN_LEFT = 0
+                    page.insert_textbox(rect, val_str, fontsize=10, fontname="helv", color=(0, 0, 0), align=0)
+                elif coord.field_type == "checkbox":
+                    page.draw_rect(rect, color=(0,0,0), width=1)
+                    if val_str.lower() in TRUTHY_VALUES:
+                        # Draw X
+                        page.draw_line(rect.top_left, rect.bottom_right, color=(0,0,0), width=1.5)
+                        page.draw_line(rect.bottom_left, rect.top_right, color=(0,0,0), width=1.5)
+                        
+        doc.save(output_pdf)
+        doc.close()
+        return output_pdf

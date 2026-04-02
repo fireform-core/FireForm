@@ -292,6 +292,93 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
     def get_data(self):
         return self._json
 
+    # ── Vision Model Methods ────────────────────────────────────────
+
+    import base64
+    
+    async def async_vision_scan_fields(self, image_bytes: bytes) -> list[dict]:
+        """
+        Passes a page image to the Vision model to map out form fields.
+        Returns a list of dicts: {"label": "...", "x": ..., "y": ..., "w": ..., "h": ...}
+        where x, y, w, h are percentages (0-100) of the page width/height.
+        """
+        import base64
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        
+        # We need the vision model here, e.g. gemma3:4b
+        vision_model = os.getenv("FIREFORM_VISION_MODEL", "gemma3:4b")
+        b64_image = base64.b64encode(image_bytes).decode("utf-8")
+        
+        prompt = '''
+SYSTEM PROMPT:
+You are an expert form layout analysis AI. Your task is to extract all visual input fields (text blanks, checkboxes) from the provided image of a document.
+Return ONLY valid JSON. The JSON should be a list of objects with the following keys:
+- "label": A descriptive semantic name for the field (e.g. "patient_name", "date_of_incident"). Use snake_case.
+- "x": The X coordinate of the top-left corner of the blank space (as a percentage of the image width, 0.0 to 100.0).
+- "y": The Y coordinate of the top-left corner of the blank space (as a percentage of the image height, 0.0 to 100.0).
+- "w": The width of the blank space (as a percentage of the image width, 0.0 to 100.0).
+- "h": The height of the blank space (as a percentage of the image height).
+- "type": "text" or "checkbox".
+Do not include markdown blocks, just the JSON list.
+        '''
+        
+        payload = {
+            "model": vision_model,
+            "prompt": prompt,
+            "images": [b64_image],
+            "stream": False,
+            "format": "json" # Force JSON mode if supported
+        }
+
+        try:
+            response = requests.post(ollama_url, json=payload, timeout=300)
+            response.raise_for_status()
+            res_text = response.json().get("response", "[]").strip()
+            
+            # Simple cleanup in case it returns markdown
+            if res_text.startswith("```json"):
+                res_text = res_text[7:]
+            if res_text.endswith("```"):
+                res_text = res_text[:-3]
+                
+            data = json.loads(res_text.strip())
+            return data if isinstance(data, list) else []
+        except Exception as e:
+            print(f"[ERROR] Vision Scan Failed: {e}")
+            return []
+
+    async def async_vision_describe_scene(self, image_bytes: bytes) -> str:
+        """
+        Takes a scene photo and generates a professional incident narrative to feed into the Data Lake.
+        """
+        import base64
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        vision_model = os.getenv("FIREFORM_VISION_MODEL", "gemma3:4b")
+        b64_image = base64.b64encode(image_bytes).decode("utf-8")
+        
+        prompt = '''
+You are a professional first responder describing an incident scene. 
+Look at the provided image and generate a concise but highly detailed incident narrative.
+Describe any structures, vehicles, hazards, visible injuries, number of units involved, and overall context.
+Use professional, objective reporting language.
+        '''
+        
+        payload = {
+            "model": vision_model,
+            "prompt": prompt,
+            "images": [b64_image],
+            "stream": False,
+        }
+
+        try:
+            response = requests.post(ollama_url, json=payload, timeout=300)
+            response.raise_for_status()
+            return response.json().get("response", "").strip()
+        except Exception as e:
+            print(f"[ERROR] Scene Description Failed: {e}")
+            return "Failed to process image scene."
     @staticmethod
     async def async_semantic_map(master_json: dict, target_pdf_fields: list) -> dict:
         """

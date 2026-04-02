@@ -276,3 +276,63 @@ Use formal language appropriate for legal documentation."""
         "format": "markdown",
         "generated_at": datetime.utcnow().isoformat()
     }
+
+
+# ── Vision Model Endpoints ──────────────────────────────
+
+from fastapi import UploadFile, File
+
+@router.post("/{incident_id}/scene-photo")
+async def add_scene_photo(
+    incident_id: str,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Multimodal Vision Integration.
+    Upload a scene photo to the incident. Uses Gemma 3 vision model to generate
+    a professional narrative of the scene and merges it into the Data Lake Master JSON.
+    """
+    if not incident_id:
+        raise AppError("Missing incident_id", status_code=400)
+        
+    incident = get_incident(db, incident_id)
+    if not incident:
+        # Auto-create if it doesn't exist
+        incident = IncidentMasterData(
+            incident_id=incident_id,
+            master_json="{}",
+            transcript_text="[VISION] Image submitted."
+        )
+        create_incident(db, incident)
+
+    import base64
+    image_bytes = await file.read()
+    
+    # Run the vision model (async)
+    from src.llm import LLM
+    llm = LLM()
+    try:
+        scene_narrative = await llm.async_vision_describe_scene(image_bytes)
+        print(f"[VISION] Scene Narrative generated: {scene_narrative[:50]}...")
+    except Exception as e:
+        raise AppError(f"Vision model failed: {e}", status_code=500)
+    
+    # Update the data lake using the smart consensus merge
+    new_data = {
+        "scene_visual_analysis": scene_narrative
+    }
+    
+    update_incident_json(
+        db, 
+        incident_id, 
+        new_data, 
+        new_transcript=f"[VISUAL OBSERVATION]: {scene_narrative}"
+    )
+
+    return {
+        "incident_id": incident_id,
+        "status": "photo_analyzed_and_merged",
+        "narrative_preview": scene_narrative[:100] + "...",
+        "message": "Scene analysis merged into master data lake."
+    }
