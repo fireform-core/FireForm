@@ -10,10 +10,6 @@ pytest
 httpx
 numpy<2
 ollama
-<<<<<<< Updated upstream
 faster-whisper
 python-multipart
 pymupdf
-=======
-faster-whisper
->>>>>>> Stashed changes
