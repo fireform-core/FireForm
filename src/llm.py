@@ -62,7 +62,7 @@ class LLM:
 
             Return only the extracted value as a plain string. Do not return JSON.
             """
-            print("\n[DEBUG] Generated Prompt:\n", prompt)
+
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
