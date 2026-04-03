@@ -133,7 +133,20 @@ async def generate_pdf_from_lake(
     print(f"[DATA LAKE] Generating '{template.name}' from incident {incident_id} via Semantic Mapper")
 
     master_data = json.loads(incident.master_json)
-    tpl_fields = list(template.fields.keys()) if isinstance(template.fields, dict) else template.fields
+
+    # FIX #2 & #4: Determine target fields based on whether this is a static or AcroForm PDF.
+    # For static PDFs (scanned with vision), use the coordinate labels as targets.
+    # For regular AcroForms, use the stored template field names.
+    from api.db.repositories import get_template_coordinates
+    coords = get_template_coordinates(db, template_id)
+    
+    if coords:
+        # Static PDF path: use the field labels from the scanned coordinates
+        tpl_fields = [c.field_label for c in coords]
+        print(f"[DATA LAKE] Static PDF detected — using {len(tpl_fields)} scanned coordinate labels as targets")
+    else:
+        # AcroForm path: use stored field names from template
+        tpl_fields = list(template.fields.keys()) if isinstance(template.fields, dict) else template.fields
 
     # --- THE MAGIC BRIDGE: AI Semantic Mapper ---
     from src.llm import LLM
@@ -153,10 +166,19 @@ async def generate_pdf_from_lake(
     # Fill PDF
     filler = Filler()
     try:
-        output_path = filler.fill_form_with_data(
-            pdf_form=template.pdf_path,
-            data=mapped_data
-        )
+        if coords:
+            print(f"[DATA LAKE] Found {len(coords)} coordinates, using static PDF filler.")
+            output_path = filler.fill_static_pdf(
+                pdf_form=template.pdf_path,
+                coordinates=coords,
+                data=mapped_data
+            )
+        else:
+            print("[DATA LAKE] No coordinates found, using dynamic AcroForm filler.")
+            output_path = filler.fill_form_with_data(
+                pdf_form=template.pdf_path,
+                data=mapped_data
+            )
     except Exception as e:
         raise AppError(f"PDF generation failed: {str(e)}", status_code=500)
 

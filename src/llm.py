@@ -177,9 +177,10 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
             field_names = list(self._target_fields)
 
         field_count = len(field_keys)
-        print(f"[LOG] Starting async batch extraction for {field_count} field(s)...")
+        text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
+        print(f"[LOG] Starting async batch extraction for {field_count} field(s) using {text_model}...")
         prompt = self.build_batch_prompt()
-        payload = {"model": "mistral", "prompt": prompt, "stream": False, "format": "json"}
+        payload = {"model": text_model, "prompt": prompt, "stream": False, "format": "json"}
 
         _start = time.time()
         try:
@@ -237,7 +238,8 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
                 label = field
 
             prompt = self.build_prompt(label)
-            payload = {"model": "mistral", "prompt": prompt, "stream": False}
+            text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
+            payload = {"model": text_model, "prompt": prompt, "stream": False}
 
             try:
                 response = requests.post(ollama_url, json=payload)
@@ -306,44 +308,87 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
         ollama_url = f"{ollama_host}/api/generate"
         
-        # We need the vision model here, e.g. gemma3:4b
         vision_model = os.getenv("FIREFORM_VISION_MODEL", "gemma3:4b")
         b64_image = base64.b64encode(image_bytes).decode("utf-8")
         
-        prompt = '''
-SYSTEM PROMPT:
-You are an expert form layout analysis AI. Your task is to extract all visual input fields (text blanks, checkboxes) from the provided image of a document.
-Return ONLY valid JSON. The JSON should be a list of objects with the following keys:
-- "label": A descriptive semantic name for the field (e.g. "patient_name", "date_of_incident"). Use snake_case.
-- "x": The X coordinate of the top-left corner of the blank space (as a percentage of the image width, 0.0 to 100.0).
-- "y": The Y coordinate of the top-left corner of the blank space (as a percentage of the image height, 0.0 to 100.0).
-- "w": The width of the blank space (as a percentage of the image width, 0.0 to 100.0).
-- "h": The height of the blank space (as a percentage of the image height).
-- "type": "text" or "checkbox".
-Do not include markdown blocks, just the JSON list.
-        '''
+        # FIX #3: Do NOT use format:json — it forces a dict root which breaks list output.
+        # Instead, write a very explicit, direct prompt that tells Gemma EXACTLY what to output.
+        prompt = '''Look at this document image carefully. Find every blank line, input field, or checkbox that a person is expected to fill in.
+
+For each field you find, output exactly one JSON object on its own line in this format:
+{"label": "snake_case_field_name", "x": 10.5, "y": 25.3, "w": 40.0, "h": 3.5, "type": "text"}
+
+Rules:
+- label: a descriptive snake_case name for the field (e.g. full_name, email_address, phone_number, street_address, comments)
+- x: left edge position as a percentage of the image width (0 to 100)
+- y: top edge position as a percentage of the image height (0 to 100)
+- w: width of the blank as a percentage of the image width (0 to 100)
+- h: height of the blank as a percentage of the image height (0 to 100)
+- type: "text" for a text line, "checkbox" for a tick box
+
+Output ONLY the JSON objects, one per line. No explanation. No markdown. No extra text.'''
         
         payload = {
             "model": vision_model,
             "prompt": prompt,
             "images": [b64_image],
             "stream": False,
-            "format": "json" # Force JSON mode if supported
+            # NOTE: No "format": "json" — that forces a dict root which kills list output!
         }
 
         try:
-            response = requests.post(ollama_url, json=payload, timeout=300)
+            # timeout=900s (15 min) — vision is slow but only runs ONCE per template!
+            response = requests.post(ollama_url, json=payload, timeout=900)
             response.raise_for_status()
-            res_text = response.json().get("response", "[]").strip()
+            res_text = response.json().get("response", "").strip()
             
-            # Simple cleanup in case it returns markdown
+            print(f"\n\n🚨 [VISION RAW RESPONSE] 🚨\n{res_text}\n\n")
+            
+            # Strip markdown fences if present
             if res_text.startswith("```json"):
                 res_text = res_text[7:]
+            if res_text.startswith("```"):
+                res_text = res_text[3:]
             if res_text.endswith("```"):
                 res_text = res_text[:-3]
-                
-            data = json.loads(res_text.strip())
-            return data if isinstance(data, list) else []
+            res_text = res_text.strip()
+
+            # FIX #1: Robust multi-format parser.
+            # Gemma might return a bare list, a wrapped dict, or newline-delimited objects.
+            fields = []
+            
+            # Strategy A: Try parsing whole thing as JSON
+            try:
+                data = json.loads(res_text)
+                if isinstance(data, list):
+                    fields = data  # Perfect bare list []
+                elif isinstance(data, dict):
+                    # Gemma wrapped it: {"fields": [...]} or {"items": [...]}
+                    for v in data.values():
+                        if isinstance(v, list):
+                            fields = v
+                            break
+            except json.JSONDecodeError:
+                # Strategy B: Parse line-by-line (one JSON object per line)
+                print("[VISION] Falling back to line-by-line JSON parsing...")
+                for line in res_text.splitlines():
+                    line = line.strip()
+                    if line.startswith("{") and line.endswith("}"):
+                        try:
+                            obj = json.loads(line)
+                            if "label" in obj:
+                                fields.append(obj)
+                        except json.JSONDecodeError:
+                            pass
+
+            # Validate fields have minimum required keys
+            valid_fields = [
+                f for f in fields
+                if isinstance(f, dict) and "label" in f and "x" in f and "y" in f
+            ]
+            print(f"[VISION] Successfully parsed {len(valid_fields)} valid fields.")
+            return valid_fields
+            
         except Exception as e:
             print(f"[ERROR] Vision Scan Failed: {e}")
             return []
@@ -373,7 +418,7 @@ Use professional, objective reporting language.
         }
 
         try:
-            response = requests.post(ollama_url, json=payload, timeout=300)
+            response = requests.post(ollama_url, json=payload, timeout=900)
             response.raise_for_status()
             return response.json().get("response", "").strip()
         except Exception as e:
@@ -412,8 +457,9 @@ RULES:
 
 MAPPED JSON OUTPUT:"""
 
-        payload = {"model": "mistral", "prompt": prompt, "stream": False, "format": "json"}
-        print(f"[SEMANTIC MAPPER] Mapping {len(master_json)} lake fields to {len(target_pdf_fields)} PDF fields...")
+        text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
+        payload = {"model": text_model, "prompt": prompt, "stream": False, "format": "json"}
+        print(f"[SEMANTIC MAPPER] Mapping {len(master_json)} lake fields to {len(target_pdf_fields)} PDF fields using {text_model}...")
         
         try:
             timeout = int(os.getenv("OLLAMA_TIMEOUT", "300"))

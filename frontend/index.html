@@ -659,6 +659,26 @@
       margin-bottom: 24px;
     }
 
+    .btn-scan {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      margin-bottom: 24px;
+      margin-left: 10px;
+      background: rgba(255, 69, 0, 0.1);
+      border: 1px solid rgba(255, 69, 0, 0.4);
+      color: var(--fire);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-scan:hover {
+      background: rgba(255, 69, 0, 0.2);
+    }
+
     .selected-tpl.none {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
@@ -1186,7 +1206,10 @@
       </div>
 
       <div class="form-area">
-        <div class="selected-tpl none" id="tplBadge">← Select a template from the sidebar</div>
+        <div style="display:flex;">
+          <div class="selected-tpl none" id="tplBadge">← Select a template from the sidebar</div>
+          <button id="btnScan" class="btn-scan" style="display:none;" onclick="scanTemplate()">👁️ AI Layout Scan</button>
+        </div>
         <div class="field-label">
           <span>Incident Description <span class="req">*</span></span>
           <span class="char-count" id="charCount">0 chars</span>
@@ -1204,6 +1227,14 @@
         <input class="input-field" id="incidentIdInput" type="text"
           placeholder="Incident ID (Optional - To append to an existing Data Lake record)" style="margin-bottom:14px;"
           oninput="updateFillBtn()" />
+          
+        <div class="upload-zone" id="photoZone" style="margin-bottom:14px; padding: 15px;">
+          <input type="file" id="photoInput" accept="image/*" capture="environment" onchange="onPhotoChosen(this)" />
+          <span class="upload-zone-icon" style="font-size: 1.5rem; margin-bottom: 5px;">📸</span>
+          <div class="upload-zone-text"><b>Add Scene Photo</b><br/>(AI will dynamically analyze details into lake)</div>
+          <div class="file-chosen" id="photoChosen"></div>
+        </div>
+        
         <textarea id="incidentText"
           placeholder="Officer Hernandez responding to a structure fire at 742 Evergreen Terrace. Two occupants evacuated safely. Minor smoke inhalation treated on scene by EMS. Unit 7 on scene 14:32, cleared 16:45. Handed off to Deputy Martinez..."
           oninput="onTextInput(this)"></textarea>
@@ -1314,6 +1345,10 @@
       const b = document.getElementById('tplBadge');
       b.className = 'selected-tpl set'; b.textContent = `\ud83d\udccb ${name}`;
       document.getElementById('step2').classList.add('done');
+      document.getElementById('btnScan').style.display = 'inline-flex';
+      document.getElementById('btnScan').textContent = '👁️ AI Layout Scan';
+      document.getElementById('btnScan').style.color = 'var(--fire)';
+      document.getElementById('btnScan').style.borderColor = 'rgba(255, 69, 0, 0.4)';
       updateFillBtn();
     }
 
@@ -1325,6 +1360,7 @@
       const b = document.getElementById('tplBadge');
       if (count === 0) { b.className = 'selected-tpl none'; b.textContent = '\u2190 Check multiple templates for batch fill'; }
       else { b.className = 'selected-tpl set'; b.textContent = `\ud83d\udccb ${count} template${count > 1 ? 's' : ''} selected for batch`; }
+      document.getElementById('btnScan').style.display = 'none';
       if (count > 0) document.getElementById('step2').classList.add('done');
       updateFillBtn(); loadTemplates();
     }
@@ -1350,6 +1386,63 @@
         onFileChosen(input);
       }
     });
+
+    async function scanTemplate() {
+      if (!selectedTplId) return;
+      const btn = document.getElementById('btnScan');
+      btn.disabled = true;
+      btn.textContent = 'Scanning...';
+      try {
+        const r = await fetch(`${API}/templates/${selectedTplId}/scan`, { method: 'POST' });
+        const data = await r.json();
+        if (r.ok || data.status === 'already_scanned') {
+          btn.textContent = '✓ Scanned';
+          btn.style.color = 'var(--green)';
+          btn.style.borderColor = 'var(--green)';
+        } else {
+          btn.textContent = '✗ Scan Failed';
+        }
+      } catch {
+        btn.textContent = '✗ Scan Failed';
+      }
+      btn.disabled = false;
+    }
+
+    async function onPhotoChosen(input) {
+      if (input.files.length > 0) {
+        const file = input.files[0];
+        const ch = document.getElementById('photoChosen');
+        ch.textContent = '⏳ Analyzing scene details...';
+        ch.style.display = 'block';
+        ch.style.color = 'var(--ember)';
+        
+        let incidentId = document.getElementById('incidentIdInput').value.trim();
+        if (!incidentId) {
+          const d = new Date();
+          incidentId = `INC-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+          document.getElementById('incidentIdInput').value = incidentId;
+        }
+        
+        const fd = new FormData();
+        fd.append('file', file);
+        
+        try {
+          const r = await fetch(`${API}/incidents/${incidentId}/scene-photo`, { method: 'POST', body: fd});
+          const data = await r.json();
+          if (r.ok || r.status === 200) {
+             ch.textContent = '✓ Scene visually analyzed & logged to Data Lake!';
+             ch.style.color = 'var(--green)';
+             updateFillBtn();
+          } else {
+             ch.textContent = '✗ Analysis failed';
+             ch.style.color = 'var(--red)';
+          }
+        } catch {
+             ch.textContent = '✗ Analysis failed';
+             ch.style.color = 'var(--red)';
+        }
+      }
+    }
 
     async function saveTemplate() {
       const file = document.getElementById('pdfInput').files[0];

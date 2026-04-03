@@ -2,12 +2,19 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlmodel import SQLModel
+from api.db.database import engine
+from api.db import models  # Ensures models are registered
 from api.routes import templates, forms, transcribe, incidents
 from api.errors.base import AppError
 from typing import Union
 import os
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    SQLModel.metadata.create_all(engine)
 
 app.add_middleware(
     CORSMiddleware,

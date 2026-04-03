@@ -323,8 +323,15 @@ class Filler:
                 rect = fitz.Rect(x_pts, y_pts, x_pts + w_pts, y_pts + h_pts)
 
                 if coord.field_type == "text":
-                    # fitz.TEXT_ALIGN_LEFT = 0
-                    page.insert_textbox(rect, val_str, fontsize=10, fontname="helv", color=(0, 0, 0), align=0)
+                    font_size = 9
+                    # For very flat rects (drawn lines have h < 3pt),
+                    # expand the rect upward so text is visually on top of the line.
+                    if h_pts < font_size:
+                        fill_rect = fitz.Rect(x_pts, y_pts - font_size - 2, x_pts + w_pts, y_pts + 1)
+                    else:
+                        fill_rect = rect
+                    page.insert_textbox(fill_rect, val_str, fontsize=font_size,
+                                        fontname="helv", color=(0, 0, 0), align=0)
                 elif coord.field_type == "checkbox":
                     page.draw_rect(rect, color=(0,0,0), width=1)
                     if val_str.lower() in TRUTHY_VALUES:
