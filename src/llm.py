@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-
+from api.services.prompt_builder import build_extraction_prompt
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -47,16 +47,26 @@ class LLM:
     def main_loop(self):
         # self.type_check_all()
         for field in self._target_fields.keys():
-            prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
+            base_prompt = build_extraction_prompt(self._transcript_text)
+
+            prompt = f"""
+            {base_prompt}
+
+            Focus specifically on extracting the value for this field:
+            {field}
+
+            Return only the extracted value as a plain string. Do not return JSON.
+            """
+            print("\n[DEBUG] Generated Prompt:\n", prompt)
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,  # streaming disabled; using single response mode
             }
 
             try:
