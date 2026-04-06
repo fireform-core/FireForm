@@ -3,7 +3,10 @@ import os
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
+import logging
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 def input_fields(num_fields: int):
     fields = []
     for i in range(num_fields):
@@ -18,17 +21,17 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
     and returns the path to the newly created file.
     """
     
-    print("[1] Received request from frontend.")
-    print(f"[2] PDF template path: {pdf_form_path}")
+    logger.info("[1] Received request from frontend.")
+    logger.info(f"[2] PDF template path: {pdf_form_path}")
     
     # Normalize Path/PathLike to a plain string for downstream code
     pdf_form_path = os.fspath(pdf_form_path)
     
     if not os.path.exists(pdf_form_path):
-        print(f"Error: PDF template not found at {pdf_form_path}")
+        logger.error(f"Error: PDF template not found at {pdf_form_path}")
         return None # Or raise an exception
 
-    print("[3] Starting extraction and PDF filling process...")
+    logger.info("[3] Starting extraction and PDF filling process...")
     try:
         output_name = Fill.fill_form(
             user_input=user_input,
@@ -36,14 +39,14 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
             pdf_form=pdf_form_path
         )
         
-        print("\n----------------------------------")
-        print(f"✅ Process Complete.")
-        print(f"Output saved to: {output_name}")
+        logger.info("\n----------------------------------")
+        logger.info(f"✅ Process Complete.")
+        logger.info(f"Output saved to: {output_name}")
         
         return output_name
         
     except Exception as e:
-        print(f"An error occurred during PDF generation: {e}")
+        logger.error(f"An error occurred during PDF generation: {e}", exc_info=True)
         # Re-raise the exception so the frontend can handle it
         raise e
 

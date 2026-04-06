@@ -1,7 +1,9 @@
 import json
 import os
 import requests
+import logging
 
+logger = logging.getLogger(__name__)
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -76,10 +78,10 @@ class LLM:
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 
-        print("----------------------------------")
-        print("\t[LOG] Resulting JSON created from the input text:")
-        print(json.dumps(self._json, indent=2))
-        print("--------- extracted data ---------")
+        logger.info("----------------------------------")
+        logger.info("\t[LOG] Resulting JSON created from the input text:")
+        logger.info(json.dumps(self._json, indent=2))
+        logger.info("--------- extracted data ---------")
 
         return self
 
@@ -115,7 +117,7 @@ class LLM:
                 f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
             )
 
-        print(
+        logger.info(
             f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
         )
         values = plural_value.split(";")
@@ -127,7 +129,7 @@ class LLM:
                 clean_value = values[current].lstrip()
                 values[current] = clean_value
 
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
+        logger.info(f"\t[LOG]: Resulting formatted list of values: {values}")
 
         return values
 
