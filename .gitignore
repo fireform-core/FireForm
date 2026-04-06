@@ -3,3 +3,5 @@
 venv
 .venv
 *.db
+template_files/
+.env
