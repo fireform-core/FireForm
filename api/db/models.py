@@ -14,6 +14,8 @@ class Template(SQLModel, table=True):
 class FormSubmission(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     template_id: int
+    report_schema_id: int | None = Field(default=None)
+    name: str | None = Field(default=None)
     input_text: str
     output_pdf_path: str
     created_at: datetime = Field(default_factory=datetime.utcnow)

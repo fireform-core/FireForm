@@ -3,6 +3,19 @@ from datetime import datetime
 from api.db.models import Datatype
 
 
+class FormSubmissionResponse(BaseModel):
+    id: int
+    template_id: int
+    report_schema_id: int | None
+    name: str | None
+    input_text: str
+    output_pdf_path: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class ReportSchemaCreate(BaseModel):
     name: str
     description: str
@@ -18,11 +31,13 @@ class TemplateAssociation(BaseModel):
 
 class ReportFill(BaseModel):
     input_text: str
+    name: str | None = None
 
 class ReportFillResponse(BaseModel):
     schema_id: int
     input_text: str
     output_pdf_paths: list[str]
+    submission_ids: list[int] = []
 
 class SchemaFieldUpdate(BaseModel):
     description: str | None = None

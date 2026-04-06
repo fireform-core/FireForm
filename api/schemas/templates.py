@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
-class TemplateCreate(BaseModel):
-    name: str
-    pdf_path: str
-    fields: dict
+
+class TemplateUpdate(BaseModel):
+    name: str | None = None
+    fields: dict | None = None
+    pdf_path: str | None = None
+
 
 class TemplateResponse(BaseModel):
     id: int

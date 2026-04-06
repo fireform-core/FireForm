@@ -3,6 +3,7 @@ pdfrw
 flask
 commonforms
 fastapi
+python-multipart
 uvicorn
 pydantic
 sqlmodel
