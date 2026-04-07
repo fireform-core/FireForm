@@ -1,9 +1,10 @@
 # Docker documentation for FireForm
 
 ## Setup
-We will be using 2 different containers:
-1. `fireform-app` -> This container will hold the whole project itself.
-2. `ollama/ollama:latest` -> This is to deploy ollama, that way it's faster to set up.
+We will be using 3 containers:
+1. `fireform-app` -> Runs the FastAPI server on `http://127.0.0.1:8000`.
+2. `fireform-frontend` -> Serves the frontend on `http://127.0.0.1:5173`.
+3. `ollama/ollama:latest` -> Runs Ollama for LLM calls.
 
 ### Initial configuration steps
 For this I provided a script that can be run to automate the setup. 
@@ -45,6 +46,23 @@ make pull-model   # Pull Mistral model into Ollama
 make clean        # Remove all containers and volumes
 ```
 * You can see this list at any time by running `make help`.
+
+## Running the full stack
+
+```bash
+make build
+make up
+```
+
+Then open:
+- Frontend: `http://127.0.0.1:5173`
+- API docs: `http://127.0.0.1:8000/docs`
+
+If this is your first run, pull the model once:
+
+```bash
+make pull-model
+```
 
 ## Debugging
 For debugging with LLMs it's really useful to attach the logs.

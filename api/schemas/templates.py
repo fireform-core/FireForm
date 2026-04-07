@@ -15,3 +15,8 @@ class TemplateResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class TemplateUploadResponse(BaseModel):
+    filename: str
+    pdf_path: str
