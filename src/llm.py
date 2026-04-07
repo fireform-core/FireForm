@@ -98,7 +98,11 @@ class LLM:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
-            self._json[field].append(parsed_value)
+            current_value = self._json[field]
+            if isinstance(current_value, list):
+                self._json[field].append(parsed_value)
+            else:
+                self._json[field] = [current_value, parsed_value]
         else:
             self._json[field] = parsed_value
 
