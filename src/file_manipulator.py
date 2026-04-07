@@ -11,11 +11,19 @@ class FileManipulator:
 
     def create_template(self, pdf_path: str):
         """
-        By using commonforms, we create an editable .pdf template and we store it.
+        By using commonforms, we create an editable .pdf template securely in the OS temp directory.
         """
-        template_path = pdf_path[:-4] + "_template.pdf"
-        prepare_form(pdf_path, template_path)
-        return template_path
+        import tempfile
+        from pathlib import Path
+        
+        safe_original_name = Path(pdf_path).stem # Extracts just "file" from "../../../file.pdf"
+        
+        # mkstemp creates a highly secure, collision-proof temporary file
+        fd, temp_path = tempfile.mkstemp(suffix="_template.pdf", prefix=f"{safe_original_name}_")
+        os.close(fd) # Close the file descriptor so commonforms can write to it
+        
+        prepare_form(pdf_path, temp_path)
+        return temp_path
 
     def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
         """
