@@ -23,40 +23,37 @@ class LLM:
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
             )
 
-    def build_prompt(self, current_field):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
-            DATA:
-            Target JSON field to find in text: {current_field}
-            
-            TEXT: {self._transcript_text}
-            """
-
-        return prompt
-
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
-            prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        # 1. CHANGE ENDPOINT: Switch from /api/generate to /api/chat
+        ollama_url = f"{ollama_host}/api/chat"
+
+        # 2. CACHE THE CONTEXT: Build the heavy system message ONCE before the loop
+        system_message = {
+            "role": "system",
+            "content": f"""You are an AI data extraction assistant. You extract information from transcribed voice recordings to fill out a JSON file. 
+Return ONLY a single string containing the extracted value.
+If the field implies plural values and you find multiple, separate them with a ";".
+If you cannot find the value in the text, return exactly "-1". Do not add any conversational filler or markdown.
+
+TRANSCRIPTION TEXT:
+{self._transcript_text}"""
+        }
+
+        # 3. FIX THE LIST BUG: Iterate directly over the list (removed .keys())
+        for field in self._target_fields:
+            
+            # 4. LIGHTWEIGHT QUERY: Only ask for the specific field in the loop
+            user_message = {
+                "role": "user",
+                "content": f"Target JSON field to extract: {field}"
+            }
 
             payload = {
                 "model": "mistral",
-                "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "messages": [system_message, user_message], # Pass as a conversation
+                "stream": False, 
             }
 
             try:
@@ -70,10 +67,10 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
-            # parse response
+            # 5. PARSE CHAT RESPONSE: Chat API returns data in message['content']
             json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
+            parsed_response = json_data["message"]["content"]
+            
             self.add_response_to_json(field, parsed_response)
 
         print("----------------------------------")
