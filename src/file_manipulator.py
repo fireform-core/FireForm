@@ -1,6 +1,13 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
+from src.validator import (
+    validate_transcript,
+    validate_template_fields,
+    validate_all_inputs,
+    ValidationException,
+    ValidationError as ValidatorError
+)
 from commonforms import prepare_form
 
 
@@ -21,15 +28,33 @@ class FileManipulator:
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
+
+        Validates all inputs before processing to catch errors early.
         """
         print("[1] Received request from frontend.")
-        print(f"[2] PDF template path: {pdf_form_path}")
+        print("[2] Validating inputs...")
+
+        # Validate transcript/user input
+        transcript_errors = validate_transcript(user_input)
+        if transcript_errors:
+            error_msg = f"Invalid transcript: {'; '.join(transcript_errors)}"
+            print(f"[ERROR] {error_msg}")
+            raise ValueError(error_msg)
+
+        # Validate template fields
+        field_errors = validate_template_fields(fields)
+        if field_errors:
+            error_msg = f"Invalid template fields: {'; '.join(field_errors)}"
+            print(f"[ERROR] {error_msg}")
+            raise ValueError(error_msg)
+
+        print(f"[3] PDF template path: {pdf_form_path}")
 
         if not os.path.exists(pdf_form_path):
             print(f"Error: PDF template not found at {pdf_form_path}")
             return None  # Or raise an exception
 
-        print("[3] Starting extraction and PDF filling process...")
+        print("[4] Starting extraction and PDF filling process...")
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
