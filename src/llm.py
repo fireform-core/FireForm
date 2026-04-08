@@ -116,7 +116,7 @@ class LLM:
             )
 
         print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
+            f"\t[LOG]: Formatting plural values for JSON, [For input {plural_value}]..."
         )
         values = plural_value.split(";")
 
