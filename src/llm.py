@@ -45,11 +45,24 @@ class LLM:
         return prompt
 
     def main_loop(self):
-        # self.type_check_all()
-        for field in self._target_fields.keys():
+        self.load_state()
+
+        fields_to_process = []
+        for field in self._target_fields:
+            if field not in self._json:
+                fields_to_process.append(field)
+
+        total_fields = len(self._target_fields)
+
+        # Loop with an index using enumerate
+        for idx, field in enumerate(fields_to_process):
+            # Calculate the actual field number (in case we resumed from a checkpoint)
+            current_field_num = total_fields - len(fields_to_process) + idx + 1
+            
+            # ADD THIS PRINT STATEMENT
+            print(f"\t[LOG] Extracting field {current_field_num}/{total_fields} -> '{field}'")
+            
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
