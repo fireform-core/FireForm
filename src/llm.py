@@ -2,14 +2,17 @@ import json
 import os
 import requests
 
+DEFAULT_MODEL = os.getenv("LLM_MODEL", "mistral")
+
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
+    def __init__(self, transcript_text=None, target_fields=None, json=None, model: str = None):
         if json is None:
             json = {}
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
         self._json = json  # dictionary
+        self._model = model or DEFAULT_MODEL  # configurable LLM model
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -46,6 +49,7 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
+        print(f"\t[LOG] Using model: {self._model}")
         for field in self._target_fields.keys():
             prompt = self.build_prompt(field)
             # print(prompt)
@@ -54,9 +58,9 @@ class LLM:
             ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
-                "model": "mistral",
+                "model": self._model,
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,
             }
 
             try:
