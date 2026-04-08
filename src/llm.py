@@ -1,7 +1,9 @@
 import json
 import os
 import requests
+import logging
 
+logger = logging.getLogger(__name__)
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -83,22 +85,58 @@ class LLM:
 
         return self
 
+    def clean_llm_output(self, response: str, field_name: str):
+        """
+        Validates and cleans the output from the LLM.
+        This prevents silent failures where the LLM returns conversational 
+        text, failure tokens ("-1", "null"), or empty strings.
+        """
+        if not response:
+            logger.warning(f"LLM returned empty value for field: {field_name}")
+            return None
+
+        # Normalize the response
+        cleaned = response.strip().replace('"', "")
+        lower_cleaned = cleaned.lower()
+
+        # Detect invalid outputs or explicit failure tokens
+        invalid_tokens = [
+            "-1", "none", "null", "not found", "unknown", 
+            "n/a", "i could not find", "i cannot determine",
+            "not mentioned", "not provided"
+        ]
+
+        if lower_cleaned == "" or any(token in lower_cleaned for token in invalid_tokens):
+            logger.warning(f"LLM failed to extract valid value for field: {field_name}. Output: '{cleaned}'")
+            return None
+
+        # Basic heuristic: Extract value if returned as "Field Name: <value>"
+        parts = cleaned.split(":", 1)
+        # Protect times like "14:00" from getting split by checking if the "key" is just numbers
+        if len(parts) == 2 and len(parts[0].strip()) < 25 and not parts[0].strip().isdigit():
+            cleaned = parts[1].strip()
+
+        return cleaned
+
     def add_response_to_json(self, field, value):
         """
         this method adds the following value under the specified field,
         or under a new field if the field doesn't exist, to the json dict
         """
-        value = value.strip().replace('"', "")
-        parsed_value = None
+        parsed_value = self.clean_llm_output(value, field)
 
-        if value != "-1":
-            parsed_value = value
+        # 🔥 CRITICAL FIX: skip invalid values completely
+        if parsed_value is None:
+            return
 
-        if ";" in value:
-            parsed_value = self.handle_plural_values(value)
+        if isinstance(parsed_value, str) and ";" in parsed_value:
+            parsed_value = self.handle_plural_values(parsed_value)
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            if isinstance(self._json[field], list):
+                self._json[field].append(parsed_value)
+            else:
+                self._json[field] = [self._json[field], parsed_value]
         else:
             self._json[field] = parsed_value
 
