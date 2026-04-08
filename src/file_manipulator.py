@@ -1,7 +1,7 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
+from src.pdf_template import prepare_form_safe
 
 
 class FileManipulator:
@@ -14,7 +14,7 @@ class FileManipulator:
         By using commonforms, we create an editable .pdf template and we store it.
         """
         template_path = pdf_path[:-4] + "_template.pdf"
-        prepare_form(pdf_path, template_path)
+        prepare_form_safe(pdf_path, template_path)
         return template_path
 
     def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
