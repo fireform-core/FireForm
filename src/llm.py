@@ -1,135 +1,111 @@
 import json
+import logging
 import os
+
 import requests
+
+from src.schemas.incident_report import IncidentReport
+
+
+logger = logging.getLogger(__name__)
 
 
 class LLM:
-    def __init__(self, transcript_text=None, target_fields=None, json=None):
-        if json is None:
-            json = {}
-        self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+    def __init__(self, transcript_text=None, target_fields=None):
+        self._transcript_text = transcript_text
+        # target_fields kept for backward compatibility with FileManipulator;
+        # new extraction uses IncidentReport.llm_schema_hint() instead.
+        self._target_fields = target_fields
+        self._result: IncidentReport | None = None
 
-    def type_check_all(self):
-        if type(self._transcript_text) is not str:
-            raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Transcript must be text. Input:\n\ttranscript_text: {self._transcript_text}"
-            )
-        elif type(self._target_fields) is not list:
-            raise TypeError(
-                f"ERROR in LLM() attributes ->\
-                Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
-            )
-
-    def build_prompt(self, current_field):
+    def build_prompt(self) -> str:
         """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
+        Build a single structured prompt for Ollama's /api/generate endpoint.
+
+        Uses IncidentReport.llm_schema_hint() as the schema constraint so the
+        model always returns a JSON object with the correct field names.
         """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
-            DATA:
-            Target JSON field to find in text: {current_field}
-            
-            TEXT: {self._transcript_text}
-            """
+        schema_hint = json.dumps(IncidentReport.llm_schema_hint(), indent=2)
+        system = (
+            "You are an AI assistant that extracts structured incident report data "
+            "from transcribed voice recordings made by first responders.\n\n"
+            "Return ONLY a valid JSON object that matches the schema below. "
+            "Do not include any explanation, markdown code fences, or extra text.\n\n"
+            f"Schema:\n{schema_hint}\n\n"
+            "Rules:\n"
+            "  - The transcript may contain ASR errors (misspellings, repeated words, partial phrases). "
+            "Use only high-confidence information explicitly present in the transcript.\n"
+            "  - Set a field to null if the information is not present in the transcript.\n"
+            "  - If two values conflict, choose null unless one value is clearly confirmed later.\n"
+            "  - For list fields (e.g. unit_ids, personnel), return a JSON array.\n"
+            "  - For integer/float fields, return numeric JSON values (not strings).\n"
+            "  - For incident_type, prefer short lowercase labels like wildfire, structure_fire, "
+            "vehicle_accident, ems, hazmat, rescue when clearly supported by transcript language.\n"
+            "  - For timestamps, reproduce the exact phrasing from the transcript "
+            "(e.g. '14:35', '1435 hours', '2:35 PM').\n"
+            "  - Do not invent or infer values that are not explicitly stated.\n"
+            "  - Never output keys that are not present in the schema."
+        )
+        user = (
+            "Extract all incident report fields from the following transcript:\n\n"
+            f"{self._transcript_text}"
+        )
+        return f"[INST] {system}\n\n{user} [/INST]"
 
-        return prompt
+    def _ollama_url(self) -> str:
+        host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        return f"{host}/api/generate"
 
-    def main_loop(self):
-        # self.type_check_all()
-        for field in self._target_fields.keys():
-            prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
-            ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
-            ollama_url = f"{ollama_host}/api/generate"
+    def main_loop(self) -> "LLM":
+        """
+        Send a single structured request to Ollama and parse response as an
+        IncidentReport. Fields that remain unextracted are listed in
+        IncidentReport.requires_review.
+        """
+        prompt = self.build_prompt()
+        model = os.getenv("OLLAMA_MODEL", "mistral")
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "format": "json",
+            "stream": False,
+        }
 
-            payload = {
-                "model": "mistral",
-                "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
-            }
+        try:
+            response = requests.post(self._ollama_url(), json=payload)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Could not connect to Ollama at {self._ollama_url()}. "
+                "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Ollama returned an error: {e}") from e
 
-            try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
-            except requests.exceptions.ConnectionError:
-                raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
-                )
-            except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
+        raw = response.json()["response"]
+        try:
+            extracted = json.loads(raw)
+        except json.JSONDecodeError as e:
+            logger.warning(
+                "Ollama returned invalid JSON: %s. Raw (first 200 chars): %.200s",
+                e,
+                raw,
+            )
+            extracted = {}
 
-            # parse response
-            json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
-
-        print("----------------------------------")
-        print("\t[LOG] Resulting JSON created from the input text:")
-        print(json.dumps(self._json, indent=2))
-        print("--------- extracted data ---------")
-
+        self._result = IncidentReport(**extracted)
+        logger.info("Extraction complete. requires_review: %s", self._result.requires_review)
         return self
 
-    def add_response_to_json(self, field, value):
+    def get_data(self) -> dict:
         """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
+        Return extracted data as plain dict for PDF filler.
+        Pipeline metadata (requires_review) is excluded.
         """
-        value = value.strip().replace('"', "")
-        parsed_value = None
+        if self._result is None:
+            return {}
+        return self._result.model_dump(exclude={"requires_review"})
 
-        if value != "-1":
-            parsed_value = value
-
-        if ";" in value:
-            parsed_value = self.handle_plural_values(value)
-
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
-        else:
-            self._json[field] = parsed_value
-
-        return
-
-    def handle_plural_values(self, plural_value):
-        """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
-        """
-        if ";" not in plural_value:
-            raise ValueError(
-                f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
-            )
-
-        print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
-        )
-        values = plural_value.split(";")
-
-        # Remove trailing leading whitespace
-        for i in range(len(values)):
-            current = i + 1
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
-
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
-
-        return values
-
-    def get_data(self):
-        return self._json
+    def get_report(self) -> IncidentReport | None:
+        """Return full incident report including requires_review."""
+        return self._result
