@@ -2,6 +2,7 @@ import os
 # from backend import Fill  
 from commonforms import prepare_form 
 from pypdf import PdfReader
+from typing import Union
 from controller import Controller
 
 def input_fields(num_fields: int):
