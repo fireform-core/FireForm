@@ -4,12 +4,15 @@ import requests
 
 
 class LLM:
+    CONFIDENCE_THRESHOLD = 0.85
+
     def __init__(self, transcript_text=None, target_fields=None, json=None):
         if json is None:
             json = {}
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+        self._json = json  # dictionary: confirmed fields (confidence >= threshold)
+        self._needs_review = {}  # fields with low confidence that a human must verify
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -26,19 +29,29 @@ class LLM:
     def build_prompt(self, current_field):
         """
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
+        Returns a structured JSON object with value and confidence so that downstream logic can apply
+        a human-in-the-loop review for hallucinated or low-confidence fields.
         @params: current_field -> represents the current element of the json that is being prompted.
         """
-        prompt = f""" 
+        prompt = f"""
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
+            You are an AI assistant designed to help fill out JSON files with information extracted from transcribed voice recordings.
+            You will receive the transcription and the name of the JSON field whose value you must identify.
+
+            You MUST respond with a single valid JSON object and nothing else. The JSON must have exactly two keys:
+            - "value": the identified string value for the field, or null if not found.
+            - "confidence": a float between 0.0 and 1.0 representing how certain you are.
+
+            Rules:
+            - If the field is plural and you find multiple values, separate them with ";" in the value string.
+            - If you cannot find the value, set "value" to null and "confidence" to 0.0.
+            - Do NOT add any explanation or text outside the JSON object.
+
+            Example output: {{"value": "John Doe", "confidence": 0.95}}
             ---
             DATA:
             Target JSON field to find in text: {current_field}
-            
+
             TEXT: {self._transcript_text}
             """
 
@@ -70,11 +83,10 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
-            # parse response
+            # parse raw Ollama response
             json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
+            raw_text = json_data["response"].strip()
+            self.add_response_to_json(field, raw_text)
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -83,24 +95,45 @@ class LLM:
 
         return self
 
-    def add_response_to_json(self, field, value):
+    def add_response_to_json(self, field, raw_text):
         """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
+        Parses the structured JSON response from the LLM.
+        Confirmed fields (confidence >= CONFIDENCE_THRESHOLD) go into self._json.
+        Low-confidence fields go into self._needs_review for human verification.
         """
-        value = value.strip().replace('"', "")
-        parsed_value = None
+        import json as json_lib
+        value = None
+        confidence = 0.0
 
-        if value != "-1":
-            parsed_value = value
+        try:
+            # The LLM is prompted to always return a JSON object
+            parsed = json_lib.loads(raw_text)
+            value = parsed.get("value")
+            confidence = float(parsed.get("confidence", 0.0))
+        except (json_lib.JSONDecodeError, ValueError, TypeError):
+            # If the LLM failed to return valid JSON, treat the whole text as a
+            # low-confidence raw string so it gets flagged for human review.
+            print(f"\t[WARN]: LLM returned non-JSON for field '{field}'. Flagging for review.")
+            value = raw_text if raw_text not in ("-1", "null", "") else None
+            confidence = 0.0
 
-        if ";" in value:
-            parsed_value = self.handle_plural_values(value)
+        # Handle plural values (semicolon-separated)
+        if value and ";" in str(value):
+            value = self.handle_plural_values(value)
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if confidence >= self.CONFIDENCE_THRESHOLD:
+            # High-confidence: write directly into the confirmed JSON
+            if field in self._json:
+                self._json[field].append(value)
+            else:
+                self._json[field] = value
         else:
-            self._json[field] = parsed_value
+            # Low-confidence: flag for human-in-the-loop review
+            print(f"\t[REVIEW REQUIRED]: Field '{field}' has confidence {confidence:.2f} (threshold: {self.CONFIDENCE_THRESHOLD}). Value: '{value}'")
+            self._needs_review[field] = {
+                "suggested_value": value,
+                "confidence": confidence,
+            }
 
         return
 
@@ -132,4 +165,9 @@ class LLM:
         return values
 
     def get_data(self):
+        """Returns confirmed high-confidence field values."""
         return self._json
+
+    def get_needs_review(self):
+        """Returns fields that could not be extracted with sufficient confidence and require human review."""
+        return self._needs_review
