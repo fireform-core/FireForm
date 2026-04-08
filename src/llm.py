@@ -7,9 +7,13 @@ class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
         if json is None:
             json = {}
-        self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+        self._transcript_text = transcript_text
+        self._target_fields = target_fields
+        self._json = json
+        
+        pp = os.path.join(os.path.dirname(__file__), "prompt.txt")
+        with open(pp, "r", encoding="utf-8") as f:
+            self.sp = f.read()
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -24,29 +28,17 @@ class LLM:
             )
 
     def build_prompt(self, current_field):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
+        prompt = f"""{self.sp}
             DATA:
             Target JSON field to find in text: {current_field}
             
             TEXT: {self._transcript_text}
             """
-
         return prompt
 
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
