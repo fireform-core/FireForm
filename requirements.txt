@@ -4,7 +4,7 @@ flask
 commonforms
 fastapi
 uvicorn
-pydantic
+pydantic>=2.0.0
 sqlmodel
 pytest
 httpx
