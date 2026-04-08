@@ -1,7 +1,6 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
 
 
 class FileManipulator:
@@ -13,6 +12,13 @@ class FileManipulator:
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        try:
+            from commonforms import prepare_form
+        except ImportError:
+            raise RuntimeError(
+                "commonforms is not installed or has missing native dependencies (cv2, numpy, ultralytics). "
+                "Use the Docker image or install full dependencies."
+            ) from None
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path
