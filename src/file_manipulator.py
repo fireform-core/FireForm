@@ -1,7 +1,7 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
+
 
 
 class FileManipulator:
@@ -13,6 +13,13 @@ class FileManipulator:
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        try:
+            from commonforms import prepare_form
+        except ImportError:
+            raise ImportError(
+                "The 'commonforms' package is required for template creation in FireForm, "
+                "but it could not be found. Install it with: pip install commonforms"
+            )
         template_path = pdf_path[:-4] + "_template.pdf"
         prepare_form(pdf_path, template_path)
         return template_path
