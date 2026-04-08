@@ -1,6 +1,9 @@
 import json
 import os
 import requests
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class LLM:
@@ -44,9 +47,11 @@ class LLM:
 
         return prompt
 
-    def main_loop(self):
+    def iterative_extraction(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        # fallback handles dicts and lists safely for _target_fields
+        fields_iter = self._target_fields.keys() if hasattr(self._target_fields, 'keys') else self._target_fields
+        for field in fields_iter:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -77,11 +82,82 @@ class LLM:
             self.add_response_to_json(field, parsed_response)
 
         print("----------------------------------")
-        print("\t[LOG] Resulting JSON created from the input text:")
+        print("\t[LOG] Resulting JSON created from the input text (ITERATIVE):")
         print(json.dumps(self._json, indent=2))
         print("--------- extracted data ---------")
 
         return self
+
+    def main_loop(self):
+        prompt = f"""
+You are an information extraction system.
+
+Your task is to extract structured data from the given incident description.
+
+Extract the following fields:
+{self._target_fields}
+
+Instructions:
+- Return ONLY a valid JSON object.
+- Do NOT include any explanation, comments, or extra text.
+- If a field is not present in the text, return null for that field.
+- Keep values concise and directly extracted from the text.
+- Do not guess or invent information.
+- If multiple values exist, return them as a list.
+- Use the exact field names provided. Do not rename fields.
+
+Incident Description:
+\"\"\"
+{self._transcript_text}
+\"\"\"
+"""
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+
+        payload = {
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False,
+        }
+
+        try:
+            response = requests.post(ollama_url, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Could not connect to Ollama at {ollama_url}. "
+                "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Ollama returned an error: {e}")
+
+        json_data = response.json()
+        parsed_response = json_data["response"]
+        
+        # Clean potential markdown JSON wrapping from strict LLMs
+        cleaned_response = parsed_response.strip()
+        if cleaned_response.startswith("```json"):
+            cleaned_response = cleaned_response[7:]
+        if cleaned_response.startswith("```"):
+            cleaned_response = cleaned_response[3:]
+        if cleaned_response.endswith("```"):
+            cleaned_response = cleaned_response[:-3]
+        cleaned_response = cleaned_response.strip()
+
+        try:
+            data = json.loads(cleaned_response)
+            self._json = data
+            
+            print("----------------------------------")
+            print("\t[LOG] Resulting JSON created from the input text (SINGLE-PASS):")
+            print(json.dumps(self._json, indent=2))
+            print("--------- extracted data ---------")
+            return self
+        except Exception:
+            # fallback to old loop method
+            logger.warning("Single-pass extraction failed, falling back.")
+            self.iterative_extraction()
+            return self
 
     def add_response_to_json(self, field, value):
         """
