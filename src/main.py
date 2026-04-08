@@ -3,6 +3,7 @@ import os
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
+from typing import Union
 
 def input_fields(num_fields: int):
     fields = []
@@ -67,8 +68,8 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
-    user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-    fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
+    user_input = "Hi. The employee's name is Venkatanarasimharajuvaripeta. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
+    descriptive_fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
     prepared_pdf = "temp_outfile.pdf"
     prepare_form(file, prepared_pdf)
     
@@ -80,4 +81,4 @@ if __name__ == "__main__":
         num_fields = 0
         
     controller = Controller()
-    controller.fill_form(user_input, fields, file)
+    controller.fill_form(user_input, descriptive_fields, file)
