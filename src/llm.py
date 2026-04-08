@@ -298,6 +298,76 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
 
     import base64
     
+    async def async_vision_identify_labels(self, image_bytes: bytes) -> list[str]:
+        """
+        Pass 1 of Hybrid Scan: Ask Gemma to identify WHAT fields exist.
+        Returns a list of label strings in top-to-bottom order.
+        e.g. ["Name", "Email", "Phone Number", "Address"]
+        
+        Gemma is great at reading and understanding text labels.
+        We deliberately do NOT ask it for coordinates here.
+        """
+        import base64
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        vision_model = os.getenv("FIREFORM_VISION_MODEL", "gemma3:4b")
+        b64_image = base64.b64encode(image_bytes).decode("utf-8")
+
+        prompt = '''Look at this form document image carefully.
+
+Find all the fields that a person is expected to fill in.
+Return the EXACT LABEL TEXT for each field, in order from top to bottom of the page.
+
+Return a JSON array of strings.
+Example: ["Name", "Email Address", "Phone Number", "Street Address", "Comments"]
+
+Rules:
+- Use the exact text as it appears on the form
+- Include only fields meant to be filled in (not headings or instructions)
+- Order them top to bottom as they appear on the page
+- Output ONLY the JSON array — no explanation, no markdown'''
+
+        payload = {
+            "model": vision_model,
+            "prompt": prompt,
+            "images": [b64_image],
+            "stream": False,
+        }
+
+        try:
+            response = requests.post(ollama_url, json=payload, timeout=900)
+            response.raise_for_status()
+            res_text = response.json().get("response", "").strip()
+            print(f"[VISION-LABELS] Raw response: {res_text}")
+
+            # Clean markdown fences
+            for fence in ["```json", "```"]:
+                if res_text.startswith(fence):
+                    res_text = res_text[len(fence):]
+            if res_text.endswith("```"):
+                res_text = res_text[:-3]
+            res_text = res_text.strip()
+
+            data = json.loads(res_text)
+            if isinstance(data, list):
+                labels = [str(l) for l in data if l]
+            elif isinstance(data, dict):
+                # Handle wrapped: {"fields": [...]} or {"labels": [...]}
+                labels = []
+                for v in data.values():
+                    if isinstance(v, list):
+                        labels = [str(l) for l in v if l]
+                        break
+            else:
+                labels = []
+
+            print(f"[VISION-LABELS] Identified {len(labels)} labels: {labels}")
+            return labels
+
+        except Exception as e:
+            print(f"[ERROR] Vision label identification failed: {e}")
+            return []
+
     async def async_vision_scan_fields(self, image_bytes: bytes) -> list[dict]:
         """
         Passes a page image to the Vision model to map out form fields.

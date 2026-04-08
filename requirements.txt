@@ -13,3 +13,5 @@ ollama
 faster-whisper
 python-multipart
 pymupdf
+pdfplumber
+reportlab

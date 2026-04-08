@@ -278,13 +278,20 @@ class Filler:
 
     def fill_static_pdf(self, pdf_form: str, coordinates: list, data: dict) -> str:
         """
-        Uses PyMuPDF to draw text directly onto absolute pixel coordinates
-        for static (non-fillable) forms.
+        Fill a static (non-fillable) PDF using the reportlab overlay + PageMerge
+        technique (proven approach from PR #70).
+
+        Coordinates come from the Data Lake (FormFieldCoordinates) as percentages.
+        We convert back to absolute PDF points and draw text on a transparent
+        reportlab canvas, then merge it onto the original page.
+
         coordinates: list of FormFieldCoordinates (from DB)
-        data: dictionary of extracted values (from Data Lake)
+        data: dictionary of extracted values (from Data Lake + Semantic Mapper)
         """
-        import fitz  # PyMuPDF
-        import os
+        import io
+        from pdfrw import PdfReader as PdfrwReader, PdfWriter as PdfrwWriter, PageMerge
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.units import inch
 
         output_pdf = (
             pdf_form[:-4]
@@ -292,53 +299,85 @@ class Filler:
             + datetime.now().strftime("%Y%m%d_%H%M%S")
             + "_static_filled.pdf"
         )
-        
-        doc = fitz.open(pdf_form)
 
-        # Draw each field
+        original_pdf = PdfrwReader(pdf_form)
+
+        # Group coordinates by page
+        page_fields: dict[int, list] = {}
         for coord in coordinates:
-            # Match data (case-insensitive fallback)
-            raw_val = data.get(coord.field_label)
-            if raw_val is None:
-                for k, v in data.items():
-                    if k.lower() == coord.field_label.lower():
-                        raw_val = v
-                        break
-                        
-            if raw_val is None or str(raw_val).strip() == "":
+            pg = coord.page_number
+            if pg not in page_fields:
+                page_fields[pg] = []
+            page_fields[pg].append(coord)
+
+        for page_num, page in enumerate(original_pdf.pages):
+            if page_num not in page_fields:
                 continue
-                
-            val_str = str(raw_val).strip()
 
-            if coord.page_number < len(doc):
-                page = doc[coord.page_number]
-                page_rect = page.rect
-                
-                # Convert percentages (0-100) to actual PDF points
-                x_pts = (coord.x / 100.0) * page_rect.width
-                y_pts = (coord.y / 100.0) * page_rect.height
-                w_pts = (coord.width / 100.0) * page_rect.width
-                h_pts = (coord.height / 100.0) * page_rect.height
-                
-                rect = fitz.Rect(x_pts, y_pts, x_pts + w_pts, y_pts + h_pts)
+            # Get page dimensions from the original PDF
+            # pdfrw stores MediaBox as [x0, y0, x1, y1]
+            media_box = page.MediaBox
+            if media_box:
+                page_w = float(media_box[2]) - float(media_box[0])
+                page_h = float(media_box[3]) - float(media_box[1])
+            else:
+                page_w = 612  # default letter width
+                page_h = 792  # default letter height
 
-                if coord.field_type == "text":
-                    font_size = 9
-                    # For very flat rects (drawn lines have h < 3pt),
-                    # expand the rect upward so text is visually on top of the line.
-                    if h_pts < font_size:
-                        fill_rect = fitz.Rect(x_pts, y_pts - font_size - 2, x_pts + w_pts, y_pts + 1)
-                    else:
-                        fill_rect = rect
-                    page.insert_textbox(fill_rect, val_str, fontsize=font_size,
-                                        fontname="helv", color=(0, 0, 0), align=0)
-                elif coord.field_type == "checkbox":
-                    page.draw_rect(rect, color=(0,0,0), width=1)
-                    if val_str.lower() in TRUTHY_VALUES:
-                        # Draw X
-                        page.draw_line(rect.top_left, rect.bottom_right, color=(0,0,0), width=1.5)
-                        page.draw_line(rect.bottom_left, rect.top_right, color=(0,0,0), width=1.5)
-                        
-        doc.save(output_pdf)
-        doc.close()
+            # Create a transparent overlay canvas for this page
+            packet = io.BytesIO()
+            c = canvas.Canvas(packet, pagesize=(page_w, page_h))
+            c.setFont("Helvetica", 10)
+            c.setFillColorRGB(0, 0, 0)  # Black text
+
+            fields_filled = 0
+
+            for coord in page_fields[page_num]:
+                # Match data (case-insensitive fallback)
+                raw_val = data.get(coord.field_label)
+                if raw_val is None:
+                    for k, v in data.items():
+                        if k.lower() == coord.field_label.lower():
+                            raw_val = v
+                            break
+
+                if raw_val is None or str(raw_val).strip() == "":
+                    continue
+
+                val_str = str(raw_val).strip()
+
+                # Convert percentages (0-100) back to absolute PDF points
+                x_pts = (coord.x / 100.0) * page_w
+                y_pts_from_top = (coord.y / 100.0) * page_h
+
+                # CRITICAL: reportlab uses BOTTOM-LEFT origin
+                # pdfplumber/our DB uses TOP-LEFT origin
+                # So we need to flip the Y axis
+                y_reportlab = page_h - y_pts_from_top
+
+                # Draw the text slightly above the baseline
+                # (y_reportlab points to the TOP of the line; text needs
+                #  to sit on the baseline which is near the bottom of the line)
+                font_size = 10
+                h_pts = (coord.height / 100.0) * page_h
+                text_y = y_reportlab - h_pts + 2  # near bottom of field area
+
+                c.setFontSize(font_size)
+                c.drawString(x_pts, text_y, val_str)
+
+                fields_filled += 1
+                print(f"  [OVERLAY] '{coord.field_label}' → '{val_str}' at ({x_pts:.1f}, {text_y:.1f})")
+
+            c.save()
+            packet.seek(0)
+
+            # Merge the overlay onto the original page
+            overlay_pdf = PdfrwReader(packet)
+            if len(overlay_pdf.pages) > 0:
+                PageMerge(page).add(overlay_pdf.pages[0]).render()
+
+            print(f"  [PAGE {page_num}] Filled {fields_filled} fields via overlay")
+
+        PdfrwWriter().write(output_pdf, original_pdf)
+        print(f"\n[STATIC FILL] Output: {output_pdf}")
         return output_pdf
