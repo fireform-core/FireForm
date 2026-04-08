@@ -3,6 +3,7 @@ import os
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
+from typing import Union
 
 def input_fields(num_fields: int):
     fields = []
