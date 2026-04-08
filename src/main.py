@@ -1,4 +1,5 @@
 import os
+from typing import Union
 # from backend import Fill  
 from commonforms import prepare_form 
 from pypdf import PdfReader
@@ -30,10 +31,11 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 
     print("[3] Starting extraction and PDF filling process...")
     try:
-        output_name = Fill.fill_form(
+        controller = Controller()
+        output_name = controller.fill_form(
             user_input=user_input,
-            definitions=definitions,
-            pdf_form=pdf_form_path
+            fields=definitions,
+            pdf_form_path=pdf_form_path
         )
         
         print("\n----------------------------------")

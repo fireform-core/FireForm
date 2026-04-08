@@ -39,8 +39,32 @@ class Filler:
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
-                            annot.AP = None
+                            answer = answers_list[i]
+                            
+                            # Check if the field type is a Button (Checkbox/Radio)
+                            field_type = annot.FT if annot.FT else (annot.Parent.FT if annot.Parent else None)
+                            if str(field_type) == "/Btn":
+                                is_truthy = str(answer).lower() in ["yes", "true", "1", "x", "on"]
+                                
+                                # Find the 'ON' state from the appearance dictionary
+                                on_state = "/Yes" # Default assumption
+                                if annot.AP and annot.AP.N:
+                                    keys = [k for k in annot.AP.N.keys() if k != "/Off"]
+                                    if keys:
+                                        on_state = keys[0]
+                                        
+                                if is_truthy:
+                                    from pdfrw import PdfName
+                                    annot.V = PdfName(on_state.strip("/"))
+                                    annot.AS = PdfName(on_state.strip("/"))
+                                else:
+                                    from pdfrw import PdfName
+                                    annot.V = PdfName("Off")
+                                    annot.AS = PdfName("Off")
+                            else:
+                                annot.V = f"{answer}"
+                                annot.AP = None
+                                
                             i += 1
                         else:
                             # Stop if we run out of answers
