@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from src.extraction_quality import ExtractionQualityProcessor
 
 
 class LLM:
@@ -10,6 +11,7 @@ class LLM:
         self._transcript_text = transcript_text  # str
         self._target_fields = target_fields  # List, contains the template field.
         self._json = json  # dictionary
+        self._quality = ExtractionQualityProcessor()
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -79,6 +81,8 @@ class LLM:
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
         print(json.dumps(self._json, indent=2))
+        print("\t[LOG] Extraction quality report:")
+        print(json.dumps(self._quality.build_report(), indent=2))
         print("--------- extracted data ---------")
 
         return self
@@ -88,21 +92,18 @@ class LLM:
         this method adds the following value under the specified field,
         or under a new field if the field doesn't exist, to the json dict
         """
-        value = value.strip().replace('"', "")
-        parsed_value = None
-
-        if value != "-1":
-            parsed_value = value
-
-        if ";" in value:
-            parsed_value = self.handle_plural_values(value)
-
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
-        else:
-            self._json[field] = parsed_value
+        existing_value = self._json.get(field)
+        normalized_value = self._quality.process(
+            field=field,
+            raw_value=value,
+            existing_value=existing_value,
+        )
+        self._json[field] = normalized_value
 
         return
+
+    def get_quality_report(self):
+        return self._quality.build_report()
 
     def handle_plural_values(self, plural_value):
         """
