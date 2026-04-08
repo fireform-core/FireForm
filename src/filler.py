@@ -39,8 +39,21 @@ class Filler:
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
-                            annot.V = f"{answers_list[i]}"
-                            annot.AP = None
+                            field_type = annot.FT
+                            value = str(answers_list[i]).strip().lower()
+
+                            if field_type == "/Btn":
+                                # Handle checkbox and radio button fields
+                                if value in ("yes", "true", "1", "checked"):
+                                    import pdfrw
+                                    annot.update(pdfrw.PdfDict(V=pdfrw.PdfName("Yes"), AS=pdfrw.PdfName("Yes")))
+                                else:
+                                    import pdfrw
+                                    annot.update(pdfrw.PdfDict(V=pdfrw.PdfName("Off"), AS=pdfrw.PdfName("Off")))
+                            else:
+                                # Handle normal text fields (original behavior)
+                                annot.V = f"{answers_list[i]}"
+                                annot.AP = None
                             i += 1
                         else:
                             # Stop if we run out of answers
