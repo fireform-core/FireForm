@@ -60,19 +60,36 @@ class LLM:
             }
 
             try:
-                response = requests.post(ollama_url, json=payload)
+                response = requests.post(ollama_url, json=payload, timeout=30)
                 response.raise_for_status()
+                json_data = response.json()
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
                     "Please ensure Ollama is running and accessible."
                 )
+            except requests.exceptions.Timeout as e:
+                raise TimeoutError(
+                    f"Request to Ollama timed out for field '{field}' at {ollama_url}: {e}"
+                ) from e
             except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
+                raise RuntimeError(
+                    f"Ollama returned an HTTP error for field '{field}': {e}"
+                )
+            except requests.exceptions.RequestException as e:
+                raise RuntimeError(
+                    f"Ollama request failed for field '{field}': {e}"
+                )
+            except ValueError as e:
+                raise ValueError(
+                    f"Invalid JSON response from Ollama for field '{field}': {e}"
+                )
 
-            # parse response
-            json_data = response.json()
-            parsed_response = json_data["response"]
+            parsed_response = json_data.get("response")
+            if parsed_response is None:
+                raise ValueError(
+                    f"Ollama response missing 'response' key for field '{field}'."
+                )
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 
