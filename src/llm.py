@@ -30,11 +30,10 @@ class LLM:
         """
         prompt = f""" 
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
+            You are an AI assistant designed to extract information from transcribed voice recordings. 
+            You must return your answer STRICTLY as a valid JSON object with two keys: "value" and "quote".
+            - "value": The identified value for the field. If not found, use "-1". If plural, separate with ";".
+            - "quote": The exact sentence or phrase from the text that justifies your value. If not found, use "N/A".
             ---
             DATA:
             Target JSON field to find in text: {current_field}
@@ -46,7 +45,7 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -56,7 +55,8 @@ class LLM:
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False, # don't really know why --> look into this later.
+                "format": "json"
             }
 
             try:
@@ -72,9 +72,15 @@ class LLM:
 
             # parse response
             json_data = response.json()
-            parsed_response = json_data["response"]
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
+            try:
+                parsed_obj = json.loads(json_data["response"])
+                val = parsed_obj.get("value", "-1")
+                quote = parsed_obj.get("quote", "N/A")
+            except json.JSONDecodeError:
+                val = "-1"
+                quote = "JSON Parse Error"
+
+            self.add_response_to_json(field, val, quote)
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -83,11 +89,19 @@ class LLM:
 
         return self
 
-    def add_response_to_json(self, field, value):
+    def add_response_to_json(self, field, value, quote="N/A"):
         """
         this method adds the following value under the specified field,
         or under a new field if the field doesn't exist, to the json dict
         """
+        # SAFETY CHECK: If the LLM returns a list, join it with semicolons
+        if isinstance(value, list):
+            value = ";".join([str(v) for v in value])
+        # If it returns a number or boolean, cast it to a string
+        elif not isinstance(value, str):
+            value = str(value)
+
+        # Now it's guaranteed to be a string
         value = value.strip().replace('"', "")
         parsed_value = None
 
@@ -96,11 +110,17 @@ class LLM:
 
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
+            
+        entry = {"value": parsed_value, "quote": quote}
 
         if field in self._json.keys():
-            self._json[field].append(parsed_value)
+            # If it's already a list, append. Otherwise convert to list.
+            if isinstance(self._json[field], list):
+                self._json[field].append(entry)
+            else:
+                self._json[field] = [self._json[field], entry]
         else:
-            self._json[field] = parsed_value
+            self._json[field] = entry
 
         return
 
