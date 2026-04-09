@@ -1,11 +1,14 @@
 import uuid
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import FastAPI
-from api.routes import templates, forms
-from fastapi import Request
+import os
+
+from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from api.routes import templates, forms
 
 app = FastAPI()
 
@@ -20,6 +23,20 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RequestIDMiddleware)
 
+default_origins = "http://127.0.0.1:5173"
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", default_origins).split(",")
+    if origin.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
@@ -34,13 +51,14 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
         },
     )
 
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     formatted_errors = []
 
     for err in exc.errors():
         loc = err.get("loc", [])
-        field = loc[-1] if loc else "unknown"  
+        field = loc[-1] if loc else "unknown"
         issue = err.get("msg", "Invalid value")
         expected = err.get("type", "")
 
@@ -60,7 +78,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             }
         },
     )
-
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -73,7 +90,5 @@ async def general_exception_handler(request: Request, exc: Exception):
             }
         },
     )
-
-
 app.include_router(templates.router)
 app.include_router(forms.router)
