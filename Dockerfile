@@ -6,6 +6,12 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    libgl1 \
+    libglib2.0-0 \
+    libxcb1 \
+    libxrender1 \
+    libxext6 \
+    libsm6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
