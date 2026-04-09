@@ -12,18 +12,28 @@ class Filler:
         Fill a PDF form with values from user_input using LLM.
         Fields are filled in the visual order (top-to-bottom, left-to-right).
         """
-        output_pdf = (
-            pdf_form[:-4]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-            + "_filled.pdf"
-        )
-
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
         textbox_answers = t2j.get_data()  # This is a dictionary
 
-        answers_list = list(textbox_answers.values())
+        # --- NEW: SEVERITY FILENAME LOGIC ---
+        is_urgent = textbox_answers.get("SEVERITY_FLAG") == "HIGH"
+        prefix = "URGENT_" if is_urgent else ""
+        
+        output_pdf = (
+            pdf_form[:-4]
+            + "_"
+            + prefix
+            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + "_filled.pdf"
+        )
+
+        # Build answers_list, safely ignoring our internal SEVERITY_FLAG
+        answers_list = []
+        for key, val in textbox_answers.items():
+            if key != "SEVERITY_FLAG":
+                answers_list.append(val)
+        # ------------------------------------
 
         # Read PDF
         pdf = PdfReader(pdf_form)
