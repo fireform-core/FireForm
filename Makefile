@@ -26,7 +26,7 @@ help:
 	@echo "make clean        - Remove containers"
 	@echo "make super-clean  - [CAUTION] Use carefully. Cleans up ALL stopped  containers, networks, build cache..."
 
-fireform: build up
+fireform: build up pull-model
 	@echo "Launching interactive shell in the app container..."
 	docker compose exec app /bin/bash
 
