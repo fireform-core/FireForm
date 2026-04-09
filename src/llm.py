@@ -46,7 +46,7 @@ class LLM:
 
     def main_loop(self):
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        for field in self._target_fields:
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -85,19 +85,28 @@ class LLM:
 
     def add_response_to_json(self, field, value):
         """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
+        Adds the value to the json dict, with normalization for boolean/checkbox logic.
         """
-        value = value.strip().replace('"', "")
+        # Clean and lowercase the value for easier comparison
+        clean_value = value.strip().replace('"', "").lower()
         parsed_value = None
 
-        if value != "-1":
-            parsed_value = value
+        # Logic to map LLM text to PDF checkbox states
+        if clean_value in ["yes", "true", "x", "checked", "1"]:
+            parsed_value = "Yes"
+        elif clean_value in ["no", "false", "unchecked", "0", "-1"]:
+            parsed_value = "Off"
+        else:
+            # Fallback for standard text fields
+            parsed_value = value.strip().replace('"', "") if value != "-1" else None
 
-        if ";" in value:
+        if ";" in value and parsed_value:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
+            # Ensure we are appending to a list if it exists
+            if not isinstance(self._json[field], list):
+                self._json[field] = [self._json[field]]
             self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
