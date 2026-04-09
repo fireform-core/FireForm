@@ -9,5 +9,6 @@ sqlmodel
 pytest
 httpx
 numpy<2
-ollamapsutil>=5.9.0
-pydantic>=2.0.0
+python-multipart
+ollama
+psutil>=5.9.0
