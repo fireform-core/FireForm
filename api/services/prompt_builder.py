@@ -1,6 +1,13 @@
 def build_extraction_prompt(input_text: str) -> str:
     return f"""
 You are an AI system that extracts structured information from incident reports.
+Your task is to extract ONLY information explicitly present in the input text.
+
+STRICT RULES:
+- Do NOT infer or guess missing information
+- If a field is not clearly mentioned, return an empty string ""
+- Do NOT add any extra fields beyond those specified
+- Do NOT modify or reinterpret values 
 
 Extract the following fields:
 - name
@@ -9,8 +16,8 @@ Extract the following fields:
 - incident_type
 - description
 
-Return ONLY valid JSON. Do not include any extra text.
-
+Return ONLY valid JSON. Do not include any extra text, explanation, or formatting outside JSON.
+The output MUST be a valid JSON object and parsable by json.loads().
 Format:
 {{
   "name": "",
@@ -34,7 +41,22 @@ Output:
   "description": "Fire involving a vehicle"
 }}
 
-Now extract from:
+Negative Example (DO NOT DO THIS):
+
+Incorrect Output:
+(This output is incorrect because it includes inferred/assumed values)
+{{
+  "location": "Central Park (assumed)",
+  "date": "2024-01-05"
+}}
+
+Correct Output:
+{{
+  "location": "Central Park",
+  "date": ""
+}}
+
+Now extract strictly from the following input (follow all rules above):
 
 {input_text}
 """
