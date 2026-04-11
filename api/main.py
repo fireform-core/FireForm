@@ -1,11 +1,17 @@
 import os
+import logging
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes import forms, templates
+from api.errors.handlers import register_exception_handlers
+
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
 
 app = FastAPI()
+
+register_exception_handlers(app)
 
 default_origins = "http://127.0.0.1:5173"
 allowed_origins = [
