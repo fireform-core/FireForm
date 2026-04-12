@@ -1,18 +1,25 @@
 class ExtractionValidator:
-    REQUIRED_FIELDS = ["location", "time", "severity", "description"]
+    FIELD_WEIGHTS = {
+        "location": 30,
+        "time": 20,
+        "severity": 30,
+        "description": 20
+    }
 
     def validate(self, data: dict):
         missing_fields = []
         confidence_score = 100
 
-        for field in self.REQUIRED_FIELDS:
+        for field, weight in self.FIELD_WEIGHTS.items():
             value = data.get(field)
 
             if value is None or value == "" or value == "-1":
                 missing_fields.append(field)
-                confidence_score -= 25
+                confidence_score -= weight
 
-        requires_review = len(missing_fields) > 0
+        confidence_score = max(confidence_score, 0)
+
+        requires_review = confidence_score < 70
 
         return {
             "requires_review": requires_review,

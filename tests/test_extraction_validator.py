@@ -61,3 +61,18 @@ def test_placeholder_fields():
     result = validator.validate(data)
 
     assert result["requires_review"] is True
+
+def test_weighted_confidence_score():
+    validator = ExtractionValidator()
+
+    data = {
+        "location": "",
+        "time": "5 PM",
+        "severity": "",
+        "description": "Fire on third floor"
+    }
+
+    result = validator.validate(data)
+
+    assert result["confidence_score"] == 40
+    assert result["requires_review"] is True
