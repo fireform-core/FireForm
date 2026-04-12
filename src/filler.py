@@ -1,22 +1,50 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
+from src.audit import AuditMetadata
 from datetime import datetime
+from typing import Optional
 
 
 class Filler:
     def __init__(self):
-        pass
+        self.audit = AuditMetadata()
 
-    def fill_form(self, pdf_form: str, llm: LLM):
+    def fill_form(
+        self,
+        pdf_form: str,
+        llm: LLM,
+        gps_latitude: Optional[float] = None,
+        gps_longitude: Optional[float] = None,
+        device_id: Optional[str] = None,
+        officer_name: Optional[str] = None,
+    ):
         """
         Fill a PDF form with values from user_input using LLM.
         Fields are filled in the visual order (top-to-bottom, left-to-right).
+        
+        Args:
+            pdf_form: Path to the PDF form template
+            llm: LLM instance for text extraction and processing
+            gps_latitude: GPS latitude coordinate
+            gps_longitude: GPS longitude coordinate
+            device_id: Unique device identifier
+            officer_name: Name of the officer generating the PDF
         """
         output_pdf = (
             pdf_form[:-4]
             + "_"
             + datetime.now().strftime("%Y%m%d_%H%M%S")
             + "_filled.pdf"
+        )
+
+        # Set audit metadata with generation timestamp
+        timestamp = datetime.utcnow().isoformat()
+        self.audit.set_metadata(
+            timestamp=timestamp,
+            gps_latitude=gps_latitude,
+            gps_longitude=gps_longitude,
+            device_id=device_id,
+            officer_name=officer_name,
         )
 
         # Generate dictionary of answers from your original function
@@ -47,6 +75,10 @@ class Filler:
                             break
 
         PdfWriter().write(output_pdf, pdf)
+
+        # Save audit metadata to JSON file
+        audit_json_path = self.audit.save_to_json(output_pdf)
+        print(f"📋 Audit metadata saved to: {audit_json_path}")
 
         # Your main.py expects this function to return the path
         return output_pdf

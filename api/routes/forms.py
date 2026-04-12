@@ -21,7 +21,14 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
         user_input=form.input_text,
         fields=fetched_template.fields,
         pdf_form_path=fetched_template.pdf_path,
+        gps_latitude=form.gps_latitude,
+        gps_longitude=form.gps_longitude,
+        device_id=form.device_id,
+        officer_name=form.officer_name,
     )
 
-    submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
+    submission = FormSubmission(
+        **form.model_dump(),
+        output_pdf_path=path
+    )
     return create_form(db, submission)
