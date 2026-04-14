@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fireform"
+version = "0.1.0"
+description = "FireForm backend and PDF processing pipeline"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "pdfrw",
+    "pydantic",
+    "requests",
+    "sqlmodel",
+    "uvicorn",
+]
+
+[tool.setuptools.packages.find]
+include = ["api*", "src*"]

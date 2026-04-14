@@ -7,7 +7,12 @@ This guide explains how to set up, initialize, and manage the FireForm database.
 > [!IMPORTANT]
 > Ensure you have installed all dependencies before proceeding:
 > ```bash
-> pip install -r requirements.txt
+> pip install -r requirements-dev.txt
+> ```
+>
+> Install the optional AI/PDF extras only if you want template creation and the Ollama-backed fill flow:
+> ```bash
+> pip install -r requirements-ai.txt
 > ```
 
 ## Database Setup
@@ -31,6 +36,14 @@ uvicorn api.main:app --reload
 
 If successful, you will see:
 `INFO: Uvicorn running on http://127.0.0.1:8000`
+
+## Running Tests
+
+The package is installed in editable mode by `requirements-dev.txt`, so tests can be run from the project root without setting `PYTHONPATH` manually:
+
+```bash
+pytest -q
+```
 
 ## Testing Endpoints
 

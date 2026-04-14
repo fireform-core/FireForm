@@ -30,7 +30,7 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/src
+      - PYTHONPATH=/app
       - OLLAMA_HOST=http://ollama:11434
     networks:
       - fireform-network

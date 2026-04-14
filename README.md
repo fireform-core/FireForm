@@ -17,6 +17,24 @@ FireForm is a centralized "report once, file everywhere" system.
 
 The result is hours of time saved per shift, per firefighter.
 
+## Local Setup
+
+FireForm targets Python 3.11. The repository includes a `.python-version` file to make that explicit.
+
+For local development, install the package in editable mode with the dev dependencies:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+python -m api.db.init_db
+pytest -q
+```
+
+For the full PDF template and Ollama-backed workflow, install the optional AI extras as well:
+```bash
+pip install -r requirements-ai.txt
+```
+
 ### ✨ Key Features
 - **Agnostic:** Works with any department's existing fillable PDF forms.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.

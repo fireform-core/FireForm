@@ -1,25 +1,31 @@
-def test_submit_form(client):
-    pass
-    # First create a template
-    # form_payload = {
-    #     "template_id": 3,
-    #     "input_text": "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005",
-    # }
+from api.db.models import Template
+from src.controller import Controller
 
-    # template_res = client.post("/templates/", json=template_payload)
-    # template_id = template_res.json()["id"]
 
-    # # Submit a form
-    # form_payload = {
-    #     "template_id": template_id,
-    #     "data": {"rating": 5, "comment": "Great service"},
-    # }
+def test_submit_form(client, db_session, monkeypatch):
+    template = Template(
+        name="Template 1",
+        fields={"Incident": "string"},
+        pdf_path="src/inputs/file_template.pdf",
+    )
+    db_session.add(template)
+    db_session.commit()
+    db_session.refresh(template)
 
-    # response = client.post("/forms/", json=form_payload)
+    monkeypatch.setattr(
+        Controller,
+        "fill_form",
+        lambda self, user_input, fields, pdf_form_path: "src/outputs/generated.pdf",
+    )
 
-    # assert response.status_code == 200
+    response = client.post(
+        "/forms/fill",
+        json={
+            "template_id": template.id,
+            "input_text": "Incident details",
+        },
+    )
 
-    # data = response.json()
-    # assert data["id"] is not None
-    # assert data["template_id"] == template_id
-    # assert data["data"] == form_payload["data"]
+    assert response.status_code == 200
+    assert response.json()["template_id"] == template.id
+    assert response.json()["output_pdf_path"] == "src/outputs/generated.pdf"

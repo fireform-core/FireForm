@@ -3,3 +3,5 @@
 venv
 .venv
 *.db
+*.egg-info/
+src/inputs/*_template.pdf
