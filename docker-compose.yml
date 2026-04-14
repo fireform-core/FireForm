@@ -23,16 +23,32 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
+    command: /bin/sh -c "python3 -m api.db.init_db && python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
     volumes:
       - .:/app
+    ports:
+      - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - OLLAMA_HOST=http://ollama:11434
     networks:
       - fireform-network
-    stdin_open: true
-    tty: true
+
+  frontend:
+    image: python:3.11-slim
+    container_name: fireform-frontend
+    working_dir: /app
+    command: python3 -m http.server 5173 --directory frontend
+    volumes:
+      - .:/app
+    ports:
+      - "5173:5173"
+    depends_on:
+      app:
+        condition: service_started
+    networks:
+      - fireform-network
 
 volumes:
   ollama_data:

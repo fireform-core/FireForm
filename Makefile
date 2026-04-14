@@ -1,4 +1,4 @@
-.PHONY: help build up down logs shell exec pull-model test clean fireform
+.PHONY: help build up down logs shell exec pull-model test clean fireform logs-app logs-ollama logs-frontend super-clean
 
 help:
 	@printf '%s\n' \
@@ -16,6 +16,9 @@ help:
 	@echo "make up           - Start all containers"
 	@echo "make down         - Stop all containers"
 	@echo "make logs         - View container logs"
+	@echo "make logs-app     - View API container logs"
+	@echo "make logs-frontend - View frontend container logs"
+	@echo "make logs-ollama  - View Ollama container logs"
 	@echo "make shell        - Open Python shell in app container"
 	@echo "make exec         - Execute Python script in container"
 	@echo "make pull-model   - Pull Mistral model into Ollama"
@@ -44,6 +47,9 @@ logs-app:
 
 logs-ollama:
 	docker compose logs -f ollama
+
+logs-frontend:
+	docker compose logs -f frontend
 
 shell:
 	docker compose exec app /bin/bash
