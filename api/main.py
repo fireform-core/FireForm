@@ -1,11 +1,14 @@
+import os
 import uuid
-from starlette.middleware.base import BaseHTTPMiddleware
-from fastapi import FastAPI
-from api.routes import templates, forms
-from fastapi import Request
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+
+from api.routes import templates, forms
 
 app = FastAPI()
 
@@ -19,7 +22,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(RequestIDMiddleware)
-
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
@@ -62,6 +64,20 @@ async def general_exception_handler(request: Request, exc: Exception):
         },
     )
 
+default_origins = "http://127.0.0.1:5173"
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", default_origins).split(",")
+    if origin.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(templates.router)
 app.include_router(forms.router)
