@@ -5,6 +5,7 @@ tests/test_llm_checkpoint.py
 import os
 import sys
 import unittest
+import tempfile
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -22,6 +23,27 @@ TRANSCRIPT = (
 FIELDS_LIST = ["name", "date", "location"]
 FIELDS_DICT = {"name": None, "date": None, "location": None}
 
+class CheckpointTestCase(unittest.TestCase):
+    """
+    Base class that redirects STATE_DIR to a temp directory for each test
+    so tests never write to /tmp/fireform_states or interfere with each other.
+    """
+ 
+    def setUp(self):
+        self.tmp_dir = tempfile.mkdtemp()
+        self.patcher = patch.object(llm_module, "STATE_DIR", self.tmp_dir)
+        self.patcher.start()
+ 
+    def tearDown(self):
+        self.patcher.stop()
+        import shutil
+        shutil.rmtree(self.tmp_dir, ignore_errors=True)
+ 
+    def make_llm(self, fields=None, transcript=None):
+        inst = LLM()
+        inst._transcript_text = transcript or TRANSCRIPT
+        inst._target_fields = fields if fields is not None else FIELDS_LIST
+        return inst
 
 #session id tests
 class TestSessionId(unittest.TestCase):
@@ -125,6 +147,72 @@ class TestGetFieldNames(unittest.TestCase):
         inst._target_fields = {}
         self.assertEqual(inst._get_field_names(), [])
 
+
+#checkpoint I/O tests 
+class TestCheckpointIO(CheckpointTestCase):
+ 
+    def test_save_creates_file(self):
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        assert llm._state_file is not None
+        llm._json = {"name": "Jane Smith"}
+        llm.save_state()
+        self.assertTrue(os.path.exists(llm._state_file))
+ 
+    def test_load_restores_json(self):
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        llm._json = {"name": "Jane Smith"}
+        llm.save_state()
+ 
+        fresh = self.make_llm()
+        fresh._setup_checkpoint()
+        resumed = fresh.load_state()
+ 
+        self.assertTrue(resumed)
+        self.assertEqual(fresh._json, {"name": "Jane Smith"})
+ 
+    def test_load_returns_false_when_no_state_file(self):
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        self.assertFalse(llm.load_state())
+ 
+    def test_clear_removes_file(self):
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        assert llm._state_file is not None
+        llm._json = {"name": "Jane Smith"}
+        llm.save_state()
+        llm.clear_state()
+        self.assertFalse(os.path.exists(llm._state_file))
+ 
+    def test_load_handles_corrupt_file_gracefully(self):
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        assert llm._state_file is not None
+        with open(llm._state_file, "w") as f:
+            f.write("{{ not valid JSON !!!")
+        result = llm.load_state()
+        self.assertFalse(result)
+        self.assertEqual(llm._json, {})
+ 
+    def test_save_is_atomic_no_tmp_file_left(self):
+        """After save_state(), no .tmp file should remain."""
+        llm = self.make_llm()
+        llm._setup_checkpoint()
+        llm._json = {"name": "Jane Smith"}
+        llm.save_state()
+        assert llm._state_file is not None
+        self.assertFalse(os.path.exists(llm._state_file + ".tmp"))
+        self.assertTrue(os.path.exists(llm._state_file))
+ 
+    def test_save_before_setup_is_safe_noop(self):
+        """save_state() before _setup_checkpoint() must not raise."""
+        llm = LLM()
+        try:
+            llm.save_state()
+        except Exception as e:
+            self.fail(f"save_state() raised unexpectedly before setup: {e}")
 
 if __name__ == "__main__":
     unittest.main()
