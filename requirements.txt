@@ -15,3 +15,5 @@ python-multipart
 pymupdf
 pdfplumber
 reportlab
+pytesseract
+Pillow

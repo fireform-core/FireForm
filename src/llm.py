@@ -176,6 +176,19 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
             field_keys = list(self._target_fields)
             field_names = list(self._target_fields)
 
+        # Cap fields to avoid overwhelming the model's context window.
+        # 80 fields ≈ safe upper limit for gemma3:4b (8k context).
+        MAX_FIELDS = int(os.getenv("FIREFORM_MAX_FIELDS", "80"))
+        if len(field_keys) > MAX_FIELDS:
+            print(f"[LOG] Capping {len(field_keys)} fields → {MAX_FIELDS} for LLM context limit")
+            field_keys  = field_keys[:MAX_FIELDS]
+            field_names = field_names[:MAX_FIELDS]
+            # Rebuild target_fields with capped subset so build_batch_prompt() is consistent
+            if isinstance(self._target_fields, dict):
+                self._target_fields = dict(zip(field_keys, field_names))
+            else:
+                self._target_fields = field_keys
+
         field_count = len(field_keys)
         text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
         print(f"[LOG] Starting async batch extraction for {field_count} field(s) using {text_model}...")
@@ -216,8 +229,8 @@ ANSWER: Return ONLY the extracted value(s), nothing else."""
                 self._json = {}
 
         except Exception as e:
-            print(f"[ERROR] Ollama request failed: {e}")
-            raise ConnectionError(f"Ollama connection failed: {e}")
+            print(f"[ERROR] Ollama request failed ({type(e).__name__}): {e}")
+            raise ConnectionError(f"Ollama connection failed: {type(e).__name__}: {e}")
 
         return self
 

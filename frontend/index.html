@@ -1245,7 +1245,7 @@
         <div class="result">
           <div class="result-loading" id="resLoading">
             <div class="spinner"></div>
-            <div class="loading-msg"><b>Mistral</b> is extracting data and filling your form...</div>
+            <div class="loading-msg"><b>FireForm AI</b> is extracting data and filling your form...</div>
           </div>
           <div class="result-success" id="resSuccess">
             <div class="success-header">
@@ -1589,8 +1589,8 @@
       document.getElementById('btnFill').disabled = true;
       const lm = document.querySelector('.loading-msg');
       lm.innerHTML = (mode === 'batch' && selectedIds.size > 1)
-        ? `<b>Mistral</b> is filling ${selectedIds.size} forms in one pass...`
-        : `<b>Mistral</b> is extracting data and filling your form...`;
+        ? `<b>FireForm AI</b> is filling ${selectedIds.size} forms in one pass...`
+        : `<b>FireForm AI</b> is extracting data and filling your form...`;
       document.getElementById('resLoading').classList.add('show');
       try {
         if (mode === 'batch' && selectedIds.size > 1) await fillBatch(text);
