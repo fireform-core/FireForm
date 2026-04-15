@@ -3,6 +3,32 @@ import os
 import requests
 from api.services.prompt_builder import build_extraction_prompt
 
+def safe_extract_value(response: str):
+    if not response:
+        return None
+
+    response = response.strip()
+
+    
+    response = response.replace('"', '').replace("'", "")
+
+    
+    if ":" in response:
+        response = response.split(":")[-1].strip()
+
+    
+    response = response.split("\n")[0]
+
+    
+    if response.lower() in ["-1", "none", "null", "not found"]:
+        return None
+
+
+    if len(response) > 200:
+        return None
+
+    return response
+
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
         if json is None:
@@ -82,7 +108,8 @@ class LLM:
 
             # parse response
             json_data = response.json()
-            parsed_response = json_data["response"]
+            raw_response = json_data["response"]
+            parsed_response = safe_extract_value(raw_response)
             # print(parsed_response)
             self.add_response_to_json(field, parsed_response)
 
@@ -94,17 +121,18 @@ class LLM:
         return self
 
     def add_response_to_json(self, field, value):
-        """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
-        """
-        value = value.strip().replace('"', "")
+        value = value.strip().replace('"', "") if value else None
         parsed_value = None
 
-        if value != "-1":
+        if value:
             parsed_value = value
+        else:
+            parsed_value = {
+                "value": None,
+                "requires_review": True
+            }
 
-        if ";" in value:
+        if value and ";" in value:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
@@ -114,30 +142,20 @@ class LLM:
 
         return
 
+
     def handle_plural_values(self, plural_value):
         """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
+         This method handles plural values.
         """
         if ";" not in plural_value:
             raise ValueError(
                 f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
             )
 
-        print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
-        )
         values = plural_value.split(";")
 
-        # Remove trailing leading whitespace
         for i in range(len(values)):
-            current = i + 1
-            if current < len(values):
-                clean_value = values[current].lstrip()
-                values[current] = clean_value
-
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
+            values[i] = values[i].strip()
 
         return values
 
