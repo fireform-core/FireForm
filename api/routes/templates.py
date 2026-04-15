@@ -18,6 +18,10 @@ router = APIRouter(prefix="/templates", tags=["templates"])
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TEMPLATE_DIR = "src/inputs"
 
+# --- Upload safety constants ---
+MAX_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024  # 20 MB
+PDF_MAGIC_BYTES = b"%PDF"
+
 
 def _resolve_target_directory(directory: str) -> Path:
     dir_value = (directory or DEFAULT_TEMPLATE_DIR).strip()
@@ -65,6 +69,28 @@ async def upload_template_pdf(
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
+    # Read file content once for all validation checks
+    content = await file.read()
+
+    # Reject empty files
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    # Enforce file size limit
+    if len(content) > MAX_UPLOAD_SIZE_BYTES:
+        size_mb = len(content) / (1024 * 1024)
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large ({size_mb:.1f} MB). Maximum allowed size is 20 MB.",
+        )
+
+    # Validate PDF magic bytes — rejects non-PDF files renamed to .pdf
+    if not content[:4].startswith(PDF_MAGIC_BYTES):
+        raise HTTPException(
+            status_code=400,
+            detail="File does not appear to be a valid PDF.",
+        )
+
     target_dir = _resolve_target_directory(directory)
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -73,7 +99,6 @@ async def upload_template_pdf(
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
         target_path = target_dir / f"{target_path.stem}_{timestamp}{target_path.suffix}"
 
-    content = await file.read()
     with target_path.open("wb") as output_file:
         output_file.write(content)
 
