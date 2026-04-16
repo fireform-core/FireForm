@@ -3,6 +3,7 @@ import os
 import requests
 from api.services.prompt_builder import build_extraction_prompt
 from src.validation import validate_extraction
+from requests.exceptions import Timeout, RequestException
 
 def safe_extract_value(response: str):
     if not response:
@@ -72,6 +73,9 @@ class LLM:
         return prompt
 
     def main_loop(self):
+        timeout = 30
+        max_retries = 3
+
         # self.type_check_all()
         for field in self._target_fields.keys():
             # print(prompt)
@@ -96,9 +100,18 @@ class LLM:
                 "stream": False,  # streaming disabled; using single response mode
             }
 
+            json_data = None
             try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
+                for attempt in range(max_retries):
+                    try:
+                        response = requests.post(ollama_url, json=payload, timeout=timeout)
+                        response.raise_for_status()
+                        json_data = response.json()
+                        break
+                    except Timeout:
+                        print(f"Ollama request timed out (attempt {attempt+1})")
+                    except RequestException as e:
+                        print(f"Ollama request failed: {e}")
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
@@ -107,12 +120,15 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
-            # parse response
-            json_data = response.json()
-            raw_response = json_data["response"]
-            parsed_response = safe_extract_value(raw_response)
-            # print(parsed_response)
-            self.add_response_to_json(field, parsed_response)
+
+            if json_data is None:
+                raise RuntimeError("Failed to get response from Ollama after retries.")
+            else:
+                # parse response
+                parsed_response = json_data["response"]
+                # print(parsed_response)
+                self.add_response_to_json(field, parsed_response)
+
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
