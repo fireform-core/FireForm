@@ -28,6 +28,9 @@
         <button class="tab" type="button" data-target="pdfPreviewerSection">
           PDF Preview
         </button>
+        <button class="tab" type="button" data-target="fieldWizardSection">
+          🧙 Field Wizard
+        </button>
       </nav>
 
       <section id="uploaderSection" class="panel card">
@@ -132,6 +135,39 @@
 
         <p id="previewStatus" class="status" aria-live="polite"></p>
         <iframe id="pdfFrame" title="PDF Preview"></iframe>
+      </section>
+
+      <section id="fieldWizardSection" class="panel card hidden">
+        <h2>🧙 Field Mapping Wizard</h2>
+        <p class="helper">
+          Upload a PDF to automatically detect all fillable form fields.
+          Only digitally created fillable PDFs (AcroForms) are supported.
+        </p>
+
+        <input id="wizardPdfFile" type="file" accept="application/pdf" class="hidden" />
+        <div
+          id="wizardDropZone"
+          class="dropzone"
+          role="button"
+          tabindex="0"
+          aria-label="Drag and drop a PDF to analyze or click to select"
+        >
+          <strong>Drop a PDF here to analyze</strong>
+          <span>or click to select a file</span>
+        </div>
+        <p id="wizardFileMeta" class="helper">No PDF selected.</p>
+
+        <button id="wizardDetectBtn" type="button" disabled>Detect Fields</button>
+
+        <p id="wizardStatus" class="status" aria-live="polite"></p>
+
+        <div id="wizardResults" class="wizard-results hidden">
+          <div id="wizardSummary" class="wizard-summary"></div>
+          <button id="wizardUseTemplateBtn" type="button" class="wizard-use-btn hidden">
+            🚀 Use as Template — Auto-fill the Create Template form with these fields
+          </button>
+          <div id="wizardFieldsList" class="wizard-fields-list"></div>
+        </div>
       </section>
     </main>
 

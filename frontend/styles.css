@@ -292,3 +292,173 @@ button:hover {
     min-height: 420px;
   }
 }
+
+/* ─── Field Wizard ───────────────────────────────── */
+
+.wizard-results {
+  display: grid;
+  gap: 16px;
+}
+
+.wizard-summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.wizard-summary.has-fields {
+  background: #eef7ee;
+  border: 1px solid #b8d9b8;
+  color: #1a5c2e;
+}
+
+.wizard-summary.no-fields {
+  background: #fef7e6;
+  border: 1px solid #e3c97a;
+  color: #7a5e12;
+}
+
+.wizard-fields-list {
+  display: grid;
+  gap: 14px;
+}
+
+.wizard-page-group {
+  display: grid;
+  gap: 8px;
+}
+
+.wizard-page-header {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.wizard-field-card {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid #d7dde3;
+  border-radius: 10px;
+  background: #fcfdfe;
+  transition: box-shadow 0.15s ease;
+}
+
+.wizard-field-card:hover {
+  box-shadow: 0 2px 8px rgba(16, 44, 70, 0.08);
+}
+
+.wizard-field-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.field-type-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.field-type-badge.text {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.field-type-badge.button {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.field-type-badge.choice {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.field-type-badge.unknown {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.field-coords {
+  font-family: "IBM Plex Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+#wizardDetectBtn {
+  justify-self: start;
+}
+
+#wizardDetectBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#wizardDetectBtn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+#wizardDetectBtn.loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: wizard-spin 0.6s linear infinite;
+}
+
+@keyframes wizard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .wizard-field-card {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+.wizard-use-btn {
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--success);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.wizard-use-btn:hover {
+  background: #15673d;
+  transform: translateY(-1px);
+}
+
