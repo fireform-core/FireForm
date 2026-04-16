@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import forms, templates
+from api.routes import forms, templates, wizard
 
 app = FastAPI()
 
@@ -24,3 +24,4 @@ app.add_middleware(
 
 app.include_router(templates.router)
 app.include_router(forms.router)
+app.include_router(wizard.router)

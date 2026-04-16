@@ -27,11 +27,22 @@ const elements = {
   previewPathBtn: document.getElementById("previewPathBtn"),
   previewStatus: document.getElementById("previewStatus"),
   pdfFrame: document.getElementById("pdfFrame"),
+  wizardPdfFile: document.getElementById("wizardPdfFile"),
+  wizardDropZone: document.getElementById("wizardDropZone"),
+  wizardFileMeta: document.getElementById("wizardFileMeta"),
+  wizardDetectBtn: document.getElementById("wizardDetectBtn"),
+  wizardStatus: document.getElementById("wizardStatus"),
+  wizardResults: document.getElementById("wizardResults"),
+  wizardSummary: document.getElementById("wizardSummary"),
+  wizardFieldsList: document.getElementById("wizardFieldsList"),
+  wizardUseTemplateBtn: document.getElementById("wizardUseTemplateBtn"),
 };
 
 let templates = loadTemplates();
 let activeObjectUrl = null;
 let selectedTemplateFile = null;
+let selectedWizardFile = null;
+let lastWizardResult = null;
 
 initialize();
 
@@ -61,6 +72,14 @@ function bindEvents() {
   elements.previewPathBtn.addEventListener("click", () =>
     previewFromPath(elements.serverPdfPath.value, { switchToPreview: true })
   );
+  elements.wizardPdfFile.addEventListener("change", handleWizardFileInput);
+  elements.wizardDropZone.addEventListener("click", () => elements.wizardPdfFile.click());
+  elements.wizardDropZone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); elements.wizardPdfFile.click(); }
+  });
+  bindWizardDropZoneDragEvents();
+  elements.wizardDetectBtn.addEventListener("click", handleWizardDetect);
+  elements.wizardUseTemplateBtn.addEventListener("click", useWizardAsTemplate);
 }
 
 function activateSection(targetId) {
@@ -609,4 +628,196 @@ function extractErrorMessage(responseBody, statusCode) {
     }
   }
   return `Request failed with status ${statusCode}.`;
+}
+
+// ─── Field Wizard ─────────────────────────────────────────────
+
+function bindWizardDropZoneDragEvents() {
+  ["dragenter", "dragover"].forEach((eventName) => {
+    elements.wizardDropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      elements.wizardDropZone.classList.add("active");
+    });
+  });
+
+  ["dragleave", "dragend", "drop"].forEach((eventName) => {
+    elements.wizardDropZone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      elements.wizardDropZone.classList.remove("active");
+    });
+  });
+
+  elements.wizardDropZone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer?.files?.[0];
+    setSelectedWizardFile(file);
+  });
+}
+
+function handleWizardFileInput(event) {
+  const file = event.target.files && event.target.files[0];
+  setSelectedWizardFile(file);
+}
+
+function setSelectedWizardFile(file) {
+  if (!file) return;
+
+  if (!isPdfFile(file)) {
+    selectedWizardFile = null;
+    elements.wizardDetectBtn.disabled = true;
+    setStatus(elements.wizardStatus, "Please select a PDF file.", "error");
+    elements.wizardFileMeta.textContent = "No PDF selected.";
+    return;
+  }
+
+  selectedWizardFile = file;
+  elements.wizardDetectBtn.disabled = false;
+  elements.wizardFileMeta.textContent = `Selected: ${file.name} (${formatBytes(file.size)})`;
+  setStatus(elements.wizardStatus, "");
+  elements.wizardResults.classList.add("hidden");
+}
+
+async function handleWizardDetect() {
+  if (!selectedWizardFile) {
+    setStatus(elements.wizardStatus, "Please select a PDF file first.", "error");
+    return;
+  }
+
+  elements.wizardDetectBtn.classList.add("loading");
+  elements.wizardDetectBtn.disabled = true;
+  elements.wizardResults.classList.add("hidden");
+  setStatus(elements.wizardStatus, "Analyzing PDF for form fields...", "info");
+
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedWizardFile, selectedWizardFile.name);
+
+    const response = await fetch(`${API_BASE_URL}/wizard/detect-fields`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const body = await parseJsonResponse(response);
+    if (!response.ok) {
+      throw new Error(extractErrorMessage(body, response.status));
+    }
+
+    lastWizardResult = body;
+    renderWizardResults(body);
+
+    if (body.total_fields > 0) {
+      setStatus(
+        elements.wizardStatus,
+        `Detected ${body.total_fields} field(s) across ${body.total_pages} page(s).`,
+        "success"
+      );
+    } else {
+      setStatus(
+        elements.wizardStatus,
+        "No interactive form fields detected. This may be a scanned/image PDF.",
+        "info"
+      );
+    }
+  } catch (error) {
+    setStatus(elements.wizardStatus, error.message, "error");
+  } finally {
+    elements.wizardDetectBtn.classList.remove("loading");
+    elements.wizardDetectBtn.disabled = false;
+  }
+}
+
+function renderWizardResults(data) {
+  elements.wizardResults.classList.remove("hidden");
+
+  // Summary bar
+  elements.wizardSummary.innerHTML = "";
+  elements.wizardSummary.className = data.total_fields > 0
+    ? "wizard-summary has-fields"
+    : "wizard-summary no-fields";
+  elements.wizardSummary.textContent = data.total_fields > 0
+    ? `\u2705 ${data.total_fields} field(s) found in ${data.filename} (${data.total_pages} page${data.total_pages !== 1 ? "s" : ""})`
+    : `\u26a0\ufe0f No fillable fields found in ${data.filename}`;
+
+  // Show or hide the "Use as Template" button
+  if (data.total_fields > 0) {
+    elements.wizardUseTemplateBtn.classList.remove("hidden");
+  } else {
+    elements.wizardUseTemplateBtn.classList.add("hidden");
+  }
+
+  // Fields list
+  elements.wizardFieldsList.innerHTML = "";
+
+  if (data.total_fields === 0) return;
+
+  data.pages.forEach((page) => {
+    if (page.fields.length === 0) return;
+
+    const group = document.createElement("div");
+    group.className = "wizard-page-group";
+
+    const header = document.createElement("div");
+    header.className = "wizard-page-header";
+    header.textContent = `Page ${page.page_number} \u2014 ${page.fields.length} field(s)`;
+    group.appendChild(header);
+
+    page.fields.forEach((field) => {
+      const card = document.createElement("div");
+      card.className = "wizard-field-card";
+
+      const name = document.createElement("span");
+      name.className = "wizard-field-name";
+      name.textContent = field.field_name;
+
+      const badge = document.createElement("span");
+      badge.className = `field-type-badge ${field.field_type.toLowerCase()}`;
+      badge.textContent = field.field_type;
+
+      const coords = document.createElement("span");
+      coords.className = "field-coords";
+      coords.textContent = `${field.rect.width}\u00d7${field.rect.height} @ (${field.rect.x}, ${field.rect.y})`;
+
+      card.append(name, badge, coords);
+      group.appendChild(card);
+    });
+
+    elements.wizardFieldsList.appendChild(group);
+  });
+}
+
+function useWizardAsTemplate() {
+  if (!lastWizardResult || lastWizardResult.total_fields === 0) {
+    setStatus(elements.wizardStatus, "No fields detected to use.", "error");
+    return;
+  }
+
+  // Build a fields dict: { field_name: field_type } for all pages
+  const fieldsDict = {};
+  lastWizardResult.pages.forEach((page) => {
+    page.fields.forEach((field) => {
+      fieldsDict[field.field_name] = field.field_type.toLowerCase();
+    });
+  });
+
+  // Auto-fill the template creation form
+  const filename = lastWizardResult.filename || "Untitled";
+  const templateName = filename.replace(/\.pdf$/i, "").replace(/[_-]/g, " ");
+  elements.templateName.value = templateName;
+  elements.templateFields.value = JSON.stringify(fieldsDict, null, 2);
+
+  // Transfer the wizard's PDF file to the template file selector
+  if (selectedWizardFile) {
+    selectedTemplateFile = selectedWizardFile;
+    updateSelectedFileMeta();
+  }
+
+  // Switch to the Upload Template tab
+  activateSection("uploaderSection");
+
+  setStatus(
+    elements.templateFormMessage,
+    `\u2705 Auto-filled from wizard: "${templateName}" with ${lastWizardResult.total_fields} field(s). Review and click Create Template.`,
+    "success"
+  );
 }
