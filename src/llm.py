@@ -77,7 +77,9 @@ class LLM:
         max_retries = 3
 
         # self.type_check_all()
-        for field in self._target_fields.keys():
+        total_fields = len(self._target_fields)
+        for i, field in enumerate(self._target_fields.keys(), 1):
+            prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
@@ -128,6 +130,7 @@ class LLM:
                 parsed_response = json_data["response"]
                 # print(parsed_response)
                 self.add_response_to_json(field, parsed_response)
+                print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
 
         print("----------------------------------")
