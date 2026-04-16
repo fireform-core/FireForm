@@ -14,6 +14,10 @@ class FileManipulator:
         By using commonforms, we create an editable .pdf template and we store it.
         """
         template_path = pdf_path[:-4] + "_template.pdf"
+
+        os.system("taskkill /F /IM ollama.exe >nul 2>&1")
+        print("Cleared existing Ollama instances. Starting fresh...")
+        
         prepare_form(pdf_path, template_path)
         return template_path
 
