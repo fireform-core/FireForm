@@ -2,6 +2,7 @@ import json
 import os
 import requests
 from api.services.prompt_builder import build_extraction_prompt
+from src.validation import validate_extraction
 
 def safe_extract_value(response: str):
     if not response:
@@ -160,4 +161,9 @@ class LLM:
         return values
 
     def get_data(self):
-        return self._json
+        validated_data, errors = validate_extraction(self._json)
+
+        if errors:
+            print("[Validation Warning]", errors)
+
+        return validated_data
