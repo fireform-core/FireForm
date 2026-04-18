@@ -17,6 +17,7 @@ from src.controller import Controller
 router = APIRouter(prefix="/templates", tags=["templates"])
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TEMPLATE_DIR = "src/inputs"
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 def _resolve_target_directory(directory: str) -> Path:
