@@ -15,4 +15,5 @@ class FormSubmission(SQLModel, table=True):
     template_id: int
     input_text: str
     output_pdf_path: str
+    requires_review: bool = False
     created_at: datetime = Field(default_factory=datetime.utcnow)
