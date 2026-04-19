@@ -9,6 +9,6 @@ sqlmodel
 pytest
 httpx
 numpy<2
-ollama
-pypdf
 python-multipart
+ollama
+psutil>=5.9.0
