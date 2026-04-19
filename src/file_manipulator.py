@@ -37,7 +37,10 @@ class FileManipulator:
 
         print("[3] Starting extraction and PDF filling process...")
         try:
-            self.llm._target_fields = fields
+            if isinstance(fields, dict):
+                self.llm._target_fields = list(fields.keys())
+            else:
+                self.llm._target_fields = fields
             self.llm._transcript_text = user_input
             output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
 
