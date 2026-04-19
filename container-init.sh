@@ -16,8 +16,9 @@ echo "============================================"
 make up
 echo "============================================"
 echo "Use make down to stop" 
-echo "Use docker ps to verify, you should see 2 containers:"
+echo "Use docker ps to verify, you should see 3 containers:"
 echo "\t* fireform-app"
+echo "\t* fireform-frontend"
 echo "\t* ollama/ollama:latest"
 docker ps
 echo "============================================"
@@ -26,4 +27,3 @@ echo "============================================"
 make pull-model
 echo "============================================"
 echo "Done"
-

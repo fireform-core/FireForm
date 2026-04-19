@@ -1,32 +1,39 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+
 from api.deps import get_db
 from api.schemas.forms import FormFill, FormFillResponse
 from api.db.repositories import create_form, get_template
 from api.db.models import FormSubmission
 from api.errors.base import AppError
 from src.controller import Controller
+from api.middleware.rate_limiter import limiter
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
+
 @router.post("/fill", response_model=FormFillResponse)
-def fill_form(form: FormFill, db: Session = Depends(get_db)):
-    if not get_template(db, form.template_id):
+@limiter.limit("20/minute")
+def fill_form(request: Request, form: FormFill, db: Session = Depends(get_db)):
+    # Single query instead of the previous duplicate get_template() calls
+    template = get_template(db, form.template_id)
+    if not template:
         raise AppError("Template not found", status_code=404)
 
-    fetched_template = get_template(db, form.template_id)
-
     controller = Controller()
-    path, review_flag = controller.fill_form(
-    user_input=form.input_text,
-    fields=fetched_template.fields,
-    pdf_form_path=fetched_template.pdf_path)
-    if not path:
-        raise AppError("PDF generation failed", status_code=400)
+    try:
+        path = controller.fill_form(
+            user_input=form.input_text,
+            fields=template.fields,
+            pdf_form_path=template.pdf_path,
+        )
+    except AppError:
+        raise  # Re-raise known application errors as-is
+    except Exception as exc:
+        raise AppError(
+            f"Form filling failed: {exc}",
+            status_code=500,
+        ) from exc
 
-    submission = FormSubmission(
-    **form.model_dump(),
-    output_pdf_path=path,
-    requires_review=review_flag)
-
+    submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
     return create_form(db, submission)
