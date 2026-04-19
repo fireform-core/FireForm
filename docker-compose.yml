@@ -9,10 +9,10 @@ services:
     networks:
       - fireform-network
     healthcheck:
-      test: ["CMD-SHELL", "ollama ps"]
+      test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 3
+      retries: 5
       start_period: 30s
 
   app:
@@ -24,14 +24,20 @@ services:
       ollama:
         condition: service_healthy
     command: /bin/sh -c "python3 -m api.db.init_db && python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
+    # Fix #224 — expose port so API is reachable at http://localhost:8000
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
     ports:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/src
+      - CUDA_VISIBLE_DEVICES=""
+      # Fix #118 #116 — correct PYTHONPATH to project root
+      - PYTHONPATH=/app
       - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_TIMEOUT=300
     networks:
       - fireform-network
 
