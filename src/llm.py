@@ -9,7 +9,7 @@ class LLM:
         if json is None:
             json = {}
         self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
+        self._target_fields = target_fields  # dict, maps field names to their values
         self._json = json  # dictionary
 
     def type_check_all(self):
@@ -18,7 +18,7 @@ class LLM:
                 f"ERROR in LLM() attributes ->\
                 Transcript must be text. Input:\n\ttranscript_text: {self._transcript_text}"
             )
-        elif type(self._target_fields) is not list:
+        elif type(self._target_fields) is not dict:
             raise TypeError(
                 f"ERROR in LLM() attributes ->\
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
