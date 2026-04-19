@@ -10,7 +10,7 @@ class FileManipulator:
 
     def create_template(self, pdf_path: str):
         """
-        By using commonforms, we create an editable .pdf template and we store it.
+        Create an editable PDF template using commonforms and write it to disk.
         """
         # Lazy import
         from commonforms import prepare_form
@@ -23,7 +23,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def fill_form(self, user_input: str, fields: dict, pdf_form_path: str):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
