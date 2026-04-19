@@ -25,8 +25,22 @@ class Filler:
 
         answers_list = list(textbox_answers.values())
 
+        # Safe handling for missing PDF templates
+        import os
+        def load_pdf_template(template_path):
+            if not os.path.exists(template_path):
+                raise FileNotFoundError(
+                    f"Template file not found at path: {template_path}"
+                )
+            try:
+                with open(template_path, "rb") as f:
+                    return f.read()
+            except Exception as e:
+                raise RuntimeError(f"Failed to load template: {str(e)}")
+
+        template_data = load_pdf_template(pdf_form)
         # Read PDF
-        pdf = PdfReader(pdf_form)
+        pdf = PdfReader(fdata=template_data)
 
         # Loop through pages
         i = 0
