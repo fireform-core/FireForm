@@ -1,32 +1,23 @@
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
-from api.deps import get_db
-from api.schemas.forms import FormFill, FormFillResponse
-from api.db.repositories import create_form, get_template
-from api.db.models import FormSubmission
-from api.errors.base import AppError
-from src.controller import Controller
+from pydantic import BaseModel, Field, field_validator
 
-router = APIRouter(prefix="/forms", tags=["forms"])
 
-@router.post("/fill", response_model=FormFillResponse)
-def fill_form(form: FormFill, db: Session = Depends(get_db)):
-    if not get_template(db, form.template_id):
-        raise AppError("Template not found", status_code=404)
+class FormFill(BaseModel):
+    template_id: int
+    input_text: str = Field(..., min_length=1, max_length=50000)
 
-    fetched_template = get_template(db, form.template_id)
+    @field_validator("input_text")
+    @classmethod
+    def validate_input_text(cls, v):
+        stripped = v.strip()
+        if not stripped:
+            raise ValueError("Input text cannot be empty or only whitespace")
+        return stripped
 
-    controller = Controller()
-    path, review_flag = controller.fill_form(
-    user_input=form.input_text,
-    fields=fetched_template.fields,
-    pdf_form_path=fetched_template.pdf_path)
-    if not path:
-        raise AppError("PDF generation failed", status_code=400)
 
-    submission = FormSubmission(
-    **form.model_dump(),
-    output_pdf_path=path,
-    requires_review=review_flag)
+class FormFillResponse(BaseModel):
+    id: int
+    template_id: int
+    input_text: str
+    output_pdf_path: str
 
-    return create_form(db, submission)
+    model_config = {"from_attributes": True}
