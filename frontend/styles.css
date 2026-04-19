@@ -1,0 +1,294 @@
+:root {
+  --bg: linear-gradient(145deg, #f7f4ec 0%, #eef4f7 100%);
+  --panel: #ffffff;
+  --panel-border: #d7dde3;
+  --text: #1f2a36;
+  --muted: #576779;
+  --primary: #125a86;
+  --primary-strong: #0b4568;
+  --success: #1a7f4b;
+  --error: #a43434;
+  --radius: 14px;
+  --shadow: 0 10px 28px rgba(16, 44, 70, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.app-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 18px 48px;
+}
+
+.app-header {
+  margin-bottom: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.15;
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-size: 1.25rem;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.api-config {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  border: 1px solid var(--panel-border);
+  background: #f9fbfc;
+  border-radius: 999px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tab.active {
+  border-color: var(--primary);
+  color: #fff;
+  background: var(--primary);
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+}
+
+.stacked-form {
+  display: grid;
+  gap: 10px;
+}
+
+.dropzone {
+  border: 2px dashed #9ab1c7;
+  border-radius: 12px;
+  padding: 20px 14px;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  cursor: pointer;
+  background: #f7fbff;
+  color: #2f4a63;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dropzone strong {
+  font-size: 1.02rem;
+  color: #1f3a53;
+}
+
+.dropzone span {
+  font-size: 0.92rem;
+  color: #4e657b;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible,
+.dropzone.active {
+  border-color: var(--primary);
+  background: #eef7ff;
+  outline: none;
+}
+
+label {
+  font-weight: 600;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #bcc8d6;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+button:hover {
+  background: var(--primary-strong);
+}
+
+.helper {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.status {
+  margin: 0;
+  min-height: 1.4em;
+  color: var(--muted);
+}
+
+.status.success {
+  color: var(--success);
+}
+
+.status.error {
+  color: var(--error);
+}
+
+.json-output {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: 10px;
+  border: 1px solid #d7dde3;
+  background: #f7fafc;
+  padding: 10px 12px;
+  max-height: 280px;
+  overflow: auto;
+  font-family: "IBM Plex Mono", "Menlo", "Consolas", monospace;
+  font-size: 0.88rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.divider {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #d7dde3;
+  margin: 4px 0;
+}
+
+.template-list {
+  display: grid;
+  gap: 12px;
+}
+
+.template-card {
+  border: 1px solid #d7dde3;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fbfcfe;
+}
+
+.template-meta {
+  margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.card-actions button {
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+.empty-state {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed #bcc8d6;
+  color: var(--muted);
+  background: #f8fafb;
+}
+
+.preview-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.inline-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+#pdfFrame {
+  width: 100%;
+  min-height: 560px;
+  border: 1px solid #d7dde3;
+  border-radius: 10px;
+  background: #fff;
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    padding: 16px 12px 28px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .inline-actions {
+    grid-template-columns: 1fr;
+  }
+
+  #pdfFrame {
+    min-height: 420px;
+  }
+}
