@@ -21,7 +21,14 @@ The result is hours of time saved per shift, per firefighter.
 - **Agnostic:** Works with any department's existing fillable PDF forms.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
+- **Verification Layer:** Verifies every resulting PDF output field to guarantee AI extracted answers were successfully assigned, ensuring 100% data fidelity.
 
+Example Verification Log:
+```bash
+[LOG]: Starting PDF fill verification...
+[!] Mismatch at field index 0: Expected 'John', Found ''
+[LOG]: Verification Summary: ✔ Correct 5 | ✖ Mismatch 1 | ⚠ Missing 0
+```
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
 
 ## 🤝 Code of Conduct
