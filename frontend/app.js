@@ -20,6 +20,8 @@ const elements = {
   inputText: document.getElementById("inputText"),
   fillFormMessage: document.getElementById("fillFormMessage"),
   fillFormResponse: document.getElementById("fillFormResponse"),
+  createTemplateBtn: document.getElementById("createTemplateBtn"),
+  fillFormBtn: document.getElementById("fillFormBtn"),
   templatesEmpty: document.getElementById("templatesEmpty"),
   templatesList: document.getElementById("templatesList"),
   localPdfFile: document.getElementById("localPdfFile"),
@@ -32,6 +34,8 @@ const elements = {
 let templates = loadTemplates();
 let activeObjectUrl = null;
 let selectedTemplateFile = null;
+let isTemplateSubmitting = false;
+let isFillSubmitting = false;
 
 initialize();
 
@@ -246,6 +250,16 @@ function normalizeFields(rawFields) {
 
 async function handleTemplateSubmit(event) {
   event.preventDefault();
+
+  if (isTemplateSubmitting) {
+    setStatus(elements.templateFormMessage, "Request already in progress...", "info");
+    return;
+  }
+
+  isTemplateSubmitting = true;
+  elements.createTemplateBtn.disabled = true;
+  elements.createTemplateBtn.textContent = "Creating...";
+
   clearJson(elements.templateFormResponse);
   setStatus(elements.templateFormMessage, "");
 
@@ -259,11 +273,13 @@ async function handleTemplateSubmit(event) {
       "Name, PDF file, and template directory are required.",
       "error"
     );
+    isTemplateSubmitting = false;
     return;
   }
 
   if (normalized.error) {
     setStatus(elements.templateFormMessage, normalized.error, "error");
+    isTemplateSubmitting = false;
     return;
   }
 
@@ -280,6 +296,7 @@ async function handleTemplateSubmit(event) {
     };
 
     setStatus(elements.templateFormMessage, "Creating template...", "info");
+
     const response = await fetch(`${API_BASE_URL}/templates/create`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -287,12 +304,14 @@ async function handleTemplateSubmit(event) {
     });
 
     const body = await parseJsonResponse(response);
+
     if (!response.ok) {
       throw new Error(extractErrorMessage(body, response.status));
     }
 
     upsertTemplate(body);
     await refreshTemplatesFromApi();
+
     elements.fillTemplateId.value = String(body.id || "");
     elements.serverPdfPath.value = body.pdf_path || "";
 
@@ -301,11 +320,17 @@ async function handleTemplateSubmit(event) {
       `Template created (id: ${body.id}). PDF saved at ${upload.pdf_path}.`,
       "success"
     );
+
     showJson(elements.templateFormResponse, body);
   } catch (error) {
     setStatus(elements.templateFormMessage, error.message, "error");
+  } finally {
+    isTemplateSubmitting = false;
+    elements.createTemplateBtn.disabled = false;
+    elements.createTemplateBtn.textContent = "Create Template";
   }
 }
+
 
 async function uploadTemplatePdf(file, directory) {
   const formData = new FormData();
@@ -327,6 +352,16 @@ async function uploadTemplatePdf(file, directory) {
 
 async function handleFillSubmit(event) {
   event.preventDefault();
+
+  if (isFillSubmitting) {
+    setStatus(elements.fillFormMessage, "Request already in progress...", "info");
+    return;
+  }
+
+  isFillSubmitting = true;
+  elements.fillFormBtn.disabled = true;
+  elements.fillFormBtn.textContent = "Submitting...";
+
   clearJson(elements.fillFormResponse);
   setStatus(elements.fillFormMessage, "");
 
@@ -335,11 +370,13 @@ async function handleFillSubmit(event) {
 
   if (!Number.isInteger(templateId) || templateId < 1) {
     setStatus(elements.fillFormMessage, "Template ID must be a positive integer.", "error");
+    isFillSubmitting = false;
     return;
   }
 
   if (!inputText) {
     setStatus(elements.fillFormMessage, "Input text is required.", "error");
+    isFillSubmitting = false;
     return;
   }
 
@@ -350,6 +387,7 @@ async function handleFillSubmit(event) {
 
   try {
     setStatus(elements.fillFormMessage, "Submitting form fill request...", "info");
+
     const response = await fetch(`${API_BASE_URL}/forms/fill`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -357,6 +395,7 @@ async function handleFillSubmit(event) {
     });
 
     const body = await parseJsonResponse(response);
+
     if (!response.ok) {
       throw new Error(extractErrorMessage(body, response.status));
     }
@@ -372,9 +411,14 @@ async function handleFillSubmit(event) {
       `Form filled (submission id: ${body.id}).`,
       "success"
     );
+
     showJson(elements.fillFormResponse, body);
   } catch (error) {
     setStatus(elements.fillFormMessage, error.message, "error");
+  } finally {
+        isFillSubmitting = false;
+    elements.fillFormBtn.disabled = false;
+    elements.fillFormBtn.textContent = "Fill Form";
   }
 }
 
