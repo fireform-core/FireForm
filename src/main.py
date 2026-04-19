@@ -1,5 +1,6 @@
 import os
-# from backend import Fill  
+# from backend import Fill 
+from typing import Union 
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
@@ -18,10 +19,10 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
     and returns the path to the newly created file.
     """
     
-    print("[1] Received request from frontend.")
+    print("[1] Received request from ag frontend.")
     print(f"[2] PDF template path: {pdf_form_path}")
     
-    # Normalize Path/PathLike to a plain string for downstream code
+    # Normalize Path to a string
     pdf_form_path = os.fspath(pdf_form_path)
     
     if not os.path.exists(pdf_form_path):
@@ -44,10 +45,11 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
         
     except Exception as e:
         print(f"An error occurred during PDF generation: {e}")
+
         # Re-raise the exception so the frontend can handle it
         raise e
 
-
+#old
 # if __name__ == "__main__":
 #     file = "./src/inputs/file.pdf"
 #     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
@@ -65,19 +67,41 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
     
 #     run_pdf_fill_process(user_input, fields, file)
 
+
+#new
+
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
+    prepared_pdf = "/app/temp_outfile.pdf"
+
     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-    fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
-    prepared_pdf = "temp_outfile.pdf"
-    prepare_form(file, prepared_pdf)
     
+    user_input_with_timeline = user_input + " At 14:30 we arrived on scene. At 15:45 the fire was contained. At 16:10 patient was transported."
+
+    # Step 1: Prepare PDF
+    prepare_form(file, prepared_pdf)
+
+    # Step 2: Extract actual PDF field names
     reader = PdfReader(prepared_pdf)
-    fields = reader.get_fields()
-    if(fields):
-        num_fields = len(fields)
-    else:
-        num_fields = 0
-        
+    pdf_fields_dict = reader.get_fields() or {}
+    pdf_field_names = list(pdf_fields_dict.keys())
+
+    # Step 3: Define  meanings 
+    definitions = [
+        "Employee's name",
+        "Employee's job title",
+        "Employee's department supervisor",
+        "Employee's phone number",
+        "Employee's email",
+        "Signature",
+        "Date"
+    ]
+
     controller = Controller()
-    controller.fill_form(user_input, fields, file)
+# standrad
+    print("\n--- Standard filling (no timeline) ---")
+    controller.fill_form(user_input, definitions, pdf_field_names, prepared_pdf, use_timeline=False)
+#Tmeline usage 
+# runs as a seperate run
+    print("\n--- Timeline-enabled filling ---")
+    controller.fill_form(user_input_with_timeline, definitions, pdf_field_names, prepared_pdf, use_timeline=True)
