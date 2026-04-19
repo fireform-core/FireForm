@@ -4,6 +4,7 @@ import requests
 from api.services.prompt_builder import build_extraction_prompt
 from src.validation import validate_extraction
 from requests.exceptions import Timeout, RequestException
+from src.llm_client import call_llm
 
 def safe_extract_value(response: str):
     if not response:
@@ -106,9 +107,7 @@ class LLM:
             try:
                 for attempt in range(max_retries):
                     try:
-                        response = requests.post(ollama_url, json=payload, timeout=timeout)
-                        response.raise_for_status()
-                        json_data = response.json()
+                        json_data = call_llm(prompt, timeout=timeout, retries=max_retries)
                         break
                     except Timeout:
                         print(f"Ollama request timed out (attempt {attempt+1})")
