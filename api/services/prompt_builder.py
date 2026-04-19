@@ -60,3 +60,26 @@ Now extract strictly from the following input (follow all rules above):
 
 {input_text}
 """
+
+def build_field_prompt(transcript_text: str, current_field: str) -> str:
+    return f"""
+SYSTEM PROMPT:
+You are an AI assistant designed to help fill out JSON fields with information extracted from transcribed text.
+
+You will receive:
+- a transcript
+- a target field name
+
+Return ONLY the value for that field.
+
+Rules:
+- If multiple values exist → separate with ";"
+- If no value found → return "-1"
+- Do NOT add explanation
+
+DATA:
+Target JSON field: {current_field}
+
+TEXT:
+{transcript_text}
+"""

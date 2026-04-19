@@ -1,7 +1,7 @@
 import json
 import os
 import requests
-from api.services.prompt_builder import build_extraction_prompt
+from api.services.prompt_builder import build_field_prompt
 from src.validation import validate_extraction
 from requests.exceptions import Timeout, RequestException
 from src.llm_client import call_llm
@@ -52,26 +52,7 @@ class LLM:
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
             )
 
-    def build_prompt(self, current_field):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
-            DATA:
-            Target JSON field to find in text: {current_field}
-            
-            TEXT: {self._transcript_text}
-            """
-
-        return prompt
+    
 
     def main_loop(self):
         timeout = 30
@@ -80,22 +61,13 @@ class LLM:
         # self.type_check_all()
         total_fields = len(self._target_fields)
         for i, field in enumerate(self._target_fields.keys(), 1):
-            prompt = self.build_prompt(field)
+            prompt = build_field_prompt(self._transcript_text, field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
-            base_prompt = build_extraction_prompt(self._transcript_text)
-
-            prompt = f"""
-            {base_prompt}
-
-            Focus specifically on extracting the value for this field:
-            {field}
-
-            Return only the extracted value as a plain string. Do not return JSON.
-            """
+           
 
             payload = {
                 "model": "mistral",
