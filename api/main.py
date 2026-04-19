@@ -1,39 +1,52 @@
+import logging
 from contextlib import asynccontextmanager
-import os
 
 from fastapi import FastAPI
-from api.routes import templates, forms
-from api.db.init_db import init_db
-from api.errors.handlers import register_exception_handlers
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import SQLModel
+
+from api.db.database import engine
 from api.routes import forms, templates
+from api.errors.handlers import register_exception_handlers
+from api.middleware.rate_limiter import register_rate_limiter
+
+logger = logging.getLogger("fireform")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Initialize the database and seed it if necessary
-    print("Initializing database...")
-    init_db()
+    logger.info("Starting FireForm — initializing database tables")
+    SQLModel.metadata.create_all(engine)
+    logger.info("Database tables ready")
     yield
-    # Shutdown logic goes here if needed
+    logger.info("Shutting down FireForm")
 
-app = FastAPI(lifespan=lifespan)
+
+app = FastAPI(
+    title="FireForm API",
+    description="AI-powered PDF form filling for first responders",
+    version="0.1.0",
+    lifespan=lifespan,
+)
 
 register_exception_handlers(app)
-
-default_origins = "http://127.0.0.1:5173"
-allowed_origins = [
-    origin.strip()
-    for origin in os.getenv("FRONTEND_ORIGINS", default_origins).split(",")
-    if origin.strip()
-]
+register_rate_limiter(app)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=False,
+    allow_origins=[
+        "http://127.0.0.1:5500",
+        "http://localhost:5500",
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(templates.router)
 app.include_router(forms.router)
+
+
+@app.get("/health", tags=["system"])
+def health_check():
+    return {"status": "healthy", "service": "fireform"}
