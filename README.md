@@ -24,6 +24,42 @@ The result is hours of time saved per shift, per firefighter.
 
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
 
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.12+
+- Docker (recommended)
+- Ollama (for local LLM)
+
+### Local Development
+
+1. Clone the repository:
+```bash
+   git clone https://github.com/fireform-core/FireForm.git
+   cd FireForm
+```
+
+2. Copy the environment template:
+```bash
+   cp .env.example .env
+```
+
+3. Generate a secure secret key:
+```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+4. Fill in the required values in `.env`
+
+5. Start with Docker:
+```bash
+   docker compose up
+```
+
+⚠️ **Never commit `.env` to Git** — it contains secrets.
+
+For production deployment and secrets rotation, see [SECRETS.md](./SECRETS.md).
+
 ## 🤝 Code of Conduct
 
 We are committed to providing a friendly, safe, and welcoming environment for all. Please see our [Code of Conduct](CODE_OF_CONDUCT.md) for more information.
