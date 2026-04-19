@@ -20,6 +20,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: fireform-app
+    ports:
+      - "8000:8000"
     depends_on:
       ollama:
         condition: service_healthy
