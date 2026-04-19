@@ -131,7 +131,6 @@ class LLM:
                 self.add_response_to_json(field, parsed_response)
                 print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
-
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
         print(json.dumps(self._json, indent=2))
@@ -174,7 +173,9 @@ class LLM:
         values = plural_value.split(";")
 
         for i in range(len(values)):
-            values[i] = values[i].strip()
+            values[i] = values[i].lstrip()
+
+        print(f"\t[LOG]: Resulting formatted list of values: {values}")
 
         return values
 

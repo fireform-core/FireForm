@@ -1,12 +1,10 @@
-
+from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import forms, templates
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
 from api.routes import templates, forms
 from api.db.init_db import init_db
 from api.errors.handlers import register_exception_handlers
@@ -21,6 +19,8 @@ async def lifespan(app: FastAPI):
     # Shutdown logic goes here if needed
 
 app = FastAPI(lifespan=lifespan)
+
+register_exception_handlers(app)
 
 default_origins = "http://127.0.0.1:5173"
 allowed_origins = [
