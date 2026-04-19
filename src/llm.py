@@ -2,7 +2,6 @@ import json
 import os
 import requests
 from api.services.prompt_builder import build_field_prompt
-from src.validation import validate_extraction
 from requests.exceptions import Timeout, RequestException
 from src.llm_client import call_llm
 
@@ -60,7 +59,7 @@ class LLM:
 
         # self.type_check_all()
         total_fields = len(self._target_fields)
-        for i, field in enumerate(self._target_fields.keys(), 1):
+        for i, field in enumerate(self._target_fields, 1):
             prompt = build_field_prompt(self._transcript_text, field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -152,9 +151,4 @@ class LLM:
         return values
 
     def get_data(self):
-        validated_data, errors = validate_extraction(self._json)
-
-        if errors:
-            print("[Validation Warning]", errors)
-
-        return validated_data
+        return self._json
