@@ -8,22 +8,13 @@ from sqlmodel import SQLModel
 from api.db.database import engine
 from api.routes import forms, templates
 from api.errors.handlers import register_exception_handlers
+from api.middleware.rate_limiter import register_rate_limiter
 
 logger = logging.getLogger("fireform")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Application lifecycle manager.
-
-    Startup: initializes database tables.
-    Shutdown: logs graceful shutdown.
-
-    Using lifespan ensures database initialization only happens
-    when the server actually starts, not when the module is
-    imported during testing or linting.
-    """
     logger.info("Starting FireForm — initializing database tables")
     SQLModel.metadata.create_all(engine)
     logger.info("Database tables ready")
@@ -39,6 +30,7 @@ app = FastAPI(
 )
 
 register_exception_handlers(app)
+register_rate_limiter(app)
 
 app.add_middleware(
     CORSMiddleware,
