@@ -2,6 +2,7 @@ const STORAGE_TEMPLATES_KEY = "fireform.templates.v1";
 const STORAGE_LAST_OUTPUT_KEY = "fireform.lastOutputPath.v1";
 const STORAGE_TEMPLATE_DIR_KEY = "fireform.templateDirectory.v1";
 const API_BASE_URL = "http://127.0.0.1:8000";
+const MAX_FILE_SIZE_MB = 20;
 
 const elements = {
   tabs: Array.from(document.querySelectorAll(".tab")),
@@ -157,6 +158,24 @@ function setSelectedTemplateFile(file) {
   if (!isPdfFile(file)) {
     selectedTemplateFile = null;
     setStatus(elements.templateFormMessage, "Please select a PDF file.", "error");
+    updateSelectedFileMeta();
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+    selectedTemplateFile = null;
+    setStatus(
+      elements.templateFormMessage,
+      `File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${MAX_FILE_SIZE_MB} MB.`,
+      "error"
+    );
+    updateSelectedFileMeta();
+    return;
+  }
+
+  if (file.size === 0) {
+    selectedTemplateFile = null;
+    setStatus(elements.templateFormMessage, "Selected file is empty.", "error");
     updateSelectedFileMeta();
     return;
   }
