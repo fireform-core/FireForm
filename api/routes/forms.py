@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from api.deps import get_db
@@ -7,12 +7,14 @@ from api.db.repositories import create_form, get_template
 from api.db.models import FormSubmission
 from api.errors.base import AppError
 from src.controller import Controller
+from api.middleware.rate_limiter import limiter
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
 
 @router.post("/fill", response_model=FormFillResponse)
-def fill_form(form: FormFill, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def fill_form(request: Request, form: FormFill, db: Session = Depends(get_db)):
     # Single query instead of the previous duplicate get_template() calls
     template = get_template(db, form.template_id)
     if not template:

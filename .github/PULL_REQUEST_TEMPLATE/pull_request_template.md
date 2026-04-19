@@ -21,9 +21,9 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] Test B
 
 **Test Configuration**:
-* Firmware version:
-* Hardware:
-* SDK:
+* Python version:
+* Docker/Compose version:
+* OS:
 
 ## Checklist:
 
