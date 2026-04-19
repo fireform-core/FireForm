@@ -2,7 +2,6 @@ import os
 import logging
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,7 +15,14 @@ class FileManipulator:
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        # Lazy import
+        from commonforms import prepare_form
         template_path = pdf_path[:-4] + "_template.pdf"
+
+        os.system("taskkill /F /IM ollama.exe >nul 2>&1")
+        print("Cleared existing Ollama instances. Starting fresh...")
+        
+        
         prepare_form(pdf_path, template_path)
         return template_path
 
