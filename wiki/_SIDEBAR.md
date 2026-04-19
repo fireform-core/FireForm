@@ -1,6 +1,6 @@
 ### Navigation
 
-- [[HOME]]
+- [[Home]]
 - [[ARCHITECTURE]]
 - [[DEPLOYMENT]]
 - [[DATABASE]]
