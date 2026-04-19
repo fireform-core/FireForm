@@ -2,5 +2,15 @@
 .idea
 venv
 .venv
-*.db
-.vscode
+
+# Temporary PDF files
+temp_outfile.pdf
+*_filled.pdf
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output directories
+src/outputs/*.pdf
