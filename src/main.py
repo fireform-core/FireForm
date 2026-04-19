@@ -25,4 +25,9 @@ if __name__ == "__main__":
         num_fields = 0
 
     controller = Controller()
-    controller.fill_form(user_input, fields, file)
+    result = controller.fill_form(user_input, fields, file)
+
+    if isinstance(result, dict) and "error" in result:
+        print(f"[INPUT ERROR] {result['error']}")
+    else:
+        print("Processing successful")

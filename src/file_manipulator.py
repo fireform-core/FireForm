@@ -28,6 +28,16 @@ class FileManipulator:
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
         """
+        # --- Value validation layer ---
+        if not isinstance(user_input, str):
+            return {"error": "Incident input must be a string"}
+
+        if not user_input.strip():
+            return {"error": "Incident description cannot be empty"}
+
+        if len(user_input.strip()) < 10:
+            return {"error": "Incident description too short to process"}
+
         print("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
 
