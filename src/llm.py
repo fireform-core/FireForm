@@ -511,18 +511,21 @@ Use professional, objective reporting language.
     async def async_semantic_map(master_json: dict, target_pdf_fields: list) -> dict:
         """
         AI Semantic Mapper: Maps unstructured Data Lake JSON to specific PDF form fields.
+        Chunks massive PDFs (like ICS-209 AcroForms with 900+ fields) to avoid LLM context overflow.
         """
         import httpx
         import json
         import os
+        import asyncio
         
         ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
         ollama_url = f"{ollama_host}/api/generate"
-        
-        # Prepare the target fields list for the prompt
-        fields_str = "\n".join([f'- "{f}"' for f in target_pdf_fields])
-        
-        prompt = f"""You are an intelligent data mapping system.
+        text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
+        timeout = int(os.getenv("OLLAMA_TIMEOUT", "600"))
+
+        async def map_chunk(chunk_fields):
+            fields_str = "\n".join([f'- "{f}"' for f in chunk_fields])
+            prompt = f"""You are an intelligent data mapping system.
 I will give you a JSON object containing extracted incident details, and a list of target form fields.
 Your job is to map the available details into the target form fields based on human semantics.
 
@@ -533,32 +536,37 @@ AVAILABLE INCIDENT DATA:
 {json.dumps(master_json, indent=2)}
 
 RULES:
-1. Return ONLY a valid JSON object. No markdown, no explanations, no text before or after the JSON braces "{{}}".
+1. Return ONLY a valid JSON object. No explanations.
 2. The JSON keys MUST EXACTLY match the TARGET FORM FIELDS requested above.
 3. If the available data does not contain information suitable for a target field, output null for that field.
-4. Do not invent information not present in the available incident data! Look for synonyms (e.g., if target is "FullName", look for "Speaker", "ApplicantName", "Officer", etc. in the available data).
+4. Do not invent information! Map synonyms where obvious.
 
 MAPPED JSON OUTPUT:"""
 
-        text_model = os.getenv("FIREFORM_TEXT_MODEL", "gemma3:4b")
-        payload = {"model": text_model, "prompt": prompt, "stream": False, "format": "json"}
-        print(f"[SEMANTIC MAPPER] Mapping {len(master_json)} lake fields to {len(target_pdf_fields)} PDF fields using {text_model}...")
-        
-        try:
-            timeout = int(os.getenv("OLLAMA_TIMEOUT", "300"))
+            payload = {"model": text_model, "prompt": prompt, "stream": False, "format": "json"}
             async with httpx.AsyncClient() as client:
                 response = await client.post(ollama_url, json=payload, timeout=timeout)
                 response.raise_for_status()
                 
             raw = response.json()["response"].strip()
             raw = raw.replace("```json", "").replace("```", "").strip()
-            
-            mapped_data = json.loads(raw)
-            mapped_count = sum(1 for v in mapped_data.values() if v is not None and str(v).lower() not in ("null", "none", ""))
-            print(f"[SEMANTIC MAPPER] Successfully mapped {mapped_count} out of {len(target_pdf_fields)} required PDF fields.")
-            return mapped_data
-            
-        except Exception as e:
-            print(f"[ERROR] Semantic mapping failed: {e}")
-            # Fallback to empty if it entirely fails, so standard processing can try fallback exact matches
-            return {}
+            return json.loads(raw)
+
+        # Chunk the target fields to prevent 503 timeouts (safe limit for gemma3:4b)
+        CHUNK_SIZE = 50
+        chunks = [target_pdf_fields[i:i + CHUNK_SIZE] for i in range(0, len(target_pdf_fields), CHUNK_SIZE)]
+        print(f"[SEMANTIC MAPPER] Mapping {len(master_json)} lake fields to {len(target_pdf_fields)} PDF fields across {len(chunks)} chunk(s)...")
+
+        mapped_data = {}
+        for idx, chunk in enumerate(chunks, 1):
+            print(f"\t[SEMANTIC MAPPER] Processing Chunk {idx}/{len(chunks)} ({len(chunk)} fields)...")
+            try:
+                # We run sequentially because local LLMs queue requests anyway
+                chunk_result = await map_chunk(chunk)
+                mapped_data.update(chunk_result)
+            except Exception as e:
+                print(f"\t[ERROR] Semantic chunk {idx} failed: {e}")
+                
+        mapped_count = sum(1 for v in mapped_data.values() if v is not None and str(v).lower() not in ("null", "none", ""))
+        print(f"[SEMANTIC MAPPER] Successfully mapped {mapped_count} out of {len(target_pdf_fields)} PDF fields.")
+        return mapped_data

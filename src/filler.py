@@ -349,24 +349,35 @@ class Filler:
                 # Convert percentages (0-100) back to absolute PDF points
                 x_pts = (coord.x / 100.0) * page_w
                 y_pts_from_top = (coord.y / 100.0) * page_h
+                w_pts = (coord.width / 100.0) * page_w
 
                 # CRITICAL: reportlab uses BOTTOM-LEFT origin
-                # pdfplumber/our DB uses TOP-LEFT origin
-                # So we need to flip the Y axis
                 y_reportlab = page_h - y_pts_from_top
 
-                # Draw the text slightly above the baseline
-                # (y_reportlab points to the TOP of the line; text needs
-                #  to sit on the baseline which is near the bottom of the line)
-                font_size = 10
-                h_pts = (coord.height / 100.0) * page_h
-                text_y = y_reportlab - h_pts + 2  # near bottom of field area
+                # Use Paragraph to support word-wrapping and newlines natively
+                from reportlab.platypus import Paragraph
+                from reportlab.lib.styles import getSampleStyleSheet
+                style = getSampleStyleSheet()["Normal"]
+                style.fontName = "Helvetica"
+                style.fontSize = 10
+                style.leading = 12
+                
+                # If width is 0 or extremely small due to edge scanning, give it a default reasonable width
+                avail_w = w_pts if w_pts > 40 else 250
 
-                c.setFontSize(font_size)
-                c.drawString(x_pts, text_y, val_str)
+                html_val = val_str.replace("\n", "<br/>")
+                p = Paragraph(html_val, style)
+                
+                # Wrap computes how much actual box height (bh) the text needs
+                bw, bh = p.wrap(avail_w, page_h)  
+                
+                # drawOn places the very bottom of the paragraph. 
+                # Since y_reportlab is the top of our field boundary, we subtract bh to anchor it below.
+                draw_y = y_reportlab - bh
+                p.drawOn(c, x_pts, draw_y)
 
                 fields_filled += 1
-                print(f"  [OVERLAY] '{coord.field_label}' → '{val_str}' at ({x_pts:.1f}, {text_y:.1f})")
+                print(f"  [OVERLAY] '{coord.field_label}' (WRAP w={avail_w:.0f}pt) → {val_str[:30]}... at ({x_pts:.1f}, {draw_y:.1f})")
 
             c.save()
             packet.seek(0)

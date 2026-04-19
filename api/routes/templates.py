@@ -220,74 +220,105 @@ def _scan_fields_with_tesseract(pdf_path: str, dpi: int = 200) -> list[dict]:
             lt = " ".join(w["text"] for w in lw)
             print(f"  line {idx:02d}: '{lt[:90]}'")
 
-        # ── Identical field detection logic as PyMuPDF path ─────────────
+        # ── Enhanced field detection: multi-colon + numbered patterns ───────
+        # Handles forms like ICS-214 where:
+        #   - Multiple "Label: [blank] Label: [blank]" appear on one line
+        #   - Numbered fields "1. Incident Name" have no colon but ARE fillable
         for line_words in lines:
             line_words = sorted(line_words, key=lambda w: w["x0"])
-            full_text = " ".join(w["text"] for w in line_words)
+            full_text  = " ".join(w["text"] for w in line_words)
 
             has_colon       = ":" in full_text
             has_underscores = "_" * 4 in full_text or full_text.count("_") >= 4
 
-            if not (has_colon or has_underscores):
-                continue
-
-            # Skip header lines with content after colon
-            if has_colon and not has_underscores:
-                colon_pos = full_text.find(":")
-                after_colon = full_text[colon_pos + 1:].strip()
-                if after_colon and not after_colon.startswith("_"):
-                    label_part = full_text[:colon_pos].strip().lower()
-                    HEADER_WORDS = {"title", "form", "section", "page", "date", "version", "revision"}
-                    if any(hw in label_part for hw in HEADER_WORDS):
-                        continue
-
-            label_text    = full_text.strip()
-            answer_x: float | None = None
             answer_y      = min(w["y0"] for w in line_words)
             answer_bottom = max(w["y1"] for w in line_words)
 
+            # ── Strategy A: UNDERSCORE blanks ───────────────────────────
             if has_underscores:
                 for w in line_words:
                     if "_" * 4 in w["text"]:
-                        answer_x = w["x0"]
-                        answer_bottom = w["y1"]
+                        answer_x   = w["x0"]
                         label_parts = [lw["text"] for lw in line_words if lw["x0"] < w["x0"]]
-                        if label_parts:
-                            label_text = " ".join(label_parts)
-                        break
+                        label_text  = " ".join(label_parts) if label_parts else full_text
+                        clean_label = re.sub(r'^[\d\.\)\s]+', '', label_text).rstrip(': _\n').strip()
+                        if clean_label:
+                            found_fields.append({
+                                "raw_label": clean_label, "answer_x": round(answer_x, 2),
+                                "answer_y": round(answer_y, 2), "answer_bottom": round(w["y1"], 2),
+                                "page_num": page_num, "page_w": round(pw_pt, 2), "page_h": round(ph_pt, 2),
+                                "line_text": full_text.strip(),
+                            })
+                            print(f"  [FIELD] '{clean_label:25s}' answer_x={answer_x:.1f}pt  y0={answer_y:.1f}pt")
+                continue   # underscore lines done
 
-            if answer_x is None and has_colon:
-                for w in line_words:
-                    if ":" in w["text"]:
-                        answer_x = w["x1"] + 2
-                        label_parts = []
-                        for lw in line_words:
-                            label_parts.append(lw["text"])
-                            if ":" in lw["text"]:
-                                break
-                        label_text = " ".join(label_parts)
-                        break
+            # ── Strategy B: ALL colons in one line → one field each ──────
+            if has_colon:
+                HEADER_WORDS = {"title", "form", "section", "page", "version", "revision", "ics", "noaa"}
+                # Find every word that contains ":" and treat each as a field label endpoint
+                colon_words = [i for i, w in enumerate(line_words) if ":" in w["text"]]
+                for ci, colon_idx in enumerate(colon_words):
+                    # Label = words from previous colon_word+1 up to this colon_word (inclusive)
+                    prev_end = colon_words[ci - 1] + 1 if ci > 0 else 0
+                    label_parts = [line_words[j]["text"] for j in range(prev_end, colon_idx + 1)]
+                    label_text  = " ".join(label_parts)
+                    clean_label = re.sub(r'^[\d\.\)\s/]+', '', label_text).rstrip(': _\n').strip()
 
-            if answer_x is None:
-                answer_x = line_words[-1]["x1"] + 2
+                    if not clean_label or len(clean_label) < 2:
+                        continue
+                    if any(hw in clean_label.lower() for hw in HEADER_WORDS):
+                        continue
 
-            clean_label = re.sub(r'^[\d\.\)\s]+', '', label_text)
-            clean_label = clean_label.rstrip(': _\n').strip()
+                    # answer_x = right edge of the colon word + small padding
+                    answer_x = line_words[colon_idx]["x1"] + 2
 
-            if not clean_label:
-                continue
+                    # answer width = distance to next colon word (or page edge)
+                    if ci + 1 < len(colon_words):
+                        next_label_start = line_words[colon_words[ci + 1] - 1]["x0"] if colon_words[ci + 1] > 0 else pw_pt
+                        field_w = max(next_label_start - answer_x - 4, 20)
+                    else:
+                        field_w = pw_pt * 0.9 - answer_x
 
-            found_fields.append({
-                "raw_label":     clean_label,
-                "answer_x":      round(answer_x, 2),
-                "answer_y":      round(answer_y, 2),
-                "answer_bottom": round(answer_bottom, 2),
-                "page_num":      page_num,
-                "page_w":        round(pw_pt, 2),
-                "page_h":        round(ph_pt, 2),
-                "line_text":     full_text.strip(),
-            })
-            print(f"  [FIELD] '{clean_label:25s}' answer_x={answer_x:.1f}pt  y0={answer_y:.1f}pt")
+                    found_fields.append({
+                        "raw_label": clean_label, "answer_x": round(answer_x, 2),
+                        "answer_y": round(answer_y, 2), "answer_bottom": round(answer_bottom, 2),
+                        "page_num": page_num, "page_w": round(pw_pt, 2), "page_h": round(ph_pt, 2),
+                        "line_text": full_text.strip(),
+                    })
+                    print(f"  [FIELD] '{clean_label:25s}' answer_x={answer_x:.1f}pt  y0={answer_y:.1f}pt")
+                continue   # colon lines done — all colons processed
+
+            # ── Strategy C: Numbered fields "1. Incident Name" (no colon) ──
+            # ICS-214 has headers like "1. Incident Name 2. Operational Period"
+            # Find all numbered tokens, split the line at each, create one field per segment
+            numbered_positions = [(m.start(), m.group()) for m in re.finditer(r'(?<!\d)\d+\.(?!\d)', full_text)]
+            if len(numbered_positions) >= 1:
+                # Split full_text into segments between numbered markers
+                segments = []
+                for si, (start, _) in enumerate(numbered_positions):
+                    end = numbered_positions[si + 1][0] if si + 1 < len(numbered_positions) else len(full_text)
+                    segments.append(full_text[start:end].strip())
+
+                for seg in segments:
+                    # The answer area is to the RIGHT of this label segment's last word in the line
+                    seg_clean = re.sub(r'^\d+\.\s*', '', seg).strip().rstrip(': _').strip()
+                    if not seg_clean or len(seg_clean) < 2:
+                        continue
+                    # Find x position of the last word in this segment
+                    seg_words = [w for w in line_words if w["text"] in seg.split()]
+                    if seg_words:
+                        last_seg_word = max(seg_words, key=lambda w: w["x1"])
+                        answer_x = last_seg_word["x1"] + 4
+                    else:
+                        answer_x = line_words[-1]["x1"] + 4
+
+                    found_fields.append({
+                        "raw_label": seg_clean, "answer_x": round(answer_x, 2),
+                        "answer_y": round(answer_y, 2), "answer_bottom": round(answer_bottom, 2),
+                        "page_num": page_num, "page_w": round(pw_pt, 2), "page_h": round(ph_pt, 2),
+                        "line_text": full_text.strip(),
+                    })
+                    print(f"  [FIELD] '{seg_clean:25s}' answer_x={answer_x:.1f}pt  y0={answer_y:.1f}pt")
 
     doc.close()
     print(f"[TESSERACT] Done — {len(found_fields)} field(s) found")
@@ -467,9 +498,14 @@ async def scan_static_template(template_id: int, db: Session = Depends(get_db)):
             })
         print(f"[SCAN] ✅ {scan_mode} → {len(found_fields)} fields with exact coords")
 
-    # ── PATH 3: Gemma Vision — last resort only ───────────────────────────
-    if not found_fields:
-        print("[SCAN] PATH 3: Gemma Vision (last resort — both deterministic paths failed)...")
+    # ── PATH 3: Gemma Vision — true last resort only ──────────────────────
+    # Only fire if BOTH deterministic paths found absolutely nothing.
+    # Gemma Vision is slow (~5-10 min) and coordinates can be imprecise
+    # (off-page for complex table forms). Use only when Tesseract gets 0 fields.
+    MIN_FIELDS_THRESHOLD = 0
+    if len(found_fields) <= MIN_FIELDS_THRESHOLD:
+        reason = "0 fields found" if not found_fields else f"only {len(found_fields)} fields found (table form needs Gemma vision)"
+        print(f"[SCAN] PATH 3: Gemma Vision ({reason})...")
         scan_mode = "vision"
         llm = LLM()
         try:

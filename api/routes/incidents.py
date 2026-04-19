@@ -57,11 +57,37 @@ async def extract_to_data_lake(
     merged_fields = {}
 
     if all_templates:
-        # Build superset from all known templates
-        for tpl in all_templates:
-            if isinstance(tpl.fields, dict):
-                merged_fields.update(tpl.fields)
-        print(f"[DATA LAKE] Base schema: {len(merged_fields)} template fields across {len(all_templates)} templates")
+        # Instead of pulling 1000+ unreadable AcroForm fields from all templates,
+        # we provide a core Universal ICS Schema to guide the LLM, and let its dynamic 
+        # schema-less extraction catch everything else. This prevents 503 timeouts!
+        merged_fields = {
+            "incident_name": "Incident Name",
+            "incident_number": "Incident Number",
+            "date_time_of_report": "Date and Time of Report",
+            "report_version": "Report Version",
+            "incident_commander": "Incident Commander",
+            "incident_management_organization": "Incident Management Organization",
+            "incident_description": "Incident Description / Sub-type",
+            "location": "Location",
+            "current_incident_size_acres": "Current Incident Size (Acres)",
+            "percent_contained": "Percent Contained",
+            "estimated_containment_date": "Estimated Containment Date",
+            "cause_of_incident": "Cause of Incident",
+            "weather_conditions": "Weather Conditions (Current)",
+            "significant_events": "Significant Events / Critical Activity",
+            "planned_actions": "Planned Actions for Next 24 Hours",
+            "operational_period_from": "Operational Period From",
+            "operational_period_to": "Operational Period To",
+            "from": "From Time",
+            "to": "To Time",
+            "unit_name": "Unit Name / Designators",
+            "unit_leader": "Unit Leader (Name and ICS Position)",
+            "personnel_assigned": "Personnel Assigned",
+            "activity_log": "Activity Log",
+            "prepared_by": "Prepared By",
+            "preparation_date_time": "Date and Time of Preparation"
+        }
+        print(f"[DATA LAKE] Using Universal ICS Schema ({len(merged_fields)} fields) to prevent LLM timeout.")
 
     try:
         llm = LLM(transcript_text=input_text, target_fields=merged_fields)
@@ -134,9 +160,7 @@ async def generate_pdf_from_lake(
 
     master_data = json.loads(incident.master_json)
 
-    # FIX #2 & #4: Determine target fields based on whether this is a static or AcroForm PDF.
-    # For static PDFs (scanned with vision), use the coordinate labels as targets.
-    # For regular AcroForms, use the stored template field names.
+    # Determine target fields based on whether this is a static or AcroForm PDF.
     from api.db.repositories import get_template_coordinates
     coords = get_template_coordinates(db, template_id)
     
@@ -146,7 +170,19 @@ async def generate_pdf_from_lake(
         print(f"[DATA LAKE] Static PDF detected — using {len(tpl_fields)} scanned coordinate labels as targets")
     else:
         # AcroForm path: use stored field names from template
-        tpl_fields = list(template.fields.keys()) if isinstance(template.fields, dict) else template.fields
+        raw_fields = list(template.fields.keys()) if isinstance(template.fields, dict) else template.fields
+        
+        # --- JUNK FILTER ---
+        import re
+        tpl_fields = []
+        for f in raw_fields:
+            if not f: continue
+            basename = str(f).split('.')[-1].split('[')[0].lower()
+            if re.match(r'^(textfield|text|checkbox|check|button|btn|radio|listbox|combo|rectangle|line)\d*$', basename):
+                continue
+            tpl_fields.append(f)
+            
+        print(f"[DATA LAKE] Junk Filter: compressed {len(raw_fields)} raw structural fields down to {len(tpl_fields)} meaningful targets.")
 
     # --- THE MAGIC BRIDGE: AI Semantic Mapper ---
     from src.llm import LLM
@@ -297,64 +333,4 @@ Use formal language appropriate for legal documentation."""
         "narrative": narrative,
         "format": "markdown",
         "generated_at": datetime.utcnow().isoformat()
-    }
-
-
-# ── Vision Model Endpoints ──────────────────────────────
-
-from fastapi import UploadFile, File
-
-@router.post("/{incident_id}/scene-photo")
-async def add_scene_photo(
-    incident_id: str,
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
-):
-    """
-    Multimodal Vision Integration.
-    Upload a scene photo to the incident. Uses Gemma 3 vision model to generate
-    a professional narrative of the scene and merges it into the Data Lake Master JSON.
-    """
-    if not incident_id:
-        raise AppError("Missing incident_id", status_code=400)
-        
-    incident = get_incident(db, incident_id)
-    if not incident:
-        # Auto-create if it doesn't exist
-        incident = IncidentMasterData(
-            incident_id=incident_id,
-            master_json="{}",
-            transcript_text="[VISION] Image submitted."
-        )
-        create_incident(db, incident)
-
-    import base64
-    image_bytes = await file.read()
-    
-    # Run the vision model (async)
-    from src.llm import LLM
-    llm = LLM()
-    try:
-        scene_narrative = await llm.async_vision_describe_scene(image_bytes)
-        print(f"[VISION] Scene Narrative generated: {scene_narrative[:50]}...")
-    except Exception as e:
-        raise AppError(f"Vision model failed: {e}", status_code=500)
-    
-    # Update the data lake using the smart consensus merge
-    new_data = {
-        "scene_visual_analysis": scene_narrative
-    }
-    
-    update_incident_json(
-        db, 
-        incident_id, 
-        new_data, 
-        new_transcript=f"[VISUAL OBSERVATION]: {scene_narrative}"
-    )
-
-    return {
-        "incident_id": incident_id,
-        "status": "photo_analyzed_and_merged",
-        "narrative_preview": scene_narrative[:100] + "...",
-        "message": "Scene analysis merged into master data lake."
     }
