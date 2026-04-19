@@ -1,7 +1,10 @@
 import os
+import logging
 from src.filler import Filler
 from src.llm import LLM
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class FileManipulator:
     def __init__(self):
@@ -28,24 +31,43 @@ class FileManipulator:
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
         """
-        print("[1] Received request from frontend.")
+        logger.info("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
 
         if not os.path.exists(pdf_form_path):
             print(f"Error: PDF template not found at {pdf_form_path}")
             return None  # Or raise an exception
 
-        print("[3] Starting extraction and PDF filling process...")
+        logger.info("[3] Starting extraction...")
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+
+            success = self.llm.extract_structured_safe()
+
+            if not success:
+                print("Structured extraction failed → fallback to old extraction")
+                self.llm.main_loop()
+
+            output_name = self.filler.fill_form(
+                pdf_form=pdf_form_path,
+                llm=self.llm
+            )
+
+            from src.utils.validation import requires_review
+
+            extracted_data = self.llm.get_data()
+
+            review_flag = requires_review(
+                extracted_data,
+                fields.keys()
+            )
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
             print(f"Output saved to: {output_name}")
 
-            return output_name
+            return output_name, review_flag
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
