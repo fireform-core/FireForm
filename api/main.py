@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from api.routes import templates, forms
 from api.db.init_db import init_db
 from api.errors.handlers import register_exception_handlers
-from fastapi.middleware.cors import CORSMiddleware
-from api.routes import forms, templates
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,6 +36,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+register_exception_handlers(app)
 
 app.include_router(templates.router)
 app.include_router(forms.router)

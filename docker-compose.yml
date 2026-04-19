@@ -24,6 +24,9 @@ services:
       ollama:
         condition: service_healthy
     command: /bin/sh -c "python3 -m api.db.init_db && python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
+    # Fix #224 — expose port so API is reachable at http://localhost:8000
+    ports:
+      - "8000:8000"
     volumes:
       - .:/app
     ports:
