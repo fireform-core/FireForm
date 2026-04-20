@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime , timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
@@ -70,7 +70,7 @@ async def upload_template_pdf(
 
     target_path = target_dir / filename
     if target_path.exists():
-        timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         target_path = target_dir / f"{target_path.stem}_{timestamp}{target_path.suffix}"
 
     content = await file.read()
