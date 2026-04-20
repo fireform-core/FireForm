@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FireForm</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <h1>FireForm</h1>
+        <p class="subtitle">
+          Create templates, fill forms, and preview PDFs from one place.
+        </p>
+      </header>
+
+      <nav class="tabs" aria-label="Primary sections">
+        <button class="tab active" type="button" data-target="uploaderSection">
+          Upload Template
+        </button>
+        <button class="tab" type="button" data-target="templateViewerSection">
+          Templates
+        </button>
+        <button class="tab" type="button" data-target="fillFormSection">
+          Fill Form
+        </button>
+        <button class="tab" type="button" data-target="pdfPreviewerSection">
+          PDF Preview
+        </button>
+      </nav>
+
+      <section id="uploaderSection" class="panel card">
+        <h2>Create Template</h2>
+        <form id="templateForm" class="stacked-form">
+          <label for="templateName">Template Name</label>
+          <input id="templateName" type="text" placeholder="Incident Intake Form" required />
+
+          <label for="templatePdfFile">Template PDF File</label>
+          <input id="templatePdfFile" type="file" accept="application/pdf" class="hidden" />
+          <div
+            id="pdfDropZone"
+            class="dropzone"
+            role="button"
+            tabindex="0"
+            aria-label="Drag and drop a PDF file or click to select"
+          >
+            <strong>Drag and drop a PDF here</strong>
+            <span>or click to select a file</span>
+          </div>
+          <p id="selectedFileMeta" class="helper">No PDF selected.</p>
+
+          <label for="templateDirectory">Template Directory</label>
+          <input
+            id="templateDirectory"
+            type="text"
+            placeholder="src/inputs"
+            value="src/inputs"
+            required
+            spellcheck="false"
+          />
+          <p class="helper">
+            The selected PDF is copied into this project directory before template creation.
+          </p>
+
+          <label for="templateFields">Fields JSON</label>
+          <textarea id="templateFields" rows="8" spellcheck="false" required>{
+  "Employee's name": "string",
+  "Employee's job title": "string",
+  "Employee's department supervisor": "string",
+  "Employee's phone number": "string",
+  "Employee's email": "string",
+  "Signature": "string",
+  "Date": "string"
+}</textarea>
+
+          <button type="submit">Create Template</button>
+        </form>
+        <p id="templateFormMessage" class="status" aria-live="polite"></p>
+        <pre id="templateFormResponse" class="json-output hidden"></pre>
+      </section>
+
+      <section id="templateViewerSection" class="panel card hidden">
+        <h2>Templates</h2>
+        <p class="helper">
+          Templates are loaded from the database and refreshed automatically.
+        </p>
+        <div id="templatesEmpty" class="empty-state hidden">No templates stored yet.</div>
+        <div id="templatesList" class="template-list"></div>
+      </section>
+
+      <section id="fillFormSection" class="panel card hidden">
+        <h2>Fill Form</h2>
+        <form id="fillForm" class="stacked-form">
+          <label for="fillTemplateId">Template ID</label>
+          <input id="fillTemplateId" type="number" min="1" placeholder="1" required />
+
+          <label for="inputText">Incident Input Text</label>
+          <textarea
+            id="inputText"
+            rows="6"
+            placeholder="Describe the incident using natural language..."
+            required
+          ></textarea>
+
+          <button type="submit">Fill Form</button>
+        </form>
+        <p id="fillFormMessage" class="status" aria-live="polite"></p>
+        <pre id="fillFormResponse" class="json-output hidden"></pre>
+      </section>
+
+      <section id="pdfPreviewerSection" class="panel card hidden">
+        <h2>PDF Preview</h2>
+
+        <div class="preview-controls">
+          <label for="localPdfFile">Preview Local PDF</label>
+          <input id="localPdfFile" type="file" accept="application/pdf" />
+        </div>
+
+        <div class="preview-controls">
+          <label for="serverPdfPath">Preview from Template or Output Path</label>
+          <div class="inline-actions">
+            <input
+              id="serverPdfPath"
+              type="text"
+              placeholder="src/inputs/file_template.pdf or https://..."
+              spellcheck="false"
+            />
+            <button id="previewPathBtn" type="button">Preview Path</button>
+          </div>
+        </div>
+
+        <p id="previewStatus" class="status" aria-live="polite"></p>
+        <iframe id="pdfFrame" title="PDF Preview"></iframe>
+      </section>
+    </main>
+
+    <script src="./app.js?v=20260401b"></script>
+  </body>
+</html>

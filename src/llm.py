@@ -2,6 +2,7 @@ import json
 import os
 import requests
 from api.services.prompt_builder import build_extraction_prompt
+from requests.exceptions import Timeout, RequestException
 
 def safe_extract_value(response: str):
     if not response:
@@ -71,8 +72,15 @@ class LLM:
         return prompt
 
     def main_loop(self):
+        timeout = 30
+        max_retries = 3
+
         # self.type_check_all()
-        for field in self._target_fields.keys():
+
+        total_fields = len(self._target_fields)
+        for i, field in enumerate(self._target_fields.keys(), 1):
+            prompt = self.build_prompt(field)
+
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
@@ -95,9 +103,18 @@ class LLM:
                 "stream": False,  # streaming disabled; using single response mode
             }
 
+            json_data = None
             try:
-                response = requests.post(ollama_url, json=payload)
-                response.raise_for_status()
+                for attempt in range(max_retries):
+                    try:
+                        response = requests.post(ollama_url, json=payload, timeout=timeout)
+                        response.raise_for_status()
+                        json_data = response.json() 
+                        break
+                    except Timeout:
+                        print(f"Ollama request timed out (attempt {attempt+1})")
+                    except RequestException as e:
+                        print(f"Ollama request failed: {e}")
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
@@ -107,11 +124,15 @@ class LLM:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
             # parse response
-            json_data = response.json()
-            raw_response = json_data["response"]
+            if json_data is None:
+                raise RuntimeError("Failed to get response from Ollama after retries.")
+
+            raw_response = json_data.get("response", "")
             parsed_response = safe_extract_value(raw_response)
-            # print(parsed_response)
+
             self.add_response_to_json(field, parsed_response)
+
+            print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -155,7 +176,13 @@ class LLM:
         values = plural_value.split(";")
 
         for i in range(len(values)):
+
             values[i] = values[i].strip()
+
+        
+
+        print(f"\t[LOG]: Resulting formatted list of values: {values}")
+
 
         return values
 
