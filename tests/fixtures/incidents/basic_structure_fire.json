@@ -1,0 +1,18 @@
+{
+  "name": "basic_structure_fire",
+  "input_text": "Engine 12 responded to a structure fire at 142 Oak Street at 18:40. No injuries were reported.",
+  "fields": [
+    "incident_type",
+    "incident_address",
+    "unit",
+    "time",
+    "injuries"
+  ],
+  "expected": {
+    "incident_type": "structure fire",
+    "incident_address": "142 Oak Street",
+    "unit": "Engine 12",
+    "time": "18:40",
+    "injuries": "No injuries were reported"
+  }
+}

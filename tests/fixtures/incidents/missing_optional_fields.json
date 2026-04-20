@@ -1,0 +1,18 @@
+{
+  "name": "missing_optional_fields",
+  "input_text": "Truck 2 responded to a small brush fire near Mile Marker 8. The fire was contained and no structures were threatened.",
+  "fields": [
+    "incident_type",
+    "incident_location",
+    "unit",
+    "acres_burned",
+    "structures_threatened"
+  ],
+  "expected": {
+    "incident_type": "brush fire",
+    "incident_location": "Mile Marker 8",
+    "unit": "Truck 2",
+    "acres_burned": null,
+    "structures_threatened": "no structures were threatened"
+  }
+}
