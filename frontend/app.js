@@ -343,6 +343,11 @@ async function handleFillSubmit(event) {
     return;
   }
 
+  if (inputText.length > 10_000) {
+    setStatus(elements.fillFormMessage, "Input text is too long (max 10,000 characters).", "error");
+    return;
+  }
+
   const payload = {
     template_id: templateId,
     input_text: inputText,
