@@ -1,6 +1,7 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
 from datetime import datetime
+from pathlib import Path
 
 
 class Filler:
@@ -12,12 +13,9 @@ class Filler:
         Fill a PDF form with values from user_input using LLM.
         Fields are filled in the visual order (top-to-bottom, left-to-right).
         """
-        output_pdf = (
-            pdf_form[:-4]
-            + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
-            + "_filled.pdf"
-        )
+        # Use pathlib to properly handle any file extension
+        base_name = Path(pdf_form).stem
+        output_pdf = f"{base_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_filled.pdf"
 
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
