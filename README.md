@@ -55,3 +55,34 @@ __Contributors:__
 - Vincent Harkins (@vharkins1)
 - Marc Vergés (@marcvergees) 
 - Jan Sans
+
+
+## Local Development Setup (Beginner Friendly)
+
+1. Clone your fork and enter project folder:
+
+ - git clone <your-fork-url>
+   cd FireForm (Terminal)
+
+2. Create virtual environment:
+
+ - python3 -m venv venv
+   source venv/bin/activate 
+
+3. Install dependencies:
+
+4. Initialize database tables:
+
+5. Run backend server:
+
+6. Open Swagger UI in browser: (http://127.0.0.1:8000/docs)
+
+### Common Errors
+
+- `sqlite3.OperationalError: no such table`
+→ Run database initialization step.
+
+- `Could not connect to Ollama`
+→ Ensure Ollama server is running locally.
+   
+
