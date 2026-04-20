@@ -1,16 +1,28 @@
-import uuid
+from contextlib import asynccontextmanager
 import os
+import uuid
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.routes import templates, forms
+from api.db.init_db import init_db
+from api.errors.handlers import register_exception_handlers
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize the database and seed it if necessary
+    print("Initializing database...")
+    init_db()
+    yield
+    # Shutdown logic goes here if needed
+
+app = FastAPI(lifespan=lifespan)
+
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -78,6 +90,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             }
         },
     )
+  
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -90,5 +103,6 @@ async def general_exception_handler(request: Request, exc: Exception):
             }
         },
     )
+  
 app.include_router(templates.router)
 app.include_router(forms.router)
