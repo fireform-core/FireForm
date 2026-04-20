@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from api.services.prompt_builder import build_extraction_prompt
 from requests.exceptions import Timeout, RequestException
 
 
@@ -24,47 +25,35 @@ class LLM:
                 Target fields must be a list. Input:\n\ttarget_fields: {self._target_fields}"
             )
 
-    def build_prompt(self, current_field):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
-            DATA:
-            Target JSON field to find in text: {current_field}
-            
-            TEXT: {self._transcript_text}
-            """
-
-        return prompt
-
     def main_loop(self):
         timeout = 30
         max_retries = 3
 
-        # self.type_check_all()
         total_fields = len(self._target_fields)
-        for i, field in enumerate(self._target_fields.keys(), 1):
-            prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
+
+        for i, field in enumerate(self._target_fields, 1):
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
+
+            base_prompt = build_extraction_prompt(self._transcript_text)
+
+            prompt = f"""
+{base_prompt}
+
+Focus specifically on extracting the value for this field:
+{field}
+
+Return only the extracted value as a plain string. Do not return JSON.
+"""
 
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,
             }
 
             json_data = None
+
             try:
                 for attempt in range(max_retries):
                     try:
@@ -76,22 +65,21 @@ class LLM:
                         print(f"Ollama request timed out (attempt {attempt+1})")
                     except RequestException as e:
                         print(f"Ollama request failed: {e}")
+
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
+                    f"Could not connect to Ollama at {ollama_url}."
                 )
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
             if json_data is None:
                 raise RuntimeError("Failed to get response from Ollama after retries.")
-            else:
-                # parse response
-                parsed_response = json_data["response"]
-                # print(parsed_response)
-                self.add_response_to_json(field, parsed_response)
-                print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
+
+            parsed_response = json_data["response"]
+            self.add_response_to_json(field, parsed_response)
+
+            print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -124,8 +112,6 @@ class LLM:
     def handle_plural_values(self, plural_value):
         """
         This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
         """
         if ";" not in plural_value:
             raise ValueError(
@@ -137,7 +123,6 @@ class LLM:
         )
         values = plural_value.split(";")
 
-        # Remove trailing leading whitespace
         for i in range(len(values)):
             values[i] = values[i].lstrip()
 
