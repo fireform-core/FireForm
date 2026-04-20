@@ -1,8 +1,34 @@
 import json
 import os
 import requests
+from api.services.prompt_builder import build_extraction_prompt
 from requests.exceptions import Timeout, RequestException
 
+def safe_extract_value(response: str):
+    if not response:
+        return None
+
+    response = response.strip()
+
+    
+    response = response.replace('"', '').replace("'", "")
+
+    
+    if ":" in response:
+        response = response.split(":")[-1].strip()
+
+    
+    response = response.split("\n")[0]
+
+    
+    if response.lower() in ["-1", "none", "null", "not found"]:
+        return None
+
+
+    if len(response) > 200:
+        return None
+
+    return response
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -50,18 +76,31 @@ class LLM:
         max_retries = 3
 
         # self.type_check_all()
+
         total_fields = len(self._target_fields)
         for i, field in enumerate(self._target_fields.keys(), 1):
             prompt = self.build_prompt(field)
+
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
+            base_prompt = build_extraction_prompt(self._transcript_text)
+
+            prompt = f"""
+            {base_prompt}
+
+            Focus specifically on extracting the value for this field:
+            {field}
+
+            Return only the extracted value as a plain string. Do not return JSON.
+            """
+
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,  # streaming disabled; using single response mode
             }
 
             json_data = None
@@ -70,7 +109,7 @@ class LLM:
                     try:
                         response = requests.post(ollama_url, json=payload, timeout=timeout)
                         response.raise_for_status()
-                        json_data = response.json()
+                        json_data = response.json() 
                         break
                     except Timeout:
                         print(f"Ollama request timed out (attempt {attempt+1})")
@@ -84,14 +123,16 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
+            # parse response
             if json_data is None:
                 raise RuntimeError("Failed to get response from Ollama after retries.")
-            else:
-                # parse response
-                parsed_response = json_data["response"]
-                # print(parsed_response)
-                self.add_response_to_json(field, parsed_response)
-                print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
+
+            raw_response = json_data.get("response", "")
+            parsed_response = safe_extract_value(raw_response)
+
+            self.add_response_to_json(field, parsed_response)
+
+            print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -101,17 +142,18 @@ class LLM:
         return self
 
     def add_response_to_json(self, field, value):
-        """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
-        """
-        value = value.strip().replace('"', "")
+        value = value.strip().replace('"', "") if value else None
         parsed_value = None
 
-        if value != "-1":
+        if value:
             parsed_value = value
+        else:
+            parsed_value = {
+                "value": None,
+                "requires_review": True
+            }
 
-        if ";" in value:
+        if value and ";" in value:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
@@ -121,27 +163,26 @@ class LLM:
 
         return
 
+
     def handle_plural_values(self, plural_value):
         """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
+         This method handles plural values.
         """
         if ";" not in plural_value:
             raise ValueError(
                 f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
             )
 
-        print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
-        )
         values = plural_value.split(";")
 
-        # Remove trailing leading whitespace
         for i in range(len(values)):
-            values[i] = values[i].lstrip()
+
+            values[i] = values[i].strip()
+
+        
 
         print(f"\t[LOG]: Resulting formatted list of values: {values}")
+
 
         return values
 
