@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import os
 
 from fastapi import FastAPI, Request
@@ -7,8 +8,20 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from api.routes import templates, forms
+from api.db.init_db import init_db
+from api.errors.handlers import register_exception_handlers
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize the database and seed it if necessary
+    print("Initializing database...")
+    init_db()
+    yield
+    # Shutdown logic goes here if needed
+
+app = FastAPI(lifespan=lifespan)
+
+register_exception_handlers(app)
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
