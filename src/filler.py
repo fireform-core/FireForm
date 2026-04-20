@@ -28,6 +28,7 @@ class Filler:
         # Read PDF
         pdf = PdfReader(pdf_form)
 
+        i = 0
         # Loop through pages
         i = 0
         for page in pdf.pages:
