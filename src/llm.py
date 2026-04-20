@@ -1,8 +1,36 @@
 import json
 import os
 import requests
+
+from api.services.prompt_builder import build_extraction_prompt
+from src.validation import validate_extraction
 from requests.exceptions import Timeout, RequestException
 
+def safe_extract_value(response: str):
+    if not response:
+        return None
+
+    response = response.strip()
+
+    
+    response = response.replace('"', '').replace("'", "")
+
+    
+    if ":" in response:
+        response = response.split(":")[-1].strip()
+
+    
+    response = response.split("\n")[0]
+
+    
+    if response.lower() in ["-1", "none", "null", "not found"]:
+        return None
+
+
+    if len(response) > 200:
+        return None
+
+    return response
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
@@ -58,10 +86,21 @@ class LLM:
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
+            base_prompt = build_extraction_prompt(self._transcript_text)
+
+            prompt = f"""
+            {base_prompt}
+
+            Focus specifically on extracting the value for this field:
+            {field}
+
+            Return only the extracted value as a plain string. Do not return JSON.
+            """
+
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,  # streaming disabled; using single response mode
             }
 
             json_data = None
@@ -101,17 +140,18 @@ class LLM:
         return self
 
     def add_response_to_json(self, field, value):
-        """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
-        """
-        value = value.strip().replace('"', "")
+        value = value.strip().replace('"', "") if value else None
         parsed_value = None
 
-        if value != "-1":
+        if value:
             parsed_value = value
+        else:
+            parsed_value = {
+                "value": None,
+                "requires_review": True
+            }
 
-        if ";" in value:
+        if value and ";" in value:
             parsed_value = self.handle_plural_values(value)
 
         if field in self._json.keys():
@@ -121,29 +161,28 @@ class LLM:
 
         return
 
+
     def handle_plural_values(self, plural_value):
         """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
+         This method handles plural values.
         """
         if ";" not in plural_value:
             raise ValueError(
                 f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
             )
 
-        print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
-        )
         values = plural_value.split(";")
-
-        # Remove trailing leading whitespace
         for i in range(len(values)):
-            values[i] = values[i].lstrip()
-
+            values[i] = values[i].strip()
+            
         print(f"\t[LOG]: Resulting formatted list of values: {values}")
-
+        
         return values
 
     def get_data(self):
-        return self._json
+        validated_data, errors = validate_extraction(self._json)
+
+        if errors:
+            print("[Validation Warning]", errors)
+
+        return validated_data

@@ -1,6 +1,6 @@
 from commonforms import prepare_form
 from pypdf import PdfReader
-from controller import Controller
+from src.controller import Controller
 
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
