@@ -10,5 +10,6 @@ pytest
 httpx
 numpy<2
 ollama
+pypdf
 python-multipart
 pypdf

@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+
 from api.services.prompt_builder import build_extraction_prompt
 from src.validation import validate_extraction
 from requests.exceptions import Timeout, RequestException
@@ -122,7 +123,6 @@ class LLM:
             except requests.exceptions.HTTPError as e:
                 raise RuntimeError(f"Ollama returned an error: {e}")
 
-
             if json_data is None:
                 raise RuntimeError("Failed to get response from Ollama after retries.")
             else:
@@ -131,7 +131,6 @@ class LLM:
                 # print(parsed_response)
                 self.add_response_to_json(field, parsed_response)
                 print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
-
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")
@@ -173,10 +172,11 @@ class LLM:
             )
 
         values = plural_value.split(";")
-
         for i in range(len(values)):
             values[i] = values[i].strip()
-
+            
+        print(f"\t[LOG]: Resulting formatted list of values: {values}")
+        
         return values
 
     def get_data(self):

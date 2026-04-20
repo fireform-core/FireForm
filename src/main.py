@@ -1,6 +1,5 @@
 from commonforms import prepare_form
 from pypdf import PdfReader
-from typing import Union
 from src.controller import Controller
 
 if __name__ == "__main__":

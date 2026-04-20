@@ -1,12 +1,14 @@
-
-import os
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from api.routes import forms, templates
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import os
+import uuid
+
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from api.routes import templates, forms
 from api.db.init_db import init_db
 from api.errors.handlers import register_exception_handlers
@@ -22,6 +24,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+register_exception_handlers(app)
+
 default_origins = "http://127.0.0.1:5173"
 allowed_origins = [
     origin.strip()
@@ -36,7 +40,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-register_exception_handlers(app)
 
 app.include_router(templates.router)
 app.include_router(forms.router)
