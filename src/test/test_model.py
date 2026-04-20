@@ -1,10 +1,12 @@
-# test_ollama.py
-import ollama
+import pytest
 
-try:
-    response = ollama.chat(model='mistral', messages=[
-        {'role': 'user', 'content': 'Say hello in Spanish'}
-    ])
-    print("Success! Response:", response['message']['content'])
-except Exception as e:
-    print("Error:", e)
+
+def test_ollama_chat_smoke():
+    ollama = pytest.importorskip("ollama")
+    response = ollama.chat(
+        model="mistral",
+        messages=[{"role": "user", "content": "Say hello in Spanish"}],
+    )
+    assert "message" in response
+    assert "content" in response["message"]
+    assert response["message"]["content"]
