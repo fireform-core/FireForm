@@ -106,16 +106,21 @@ class LLM:
         or under a new field if the field doesn't exist, to the json dict
         """
         value = value.strip().replace('"', "")
-        parsed_value = None
 
-        if value != "-1":
-            parsed_value = value
+        if value == "-1":
+            return
+
+        parsed_value = value
 
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            existing = self._json[field]
+            if isinstance(existing, list):
+                existing.append(parsed_value)
+            else:
+                self._json[field] = [existing, parsed_value]
         else:
             self._json[field] = parsed_value
 
