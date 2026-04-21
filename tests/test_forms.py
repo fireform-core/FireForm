@@ -1,25 +1,93 @@
-def test_submit_form(client):
-    pass
-    # First create a template
-    # form_payload = {
-    #     "template_id": 3,
-    #     "input_text": "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005",
-    # }
+def test_submit_form_complete_flow(client, monkeypatch):
+    template_payload = {
+        "name": "Template form complete",
+        "pdf_path": "src/inputs/file.pdf",
+        "fields": {
+            "Incident location": {"required": True},
+            "Incident date": {"required": True},
+            "Reporter name": {"required": True},
+        },
+    }
 
-    # template_res = client.post("/templates/", json=template_payload)
-    # template_id = template_res.json()["id"]
+    create_template_response = client.post("/templates/create", json=template_payload)
+    assert create_template_response.status_code == 200
+    template_id = create_template_response.json()["id"]
 
-    # # Submit a form
-    # form_payload = {
-    #     "template_id": template_id,
-    #     "data": {"rating": 5, "comment": "Great service"},
-    # }
+    def fake_fill_form(self, user_input, fields, pdf_form_path, retry_input_texts, max_retry_rounds):
+        return {
+            "output_pdf_path": "src/outputs/complete.pdf",
+            "status": "completed",
+            "required_completion_pct": 100,
+            "completed_required_fields": [
+                "Incident location",
+                "Incident date",
+                "Reporter name",
+            ],
+            "missing_required_fields": [],
+            "attempts_used": 1,
+            "retry_prompt": None,
+        }
 
-    # response = client.post("/forms/", json=form_payload)
+    monkeypatch.setattr("api.routes.forms.Controller.fill_form", fake_fill_form)
 
-    # assert response.status_code == 200
+    form_payload = {
+        "template_id": template_id,
+        "input_text": "Incident happened near station 4 yesterday and was reported by Alex.",
+        "retry_input_texts": [],
+        "max_retry_rounds": 1,
+    }
+    response = client.post("/forms/fill", json=form_payload)
 
-    # data = response.json()
-    # assert data["id"] is not None
-    # assert data["template_id"] == template_id
-    # assert data["data"] == form_payload["data"]
+    assert response.status_code == 200
+    data = response.json()
+    assert data["template_id"] == template_id
+    assert data["status"] == "completed"
+    assert data["required_completion_pct"] == 100
+    assert data["missing_required_fields"] == []
+    assert data["attempts_used"] == 1
+
+
+def test_submit_form_incomplete_flow_returns_retry_prompt(client, monkeypatch):
+    template_payload = {
+        "name": "Template form incomplete",
+        "pdf_path": "src/inputs/file.pdf",
+        "fields": {
+            "Incident location": {"required": True},
+            "Incident date": {"required": True},
+            "Reporter name": {"required": True},
+        },
+    }
+
+    create_template_response = client.post("/templates/create", json=template_payload)
+    assert create_template_response.status_code == 200
+    template_id = create_template_response.json()["id"]
+
+    def fake_fill_form(self, user_input, fields, pdf_form_path, retry_input_texts, max_retry_rounds):
+        return {
+            "output_pdf_path": None,
+            "status": "incomplete",
+            "required_completion_pct": 66,
+            "completed_required_fields": ["Incident location", "Reporter name"],
+            "missing_required_fields": ["Incident date"],
+            "attempts_used": 2,
+            "retry_prompt": "Some required information is still missing. Please answer these fields: Incident date.",
+        }
+
+    monkeypatch.setattr("api.routes.forms.Controller.fill_form", fake_fill_form)
+
+    form_payload = {
+        "template_id": template_id,
+        "input_text": "Incident happened near station 4 and was reported by Alex.",
+        "retry_input_texts": ["It happened on January 2nd."],
+        "max_retry_rounds": 1,
+    }
+    response = client.post("/forms/fill", json=form_payload)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["template_id"] == template_id
+    assert data["status"] == "incomplete"
+    assert data["required_completion_pct"] == 66
+    assert data["missing_required_fields"] == ["Incident date"]
+    assert data["attempts_used"] == 2
+    assert data["retry_prompt"] is not None
