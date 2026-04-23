@@ -1,5 +1,8 @@
 import json
 import os
+import time
+from typing import Callable
+
 import requests
 from requests.exceptions import Timeout, RequestException
 
@@ -45,13 +48,44 @@ class LLM:
 
         return prompt
 
-    def main_loop(self):
-        timeout = 30
-        max_retries = 3
+    def _post_to_ollama_with_retry(self, url, payload):
+        retries = int(os.getenv("OLLAMA_RETRIES", "2"))
+        delay_seconds = float(os.getenv("OLLAMA_RETRY_DELAY_SECONDS", "0.5"))
+        timeout_seconds = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "60"))
+
+        for attempt in range(retries + 1):
+            try:
+                response = requests.post(url, json=payload, timeout=timeout_seconds)
+                response.raise_for_status()
+                return response
+            except requests.exceptions.ConnectionError as exc:
+                if attempt >= retries:
+                    raise ConnectionError(
+                        f"Could not connect to Ollama at {url}. "
+                        "Please ensure Ollama is running and accessible."
+                    ) from exc
+            except requests.exceptions.HTTPError as exc:
+                if attempt >= retries:
+                    raise RuntimeError(f"Ollama returned an error: {exc}") from exc
+
+            sleep_seconds = delay_seconds * (2**attempt)
+            print(
+                f"[WARN] Ollama request failed for attempt {attempt + 1}. "
+                f"Retrying in {sleep_seconds:.2f}s..."
+            )
+            time.sleep(sleep_seconds)
+
+    def main_loop(
+        self,
+        progress_callback: Callable[[str, str, int, int], None] | None = None,
+        reset_json: bool = True,
+    ):
+        if reset_json:
+            self._json = {}
 
         # self.type_check_all()
-        total_fields = len(self._target_fields)
-        for i, field in enumerate(self._target_fields.keys(), 1):
+        total_fields = len(self._target_fields.keys())
+        for index, field in enumerate(self._target_fields.keys(), start=1):
             prompt = self.build_prompt(field)
             # print(prompt)
             # ollama_url = "http://localhost:11434/api/generate"
@@ -64,34 +98,16 @@ class LLM:
                 "stream": False,  # don't really know why --> look into this later.
             }
 
-            json_data = None
-            try:
-                for attempt in range(max_retries):
-                    try:
-                        response = requests.post(ollama_url, json=payload, timeout=timeout)
-                        response.raise_for_status()
-                        json_data = response.json()
-                        break
-                    except Timeout:
-                        print(f"Ollama request timed out (attempt {attempt+1})")
-                    except RequestException as e:
-                        print(f"Ollama request failed: {e}")
-            except requests.exceptions.ConnectionError:
-                raise ConnectionError(
-                    f"Could not connect to Ollama at {ollama_url}. "
-                    "Please ensure Ollama is running and accessible."
-                )
-            except requests.exceptions.HTTPError as e:
-                raise RuntimeError(f"Ollama returned an error: {e}")
+            response = self._post_to_ollama_with_retry(ollama_url, payload)
 
-            if json_data is None:
-                raise RuntimeError("Failed to get response from Ollama after retries.")
-            else:
-                # parse response
-                parsed_response = json_data["response"]
-                # print(parsed_response)
-                self.add_response_to_json(field, parsed_response)
-                print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
+            # parse response
+            json_data = response.json()
+            parsed_response = json_data["response"]
+            # print(parsed_response)
+            self.add_response_to_json(field, parsed_response)
+
+            if progress_callback is not None:
+                progress_callback(field, parsed_response, index, total_fields)
 
         print("----------------------------------")
         print("\t[LOG] Resulting JSON created from the input text:")

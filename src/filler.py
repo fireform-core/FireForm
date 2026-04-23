@@ -1,17 +1,14 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
+from src.zip_resolver import OfflineUSZipResolver
 from datetime import datetime
 
 
 class Filler:
     def __init__(self):
-        pass
+        self.zip_resolver = OfflineUSZipResolver()
 
-    def fill_form(self, pdf_form: str, llm: LLM):
-        """
-        Fill a PDF form with values from user_input using LLM.
-        Fields are filled in the visual order (top-to-bottom, left-to-right).
-        """
+    def _fill_pdf_with_answers(self, pdf_form: str, textbox_answers: dict):
         output_pdf = (
             pdf_form[:-4]
             + "_"
@@ -19,16 +16,10 @@ class Filler:
             + "_filled.pdf"
         )
 
-        # Generate dictionary of answers from your original function
-        t2j = llm.main_loop()
-        textbox_answers = t2j.get_data()  # This is a dictionary
-
+        textbox_answers = self.zip_resolver.enrich_missing_zip_fields(textbox_answers)
         answers_list = list(textbox_answers.values())
 
-        # Read PDF
         pdf = PdfReader(pdf_form)
-
-        # Loop through pages
         i = 0
         for page in pdf.pages:
             if page.Annots:
@@ -43,10 +34,19 @@ class Filler:
                             annot.AP = None
                             i += 1
                         else:
-                            # Stop if we run out of answers
                             break
 
         PdfWriter().write(output_pdf, pdf)
-
-        # Your main.py expects this function to return the path
         return output_pdf
+
+    def fill_form(self, pdf_form: str, llm: LLM):
+        """
+        Fill a PDF form with values from user_input using LLM.
+        Fields are filled in the visual order (top-to-bottom, left-to-right).
+        """
+        # Backwards-compatible wrapper used by old call sites.
+        t2j = llm.main_loop()
+        return self._fill_pdf_with_answers(pdf_form=pdf_form, textbox_answers=t2j.get_data())
+
+    def fill_form_with_answers(self, pdf_form: str, answers: dict):
+        return self._fill_pdf_with_answers(pdf_form=pdf_form, textbox_answers=answers)

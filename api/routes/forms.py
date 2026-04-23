@@ -17,11 +17,26 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
         raise AppError("Template not found", status_code=404)
 
     controller = Controller()
-    path = controller.fill_form(
-        user_input=form.input_text,
-        fields=fetched_template.fields,
-        pdf_form_path=fetched_template.pdf_path,
-    )
+    try:
+        result = controller.fill_form(
+            user_input=form.input_text,
+            fields=fetched_template.fields,
+            pdf_form_path=fetched_template.pdf_path,
+            retry_input_texts=form.retry_input_texts,
+            max_retry_rounds=form.max_retry_rounds,
+        )
+    except FileNotFoundError as exc:
+        raise AppError(str(exc), status_code=400) from exc
 
-    submission = FormSubmission(**form.model_dump(), output_pdf_path=path)
+    submission = FormSubmission(
+        template_id=form.template_id,
+        input_text=form.input_text,
+        output_pdf_path=result["output_pdf_path"],
+        status=result["status"],
+        required_completion_pct=result["required_completion_pct"],
+        completed_required_fields=result["completed_required_fields"],
+        missing_required_fields=result["missing_required_fields"],
+        attempts_used=result["attempts_used"],
+        retry_prompt=result["retry_prompt"],
+    )
     return create_form(db, submission)

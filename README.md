@@ -22,6 +22,20 @@ The result is hours of time saved per shift, per firefighter.
 - **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
 
+### Iterative Missing-Data Recovery
+
+FireForm now supports iterative extraction when required answers are incomplete:
+- After each extraction pass, FireForm computes required-field completion progress.
+- If required fields are missing, FireForm automatically reruns the extraction round.
+- Prior valid values are preserved and merged so retries do not lose good data.
+- API responses include:
+	- `required_completion_pct`
+	- `completed_required_fields`
+	- `missing_required_fields`
+	- `retry_prompt`
+
+This enables frontend clients to display a live progress bar and prompt users to provide only the missing details.
+
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
 
 ## 🤝 Code of Conduct
