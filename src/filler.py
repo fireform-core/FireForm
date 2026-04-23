@@ -1,11 +1,12 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
+from src.zip_resolver import OfflineUSZipResolver
 from datetime import datetime
 
 
 class Filler:
     def __init__(self):
-        pass
+        self.zip_resolver = OfflineUSZipResolver()
 
     def fill_form(self, pdf_form: str, llm: LLM):
         """
@@ -22,6 +23,7 @@ class Filler:
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
         textbox_answers = t2j.get_data()  # This is a dictionary
+        textbox_answers = self.zip_resolver.enrich_missing_zip_fields(textbox_answers)
 
         answers_list = list(textbox_answers.values())
 
