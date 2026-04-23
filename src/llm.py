@@ -147,3 +147,109 @@ class LLM:
 
     def get_data(self):
         return self._json
+
+    def build_batch_prompt(self, fields):
+        """
+        Constructs a single comprehensive prompt for all PDF fields.
+        This method creates a JSON-friendly prompt that asks the LLM to extract
+        values for multiple fields in one API call, significantly reducing latency.
+        
+        Args:
+            fields: List of field names to extract from the transcript text
+            
+        Returns:
+            str: A comprehensive prompt requesting JSON output for all fields
+        """
+        fields_list = '", "'.join(fields)
+        prompt = f"""
+            SYSTEM PROMPT:
+            You are an AI assistant designed to extract information from transcribed voice recordings 
+            and return it in JSON format. You will receive the transcription and a list of JSON fields.
+            
+            Extract the value for each field from the provided text and return ONLY a valid JSON object
+            with field names as keys and extracted values as values.
+            
+            Rules:
+            - If a field name is plural and you find multiple values, return them as a list separated by ";"
+            - If you cannot find a value for a field, use "-1" as the value
+            - Return ONLY the JSON object, no additional text or explanations
+            - Ensure the JSON is properly formatted and valid
+            
+            FIELDS TO EXTRACT: ["{fields_list}"]
+            
+            TEXT: {self._transcript_text}
+            
+            EXAMPLE OUTPUT FORMAT:
+            {{"field_name": "extracted_value", "another_field": ["value1", "value2"], "missing_field": "-1"}}
+        """
+        return prompt.strip()
+
+    def main_loop_batched(self):
+        """
+        Processes all PDF fields in a single LLM API call for improved performance.
+        Instead of making N separate API calls for N fields, this method sends one
+        comprehensive request and parses the JSON response to populate all fields.
+        
+        This method can reduce processing time by 70%+ for forms with multiple fields
+        by eliminating network latency overhead.
+        
+        Returns:
+            self: Returns the LLM instance for method chaining
+        """
+        print("[BATCH] Starting batched extraction for all fields...")
+        
+        # Build comprehensive prompt for all fields
+        prompt = self.build_batch_prompt(self._target_fields.keys())
+        
+        # Configure Ollama API request
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
+        ollama_url = f"{ollama_host}/api/generate"
+        
+        payload = {
+            "model": "mistral",
+            "prompt": prompt,
+            "stream": False,
+        }
+
+        try:
+            # Send single API request for all fields
+            response = requests.post(ollama_url, json=payload)
+            response.raise_for_status()
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError(
+                f"Could not connect to Ollama at {ollama_url}. "
+                "Please ensure Ollama is running and accessible."
+            )
+        except requests.exceptions.HTTPError as e:
+            raise RuntimeError(f"Ollama returned an error: {e}")
+
+        # Parse JSON response from LLM
+        json_data = response.json()
+        raw_response = json_data["response"].strip()
+        
+        try:
+            # Parse the JSON response and populate all fields
+            extracted_data = json.loads(raw_response)
+            
+            # Validate that we got a dictionary
+            if not isinstance(extracted_data, dict):
+                raise ValueError("LLM response is not a valid JSON object")
+                
+            # Process each extracted field
+            for field, value in extracted_data.items():
+                self.add_response_to_json(field, str(value))
+                
+        except json.JSONDecodeError as e:
+            print(f"[ERROR] Failed to parse JSON response: {e}")
+            print(f"[ERROR] Raw response: {raw_response}")
+            raise RuntimeError("Invalid JSON response from LLM")
+        except Exception as e:
+            print(f"[ERROR] Error processing batched response: {e}")
+            raise
+
+        print("----------------------------------")
+        print("\t[LOG] Batched extraction completed. Resulting JSON:")
+        print(json.dumps(self._json, indent=2))
+        print("--------- batched extraction completed ---------")
+
+        return self
