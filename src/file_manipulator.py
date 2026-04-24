@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from src.filler import Filler
 from src.llm import LLM
 
@@ -23,10 +24,28 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def fill_form(
+        self,
+        user_input: str,
+        fields: list,
+        pdf_form_path: str,
+        gps_latitude: Optional[float] = None,
+        gps_longitude: Optional[float] = None,
+        device_id: Optional[str] = None,
+        officer_name: Optional[str] = None,
+    ):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
+        
+        Args:
+            user_input: The text input for PDF filling
+            fields: List of fields to fill
+            pdf_form_path: Path to the PDF form
+            gps_latitude: GPS latitude coordinate
+            gps_longitude: GPS longitude coordinate
+            device_id: Unique device identifier
+            officer_name: Name of the officer generating the PDF
         """
         print("[1] Received request from frontend.")
         print(f"[2] PDF template path: {pdf_form_path}")
@@ -39,7 +58,14 @@ class FileManipulator:
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            output_name = self.filler.fill_form(
+                pdf_form=pdf_form_path,
+                llm=self.llm,
+                gps_latitude=gps_latitude,
+                gps_longitude=gps_longitude,
+                device_id=device_id,
+                officer_name=officer_name,
+            )
 
             print("\n----------------------------------")
             print("✅ Process Complete.")
