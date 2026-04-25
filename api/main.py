@@ -3,6 +3,7 @@ import os
 
 from fastapi import FastAPI
 from api.routes import templates, forms
+<<<<<<< HEAD
 from api.db.init_db import init_db
 from api.errors.handlers import register_exception_handlers
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,6 +35,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+=======
+from api.errors.handlers import register_exception_handlers
+
+app = FastAPI()
+register_exception_handlers(app)
+>>>>>>> 488c7ef (feat: add multi-document batch automation from single incident record)
 
 app.include_router(templates.router)
 app.include_router(forms.router)
