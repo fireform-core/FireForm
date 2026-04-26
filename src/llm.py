@@ -1,16 +1,20 @@
 import json
 import os
+import re
 import requests
 from requests.exceptions import Timeout, RequestException
+
+from src.logger import setup_logger
+logger = setup_logger(__name__)
 
 
 class LLM:
     def __init__(self, transcript_text=None, target_fields=None, json=None):
         if json is None:
             json = {}
-        self._transcript_text = transcript_text  # str
-        self._target_fields = target_fields  # List, contains the template field.
-        self._json = json  # dictionary
+        self._transcript_text = transcript_text
+        self._target_fields = target_fields
+        self._json = json
 
     def type_check_all(self):
         if type(self._transcript_text) is not str:
@@ -25,24 +29,19 @@ class LLM:
             )
 
     def build_prompt(self, current_field):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        """
-        prompt = f""" 
+        prompt = f"""
             SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
+            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings.
+            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return
+            only a single string containing the identified value for the JSON field.
             If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
             If you don't identify the value in the provided text, return "-1".
             ---
             DATA:
             Target JSON field to find in text: {current_field}
-            
+
             TEXT: {self._transcript_text}
             """
-
         return prompt
 
     def main_loop(self):
@@ -53,15 +52,13 @@ class LLM:
         total_fields = len(self._target_fields)
         for i, field in enumerate(self._target_fields.keys(), 1):
             prompt = self.build_prompt(field)
-            # print(prompt)
-            # ollama_url = "http://localhost:11434/api/generate"
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 
             payload = {
                 "model": "mistral",
                 "prompt": prompt,
-                "stream": False,  # don't really know why --> look into this later.
+                "stream": False,
             }
 
             json_data = None
@@ -73,9 +70,9 @@ class LLM:
                         json_data = response.json()
                         break
                     except Timeout:
-                        print(f"Ollama request timed out (attempt {attempt+1})")
+                        logger.warning(f"Ollama request timed out (attempt {attempt+1})")
                     except RequestException as e:
-                        print(f"Ollama request failed: {e}")
+                        logger.error(f"Ollama request failed: {e}")
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "
@@ -87,23 +84,23 @@ class LLM:
             if json_data is None:
                 raise RuntimeError("Failed to get response from Ollama after retries.")
             else:
-                # parse response
                 parsed_response = json_data["response"]
-                # print(parsed_response)
                 self.add_response_to_json(field, parsed_response)
-                print(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
+                logger.info(f"[{i}/{total_fields}] Extracted data for field '{field}' successfully.")
 
-        print("----------------------------------")
-        print("\t[LOG] Resulting JSON created from the input text:")
-        print(json.dumps(self._json, indent=2))
-        print("--------- extracted data ---------")
+        # ── NEW: build confidence-scored result ──
+        extraction_result = self.build_extraction_result()
+        logger.info("----------------------------------")
+        logger.info("Resulting JSON with confidence scores:")
+        logger.info(json.dumps(extraction_result, indent=2))
+        logger.info("--------- extracted data ---------")
 
         return self
 
     def add_response_to_json(self, field, value):
         """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
+        Adds the value under the specified field.
+        Existing PR #337 fix preserved — handles non-list fields safely.
         """
         value = value.strip().replace('"', "")
         parsed_value = None
@@ -114,36 +111,95 @@ class LLM:
         if ";" in value:
             parsed_value = self.handle_plural_values(value)
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            if isinstance(self._json[field], list):
+                self._json[field].append(parsed_value)
+            else:
+                self._json[field] = [self._json[field], parsed_value]
         else:
             self._json[field] = parsed_value
 
         return
 
     def handle_plural_values(self, plural_value):
-        """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
-        """
         if ";" not in plural_value:
             raise ValueError(
                 f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
             )
 
-        print(
-            f"\t[LOG]: Formating plural values for JSON, [For input {plural_value}]..."
-        )
+        logger.info(f"Formatting plural values for JSON, input: {plural_value}")
         values = plural_value.split(";")
 
-        # Remove trailing leading whitespace
         for i in range(len(values)):
             values[i] = values[i].lstrip()
 
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
-
+        logger.info(f"Resulting formatted list of values: {values}")
         return values
+
+    def _compute_field_confidence(self, value) -> float:
+        """
+        Heuristic confidence scoring for an extracted field value.
+        Returns a float between 0.0 and 1.0.
+        """
+        if value is None or value == "" or value == "-1":
+            return 0.0
+        if isinstance(value, list):
+            return 0.85 if len(value) > 0 else 0.0
+        if isinstance(value, str):
+            vague_patterns = [
+                r"not (specified|mentioned|provided|found|available)",
+                r"^n/?a$",
+                r"^\?+$",
+                r"^unknown$"
+            ]
+            for pattern in vague_patterns:
+                if re.search(pattern, value.strip(), re.IGNORECASE):
+                    return 0.2
+            if len(value.strip()) < 3:
+                return 0.3
+            return 0.9
+        return 0.8
+
+    def build_extraction_result(self) -> dict:
+        """
+        Wraps each extracted field with a confidence score.
+        Adds top-level _meta block with requires_review flag
+        when any field confidence is below threshold.
+        """
+        CONFIDENCE_THRESHOLD = 0.5
+        result = {}
+        low_confidence_fields = []
+
+        for field, value in self._json.items():
+            score = self._compute_field_confidence(value)
+            result[field] = {
+                "value": value,
+                "confidence": round(score, 2)
+            }
+            if score < CONFIDENCE_THRESHOLD:
+                low_confidence_fields.append(field)
+
+        total_fields = len(self._json)
+        overall = (
+            round(sum(result[f]["confidence"] for f in result) / total_fields, 2)
+            if total_fields > 0 else 0.0
+        )
+
+        result["_meta"] = {
+            "requires_review": len(low_confidence_fields) > 0,
+            "low_confidence_fields": low_confidence_fields,
+            "overall_confidence": overall
+        }
+
+        if result["_meta"]["requires_review"]:
+            logger.warning(
+                "Extraction requires human review. Low confidence fields: %s",
+                low_confidence_fields
+            )
+        else:
+            logger.info("Extraction complete. All fields passed confidence threshold.")
+
+        return result
 
     def get_data(self):
         return self._json
