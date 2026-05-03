@@ -31,6 +31,7 @@ help:
 fireform: build up pull-model
 	@echo ""
 	@echo "✅ FireForm is ready!"
+	@echo "   Frontend: http://localhost:5173"
 	@echo "   API:      http://localhost:8000"
 	@echo "   API Docs: http://localhost:8000/docs"
 	@echo ""

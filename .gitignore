@@ -4,3 +4,21 @@ venv
 .venv
 *.db
 .vscode
+node_modules/
+frontend/dist/
+frontend/out/
+
+# macOS
+.DS_Store
+
+# Temp / scratch files
+temp_*.pdf
+
+# Sample input PDFs (keep the directory, not the files)
+src/inputs/*.pdf
+
+# Codex agent config
+.codex/
+
+# Electron build artifacts
+frontend/release/

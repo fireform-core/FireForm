@@ -41,10 +41,23 @@ If you have a great idea for FireForm, we'd love to hear it! Please open an issu
 
 ## 🛠️ Local Development Setup
 
-FireForm uses Docker and Docker Compose for development to ensure a consistent environment.
+FireForm uses Docker and Docker Compose for the backend to ensure a consistent environment.
 
 ### Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - `make` (optional, but recommended)
+- [Node.js](https://nodejs.org/) 20+ (only needed for the desktop app)
+
+### Desktop App Development
+
+The frontend is a vanilla HTML/CSS/JS app wrapped in Electron. To run it locally:
+
+```bash
+cd frontend
+npm install    # one-time setup
+npm start      # launches the Electron desktop window
+```
+
+The backend (API + Ollama) must be running separately via Docker — see `make fireform`.

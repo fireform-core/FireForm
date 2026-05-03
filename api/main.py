@@ -20,7 +20,7 @@ app = FastAPI(lifespan=lifespan)
 
 register_exception_handlers(app)
 
-default_origins = "http://127.0.0.1:5173"
+default_origins = "http://127.0.0.1:5173,http://localhost:5173"
 allowed_origins = [
     origin.strip()
     for origin in os.getenv("FRONTEND_ORIGINS", default_origins).split(",")

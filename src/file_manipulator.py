@@ -16,8 +16,7 @@ class FileManipulator:
         from commonforms import prepare_form
         template_path = pdf_path[:-4] + "_template.pdf"
 
-        os.system("taskkill /F /IM ollama.exe >nul 2>&1")
-        print("Cleared existing Ollama instances. Starting fresh...")
+        # Ollama lifecycle is managed by Docker / the OS — no need to kill it here.
         
         
         prepare_form(pdf_path, template_path)

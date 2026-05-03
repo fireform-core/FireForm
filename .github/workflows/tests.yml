@@ -22,10 +22,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
 
       - name: Run tests
         env:
-          PYTHONPATH: src
+          PYTHONPATH: .
         run: |
-          python -m pytest src/test/ -v --tb=short --ignore=src/test/test_model.py
+          python -m pytest tests/ -v --tb=short
