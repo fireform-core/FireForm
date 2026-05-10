@@ -1,3 +1,17 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+# Monkey patch rfdetr to force CPU usage on Mac Silicon / Docker
+try:
+    import rfdetr.detr
+    original_ensure = rfdetr.detr._ensure_model_on_device
+    def patched_ensure(model_ctx):
+        model_ctx.device = "cpu"
+        original_ensure(model_ctx)
+    rfdetr.detr._ensure_model_on_device = patched_ensure
+except ImportError:
+    pass
+
 from commonforms import prepare_form
 from pypdf import PdfReader
 from controller import Controller

@@ -46,7 +46,7 @@ class LLM:
         return prompt
 
     def main_loop(self):
-        timeout = 30
+        timeout = 45
         max_retries = 3
 
         # self.type_check_all()
@@ -73,9 +73,9 @@ class LLM:
                         json_data = response.json()
                         break
                     except Timeout:
-                        print(f"Ollama request timed out (attempt {attempt+1})")
+                        print(f"[LOG]: Ollama request timed out (attempt {attempt+1}) for field '{field}'. Retrying...")
                     except RequestException as e:
-                        print(f"Ollama request failed: {e}")
+                        print(f"[LOG]: Ollama request failed: {e}")
             except requests.exceptions.ConnectionError:
                 raise ConnectionError(
                     f"Could not connect to Ollama at {ollama_url}. "

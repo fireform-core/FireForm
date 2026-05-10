@@ -1,6 +1,9 @@
 from contextlib import asynccontextmanager
 import os
 
+# Disable CUDA to prevent PyTorch from trying to find NVIDIA drivers on Mac Silicon / Docker
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 from fastapi import FastAPI
 from api.routes import templates, forms
 from api.db.init_db import init_db
