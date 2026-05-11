@@ -1,10 +1,12 @@
+import os
+
 from sqlmodel import create_engine, Session
 
 DATABASE_URL = "sqlite:///./fireform.db"
 
 engine = create_engine(
     DATABASE_URL,
-    echo=True,
+    echo=os.getenv("SQL_DEBUG", "false").lower() == "true",
     connect_args={"check_same_thread": False},
 )
 
