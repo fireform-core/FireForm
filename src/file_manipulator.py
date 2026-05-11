@@ -63,5 +63,4 @@ class FileManipulator:
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
             raise e
