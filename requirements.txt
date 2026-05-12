@@ -1,6 +1,5 @@
 requests
 pdfrw
-flask
 commonforms
 fastapi
 uvicorn
