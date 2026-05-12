@@ -29,21 +29,11 @@ class LLM:
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
         @params: current_field -> represents the current element of the json that is being prompted.
         """
-        prompt = f""" 
-            SYSTEM PROMPT:
-            You are an AI assistant designed to help fillout json files with information extracted from transcribed voice recordings. 
-            You will receive the transcription, and the name of the JSON field whose value you have to identify in the context. Return 
-            only a single string containing the identified value for the JSON field. 
-            If the field name is plural, and you identify more than one possible value in the text, return both separated by a ";".
-            If you don't identify the value in the provided text, return "-1".
-            ---
-            DATA:
-            Target JSON field to find in text: {current_field}
-            
-            TEXT: {self._transcript_text}
-            """
+        prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
+        with open(prompt_path, "r") as f:
+            template = f.read()
 
-        return prompt
+        return template.format(field=current_field, text=self._transcript_text)
 
     def main_loop(self):
         timeout = 45
