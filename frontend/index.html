@@ -28,6 +28,9 @@
         <button class="tab" type="button" data-target="pdfPreviewerSection">
           PDF Preview
         </button>
+        <button class="tab" type="button" data-target="weatherSection">
+          Weather
+        </button>
       </nav>
 
       <section id="uploaderSection" class="panel card">
@@ -132,6 +135,26 @@
 
         <p id="previewStatus" class="status" aria-live="polite"></p>
         <iframe id="pdfFrame" title="PDF Preview"></iframe>
+      </section>
+
+      <section id="weatherSection" class="panel card hidden">
+        <h2>Weather Forecast</h2>
+        <p class="helper">Input latitude and longitude to get the current weather from Open-Meteo.</p>
+        <form id="weatherForm" class="stacked-form">
+          <div class="grid-2">
+            <div>
+              <label for="latitude">Latitude</label>
+              <input id="latitude" type="number" step="any" placeholder="52.52" required />
+            </div>
+            <div>
+              <label for="longitude">Longitude</label>
+              <input id="longitude" type="number" step="any" placeholder="13.41" required />
+            </div>
+          </div>
+          <button type="submit">Get Weather</button>
+        </form>
+        <p id="weatherMessage" class="status" aria-live="polite"></p>
+        <div id="weatherResult" class="json-output hidden"></div>
       </section>
     </main>
 

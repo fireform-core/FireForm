@@ -7,6 +7,7 @@ venv
 node_modules/
 frontend/dist/
 frontend/out/
+*.sqlite
 
 # macOS
 .DS_Store
@@ -22,3 +23,4 @@ src/inputs/*.pdf
 
 # Electron build artifacts
 frontend/release/
+

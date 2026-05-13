@@ -27,6 +27,11 @@ const elements = {
   previewPathBtn: document.getElementById("previewPathBtn"),
   previewStatus: document.getElementById("previewStatus"),
   pdfFrame: document.getElementById("pdfFrame"),
+  weatherForm: document.getElementById("weatherForm"),
+  latitude: document.getElementById("latitude"),
+  longitude: document.getElementById("longitude"),
+  weatherMessage: document.getElementById("weatherMessage"),
+  weatherResult: document.getElementById("weatherResult"),
 };
 
 let templates = loadTemplates();
@@ -61,6 +66,7 @@ function bindEvents() {
   elements.previewPathBtn.addEventListener("click", () =>
     previewFromPath(elements.serverPdfPath.value, { switchToPreview: true })
   );
+  elements.weatherForm.addEventListener("submit", handleWeatherSubmit);
 }
 
 function activateSection(targetId) {
@@ -375,6 +381,36 @@ async function handleFillSubmit(event) {
     showJson(elements.fillFormResponse, body);
   } catch (error) {
     setStatus(elements.fillFormMessage, error.message, "error");
+  }
+}
+
+async function handleWeatherSubmit(event) {
+  event.preventDefault();
+  clearJson(elements.weatherResult);
+  setStatus(elements.weatherMessage, "");
+
+  const latitude = parseFloat(elements.latitude.value);
+  const longitude = parseFloat(elements.longitude.value);
+
+  if (isNaN(latitude) || isNaN(longitude)) {
+    setStatus(elements.weatherMessage, "Latitude and Longitude must be valid numbers.", "error");
+    return;
+  }
+
+  try {
+    setStatus(elements.weatherMessage, "Fetching weather data...", "info");
+    const url = `${API_BASE_URL}/weather/forecast?latitude=${latitude}&longitude=${longitude}`;
+    const response = await fetch(url);
+    
+    const body = await parseJsonResponse(response);
+    if (!response.ok) {
+      throw new Error(extractErrorMessage(body, response.status));
+    }
+
+    setStatus(elements.weatherMessage, "Weather data retrieved successfully.", "success");
+    showJson(elements.weatherResult, body);
+  } catch (error) {
+    setStatus(elements.weatherMessage, error.message, "error");
   }
 }
 
