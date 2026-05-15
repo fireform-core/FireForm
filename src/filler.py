@@ -44,10 +44,13 @@ class Filler:
                             # Check if the field type is a Button (Checkbox/Radio)
                             field_type = annot.FT if annot.FT else (annot.Parent.FT if annot.Parent else None)
                             if str(field_type) == "/Btn":
-                                is_truthy = str(answer).lower() in ["yes", "true", "1", "x", "on"]
+                                # The LLM pipeline guarantees Python bool for boolean fields.
+                                # We check isinstance(answer, bool) so only an explicit True
+                                # activates the button — no fuzzy string matching needed.
+                                is_truthy = isinstance(answer, bool) and answer
                                 
                                 # Find the 'ON' state from the appearance dictionary
-                                on_state = "/Yes" # Default assumption
+                                on_state = "/Yes"  # Default assumption
                                 if annot.AP and annot.AP.N:
                                     keys = [k for k in annot.AP.N.keys() if k != "/Off"]
                                     if keys:

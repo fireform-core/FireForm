@@ -64,15 +64,18 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-    fields = [
-        "Employee's name",
-        "Employee's job title",
-        "Employee's department supervisor",
-        "Employee's phone number",
-        "Employee's email",
-        "Signature",
-        "Date",
-    ]
+    # Fields dict maps each field name to its expected Python type.
+    # Use `bool` for checkbox/radio fields so the LLM is instructed to
+    # return exactly True or False instead of fuzzy strings like "yes".
+    fields = {
+        "Employee's name": str,
+        "Employee's job title": str,
+        "Employee's department supervisor": str,
+        "Employee's phone number": str,
+        "Employee's email": str,
+        "Signature": str,
+        "Date": str,
+    }
     prepared_pdf = "temp_outfile.pdf"
     prepare_form(file, prepared_pdf)
 
