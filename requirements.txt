@@ -1,6 +1,5 @@
 requests
 pdfrw
-flask
 commonforms
 fastapi
 uvicorn
@@ -10,3 +9,5 @@ pytest
 httpx
 numpy<2
 ollama
+pypdf
+python-multipart

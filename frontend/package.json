@@ -1,0 +1,34 @@
+{
+  "name": "fireform",
+  "version": "1.0.0",
+  "description": "FireForm — report once, file everywhere",
+  "main": "electron.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --publish never"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.fireform.app",
+    "productName": "FireForm",
+    "files": [
+      "index.html",
+      "app.js",
+      "styles.css",
+      "electron.js",
+      "preload.js"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

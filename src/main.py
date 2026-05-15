@@ -1,6 +1,19 @@
-import os
 from typing import Union
-# from backend import Fill  
+import os
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+# Monkey patch rfdetr to force CPU usage on Mac Silicon / Docker
+try:
+    import rfdetr.detr
+    original_ensure = rfdetr.detr._ensure_model_on_device
+    def patched_ensure(model_ctx):
+        model_ctx.device = "cpu"
+        original_ensure(model_ctx)
+    rfdetr.detr._ensure_model_on_device = patched_ensure
+except ImportError:
+    pass
+
 from commonforms import prepare_form 
 from pypdf import PdfReader
 from controller import Controller
@@ -48,38 +61,27 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Unio
         print(f"An error occurred during PDF generation: {e}")
         # Re-raise the exception so the frontend can handle it
         raise e
-
-
-# if __name__ == "__main__":
-#     file = "./src/inputs/file.pdf"
-#     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-#     fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
-#     prepared_pdf = "temp_outfile.pdf"
-#     prepare_form(file, prepared_pdf)
-    
-#     reader = PdfReader(prepared_pdf)
-#     fields = reader.get_fields()
-#     if(fields):
-#         num_fields = len(fields)
-#     else:
-#         num_fields = 0
-#     #fields = input_fields(num_fields) # Uncomment to edit fields
-    
-#     run_pdf_fill_process(user_input, fields, file)
-
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
     user_input = "Hi. The employee's name is John Doe. His job title is managing director. His department supervisor is Jane Doe. His phone number is 123456. His email is jdoe@ucsc.edu. The signature is <Mamañema>, and the date is 01/02/2005"
-    fields = ["Employee's name", "Employee's job title", "Employee's department supervisor", "Employee's phone number", "Employee's email", "Signature", "Date"]
+    fields = [
+        "Employee's name",
+        "Employee's job title",
+        "Employee's department supervisor",
+        "Employee's phone number",
+        "Employee's email",
+        "Signature",
+        "Date",
+    ]
     prepared_pdf = "temp_outfile.pdf"
     prepare_form(file, prepared_pdf)
-    
+
     reader = PdfReader(prepared_pdf)
     fields = reader.get_fields()
-    if(fields):
+    if fields:
         num_fields = len(fields)
     else:
         num_fields = 0
-        
+
     controller = Controller()
     controller.fill_form(user_input, fields, file)

@@ -1,7 +1,6 @@
 import os
 from src.filler import Filler
 from src.llm import LLM
-from commonforms import prepare_form
 
 
 class FileManipulator:
@@ -13,7 +12,28 @@ class FileManipulator:
         """
         By using commonforms, we create an editable .pdf template and we store it.
         """
+        # Disable CUDA to force CPU usage, preventing errors on Mac Silicon / Docker
+        import os
+        os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
+        # Monkey patch rfdetr to force CPU usage on Mac Silicon / Docker
+        try:
+            import rfdetr.detr
+            original_ensure = rfdetr.detr._ensure_model_on_device
+            def patched_ensure(model_ctx):
+                model_ctx.device = "cpu"
+                original_ensure(model_ctx)
+            rfdetr.detr._ensure_model_on_device = patched_ensure
+        except ImportError:
+            pass
+
+        # Lazy import
+        from commonforms import prepare_form
         template_path = pdf_path[:-4] + "_template.pdf"
+
+        # Ollama lifecycle is managed by Docker / the OS — no need to kill it here.
+        
+        
         prepare_form(pdf_path, template_path)
         return template_path
 
@@ -43,5 +63,4 @@ class FileManipulator:
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            # Re-raise the exception so the frontend can handle it
             raise e

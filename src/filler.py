@@ -29,13 +29,13 @@ class Filler:
         pdf = PdfReader(pdf_form)
 
         # Loop through pages
+        i = 0
         for page in pdf.pages:
             if page.Annots:
                 sorted_annots = sorted(
                     page.Annots, key=lambda a: (-float(a.Rect[1]), float(a.Rect[0]))
                 )
 
-                i = 0
                 for annot in sorted_annots:
                     if annot.Subtype == "/Widget" and annot.T:
                         if i < len(answers_list):
