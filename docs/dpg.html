@@ -70,7 +70,118 @@
                 </div>
 
             </div>
+
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Clear Ownership & Accountability</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        In accordance with the Digital Public Goods Alliance requirements for Open Software, the ownership and accountability of the FireForm project and all its produced assets are clearly defined. 
+                    </p>
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        <strong>Accountable Entity:</strong> The intellectual property and copyright of the software code and content are owned by the original core creators: Juan Álvarez Sánchez, Manuel Carriedo Garrido, Vincent Harkins, Marc Vergés, and Jan Sans.
+                    </p>
+                    <p style="line-height: 1.6;">
+                        This ownership is publicly documented and verifiable across our project's assets:
+                    </p>
+                    <ul style="margin-top: 15px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>Software License:</strong> Detailed in our public <a href="https://github.com/fireform-core/FireForm/blob/main/LICENSE" style="color: #64b5f6;" target="_blank">MIT License</a>.</li>
+                        <li><strong>Source Repository:</strong> Explicitly stated in our <a href="https://github.com/fireform-core/FireForm#readme" style="color: #64b5f6;" target="_blank">GitHub README page</a>.</li>
+                        <li><strong>Public Website:</strong> Documented here on our official project website.</li>
+                    </ul>
+                </div>
+            </div>
             
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Platform Independence</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        In accordance with the Digital Public Goods Alliance requirements for Open Software and Open AI Systems, FireForm guarantees platform independence. We do not rely on mandatory proprietary dependencies or closed components that would restrict our MIT License.
+                    </p>
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        <strong>Core Dependencies:</strong>
+                    </p>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>Frontend:</strong> React, Electron, Node.js. (Declared in <code>frontend/package.json</code>)</li>
+                        <li><strong>Backend:</strong> Python, FastAPI, SQLite. (Declared in <code>requirements.txt</code>)</li>
+                        <li><strong>AI System:</strong> <a href="https://ollama.com/" style="color: #64b5f6;" target="_blank">Ollama</a> running open-weight models like Mistral. All inference runs locally.</li>
+                    </ul>
+                    <p style="line-height: 1.6;">
+                        <strong>Dependency Graph (SBOM):</strong> All components and their versions in our software supply chain are automatically tracked by our source repository. You can view our full dependency graph and SBOM directly on our <a href="https://github.com/fireform-core/FireForm/network/dependencies" style="color: #64b5f6;" target="_blank">GitHub repository</a>. If any proprietary components are ever integrated, they will be strictly optional and replaceable with open alternatives without modifying the core solution.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Mechanism for Extracting Data</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        Digital public goods must ensure that data and content can be extracted or imported in a non-proprietary format. FireForm embraces this requirement at the core of its architecture:
+                    </p>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>Standard Format (JSON):</strong> All data extracted by the LLM—whether non-PII or PII—is formatted and exported natively as a non-proprietary <strong>JSON</strong> object. This makes it instantly compatible with any modern software or data pipeline without vendor lock-in.</li>
+                        <li><strong>Open Storage (SQLite):</strong> Metadata, templates, and local configuration are stored using <strong>SQLite</strong>, an open, serverless database engine. The data is saved locally in a <code>fireform.db</code> file, which can be easily extracted, backed up, and read by hundreds of open-source tools.</li>
+                        <li><strong>API Access:</strong> Our local Python FastAPI backend exposes these JSON objects and database entries, allowing automated systems to securely extract the data.</li>
+                    </ul>
+                    <p style="line-height: 1.6;">
+                        By standardizing on JSON and SQLite, FireForm guarantees that emergency departments retain full ownership and accessibility of their data at all times.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Privacy & Applicable Laws</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        FireForm is designed from the ground up with a <strong>privacy-first, local-only architecture</strong>. Because emergency incident reports frequently contain sensitive Personally Identifiable Information (PII), we guarantee that no data ever leaves the user's device. 
+                    </p>
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        By eliminating cloud servers and third-party APIs, FireForm enables first responder organizations to easily comply with the world's most stringent data protection laws, including:
+                    </p>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>HIPAA (Health Insurance Portability and Accountability Act):</strong> Ensures EMS medical data remains entirely offline and secure.</li>
+                        <li><strong>CCPA (California Consumer Privacy Act):</strong> Ensures no consumer data is shared or sold.</li>
+                        <li><strong>GDPR (General Data Protection Regulation):</strong> Enforces strict data minimization and localizes data subjects' rights.</li>
+                    </ul>
+                    <p style="line-height: 1.6;">
+                        For full details on our consent management procedures, data minimization practices, and compliance framework, please read our official <a href="privacy.html" style="color: #64b5f6;" target="_blank">Privacy Policy</a>.
+                    </p>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Do No Harm by Design</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        FireForm is committed to anticipating and preventing harm by design, strictly adhering to the DPGA's framework:
+                    </p>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>9A. Data Privacy & Security:</strong> Because our solution handles sensitive incident data (PII), we mitigate risk by strictly operating offline. Data is never exposed to public networks, avoiding data breaches. (See our <a href="privacy.html" style="color: #64b5f6;" target="_blank">Privacy Policy</a>).</li>
+                        <li><strong>9B. Inappropriate & Illegal Content:</strong> FireForm is an enterprise productivity tool for emergency responders, not a social platform. It does not host public user-generated content, completely mitigating the risk of distributing illegal or misleading public content.</li>
+                        <li><strong>9C. Protection from Harassment:</strong> There is no public user-to-user interaction within the app. For our open-source contributor community, we strictly enforce our <a href="https://github.com/fireform-core/FireForm/blob/main/CODE_OF_CONDUCT.md" style="color: #64b5f6;" target="_blank">Code of Conduct</a> to protect against harassment and abuse.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top: 60px;">
+                <h2 class="section-heading" style="text-align: left;">Standards & Best Practices</h2>
+                <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                    <p style="margin-bottom: 20px; line-height: 1.6;">
+                        FireForm strictly aligns with globally recognized standards and best practices curated by the DPGA to ensure high-quality, interoperable, and sustainable software:
+                    </p>
+                    <h3 style="margin-bottom: 15px; font-size: 1.2rem;">Adhered Standards:</h3>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>JSON & UTF-8 (Data Interchange):</strong> All incident data extracted by our AI system is structured purely as JSON with UTF-8 encoding.</li>
+                        <li><strong>OpenAPI & REST (Data Exchange):</strong> Our Python backend is built with FastAPI, which automatically generates interactive OpenAPI specifications and follows RESTful architectural patterns.</li>
+                    </ul>
+                    <h3 style="margin-bottom: 15px; font-size: 1.2rem; margin-top: 30px;">Adhered Best Practices:</h3>
+                    <ul style="margin-bottom: 20px; margin-left: 20px; line-height: 1.6;">
+                        <li><strong>Community:</strong> We maintain a welcoming environment through our <a href="https://github.com/fireform-core/FireForm/blob/main/CODE_OF_CONDUCT.md" style="color: #64b5f6;" target="_blank">Code of Conduct</a> and clear <a href="https://github.com/fireform-core/FireForm/blob/main/CONTRIBUTING.md" style="color: #64b5f6;" target="_blank">Contribution Guidelines</a>.</li>
+                        <li><strong>Lifecycle Management:</strong> All codebase modifications use Git for Change Management. We track progress with Tagged Releases and strictly adhere to Semantic Versioning.</li>
+                        <li><strong>Interoperability & Architecture:</strong> We prioritize Open Standards and File Formats, modularized Programmatic APIs, and strict Dependency Management.</li>
+                    </ul>
+                </div>
+            </div>
+
             <div style="margin-top: 60px;">
                 <h2 class="section-heading" style="text-align: left;">Public Communications & Mission</h2>
                 <p style="color: rgba(255, 255, 255, 0.8); line-height: 1.6; font-size: 1.1rem; margin-bottom: 20px;">

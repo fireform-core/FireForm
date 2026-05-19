@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireForm - Privacy Policy</title>
+    <meta name="description" content="FireForm Privacy Policy. Learn how we protect your data through local-first architecture.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-effects">
+        <div class="glow red-glow"></div>
+        <div class="glow orange-glow"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html" style="color: inherit; text-decoration: none;"><span class="fire-icon">🔥</span> FireForm</a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="github-link" style="margin-right: 15px;">Home</a>
+                <a href="dpg.html" class="github-link" style="margin-right: 15px;">DPG & SDGs</a>
+                <a href="https://github.com/fireform-core/FireForm" target="_blank" rel="noopener noreferrer" class="github-link">
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="hero" style="min-height: auto; padding-top: 120px; padding-bottom: 60px;">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">Privacy <span class="gradient-text">Policy</span></h1>
+                <p class="hero-subtitle" style="text-align: left;">
+                    FireForm is built on the principle of privacy by design. Our architecture guarantees that your data, including Personally Identifiable Information (PII), never leaves your device.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <div class="container" style="padding-bottom: 80px;">
+        <div class="features-section">
+            
+            <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                <h3 style="margin-bottom: 15px;">1. Local-First Architecture</h3>
+                <p style="margin-bottom: 20px; line-height: 1.6;">
+                    FireForm is a completely offline, local-first application. All processing, including voice transcription and AI-based information extraction, is performed on your local hardware using local Large Language Models (LLMs) via Ollama. 
+                </p>
+                <p style="line-height: 1.6;">
+                    We do not use cloud APIs, we do not have central servers that collect your data, and we do not track telemetry. Therefore, we do not collect, process, or share any PII with third parties.
+                </p>
+            </div>
+
+            <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                <h3 style="margin-bottom: 15px;">2. Data Collection and Usage</h3>
+                <p style="margin-bottom: 20px; line-height: 1.6;">
+                    The only data collected by FireForm is the information you explicitly input (voice memos, text, and PDF templates) to generate incident reports. This data is stored locally on your device in a local SQLite database and standard JSON files. You maintain full ownership and control over this data, and can delete it or export it at any time.
+                </p>
+                <p style="line-height: 1.6;">
+                    Because all data remains on your device, consent management and data subject requests are fully within the control of the user or the deploying organization (e.g., the fire department).
+                </p>
+            </div>
+
+            <div class="feature-card" style="text-align: left; padding: 40px; margin-bottom: 40px;">
+                <h3 style="margin-bottom: 15px;">3. Compliance with Applicable Laws</h3>
+                <p style="margin-bottom: 20px; line-height: 1.6;">
+                    By guaranteeing that data never leaves the host machine, FireForm enables deploying organizations to easily comply with the strictest data protection and privacy laws worldwide. We specifically support compliance with:
+                </p>
+                <ul style="margin-left: 20px; line-height: 1.6;">
+                    <li><strong>Health Insurance Portability and Accountability Act (HIPAA):</strong> By ensuring EMS and healthcare-related incident data remains entirely offline and secure on the local device.</li>
+                    <li><strong>California Consumer Privacy Act (CCPA) / CPRA:</strong> No consumer data is shared or sold. The local architecture defaults to maximum privacy.</li>
+                    <li><strong>General Data Protection Regulation (GDPR):</strong> Complete data minimization and localized processing ensures that no unauthorized cross-border data transfers occur, and data subjects' rights are easily managed locally.</li>
+                </ul>
+            </div>
+
+            <div class="feature-card" style="text-align: left; padding: 40px;">
+                <h3 style="margin-bottom: 15px;">4. Contact Us</h3>
+                <p style="line-height: 1.6;">
+                    If you have any questions about this Privacy Policy or how FireForm handles data, please contact the core maintainers via our <a href="https://github.com/fireform-core/FireForm" style="color: #64b5f6;">GitHub Repository</a>.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>FireForm is a Digital Public Good. Licensed under MIT.</p>
+        </div>
+    </footer>
+</body>
+</html>

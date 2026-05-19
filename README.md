@@ -73,9 +73,55 @@ If you use FireForm in your research or project, please cite it using the follow
 
 You can also use the "Cite this repository" button in the GitHub repository sidebar to export the citation in your preferred format.
 
-__Contributors:__ 
+## 📝 Ownership & Accountability
+
+FireForm is an **Open Software** Digital Public Good. Ownership and accountability for the software code and its assets are clearly defined and lie with the core creators. This ownership is officially documented in our public [LICENSE](LICENSE) file, on our [public website](https://fireform-core.github.io/FireForm/dpg.html), and listed below.
+
+__Contributors (Accountable Entity):__ 
 - Juan Álvarez Sánchez (@juanalvv)
 - Manuel Carriedo Garrido
 - Vincent Harkins (@vharkins1)
 - Marc Vergés (@marcvergees) 
 - Jan Sans
+
+## 🔓 Platform Independence
+
+FireForm is built entirely on open-source technologies and has **no mandatory proprietary dependencies**, ensuring complete platform independence.
+- **Frontend:** Built with React and packaged with Electron (Node.js). Dependencies are listed in `frontend/package.json`.
+- **Backend:** Built with Python (FastAPI, SQLite). Dependencies are listed in `requirements.txt`.
+- **AI System:** Uses [Ollama](https://ollama.com/) running open-weight LLMs (e.g., Mistral), ensuring all AI processing is done locally and openly.
+
+All dependencies can be verified through the [GitHub dependency graph (SBOM)](https://github.com/fireform-core/FireForm/network/dependencies). There are no vendor lock-ins, and any external service is designed to be replaceable with open alternatives without overhauling the core product.
+
+## 💾 Mechanism for Extracting Data
+
+FireForm is designed from the ground up to ensure that all generated and collected data is fully accessible and not locked into proprietary formats.
+- **Data Format:** Any information (both non-PII and PII) extracted by the local LLM is generated and exported natively as a standard, non-proprietary **JSON** file.
+- **Data Storage:** User preferences and template mappings are stored locally using **SQLite**, an open-source database engine.
+- **Export Mechanism:** All structured data can be easily imported, exported, or exposed via the local FastAPI endpoints. No closed formats or proprietary databases are used.
+
+## 🔒 Privacy & Applicable Laws
+
+FireForm is built on a local-first architecture, ensuring that all processing (including AI extraction) occurs locally on the user's hardware. We do not collect, process, or share any Personally Identifiable Information (PII) with third parties. By keeping data completely offline, FireForm natively assists deploying organizations in complying with strict data protection laws such as **HIPAA**, **CCPA**, and **GDPR**. 
+
+For complete details on our data handling and consent management procedures, please review our public [Privacy Policy](https://fireform-core.github.io/FireForm/privacy.html).
+
+## 🛡️ Do No Harm by Design
+
+FireForm is built to anticipate and prevent harm:
+- **Data Privacy & Security (9A):** We handle sensitive incident data entirely offline. By never transmitting data to the cloud, we natively prevent online data breaches of PII.
+- **Inappropriate Content (9B):** The application is an internal productivity tool without public social interactions or user-generated content hosting, completely mitigating the risks of public harassment or illegal content distribution.
+- **Protection from Harassment (9C):** For our open-source contributor community, we strictly enforce our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a safe, harassment-free environment for all contributors.
+
+## 🏅 Standards & Best Practices
+
+FireForm strictly aligns with globally recognized standards and best practices to ensure interoperability and sustainable implementation:
+
+**Featured Standards:**
+- **JSON & UTF-8:** All data extraction and templates rely on standard JSON and UTF-8 encoding.
+- **OpenAPI & REST:** The Python FastAPI backend automatically adheres to the OpenAPI specification and RESTful architectural standards.
+
+**Featured Best Practices:**
+- **Community:** We enforce a strict [Code of Conduct](CODE_OF_CONDUCT.md) and provide clear [Contribution Guidelines](CONTRIBUTING.md).
+- **Lifecycle Management:** We use Git for Change Management, strictly adhere to Semantic Versioning (SemVer), and utilize Tagged Releases.
+- **Interoperability & Architecture:** We employ Open Standards (JSON/SQLite), Programmatic APIs (FastAPI), and strict Dependency Management (`package.json`, `requirements.txt`).
