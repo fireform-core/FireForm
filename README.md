@@ -1,8 +1,10 @@
 # 🔥 FireForm
 
-FireForm is the 1st Place Winner of the Reboot the Earth hackathon, hosted by the United Nations (UN) and UC Santa Cruz (UCSC).
+[![Digital Public Goods](https://img.shields.io/badge/Digital_Public_Good-United_Nations-blue.svg)](https://fireform-core.github.io/FireForm/dpg.html)
 
-It is an open-source, agnostic system built to solve administrative overhead for first responders. FireForm is a Digital Public Good (DPG) designed to help departments like Cal Fire save hundreds of hours by eliminating redundant paperwork.
+**FireForm is a recognized Digital Public Good (DPG) from the United Nations** and the 1st Place Winner of the Reboot the Earth hackathon, hosted by the UN and UC Santa Cruz (UCSC).
+
+It is an open-source, agnostic system built to solve administrative overhead for first responders, designed to help departments like Cal Fire save hundreds of hours by eliminating redundant paperwork.
 
 ## 🚩 The Problem
 
