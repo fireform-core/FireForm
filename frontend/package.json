@@ -2,6 +2,7 @@
   "name": "fireform",
   "version": "1.0.0",
   "description": "FireForm — report once, file everywhere",
+  "repository": "fireform-core/FireForm",
   "main": "electron.js",
   "scripts": {
     "start": "electron .",
