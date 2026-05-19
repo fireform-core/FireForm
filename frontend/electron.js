@@ -1,5 +1,25 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
+const { spawn } = require("child_process");
+
+let backendProcess = null;
+
+function startBackend() {
+  if (app.isPackaged) {
+    const ext = process.platform === 'win32' ? '.exe' : '';
+    const backendPath = path.join(process.resourcesPath, "bin", `api-backend${ext}`);
+    
+    backendProcess = spawn(backendPath, [], {
+      stdio: 'ignore'
+    });
+
+    backendProcess.on('error', (err) => {
+      console.error('Failed to start backend process.', err);
+    });
+  } else {
+    console.log("Running in development mode. Assuming backend is running via Docker Desktop.");
+  }
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -11,10 +31,21 @@ function createWindow() {
   });
 
   win.loadFile("index.html");
-  win.webContents.openDevTools();
+  if (!app.isPackaged) {
+    win.webContents.openDevTools();
+  }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  startBackend();
+  createWindow();
+});
+
+app.on("will-quit", () => {
+  if (backendProcess) {
+    backendProcess.kill();
+  }
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

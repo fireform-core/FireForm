@@ -33,7 +33,31 @@ let templates = loadTemplates();
 let activeObjectUrl = null;
 let selectedTemplateFile = null;
 
-initialize();
+waitForBackend().then(initialize);
+
+async function waitForBackend() {
+  const loadingScreen = document.getElementById("loadingScreen");
+  let isReady = false;
+  
+  while (!isReady) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/templates`);
+      if (response.ok) {
+        isReady = true;
+      }
+    } catch (e) {
+      // Ignore error and try again
+    }
+    
+    if (!isReady) {
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  
+  if (loadingScreen) {
+    loadingScreen.classList.add("hidden");
+  }
+}
 
 async function initialize() {
   bindEvents();
