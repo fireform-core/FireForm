@@ -89,7 +89,7 @@ __Contributors (Accountable Entity):__
 FireForm is built entirely on open-source technologies and has **no mandatory proprietary dependencies**, ensuring complete platform independence.
 - **Frontend:** Built with React and packaged with Electron (Node.js). Dependencies are listed in `frontend/package.json`.
 - **Backend:** Built with Python (FastAPI, SQLite). Dependencies are listed in `requirements.txt`.
-- **AI System:** Uses [Ollama](https://ollama.com/) running open-weight LLMs (e.g., Mistral), ensuring all AI processing is done locally and openly.
+- **AI System (Optional):** Uses [Ollama](https://ollama.com/) running open-weight LLMs (e.g., Mistral), ensuring all AI processing is done locally and openly. *Note: The AI features are optional and not core to the main functionality of FireForm (which operates as a digital form and template manager). The AI extraction can be disabled in the application settings. Furthermore, this local Ollama dependency can be swapped with any other LLM service.*
 
 All dependencies can be verified through the [GitHub dependency graph (SBOM)](https://github.com/fireform-core/FireForm/network/dependencies). There are no vendor lock-ins, and any external service is designed to be replaceable with open alternatives without overhauling the core product.
 
@@ -104,7 +104,7 @@ FireForm is designed from the ground up to ensure that all generated and collect
 
 FireForm is built on a local-first architecture, ensuring that all processing (including AI extraction) occurs locally on the user's hardware. We do not collect, process, or share any Personally Identifiable Information (PII) with third parties. By keeping data completely offline, FireForm natively assists deploying organizations in complying with strict data protection laws such as **HIPAA**, **CCPA**, and **GDPR**. 
 
-For complete details on our data handling and consent management procedures, please review our public [Privacy Policy](https://fireform-core.github.io/FireForm/privacy.html).
+For complete details on our data handling, consent management procedures, and how the solution was designed to comply with HIPAA, CCPA, and GDPR, please review our public [Privacy Policy](https://fireform-core.github.io/FireForm/privacy.html).
 
 ## 🛡️ Do No Harm by Design
 
