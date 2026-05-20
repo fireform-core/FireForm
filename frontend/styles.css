@@ -284,6 +284,10 @@ button:hover {
   justify-self: start;
 }
 
+.field-count-badge.hidden {
+  display: none;
+}
+
 .field-count-badge.match {
   background: #e8f3ec;
   border-color: #b9d8c4;
