@@ -1,6 +1,6 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
-from datetime import datetime
+from uuid import uuid4
 
 
 class Filler:
@@ -15,7 +15,7 @@ class Filler:
         output_pdf = (
             pdf_form[:-4]
             + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + str(uuid4())
             + "_filled.pdf"
         )
 
