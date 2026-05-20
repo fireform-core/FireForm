@@ -1,5 +1,6 @@
 from pdfrw import PdfReader, PdfWriter
 from src.llm import LLM
+from src.zip_resolver import ZipResolver
 from datetime import datetime
 
 
@@ -22,6 +23,7 @@ class Filler:
         # Generate dictionary of answers from your original function
         t2j = llm.main_loop()
         textbox_answers = t2j.get_data()  # This is a dictionary
+        textbox_answers = ZipResolver().enrich(textbox_answers)
 
         answers_list = list(textbox_answers.values())
 
