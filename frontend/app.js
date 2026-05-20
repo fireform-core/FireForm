@@ -1,7 +1,25 @@
 const STORAGE_TEMPLATES_KEY = "fireform.templates.v1";
 const STORAGE_LAST_OUTPUT_KEY = "fireform.lastOutputPath.v1";
 const STORAGE_TEMPLATE_DIR_KEY = "fireform.templateDirectory.v1";
+const STORAGE_FIELD_ROWS_KEY = "fireform.fieldRows.v1";
 const API_BASE_URL = "http://127.0.0.1:8000";
+
+// UI label <-> stored type-string mapping. The stored values stay backward
+// compatible with the existing default "string" type.
+const FIELD_TYPES = [
+  { label: "Text", value: "string" },
+  { label: "Long Text", value: "long_text" },
+  { label: "Number", value: "number" },
+  { label: "Date", value: "date" },
+  { label: "Time", value: "time" },
+  { label: "Email", value: "email" },
+  { label: "Phone", value: "phone" },
+  { label: "Signature", value: "signature" },
+  { label: "Checkbox", value: "checkbox" },
+  { label: "List", value: "list" },
+];
+const TYPE_VALUE_TO_LABEL = Object.fromEntries(FIELD_TYPES.map((t) => [t.value, t.label]));
+const DEFAULT_FIELD_ROWS = [{ name: "", type: "string" }];
 
 const elements = {
   tabs: Array.from(document.querySelectorAll(".tab")),
@@ -12,7 +30,12 @@ const elements = {
   pdfDropZone: document.getElementById("pdfDropZone"),
   selectedFileMeta: document.getElementById("selectedFileMeta"),
   templateDirectory: document.getElementById("templateDirectory"),
-  templateFields: document.getElementById("templateFields"),
+  makeFillableBtn: document.getElementById("makeFillableBtn"),
+  makeFillableHelpBtn: document.getElementById("makeFillableHelpBtn"),
+  makeFillableHelp: document.getElementById("makeFillableHelp"),
+  fieldsBuilder: document.getElementById("fieldsBuilder"),
+  fieldCountBadge: document.getElementById("fieldCountBadge"),
+  addFieldBtn: document.getElementById("addFieldBtn"),
   templateFormMessage: document.getElementById("templateFormMessage"),
   templateFormResponse: document.getElementById("templateFormResponse"),
   fillForm: document.getElementById("fillForm"),
@@ -32,6 +55,10 @@ const elements = {
 let templates = loadTemplates();
 let activeObjectUrl = null;
 let selectedTemplateFile = null;
+let fieldRows = loadFieldRows();
+let dragSourceIndex = null;
+let uploadedPath = null;
+let uploadedFieldCount = null;
 
 waitForBackend().then(initialize);
 
@@ -62,6 +89,7 @@ async function waitForBackend() {
 async function initialize() {
   bindEvents();
   restoreTemplateDirectory();
+  renderFieldRows();
   renderTemplates();
   restorePreviewState();
   updateSelectedFileMeta();
@@ -78,6 +106,9 @@ function bindEvents() {
   elements.pdfDropZone.addEventListener("click", () => elements.templatePdfFile.click());
   elements.pdfDropZone.addEventListener("keydown", handleDropZoneKeyDown);
   elements.templateDirectory.addEventListener("input", handleTemplateDirectoryInput);
+  elements.addFieldBtn.addEventListener("click", handleAddFieldClick);
+  elements.makeFillableBtn.addEventListener("click", handleMakeFillableClick);
+  elements.makeFillableHelpBtn.addEventListener("click", toggleMakeFillableHelp);
   bindDropZoneDragEvents();
   elements.fillForm.addEventListener("submit", handleFillSubmit);
   elements.templatesList.addEventListener("click", handleTemplateActionClick);
@@ -180,15 +211,76 @@ function setSelectedTemplateFile(file) {
 
   if (!isPdfFile(file)) {
     selectedTemplateFile = null;
+    uploadedPath = null;
+    uploadedFieldCount = null;
+    setMakeFillableButtonState();
+    renderFieldCountBadge();
     setStatus(elements.templateFormMessage, "Please select a PDF file.", "error");
     updateSelectedFileMeta();
     return;
   }
 
   selectedTemplateFile = file;
+  uploadedPath = null;
+  uploadedFieldCount = null;
+  setMakeFillableButtonState();
+  renderFieldCountBadge();
   clearJson(elements.templateFormResponse);
   setStatus(elements.templateFormMessage, "");
   updateSelectedFileMeta();
+  // Eager upload so the user gets a live field-count comparison while building rows.
+  uploadSelectedFileSilently();
+}
+
+async function uploadSelectedFileSilently() {
+  if (!selectedTemplateFile) return;
+  const directory = normalizeDirectory(elements.templateDirectory.value);
+  if (!directory) return;
+
+  const fileAtUploadStart = selectedTemplateFile;
+  try {
+    const upload = await uploadTemplatePdf(fileAtUploadStart, directory);
+    // Guard against the user picking a different file mid-upload.
+    if (fileAtUploadStart !== selectedTemplateFile) return;
+    uploadedPath = upload.pdf_path;
+    uploadedFieldCount =
+      typeof upload.field_count === "number" ? upload.field_count : null;
+    renderFieldCountBadge();
+  } catch (_error) {
+    // Silent failure — the explicit Create / Make Fillable paths surface errors.
+  }
+}
+
+function setMakeFillableButtonState() {
+  if (!elements.makeFillableBtn) return;
+  elements.makeFillableBtn.disabled = !selectedTemplateFile;
+  elements.makeFillableBtn.textContent = "Make this PDF fillable";
+}
+
+function renderFieldCountBadge() {
+  const badge = elements.fieldCountBadge;
+  if (!badge) return;
+
+  if (!selectedTemplateFile || uploadedFieldCount === null) {
+    badge.classList.add("hidden");
+    badge.classList.remove("match", "mismatch");
+    badge.textContent = "";
+    return;
+  }
+
+  const expected = uploadedFieldCount;
+  const actual = fieldRows.length;
+  const noun = (n) => `${n} fillable field${n === 1 ? "" : "s"}`;
+  const rowNoun = (n) => `${n} row${n === 1 ? "" : "s"}`;
+
+  badge.classList.remove("hidden", "match", "mismatch");
+  if (expected === actual) {
+    badge.classList.add("match");
+    badge.textContent = `PDF has ${noun(expected)} — your ${rowNoun(actual)} match.`;
+  } else {
+    badge.classList.add("mismatch");
+    badge.textContent = `PDF has ${noun(expected)} — you have ${rowNoun(actual)}.`;
+  }
 }
 
 function isPdfFile(file) {
@@ -256,16 +348,28 @@ function clearJson(preElement) {
   preElement.classList.add("hidden");
 }
 
-function normalizeFields(rawFields) {
-  try {
-    const parsed = JSON.parse(rawFields);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      return { error: "Fields must be a JSON object." };
-    }
-    return { value: parsed };
-  } catch (_error) {
-    return { error: "Fields JSON is invalid. Fix syntax and try again." };
+function collectFieldRows() {
+  syncFieldRowsFromDom();
+
+  if (fieldRows.length === 0) {
+    return { error: "Add at least one field before creating the template." };
   }
+
+  const dict = {};
+  const seen = new Set();
+  for (const row of fieldRows) {
+    const name = row.name.trim();
+    if (!name) {
+      return { error: "Every field needs a name." };
+    }
+    const key = name.toLowerCase();
+    if (seen.has(key)) {
+      return { error: `Field names must be unique ("${name}" appears more than once).` };
+    }
+    seen.add(key);
+    dict[name] = row.type || "string";
+  }
+  return { value: dict };
 }
 
 async function handleTemplateSubmit(event) {
@@ -275,7 +379,7 @@ async function handleTemplateSubmit(event) {
 
   const name = elements.templateName.value.trim();
   const templateDirectory = normalizeDirectory(elements.templateDirectory.value);
-  const normalized = normalizeFields(elements.templateFields.value.trim());
+  const collected = collectFieldRows();
 
   if (!name || !templateDirectory || !selectedTemplateFile) {
     setStatus(
@@ -286,21 +390,26 @@ async function handleTemplateSubmit(event) {
     return;
   }
 
-  if (normalized.error) {
-    setStatus(elements.templateFormMessage, normalized.error, "error");
+  if (collected.error) {
+    setStatus(elements.templateFormMessage, collected.error, "error");
     return;
   }
 
   try {
     localStorage.setItem(STORAGE_TEMPLATE_DIR_KEY, templateDirectory);
-    setStatus(elements.templateFormMessage, "Copying PDF into project directory...", "info");
-
-    const upload = await uploadTemplatePdf(selectedTemplateFile, templateDirectory);
+    saveFieldRows();
+    let activePdfPath = uploadedPath;
+    if (!activePdfPath) {
+      setStatus(elements.templateFormMessage, "Copying PDF into project directory...", "info");
+      const upload = await uploadTemplatePdf(selectedTemplateFile, templateDirectory);
+      activePdfPath = upload.pdf_path;
+      uploadedPath = upload.pdf_path;
+    }
 
     const payload = {
       name,
-      pdf_path: upload.pdf_path,
-      fields: normalized.value,
+      pdf_path: activePdfPath,
+      fields: collected.value,
     };
 
     setStatus(elements.templateFormMessage, "Creating template...", "info");
@@ -320,12 +429,25 @@ async function handleTemplateSubmit(event) {
     elements.fillTemplateId.value = String(body.id || "");
     elements.serverPdfPath.value = body.pdf_path || "";
 
+    const expected = body.field_count;
+    const actual = Object.keys(collected.value).length;
+    let mismatchNote = "";
+    let statusLevel = "success";
+    if (typeof expected === "number" && expected !== actual) {
+      mismatchNote = ` Heads up — the PDF has ${expected} fillable field${expected === 1 ? "" : "s"}, but you added ${actual} row${actual === 1 ? "" : "s"}. Fills may be incomplete or misaligned.`;
+      statusLevel = "error";
+    }
+
     setStatus(
       elements.templateFormMessage,
-      `Template created (id: ${body.id}). PDF saved at ${upload.pdf_path}.`,
-      "success"
+      `Template created (id: ${body.id}). PDF saved at ${activePdfPath}.${mismatchNote}`,
+      statusLevel
     );
     showJson(elements.templateFormResponse, body);
+    uploadedPath = null;
+    uploadedFieldCount = null;
+    setMakeFillableButtonState();
+    renderFieldCountBadge();
   } catch (error) {
     setStatus(elements.templateFormMessage, error.message, "error");
   }
@@ -535,9 +657,7 @@ function renderTemplates() {
     path.className = "template-meta";
     path.textContent = `pdf_path: ${template.pdf_path || ""}`;
 
-    const fields = document.createElement("pre");
-    fields.className = "json-output";
-    fields.textContent = JSON.stringify(template.fields || {}, null, 2);
+    const fields = buildFieldsTable(template.fields || {});
 
     const actions = document.createElement("div");
     actions.className = "card-actions";
@@ -558,6 +678,261 @@ function renderTemplates() {
     card.append(title, path, fields, actions);
     elements.templatesList.append(card);
   });
+}
+
+function buildFieldsTable(fieldsDict) {
+  const table = document.createElement("table");
+  table.className = "fields-table";
+
+  const thead = document.createElement("thead");
+  thead.innerHTML = "<tr><th>Field</th><th>Type</th></tr>";
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  const entries = Object.entries(fieldsDict || {});
+  if (!entries.length) {
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 2;
+    cell.textContent = "No fields.";
+    row.appendChild(cell);
+    tbody.appendChild(row);
+  } else {
+    for (const [name, type] of entries) {
+      const row = document.createElement("tr");
+      const nameCell = document.createElement("td");
+      nameCell.textContent = name;
+      const typeCell = document.createElement("td");
+      typeCell.textContent = TYPE_VALUE_TO_LABEL[type] || "Text";
+      row.append(nameCell, typeCell);
+      tbody.appendChild(row);
+    }
+  }
+  table.appendChild(tbody);
+  return table;
+}
+
+function loadFieldRows() {
+  try {
+    const raw = localStorage.getItem(STORAGE_FIELD_ROWS_KEY);
+    if (!raw) {
+      return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
+    }
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
+    }
+    return parsed
+      .filter((item) => item && typeof item === "object")
+      .map((item) => ({
+        name: typeof item.name === "string" ? item.name : "",
+        type: normalizeFieldType(item.type),
+      }));
+  } catch (_error) {
+    return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
+  }
+}
+
+function normalizeFieldType(value) {
+  return TYPE_VALUE_TO_LABEL[value] ? value : "string";
+}
+
+function saveFieldRows() {
+  localStorage.setItem(STORAGE_FIELD_ROWS_KEY, JSON.stringify(fieldRows));
+}
+
+function syncFieldRowsFromDom() {
+  const rowEls = Array.from(elements.fieldsBuilder.querySelectorAll(".field-row"));
+  fieldRows = rowEls.map((rowEl) => ({
+    name: rowEl.querySelector(".field-name").value,
+    type: rowEl.querySelector(".field-type").value,
+  }));
+}
+
+function renderFieldRows() {
+  elements.fieldsBuilder.innerHTML = "";
+  fieldRows.forEach((row, index) => {
+    elements.fieldsBuilder.appendChild(buildFieldRow(row, index));
+  });
+  renderFieldCountBadge();
+}
+
+function buildFieldRow(row, index) {
+  const rowEl = document.createElement("div");
+  rowEl.className = "field-row";
+  rowEl.draggable = true;
+  rowEl.dataset.index = String(index);
+
+  const handle = document.createElement("span");
+  handle.className = "field-drag-handle";
+  handle.setAttribute("aria-hidden", "true");
+  handle.textContent = "⋮⋮"; // two-column dots — reads as a grip handle
+
+  const nameInput = document.createElement("input");
+  nameInput.type = "text";
+  nameInput.className = "field-name";
+  nameInput.placeholder = "Give description here";
+  nameInput.value = row.name || "";
+  nameInput.addEventListener("input", () => {
+    syncFieldRowsFromDom();
+    saveFieldRows();
+  });
+
+  const typeSelect = document.createElement("select");
+  typeSelect.className = "field-type";
+  FIELD_TYPES.forEach((t) => {
+    const opt = document.createElement("option");
+    opt.value = t.value;
+    opt.textContent = t.label;
+    typeSelect.appendChild(opt);
+  });
+  typeSelect.value = normalizeFieldType(row.type);
+  typeSelect.addEventListener("change", () => {
+    syncFieldRowsFromDom();
+    saveFieldRows();
+  });
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.className = "field-delete-btn";
+  deleteBtn.setAttribute("aria-label", "Remove field");
+  deleteBtn.textContent = "✕"; // ✕
+  deleteBtn.addEventListener("click", () => {
+    syncFieldRowsFromDom();
+    const rowIndex = Number(rowEl.dataset.index);
+    fieldRows.splice(rowIndex, 1);
+    saveFieldRows();
+    renderFieldRows();
+  });
+
+  rowEl.addEventListener("dragstart", handleRowDragStart);
+  rowEl.addEventListener("dragover", handleRowDragOver);
+  rowEl.addEventListener("dragleave", handleRowDragLeave);
+  rowEl.addEventListener("drop", handleRowDrop);
+  rowEl.addEventListener("dragend", handleRowDragEnd);
+
+  rowEl.append(handle, nameInput, typeSelect, deleteBtn);
+  return rowEl;
+}
+
+function toggleMakeFillableHelp() {
+  const willShow = elements.makeFillableHelp.classList.contains("hidden");
+  elements.makeFillableHelp.classList.toggle("hidden", !willShow);
+  elements.makeFillableHelpBtn.setAttribute("aria-expanded", String(willShow));
+}
+
+async function handleMakeFillableClick() {
+  if (!selectedTemplateFile) {
+    setStatus(elements.templateFormMessage, "Select a PDF first.", "error");
+    return;
+  }
+
+  const templateDirectory = normalizeDirectory(elements.templateDirectory.value);
+  if (!templateDirectory) {
+    setStatus(elements.templateFormMessage, "Template directory is required.", "error");
+    return;
+  }
+
+  elements.makeFillableBtn.disabled = true;
+  const previousLabel = elements.makeFillableBtn.textContent;
+  elements.makeFillableBtn.textContent = "Working...";
+  setStatus(
+    elements.templateFormMessage,
+    "Uploading PDF and running fillable-field detection (this can take a minute)...",
+    "info"
+  );
+
+  try {
+    if (!uploadedPath) {
+      const upload = await uploadTemplatePdf(selectedTemplateFile, templateDirectory);
+      uploadedPath = upload.pdf_path;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/templates/make-fillable`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pdf_path: uploadedPath }),
+    });
+    const body = await parseJsonResponse(response);
+    if (!response.ok) {
+      throw new Error(extractErrorMessage(body, response.status));
+    }
+
+    uploadedPath = body.pdf_path;
+    const count = typeof body.field_count === "number" ? body.field_count : null;
+    uploadedFieldCount = count;
+    renderFieldCountBadge();
+    setStatus(
+      elements.templateFormMessage,
+      count !== null
+        ? `Fillable PDF created — ${count} field${count === 1 ? "" : "s"} detected.`
+        : "Fillable PDF created.",
+      "success"
+    );
+    elements.makeFillableBtn.textContent = "Re-detect fields";
+    elements.makeFillableBtn.disabled = false;
+  } catch (error) {
+    setStatus(elements.templateFormMessage, error.message, "error");
+    elements.makeFillableBtn.textContent = previousLabel;
+    elements.makeFillableBtn.disabled = false;
+  }
+}
+
+function handleAddFieldClick() {
+  syncFieldRowsFromDom();
+  fieldRows.push({ name: "", type: "string" });
+  saveFieldRows();
+  renderFieldRows();
+  const rows = elements.fieldsBuilder.querySelectorAll(".field-row .field-name");
+  if (rows.length) {
+    rows[rows.length - 1].focus();
+  }
+}
+
+function handleRowDragStart(event) {
+  const rowEl = event.currentTarget;
+  dragSourceIndex = Number(rowEl.dataset.index);
+  rowEl.classList.add("is-dragging");
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", String(dragSourceIndex));
+  }
+}
+
+function handleRowDragOver(event) {
+  event.preventDefault();
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = "move";
+  }
+  event.currentTarget.classList.add("drag-over");
+}
+
+function handleRowDragLeave(event) {
+  event.currentTarget.classList.remove("drag-over");
+}
+
+function handleRowDrop(event) {
+  event.preventDefault();
+  const rowEl = event.currentTarget;
+  rowEl.classList.remove("drag-over");
+  const targetIndex = Number(rowEl.dataset.index);
+  if (dragSourceIndex === null || dragSourceIndex === targetIndex) {
+    return;
+  }
+  syncFieldRowsFromDom();
+  const [moved] = fieldRows.splice(dragSourceIndex, 1);
+  fieldRows.splice(targetIndex, 0, moved);
+  dragSourceIndex = null;
+  saveFieldRows();
+  renderFieldRows();
+}
+
+function handleRowDragEnd(event) {
+  event.currentTarget.classList.remove("is-dragging");
+  elements.fieldsBuilder
+    .querySelectorAll(".field-row.drag-over")
+    .forEach((el) => el.classList.remove("drag-over"));
+  dragSourceIndex = null;
 }
 
 function loadTemplates() {

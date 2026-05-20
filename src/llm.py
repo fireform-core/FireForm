@@ -10,24 +10,25 @@ class LLM:
         self._target_fields = target_fields
         self._json = json_dict if json_dict is not None else {}
 
-    def build_prompt(self, current_field: str):
+    def build_prompt(self, current_field: str, current_type: str = "string"):
         """
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
         @params: current_field -> represents the current element of the json that is being prompted.
+        @params: current_type  -> hint to the LLM about the expected value shape (date, number, etc.).
         """
         prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
         with open(prompt_path, "r") as f:
             template = f.read()
 
-        return template.format(field=current_field, text=self._transcript_text)
+        return template.format(field=current_field, type=current_type, text=self._transcript_text)
 
     def main_loop(self):
         timeout = 45
         max_retries = 3
 
         total_fields = len(self._target_fields)
-        for i, field in enumerate(self._target_fields.keys(), 1):
-            prompt = self.build_prompt(field)
+        for i, (field, field_type) in enumerate(self._target_fields.items(), 1):
+            prompt = self.build_prompt(field, field_type if isinstance(field_type, str) else "string")
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
 

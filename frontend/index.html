@@ -55,6 +55,25 @@
           </div>
           <p id="selectedFileMeta" class="helper">No PDF selected.</p>
 
+          <div class="inline-actions">
+            <button id="makeFillableBtn" type="button" class="secondary-btn" disabled>
+              Make this PDF fillable
+            </button>
+            <button
+              id="makeFillableHelpBtn"
+              type="button"
+              class="help-trigger"
+              aria-expanded="false"
+              aria-controls="makeFillableHelp"
+              aria-label="What does this do?"
+            >?</button>
+          </div>
+          <p id="makeFillableHelp" class="helper hidden">
+            Use this only if your PDF doesn't already have fillable form fields. It runs
+            an AI step to detect fields and add them (slower). Skip it if your PDF is
+            already fillable.
+          </p>
+
           <label for="templateDirectory">Template Directory</label>
           <input
             id="templateDirectory"
@@ -68,16 +87,14 @@
             The selected PDF is copied into this project directory before template creation.
           </p>
 
-          <label for="templateFields">Fields JSON</label>
-          <textarea id="templateFields" rows="8" spellcheck="false" required>{
-  "Employee's name": "string",
-  "Employee's job title": "string",
-  "Employee's department supervisor": "string",
-  "Employee's phone number": "string",
-  "Employee's email": "string",
-  "Signature": "string",
-  "Date": "string"
-}</textarea>
+          <label>Form Fields</label>
+          <p class="helper">
+            What information should be filled in? Add one row per field. Fields are filled
+            into your PDF in the order shown — drag to reorder.
+          </p>
+          <p id="fieldCountBadge" class="field-count-badge hidden" aria-live="polite"></p>
+          <div id="fieldsBuilder" class="fields-builder" aria-live="polite"></div>
+          <button id="addFieldBtn" type="button" class="secondary-btn">+ Add Field</button>
 
           <button type="submit">Create Template</button>
         </form>
@@ -140,6 +157,6 @@
       </section>
     </main>
 
-    <script src="./app.js?v=20260401b"></script>
+    <script src="./app.js?v=20260519h"></script>
   </body>
 </html>
