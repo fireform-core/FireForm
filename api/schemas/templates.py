@@ -25,7 +25,14 @@ class TemplateResponse(BaseModel):
         from_attributes = True
 
 
+class ExtractedField(BaseModel):
+    name: str
+    description: str
+    type: str
+
+
 class TemplateUploadResponse(BaseModel):
     filename: str
     pdf_path: str
     field_count: int | None = None
+    fields: list[ExtractedField] = []

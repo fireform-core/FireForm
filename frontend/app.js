@@ -245,10 +245,31 @@ async function uploadSelectedFileSilently() {
     uploadedPath = upload.pdf_path;
     uploadedFieldCount =
       typeof upload.field_count === "number" ? upload.field_count : null;
+    maybeSeedFieldRows(upload.fields);
     renderFieldCountBadge();
   } catch (_error) {
     // Silent failure — the explicit Create / Make Fillable paths surface errors.
   }
+}
+
+// Prefill the field rows from the PDF's own form fields, but never overwrite
+// rows the user has already started filling in.
+function maybeSeedFieldRows(fields) {
+  if (!Array.isArray(fields) || !fields.length) return;
+  syncFieldRowsFromDom();
+  if (!fieldRows.every((row) => !row.name.trim())) return;
+
+  fieldRows = fields.map((f) => ({
+    name: f.description || f.name || "",
+    type: normalizeFieldType(f.type),
+  }));
+  saveFieldRows();
+  renderFieldRows();
+  setStatus(
+    elements.templateFormMessage,
+    `Loaded ${fieldRows.length} field${fieldRows.length === 1 ? "" : "s"} from the PDF — edit the descriptions as needed.`,
+    "info"
+  );
 }
 
 function setMakeFillableButtonState() {
@@ -750,10 +771,12 @@ function syncFieldRowsFromDom() {
 }
 
 function renderFieldRows() {
-  elements.fieldsBuilder.innerHTML = "";
+  const fragment = document.createDocumentFragment();
   fieldRows.forEach((row, index) => {
-    elements.fieldsBuilder.appendChild(buildFieldRow(row, index));
+    fragment.appendChild(buildFieldRow(row, index));
   });
+  elements.fieldsBuilder.innerHTML = "";
+  elements.fieldsBuilder.appendChild(fragment);
   renderFieldCountBadge();
 }
 
