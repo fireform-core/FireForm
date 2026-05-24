@@ -3,6 +3,7 @@
 venv
 .venv
 *.db
+*.sqlite
 .vscode
 node_modules/
 frontend/dist/

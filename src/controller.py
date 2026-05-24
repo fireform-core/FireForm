@@ -7,5 +7,5 @@ class Controller:
     def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
         return self.file_manipulator.fill_form(user_input, fields, pdf_form_path)
     
-    def create_template(self, pdf_path: str):
-        return self.file_manipulator.create_template(pdf_path)
+    def prepare_fillable(self, pdf_path: str):
+        return self.file_manipulator.prepare_fillable(pdf_path)

@@ -105,10 +105,9 @@ class TestTemplateEndpoints:
         assert data["id"] is not None
         assert data["name"] == "Fire Report"
         assert data["fields"]["Location"] == "string"
-        # Controller.create_template was called with the pdf_path
-        mock_controller["template_ctrl"].create_template.assert_called_once_with(
-            "src/inputs/fire_report.pdf"
-        )
+        # Plain create just persists the row; commonforms only runs via
+        # the separate /make-fillable endpoint.
+        mock_controller["template_ctrl"].create_template.assert_not_called()
 
     def test_create_then_list(self, client, mock_controller):
         """Creating a template should make it appear in the list."""

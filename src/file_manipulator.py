@@ -8,9 +8,10 @@ class FileManipulator:
         self.filler = Filler()
         self.llm = LLM()
 
-    def create_template(self, pdf_path: str):
+    def prepare_fillable(self, pdf_path: str):
         """
-        By using commonforms, we create an editable .pdf template and we store it.
+        Run commonforms on a flat PDF to detect form regions and produce a
+        fillable PDF. Returns the new path (alongside the original).
         """
         # Disable CUDA to force CPU usage, preventing errors on Mac Silicon / Docker
         import os
@@ -27,13 +28,9 @@ class FileManipulator:
         except ImportError:
             pass
 
-        # Lazy import
         from commonforms import prepare_form
         template_path = pdf_path[:-4] + "_template.pdf"
 
-        # Ollama lifecycle is managed by Docker / the OS — no need to kill it here.
-        
-        
         prepare_form(pdf_path, template_path)
         return template_path
 

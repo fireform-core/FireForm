@@ -25,6 +25,8 @@ class LLM:
         prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
         with open(prompt_path, "r") as f:
             template = f.read()
+            
+        current_type = "boolean" if field_type is bool else "string"
 
         if field_type is bool:
             bool_instruction = (
@@ -32,17 +34,17 @@ class LLM:
                 "You MUST respond with ONLY the literal word True or False. "
                 "Do not use 'yes', 'no', '1', '0', or any other value."
             )
-            return template.format(field=current_field, text=self._transcript_text) + bool_instruction
+            return template.format(field=current_field, type=current_type, text=self._transcript_text) + bool_instruction
 
-        return template.format(field=current_field, text=self._transcript_text)
+        return template.format(field=current_field, type=current_type, text=self._transcript_text)
 
     def main_loop(self):
         timeout = 45
         max_retries = 3
 
         total_fields = len(self._target_fields)
-        for i, field in enumerate(self._target_fields.keys(), 1):
-            field_type = self._target_fields[field] if isinstance(self._target_fields[field], type) else str
+        for i, (field, field_val) in enumerate(self._target_fields.items(), 1):
+            field_type = field_val if isinstance(field_val, type) else str
             prompt = self.build_prompt(field, field_type=field_type)
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
@@ -118,7 +120,6 @@ class LLM:
 
             if ";" in value:
                 parsed_value = self.handle_plural_values(value)
-
         if field in self._json.keys():
             self._json[field].append(parsed_value)
         else:
@@ -126,29 +127,6 @@ class LLM:
 
         return
 
-    def handle_plural_values(self, plural_value: str):
-        """
-        This method handles plural values.
-        Takes in strings of the form 'value1; value2; value3; ...; valueN'
-        returns a list with the respective values -> [value1, value2, value3, ..., valueN]
-        """
-        if ";" not in plural_value:
-            raise ValueError(
-                f"Value is not plural, doesn't have ; separator, Value: {plural_value}"
-            )
-
-        print(
-            f"\t[LOG]: Formatting plural values for JSON, [For input {plural_value}]..."
-        )
-        values = plural_value.split(";")
-
-        # Remove trailing leading whitespace
-        for i in range(len(values)):
-            values[i] = values[i].lstrip()
-
-        print(f"\t[LOG]: Resulting formatted list of values: {values}")
-
-        return values
 
     def get_data(self):
         return self._json
