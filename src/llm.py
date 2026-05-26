@@ -30,9 +30,9 @@ class LLM:
 
         if field_type is bool:
             bool_instruction = (
-                "\nIMPORTANT: This field is a boolean. "
+                "\nIMPORTANT: This field is a boolean (checkbox or radio button). "
                 "You MUST respond with ONLY the literal word True or False. "
-                "Do not use 'yes', 'no', '1', '0', or any other value."
+                "Do not use 'Checked', 'yes', 'no', '1', '0', 'X', or any other value."
             )
             return template.format(field=current_field, type=current_type, text=self._transcript_text) + bool_instruction
 
@@ -61,7 +61,17 @@ class LLM:
                     try:
                         response = requests.post(ollama_url, json=payload, timeout=timeout)
                         response.raise_for_status()
-                        json_data = response.json()
+                        
+                        temp_json_data = response.json()
+                        parsed_response = temp_json_data["response"].strip().replace('"', "")
+                        
+                        if field_type is bool:
+                            if parsed_response.lower() not in ["true", "false"]:
+                                print(f"[WARN]: LLM returned unexpected boolean value '{parsed_response}' for field '{field}' (attempt {attempt+1}). Retrying...")
+                                payload["prompt"] += "\nERROR: Your previous response was invalid. You MUST respond with ONLY the literal word True or False."
+                                continue
+                                
+                        json_data = temp_json_data
                         break
                     except Timeout:
                         print(f"[LOG]: Ollama request timed out (attempt {attempt+1}) for field '{field}'. Retrying...")
