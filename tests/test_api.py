@@ -202,10 +202,106 @@ class TestFormEndpoints:
         })
         assert resp.status_code == 404
 
+    def test_fill_form_template_file_not_found(self, client, mock_controller):
+        tpl_id = self._seed_template(client, mock_controller)
+        mock_controller["form_ctrl"].fill_form.side_effect = FileNotFoundError("PDF template not found")
+
+        resp = client.post("/forms/fill", json={
+            "template_id": tpl_id,
+            "input_text": "some text",
+        })
+        assert resp.status_code == 500
+        assert "PDF template not found" in resp.json()["error"]
+
     def test_fill_form_validates_body(self, client):
         """Missing required fields → 422."""
         resp = client.post("/forms/fill", json={})
         assert resp.status_code == 422
+
+    def test_transcribe_success(self, client, monkeypatch):
+        """Audio is forwarded to the whisper sidecar and its text returned."""
+        import io
+        from unittest.mock import MagicMock
+
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"text": "structure fire on main street"}
+        fake_response.raise_for_status.return_value = None
+
+        captured = {}
+
+        def fake_post(url, params=None, files=None, timeout=None):
+            captured["url"] = url
+            captured["params"] = params
+            captured["files"] = files
+            return fake_response
+
+        monkeypatch.setattr("api.routes.forms.requests.post", fake_post)
+
+        audio = ("audio", ("recording.wav", io.BytesIO(b"RIFFfake"), "audio/wav"))
+        resp = client.post("/forms/transcribe", files=[audio])
+
+        assert resp.status_code == 200
+        assert resp.json()["text"] == "structure fire on main street"
+        assert captured["url"].endswith("/asr")
+        assert "audio_file" in captured["files"]
+        assert captured["params"]["output"] == "json"
+
+    def test_list_models(self, client, monkeypatch):
+        """/forms/models lists Ollama models and always includes the default."""
+        from unittest.mock import MagicMock
+
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"models": [{"name": "qwen2.5:3b"}, {"name": "mistral:latest"}]}
+        fake_response.raise_for_status.return_value = None
+        monkeypatch.setattr("api.routes.forms.requests.get", lambda *a, **k: fake_response)
+        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+
+        resp = client.get("/forms/models")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["default"] == "qwen2.5:1.5b"
+        assert "qwen2.5:1.5b" in body["models"]  # default injected even if not pulled
+        assert "qwen2.5:3b" in body["models"]
+
+    def test_list_models_ollama_down(self, client, monkeypatch):
+        """If Ollama is unreachable, still return the default alone."""
+        import requests
+
+        def boom(*a, **k):
+            raise requests.exceptions.ConnectionError("down")
+
+        monkeypatch.setattr("api.routes.forms.requests.get", boom)
+        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+
+        resp = client.get("/forms/models")
+        assert resp.status_code == 200
+        assert resp.json()["models"] == ["qwen2.5:1.5b"]
+
+    def test_fill_form_passes_model_override(self, client, mock_controller):
+        """A `model` in the request reaches Controller.fill_form but isn't persisted."""
+        tpl_id = self._seed_template(client, mock_controller)
+        resp = client.post("/forms/fill", json={
+            "template_id": tpl_id,
+            "input_text": "John Doe",
+            "model": "qwen2.5:3b",
+        })
+        assert resp.status_code == 200
+        _, kwargs = mock_controller["form_ctrl"].fill_form.call_args
+        assert kwargs["model"] == "qwen2.5:3b"
+
+    def test_transcribe_service_unavailable(self, client, monkeypatch):
+        """A down whisper service surfaces as a 503, not a 500."""
+        import io
+        import requests
+
+        def fake_post(*args, **kwargs):
+            raise requests.exceptions.ConnectionError("no service")
+
+        monkeypatch.setattr("api.routes.forms.requests.post", fake_post)
+
+        audio = ("audio", ("recording.wav", io.BytesIO(b"data"), "audio/wav"))
+        resp = client.post("/forms/transcribe", files=[audio])
+        assert resp.status_code == 503
 
 
 # ═══════════════════════════════════════════════════════════════════════════

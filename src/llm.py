@@ -5,10 +5,12 @@ from requests.exceptions import Timeout, RequestException
 
 
 class LLM:
-    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None):
+    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None, model: str=None):
         self._transcript_text = transcript_text
         self._target_fields = target_fields
         self._json = json_dict if json_dict is not None else {}
+        # Optional per-request model override; falls back to OLLAMA_MODEL env.
+        self._model = model
 
     def build_prompt(self, current_field: str, field_type: type = str):
         """
@@ -48,9 +50,10 @@ class LLM:
             prompt = self.build_prompt(field, field_type=field_type)
             ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
             ollama_url = f"{ollama_host}/api/generate"
+            ollama_model = self._model or os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 
             payload = {
-                "model": "mistral",
+                "model": ollama_model,
                 "prompt": prompt,
                 "stream": False,
             }

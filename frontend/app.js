@@ -1,7 +1,8 @@
 const STORAGE_TEMPLATES_KEY = "fireform.templates.v1";
 const STORAGE_LAST_OUTPUT_KEY = "fireform.lastOutputPath.v1";
-const STORAGE_TEMPLATE_DIR_KEY = "fireform.templateDirectory.v1";
-const STORAGE_FIELD_ROWS_KEY = "fireform.fieldRows.v1";
+// Where uploaded template PDFs are copied. Fixed for now; longer term this
+// should be user-configurable behind a Settings button (see note below).
+const DEFAULT_TEMPLATE_DIRECTORY = "src/inputs";
 const API_BASE_URL = "http://127.0.0.1:8000";
 
 // UI label <-> stored type-string mapping. The stored values stay backward
@@ -29,7 +30,7 @@ const elements = {
   templatePdfFile: document.getElementById("templatePdfFile"),
   pdfDropZone: document.getElementById("pdfDropZone"),
   selectedFileMeta: document.getElementById("selectedFileMeta"),
-  templateDirectory: document.getElementById("templateDirectory"),
+  changePdfBtn: document.getElementById("changePdfBtn"),
   makeFillableBtn: document.getElementById("makeFillableBtn"),
   makeFillableHelpBtn: document.getElementById("makeFillableHelpBtn"),
   makeFillableHelp: document.getElementById("makeFillableHelp"),
@@ -39,8 +40,16 @@ const elements = {
   templateFormMessage: document.getElementById("templateFormMessage"),
   templateFormResponse: document.getElementById("templateFormResponse"),
   fillForm: document.getElementById("fillForm"),
-  fillTemplateId: document.getElementById("fillTemplateId"),
+  fillModel: document.getElementById("fillModel"),
+  fillTemplateTiles: document.getElementById("fillTemplateTiles"),
+  fillSelectionHint: document.getElementById("fillSelectionHint"),
+  fillSubmitBtn: document.getElementById("fillSubmitBtn"),
   inputText: document.getElementById("inputText"),
+  sttControls: document.getElementById("sttControls"),
+  sttRecordBtn: document.getElementById("sttRecordBtn"),
+  sttPauseBtn: document.getElementById("sttPauseBtn"),
+  sttStopBtn: document.getElementById("sttStopBtn"),
+  sttStatus: document.getElementById("sttStatus"),
   fillFormMessage: document.getElementById("fillFormMessage"),
   fillFormResponse: document.getElementById("fillFormResponse"),
   templatesEmpty: document.getElementById("templatesEmpty"),
@@ -55,10 +64,21 @@ const elements = {
 let templates = loadTemplates();
 let activeObjectUrl = null;
 let selectedTemplateFile = null;
-let fieldRows = loadFieldRows();
+// Field rows are scratch state for building one template — they start empty
+// each session and are not persisted.
+let fieldRows = DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
 let dragSourceIndex = null;
 let uploadedPath = null;
 let uploadedFieldCount = null;
+// Template ids currently selected in the Fill Form tab (multi-select).
+let selectedFillIds = new Set();
+
+// Speech-to-text recording state. The MediaRecorder captures compressed audio
+// in the renderer; on stop we POST it straight to /forms/transcribe (the local
+// Whisper service handles decoding).
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordingStream = null;
 
 waitForBackend().then(initialize);
 
@@ -88,11 +108,12 @@ async function waitForBackend() {
 
 async function initialize() {
   bindEvents();
-  restoreTemplateDirectory();
   renderFieldRows();
   renderTemplates();
+  renderFillTemplates();
   restorePreviewState();
   updateSelectedFileMeta();
+  loadModels();
   await refreshTemplatesFromApi();
 }
 
@@ -105,12 +126,17 @@ function bindEvents() {
   elements.templatePdfFile.addEventListener("change", handleTemplateFileInput);
   elements.pdfDropZone.addEventListener("click", () => elements.templatePdfFile.click());
   elements.pdfDropZone.addEventListener("keydown", handleDropZoneKeyDown);
-  elements.templateDirectory.addEventListener("input", handleTemplateDirectoryInput);
+  elements.changePdfBtn.addEventListener("click", () => elements.templatePdfFile.click());
   elements.addFieldBtn.addEventListener("click", handleAddFieldClick);
   elements.makeFillableBtn.addEventListener("click", handleMakeFillableClick);
   elements.makeFillableHelpBtn.addEventListener("click", toggleMakeFillableHelp);
   bindDropZoneDragEvents();
   elements.fillForm.addEventListener("submit", handleFillSubmit);
+  elements.fillTemplateTiles.addEventListener("click", handleTileClick);
+  elements.fillTemplateTiles.addEventListener("keydown", handleTileKeydown);
+  elements.sttRecordBtn.addEventListener("click", startRecording);
+  elements.sttPauseBtn.addEventListener("click", togglePauseRecording);
+  elements.sttStopBtn.addEventListener("click", stopRecording);
   elements.templatesList.addEventListener("click", handleTemplateActionClick);
   elements.localPdfFile.addEventListener("change", handleLocalFilePreview);
   elements.previewPathBtn.addEventListener("click", () =>
@@ -138,7 +164,11 @@ async function refreshTemplatesFromApi() {
         fields: template.fields || {},
       }));
       saveTemplates();
+      // Drop selections for templates that no longer exist.
+      const liveIds = new Set(templates.map((t) => Number(t.id)));
+      selectedFillIds.forEach((id) => { if (!liveIds.has(id)) selectedFillIds.delete(id); });
       renderTemplates();
+      renderFillTemplates();
     }
   } catch (error) {
     setStatus(
@@ -184,26 +214,6 @@ function handleTemplateFileInput(event) {
   setSelectedTemplateFile(file);
 }
 
-function handleTemplateDirectoryInput() {
-  const directory = normalizeDirectory(elements.templateDirectory.value);
-  localStorage.setItem(STORAGE_TEMPLATE_DIR_KEY, directory);
-  updateSelectedFileMeta();
-}
-
-function restoreTemplateDirectory() {
-  const saved = localStorage.getItem(STORAGE_TEMPLATE_DIR_KEY);
-  if (saved) {
-    elements.templateDirectory.value = saved;
-  }
-}
-
-function normalizeDirectory(value) {
-  return String(value || "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/\/+$/, "");
-}
-
 function setSelectedTemplateFile(file) {
   if (!file) {
     return;
@@ -234,8 +244,7 @@ function setSelectedTemplateFile(file) {
 
 async function uploadSelectedFileSilently() {
   if (!selectedTemplateFile) return;
-  const directory = normalizeDirectory(elements.templateDirectory.value);
-  if (!directory) return;
+  const directory = DEFAULT_TEMPLATE_DIRECTORY;
 
   const fileAtUploadStart = selectedTemplateFile;
   try {
@@ -252,18 +261,28 @@ async function uploadSelectedFileSilently() {
   }
 }
 
-// Prefill the field rows from the PDF's own form fields, but never overwrite
-// rows the user has already started filling in.
+// Auto-add a row per field the PDF already defines — same as clicking "+ Add
+// Field" for each — filling in its description and type so the user can edit.
+// If the list already has rows the user typed, warn before replacing them.
 function maybeSeedFieldRows(fields) {
   if (!Array.isArray(fields) || !fields.length) return;
   syncFieldRowsFromDom();
-  if (!fieldRows.every((row) => !row.name.trim())) return;
+
+  if (fieldRows.some((row) => row.name.trim())) {
+    const replace = window.confirm(
+      `This PDF has ${fields.length} fillable field${fields.length === 1 ? "" : "s"}.\n\n` +
+        "Replace your current form fields with them? Your existing entries will be lost."
+    );
+    if (!replace) {
+      setStatus(elements.templateFormMessage, "Kept your existing form fields.", "info");
+      return;
+    }
+  }
 
   fieldRows = fields.map((f) => ({
     name: f.description || f.name || "",
     type: normalizeFieldType(f.type),
   }));
-  saveFieldRows();
   renderFieldRows();
   setStatus(
     elements.templateFormMessage,
@@ -310,15 +329,17 @@ function isPdfFile(file) {
 }
 
 function updateSelectedFileMeta() {
-  if (!selectedTemplateFile) {
+  // Once a file is chosen, swap the drop zone for a compact "change" control.
+  const hasFile = !!selectedTemplateFile;
+  elements.pdfDropZone.classList.toggle("hidden", hasFile);
+  elements.changePdfBtn.classList.toggle("hidden", !hasFile);
+
+  if (!hasFile) {
     elements.selectedFileMeta.textContent = "No PDF selected.";
     return;
   }
 
-  const directory = normalizeDirectory(elements.templateDirectory.value);
-  const destinationPath = directory
-    ? `${directory}/${selectedTemplateFile.name}`
-    : selectedTemplateFile.name;
+  const destinationPath = `${DEFAULT_TEMPLATE_DIRECTORY}/${selectedTemplateFile.name}`;
 
   elements.selectedFileMeta.textContent = `Selected: ${selectedTemplateFile.name} (${formatBytes(
     selectedTemplateFile.size
@@ -399,13 +420,13 @@ async function handleTemplateSubmit(event) {
   setStatus(elements.templateFormMessage, "");
 
   const name = elements.templateName.value.trim();
-  const templateDirectory = normalizeDirectory(elements.templateDirectory.value);
+  const templateDirectory = DEFAULT_TEMPLATE_DIRECTORY;
   const collected = collectFieldRows();
 
-  if (!name || !templateDirectory || !selectedTemplateFile) {
+  if (!name || !selectedTemplateFile) {
     setStatus(
       elements.templateFormMessage,
-      "Name, PDF file, and template directory are required.",
+      "Name and PDF file are required.",
       "error"
     );
     return;
@@ -417,8 +438,6 @@ async function handleTemplateSubmit(event) {
   }
 
   try {
-    localStorage.setItem(STORAGE_TEMPLATE_DIR_KEY, templateDirectory);
-    saveFieldRows();
     let activePdfPath = uploadedPath;
     if (!activePdfPath) {
       setStatus(elements.templateFormMessage, "Copying PDF into project directory...", "info");
@@ -446,8 +465,10 @@ async function handleTemplateSubmit(event) {
     }
 
     upsertTemplate(body);
+    if (body.id != null) {
+      selectedFillIds.add(Number(body.id));
+    }
     await refreshTemplatesFromApi();
-    elements.fillTemplateId.value = String(body.id || "");
     elements.serverPdfPath.value = body.pdf_path || "";
 
     const expected = body.field_count;
@@ -492,57 +513,398 @@ async function uploadTemplatePdf(file, directory) {
   return body;
 }
 
-async function handleFillSubmit(event) {
-  event.preventDefault();
-  clearJson(elements.fillFormResponse);
-  setStatus(elements.fillFormMessage, "");
+// ───────────────────────── Fill Form: model + template tiles ──────────────
 
-  const templateId = Number(elements.fillTemplateId.value);
-  const inputText = elements.inputText.value.trim();
+// "1 field" / "3 forms" — keeps the count-and-label logic in one place.
+function pluralize(count, noun) {
+  return `${count} ${noun}${count === 1 ? "" : "s"}`;
+}
 
-  if (!Number.isInteger(templateId) || templateId < 1) {
-    setStatus(elements.fillFormMessage, "Template ID must be a positive integer.", "error");
-    return;
-  }
+// Look up a template by id (ids may arrive as strings from dataset attributes).
+function findTemplate(id) {
+  return templates.find((template) => Number(template.id) === Number(id));
+}
 
-  if (!inputText) {
-    setStatus(elements.fillFormMessage, "Input text is required.", "error");
-    return;
-  }
-
-  const payload = {
-    template_id: templateId,
-    input_text: inputText,
-  };
-
+// Populate the model picker from the local Ollama models the API reports.
+async function loadModels() {
+  const select = elements.fillModel;
   try {
-    setStatus(elements.fillFormMessage, "Submitting form fill request...", "info");
-    const response = await fetch(`${API_BASE_URL}/forms/fill`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
+    const response = await fetch(`${API_BASE_URL}/forms/models`);
     const body = await parseJsonResponse(response);
     if (!response.ok) {
       throw new Error(extractErrorMessage(body, response.status));
     }
 
-    if (body.output_pdf_path) {
-      localStorage.setItem(STORAGE_LAST_OUTPUT_KEY, body.output_pdf_path);
-      elements.serverPdfPath.value = body.output_pdf_path;
-      await previewFromPath(body.output_pdf_path, { switchToPreview: true });
+    select.innerHTML = "";
+    const models = body.models || [];
+    models.forEach((name) => {
+      const isDefault = name === body.default;
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = isDefault ? `${name} (default)` : name;
+      option.selected = isDefault;
+      select.append(option);
+    });
+  } catch (_error) {
+    // Ollama unreachable — leave one placeholder so the picker isn't empty.
+    if (!select.options.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "(default model)";
+      select.append(option);
     }
-
-    setStatus(
-      elements.fillFormMessage,
-      `Form filled (submission id: ${body.id}).`,
-      "success"
-    );
-    showJson(elements.fillFormResponse, body);
-  } catch (error) {
-    setStatus(elements.fillFormMessage, error.message, "error");
   }
+}
+
+// Build one selectable tile. Whether it's selected is shown purely through the
+// tile's highlighted styling (.selected) — there's no separate checkbox.
+function createTemplateTile(template) {
+  const id = Number(template.id);
+  const selected = selectedFillIds.has(id);
+
+  const tile = document.createElement("div");
+  tile.className = selected ? "template-tile selected" : "template-tile";
+  tile.dataset.templateId = String(id);
+  // Behaves like a toggle button for keyboard and screen-reader users.
+  tile.setAttribute("role", "button");
+  tile.setAttribute("tabindex", "0");
+  tile.setAttribute("aria-pressed", String(selected));
+
+  const title = document.createElement("span");
+  title.className = "tile-title";
+  title.textContent = template.name || "Untitled";
+
+  const fieldCount = template.fields ? Object.keys(template.fields).length : 0;
+  const meta = document.createElement("span");
+  meta.className = "tile-meta";
+  meta.textContent = pluralize(fieldCount, "field");
+
+  const body = document.createElement("div");
+  body.className = "tile-body";
+  body.append(title, meta);
+
+  // Preview must not toggle selection, so it carries its own id and the click
+  // handler stops the event from bubbling up to the tile.
+  const previewButton = document.createElement("button");
+  previewButton.type = "button";
+  previewButton.className = "tile-preview-btn";
+  previewButton.dataset.previewId = String(id);
+  previewButton.textContent = "Preview";
+
+  tile.append(body, previewButton);
+  return tile;
+}
+
+function renderFillTemplates() {
+  const container = elements.fillTemplateTiles;
+  container.innerHTML = "";
+
+  if (!templates.length) {
+    const empty = document.createElement("p");
+    empty.className = "empty-state";
+    empty.textContent = "No templates yet — create one in the Create Template tab.";
+    container.append(empty);
+    updateFillButtonState();
+    return;
+  }
+
+  templates.forEach((template) => container.append(createTemplateTile(template)));
+  updateFillButtonState();
+}
+
+function handleTileClick(event) {
+  // A click on the Preview button previews the PDF without toggling selection.
+  const previewButton = event.target.closest(".tile-preview-btn");
+  if (previewButton) {
+    event.stopPropagation();
+    const template = findTemplate(previewButton.dataset.previewId);
+    if (template) {
+      elements.serverPdfPath.value = template.pdf_path || "";
+      previewFromPath(template.pdf_path || "", { switchToPreview: true });
+    }
+    return;
+  }
+
+  // A click anywhere else on the tile toggles it on/off for filling.
+  const tile = event.target.closest(".template-tile");
+  if (tile) {
+    toggleFillSelection(Number(tile.dataset.templateId));
+  }
+}
+
+function handleTileKeydown(event) {
+  // Enter/Space activate the focused tile, matching its role="button".
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+  const tile = event.target.closest(".template-tile");
+  if (tile) {
+    event.preventDefault();
+    toggleFillSelection(Number(tile.dataset.templateId));
+  }
+}
+
+function toggleFillSelection(id) {
+  if (selectedFillIds.has(id)) {
+    selectedFillIds.delete(id);
+  } else {
+    selectedFillIds.add(id);
+  }
+  renderFillTemplates();
+}
+
+function updateFillButtonState() {
+  const count = selectedFillIds.size;
+  const nothingSelected = count === 0;
+
+  // Greyed out (but still clickable) until at least one form is chosen.
+  elements.fillSubmitBtn.classList.toggle("is-disabled", nothingSelected);
+  elements.fillSubmitBtn.textContent = count > 1 ? `Fill ${count} Forms` : "Fill Form";
+
+  elements.fillSelectionHint.classList.remove("error");
+  elements.fillSelectionHint.textContent = nothingSelected
+    ? "Select one or more forms to fill."
+    : `${pluralize(count, "form")} selected.`;
+}
+
+// A human-readable label for a template, used in the success/error summary.
+function templateLabel(id) {
+  const template = findTemplate(id);
+  return template && template.name ? template.name : `id ${id}`;
+}
+
+// Fill a single template and return its submission. Throws on failure so the
+// caller can note which form failed and still continue with the others.
+async function fillOneTemplate(id, inputText, model) {
+  const response = await fetch(`${API_BASE_URL}/forms/fill`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ template_id: id, input_text: inputText, model }),
+  });
+  const body = await parseJsonResponse(response);
+  if (!response.ok) {
+    throw new Error(extractErrorMessage(body, response.status));
+  }
+  return body;
+}
+
+// Summarize "N filled, M failed" into the status line, choosing the right tone:
+// all-good = success, some failed but some worked = info, nothing worked = error.
+function reportFillOutcome(results, errors) {
+  const parts = [];
+  if (results.length) parts.push(`${results.length} filled`);
+  if (errors.length) parts.push(`${errors.length} failed`);
+
+  let level = "success";
+  if (errors.length) {
+    level = results.length ? "info" : "error";
+  }
+
+  const detail = errors.length ? ` ${errors.join("; ")}` : "";
+  setStatus(elements.fillFormMessage, `${parts.join(", ")}.${detail}`, level);
+}
+
+async function handleFillSubmit(event) {
+  event.preventDefault();
+  clearJson(elements.fillFormResponse);
+  setStatus(elements.fillFormMessage, "");
+
+  const ids = Array.from(selectedFillIds);
+  if (!ids.length) {
+    // The button looks disabled but stays clickable, so prompt the user here.
+    elements.fillSelectionHint.classList.add("error");
+    elements.fillSelectionHint.textContent = "Select at least one form to fill.";
+    setStatus(elements.fillFormMessage, "Select at least one form to fill.", "error");
+    return;
+  }
+
+  const inputText = elements.inputText.value.trim();
+  if (!inputText) {
+    setStatus(elements.fillFormMessage, "Input text is required.", "error");
+    return;
+  }
+
+  // An empty picker value means "let the server use its default model".
+  const model = elements.fillModel.value || undefined;
+  setStatus(elements.fillFormMessage, `Filling ${pluralize(ids.length, "form")}…`, "info");
+
+  // Fill each selected form independently so one failure doesn't stop the rest.
+  const results = [];
+  const errors = [];
+  for (const id of ids) {
+    try {
+      results.push(await fillOneTemplate(id, inputText, model));
+    } catch (error) {
+      errors.push(`${templateLabel(id)}: ${error.message}`);
+    }
+  }
+
+  const lastResult = results[results.length - 1];
+  if (lastResult) {
+    showJson(elements.fillFormResponse, results.length === 1 ? lastResult : results);
+    if (lastResult.output_pdf_path) {
+      localStorage.setItem(STORAGE_LAST_OUTPUT_KEY, lastResult.output_pdf_path);
+      elements.serverPdfPath.value = lastResult.output_pdf_path;
+    }
+  }
+
+  reportFillOutcome(results, errors);
+
+  // Preview the most recently filled PDF.
+  if (lastResult && lastResult.output_pdf_path) {
+    await previewFromPath(lastResult.output_pdf_path, { switchToPreview: true });
+  }
+}
+
+// ───────────────────────── Speech-to-text (local Whisper) ─────────────────
+
+function setSttStatus(message) {
+  if (elements.sttStatus) {
+    elements.sttStatus.textContent = message || "";
+  }
+}
+
+async function startRecording() {
+  if (mediaRecorder) {
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setSttStatus("Microphone capture is not available in this environment.");
+    return;
+  }
+
+  try {
+    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (error) {
+    setSttStatus("Microphone permission denied.");
+    return;
+  }
+
+  recordedChunks = [];
+  mediaRecorder = new MediaRecorder(recordingStream);
+  mediaRecorder.addEventListener("dataavailable", (event) => {
+    if (event.data && event.data.size > 0) {
+      recordedChunks.push(event.data);
+    }
+  });
+  mediaRecorder.addEventListener("stop", handleRecordingStop);
+  mediaRecorder.start();
+
+  elements.sttControls.classList.add("is-recording");
+  elements.sttControls.classList.remove("is-paused");
+  elements.sttRecordBtn.disabled = true;
+  elements.sttPauseBtn.disabled = false;
+  elements.sttStopBtn.disabled = false;
+  elements.sttPauseBtn.textContent = "Pause";
+  setSttStatus("Recording…");
+}
+
+function togglePauseRecording() {
+  if (!mediaRecorder) {
+    return;
+  }
+  if (mediaRecorder.state === "recording") {
+    mediaRecorder.pause();
+    elements.sttControls.classList.add("is-paused");
+    elements.sttControls.classList.remove("is-recording");
+    elements.sttPauseBtn.textContent = "Resume";
+    setSttStatus("Paused.");
+  } else if (mediaRecorder.state === "paused") {
+    mediaRecorder.resume();
+    elements.sttControls.classList.add("is-recording");
+    elements.sttControls.classList.remove("is-paused");
+    elements.sttPauseBtn.textContent = "Pause";
+    setSttStatus("Recording…");
+  }
+}
+
+function stopRecording() {
+  if (!mediaRecorder) {
+    return;
+  }
+  // Lock the controls while we finalize capture and transcribe.
+  elements.sttPauseBtn.disabled = true;
+  elements.sttStopBtn.disabled = true;
+  setSttStatus("Finishing capture…");
+  mediaRecorder.stop();
+}
+
+async function handleRecordingStop() {
+  elements.sttControls.classList.remove("is-recording", "is-paused");
+  stopRecordingStream();
+
+  const chunks = recordedChunks;
+  const recorder = mediaRecorder;
+  recordedChunks = [];
+  mediaRecorder = null;
+
+  const blob = new Blob(chunks, { type: (recorder && recorder.mimeType) || "audio/webm" });
+  if (!blob.size) {
+    resetSttControls();
+    setSttStatus("Nothing was recorded.");
+    return;
+  }
+
+  try {
+    setSttStatus("Transcribing…");
+    const text = await transcribeAudio(blob);
+    appendTranscribedText(text);
+    setSttStatus(text ? "Transcription added." : "No speech detected.");
+  } catch (error) {
+    setSttStatus(`Transcription failed: ${error.message}`);
+  } finally {
+    resetSttControls();
+  }
+}
+
+function resetSttControls() {
+  elements.sttRecordBtn.disabled = false;
+  elements.sttPauseBtn.disabled = true;
+  elements.sttStopBtn.disabled = true;
+  elements.sttPauseBtn.textContent = "Pause";
+  elements.sttControls.classList.remove("is-recording", "is-paused");
+}
+
+function stopRecordingStream() {
+  if (recordingStream) {
+    recordingStream.getTracks().forEach((track) => track.stop());
+    recordingStream = null;
+  }
+}
+
+function appendTranscribedText(text) {
+  if (!text) {
+    return;
+  }
+  const existing = elements.inputText.value.trim();
+  elements.inputText.value = existing ? `${existing} ${text}` : text;
+  // Let any listeners (and the required-field check) see the new value.
+  elements.inputText.dispatchEvent(new Event("input"));
+}
+
+// "audio/webm;codecs=opus" -> "webm". Just gives the upload a sensible filename;
+// the server decodes by content, not extension.
+function audioExtension(mimeType) {
+  const subtype = (mimeType || "").split("/")[1] || "";
+  const withoutCodecs = subtype.split(";")[0].trim();
+  return withoutCodecs || "webm";
+}
+
+// The Whisper ASR service decodes audio with ffmpeg, so we post the recording
+// as-is (typically webm/opus) — no client-side transcoding needed.
+async function transcribeAudio(blob) {
+  const formData = new FormData();
+  formData.append("audio", blob, `recording.${audioExtension(blob.type)}`);
+
+  const response = await fetch(`${API_BASE_URL}/forms/transcribe`, {
+    method: "POST",
+    body: formData,
+  });
+  const body = await parseJsonResponse(response);
+  if (!response.ok) {
+    throw new Error(extractErrorMessage(body, response.status));
+  }
+  return (body.text || "").trim();
 }
 
 function handleTemplateActionClick(event) {
@@ -564,12 +926,12 @@ function handleTemplateActionClick(event) {
   }
 
   if (button.dataset.action === "use-fill") {
-    elements.fillTemplateId.value = String(template.id);
+    selectedFillIds.add(Number(template.id));
+    renderFillTemplates();
     activateSection("fillFormSection");
-    elements.fillTemplateId.focus();
     setStatus(
       elements.fillFormMessage,
-      `Template ${template.id} loaded into Fill Form.`,
+      `"${template.name || "Template"}" selected for filling.`,
       "info"
     );
   }
@@ -733,33 +1095,8 @@ function buildFieldsTable(fieldsDict) {
   return table;
 }
 
-function loadFieldRows() {
-  try {
-    const raw = localStorage.getItem(STORAGE_FIELD_ROWS_KEY);
-    if (!raw) {
-      return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
-    }
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
-    }
-    return parsed
-      .filter((item) => item && typeof item === "object")
-      .map((item) => ({
-        name: typeof item.name === "string" ? item.name : "",
-        type: normalizeFieldType(item.type),
-      }));
-  } catch (_error) {
-    return DEFAULT_FIELD_ROWS.map((row) => ({ ...row }));
-  }
-}
-
 function normalizeFieldType(value) {
   return TYPE_VALUE_TO_LABEL[value] ? value : "string";
-}
-
-function saveFieldRows() {
-  localStorage.setItem(STORAGE_FIELD_ROWS_KEY, JSON.stringify(fieldRows));
 }
 
 function syncFieldRowsFromDom() {
@@ -798,7 +1135,6 @@ function buildFieldRow(row, index) {
   nameInput.value = row.name || "";
   nameInput.addEventListener("input", () => {
     syncFieldRowsFromDom();
-    saveFieldRows();
   });
 
   const typeSelect = document.createElement("select");
@@ -812,7 +1148,6 @@ function buildFieldRow(row, index) {
   typeSelect.value = normalizeFieldType(row.type);
   typeSelect.addEventListener("change", () => {
     syncFieldRowsFromDom();
-    saveFieldRows();
   });
 
   const deleteBtn = document.createElement("button");
@@ -824,7 +1159,6 @@ function buildFieldRow(row, index) {
     syncFieldRowsFromDom();
     const rowIndex = Number(rowEl.dataset.index);
     fieldRows.splice(rowIndex, 1);
-    saveFieldRows();
     renderFieldRows();
   });
 
@@ -850,11 +1184,7 @@ async function handleMakeFillableClick() {
     return;
   }
 
-  const templateDirectory = normalizeDirectory(elements.templateDirectory.value);
-  if (!templateDirectory) {
-    setStatus(elements.templateFormMessage, "Template directory is required.", "error");
-    return;
-  }
+  const templateDirectory = DEFAULT_TEMPLATE_DIRECTORY;
 
   elements.makeFillableBtn.disabled = true;
   const previousLabel = elements.makeFillableBtn.textContent;
@@ -904,7 +1234,6 @@ async function handleMakeFillableClick() {
 function handleAddFieldClick() {
   syncFieldRowsFromDom();
   fieldRows.push({ name: "", type: "string" });
-  saveFieldRows();
   renderFieldRows();
   const rows = elements.fieldsBuilder.querySelectorAll(".field-row .field-name");
   if (rows.length) {
@@ -946,7 +1275,6 @@ function handleRowDrop(event) {
   const [moved] = fieldRows.splice(dragSourceIndex, 1);
   fieldRows.splice(targetIndex, 0, moved);
   dragSourceIndex = null;
-  saveFieldRows();
   renderFieldRows();
 }
 

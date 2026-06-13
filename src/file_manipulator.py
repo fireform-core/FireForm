@@ -34,7 +34,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
@@ -43,13 +43,13 @@ class FileManipulator:
         print(f"[2] PDF template path: {pdf_form_path}")
 
         if not os.path.exists(pdf_form_path):
-            print(f"Error: PDF template not found at {pdf_form_path}")
-            return None  # Or raise an exception
+            raise FileNotFoundError(f"PDF template not found at {pdf_form_path}")
 
         print("[3] Starting extraction and PDF filling process...")
         try:
             self.llm._target_fields = fields
             self.llm._transcript_text = user_input
+            self.llm._model = model
             output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
 
             print("\n----------------------------------")

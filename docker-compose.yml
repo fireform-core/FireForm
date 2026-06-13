@@ -15,6 +15,30 @@ services:
       retries: 5
       start_period: 30s
 
+  whisper:
+    # Multi-arch (arm64 + amd64) Whisper ASR service — runs natively on Apple
+    # Silicon. Uses the faster-whisper (CTranslate2) engine and bundles ffmpeg,
+    # so it accepts any audio the browser produces. Model is pulled from
+    # Hugging Face on first request into the whisper_models volume.
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: fireform-whisper
+    environment:
+      - ASR_ENGINE=faster_whisper
+      - ASR_MODEL=small.en
+      - ASR_MODEL_PATH=/data/whisper
+    volumes:
+      - whisper_models:/data/whisper
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      - fireform-network
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:9000/docs')\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
   app:
     build:
       context: .
@@ -23,9 +47,14 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
+      whisper:
+        condition: service_started
     command: /bin/sh -c "python3 -m api.db.init_db && python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
     volumes:
       - .:/app
+      # Persist the SQLite DB (~/.fireform) across container rebuilds so created
+      # templates aren't wiped each time the image is recreated.
+      - fireform_db:/root/.fireform
     ports:
       - "8000:8000"
     environment:
@@ -35,6 +64,8 @@ services:
       - PYTHONPATH=/app
       - OLLAMA_HOST=http://ollama:11434
       - OLLAMA_TIMEOUT=300
+      - OLLAMA_MODEL=qwen2.5:1.5b
+      - WHISPER_HOST=http://whisper:9000
     networks:
       - fireform-network
 
@@ -55,6 +86,10 @@ services:
 
 volumes:
   ollama_data:
+    driver: local
+  whisper_models:
+    driver: local
+  fireform_db:
     driver: local
 
 networks:

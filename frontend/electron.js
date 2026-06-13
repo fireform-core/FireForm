@@ -30,6 +30,14 @@ function createWindow() {
     },
   });
 
+  // Allow microphone capture for the local speech-to-text recorder. Audio is
+  // only ever sent to the local Whisper service — nothing leaves the machine.
+  win.webContents.session.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      callback(permission === "media");
+    }
+  );
+
   win.loadFile("index.html");
   if (!app.isPackaged) {
     win.webContents.openDevTools();

@@ -54,6 +54,7 @@
             <span>or click to select a file</span>
           </div>
           <p id="selectedFileMeta" class="helper">No PDF selected.</p>
+          <button id="changePdfBtn" type="button" class="secondary-btn hidden">Change PDF</button>
 
           <div class="inline-actions">
             <button id="makeFillableBtn" type="button" class="secondary-btn" disabled>
@@ -72,19 +73,6 @@
             Use this only if your PDF doesn't already have fillable form fields. It runs
             an AI step to detect fields and add them (slower). Skip it if your PDF is
             already fillable.
-          </p>
-
-          <label for="templateDirectory">Template Directory</label>
-          <input
-            id="templateDirectory"
-            type="text"
-            placeholder="src/inputs"
-            value="src/inputs"
-            required
-            spellcheck="false"
-          />
-          <p class="helper">
-            The selected PDF is copied into this project directory before template creation.
           </p>
 
           <label>Form Fields</label>
@@ -114,18 +102,33 @@
       <section id="fillFormSection" class="panel card hidden">
         <h2>Fill Form</h2>
         <form id="fillForm" class="stacked-form">
-          <label for="fillTemplateId">Template ID</label>
-          <input id="fillTemplateId" type="number" min="1" placeholder="1" required />
-
           <label for="inputText">Incident Input Text</label>
+          <div class="stt-controls" id="sttControls">
+            <button id="sttRecordBtn" type="button" class="secondary-btn stt-btn">
+              <span class="stt-dot" aria-hidden="true"></span> Record
+            </button>
+            <button id="sttPauseBtn" type="button" class="secondary-btn stt-btn" disabled>
+              Pause
+            </button>
+            <button id="sttStopBtn" type="button" class="secondary-btn stt-btn" disabled>
+              Stop &amp; Transcribe
+            </button>
+            <span id="sttStatus" class="stt-status" aria-live="polite"></span>
+          </div>
           <textarea
             id="inputText"
             rows="6"
-            placeholder="Describe the incident using natural language..."
-            required
+            placeholder="Describe the incident using natural language, or use the recorder above..."
           ></textarea>
 
-          <button type="submit">Fill Form</button>
+          <label>Forms to fill</label>
+          <p id="fillSelectionHint" class="helper">Select one or more forms to fill.</p>
+          <div id="fillTemplateTiles" class="template-tiles"></div>
+
+          <label for="fillModel">Extraction model</label>
+          <select id="fillModel"></select>
+
+          <button id="fillSubmitBtn" type="submit" class="is-disabled">Fill Form</button>
         </form>
         <p id="fillFormMessage" class="status" aria-live="polite"></p>
         <pre id="fillFormResponse" class="json-output hidden"></pre>

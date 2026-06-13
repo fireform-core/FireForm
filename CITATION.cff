@@ -12,7 +12,7 @@ authors:
 - family-names: "Sans Domingo"
   given-names: "Jan"
 title: "FireForm"
-version: 1.0.0
+version: 1.1.0
 url: "https://github.com/juanalvv/FireForm"
 abstract: "FireForm is a Digital Public Good (DPG) designed to solve administrative overhead for first responders by automating PDF form filling using AI."
 keywords:

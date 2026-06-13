@@ -244,6 +244,140 @@ button:hover {
   background: #e5ecf3;
 }
 
+.stt-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.stt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+}
+
+.stt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stt-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c2ccd6;
+  flex-shrink: 0;
+}
+
+.stt-controls.is-recording .stt-dot {
+  background: var(--error);
+  animation: stt-pulse 1.1s ease-in-out infinite;
+}
+
+.stt-controls.is-paused .stt-dot {
+  background: var(--primary);
+}
+
+@keyframes stt-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.78); }
+}
+
+.stt-status {
+  color: var(--muted);
+  font-size: 0.92rem;
+  min-height: 1.2em;
+}
+
+/* Fill Form: model picker, template tiles, view toggle */
+.helper.error {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.template-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.template-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 112px;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: #fbfcfe;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.template-tile:hover {
+  border-color: #9ab1c7;
+}
+
+.template-tile:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.template-tile.selected {
+  border-color: var(--primary);
+  background: #eef7ff;
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tile-title {
+  font-weight: 700;
+  color: var(--text);
+  /* Uniform tiles: clamp long titles to two lines, then ellipsis. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.tile-meta {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.tile-preview-btn {
+  margin-top: auto; /* pin to the bottom so every tile's button lines up */
+  align-self: flex-start;
+  background: transparent;
+  color: var(--primary-strong);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.tile-preview-btn:hover {
+  background: #e5ecf3;
+}
+
+/* Greyed-but-clickable: looks disabled, still fires click to prompt the user. */
+button.is-disabled,
+button.is-disabled:hover {
+  background: #c2ccd6;
+  cursor: not-allowed;
+}
+
 .help-trigger {
   background: #e5ecf3;
   color: var(--primary-strong);

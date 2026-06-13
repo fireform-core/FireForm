@@ -8,6 +8,7 @@ venv
 node_modules/
 frontend/dist/
 frontend/out/
+src/inputs/
 
 # macOS
 .DS_Store
@@ -23,3 +24,6 @@ src/inputs/*.pdf
 
 # Electron build artifacts
 frontend/release/
+
+# Local Claude Code instructions
+CLAUDE.md

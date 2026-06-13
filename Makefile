@@ -1,5 +1,9 @@
 .PHONY: help build up down logs shell exec pull-model test clean fireform logs-app logs-ollama logs-frontend super-clean
 
+# The extraction model pulled into Ollama and used by src/llm.py. Override with
+# `make pull-model OLLAMA_MODEL=...`. A 1.5B model keeps per-field fills fast.
+OLLAMA_MODEL ?= qwen2.5:1.5b
+
 help:
 	@printf '%s\n' \
 	'    ______                ______                     ' \
@@ -21,13 +25,13 @@ help:
 	@echo "make logs-ollama  - View Ollama container logs"
 	@echo "make shell        - Open Python shell in app container"
 	@echo "make exec         - Execute Python script in container"
-	@echo "make pull-model   - Pull Mistral model into Ollama"
+	@echo "make pull-model   - Pull the extraction model ($(OLLAMA_MODEL)) into Ollama"
 	@echo "make test         - Run tests"
 	@echo "make clean        - Remove containers"
 	@echo "make super-clean  - [CAUTION] Use carefully. Cleans up ALL stopped  containers, networks, build cache..."
 
 # Fix #382 — pull-model is now part of the main setup flow
-# Mistral is pulled automatically before you need it
+# The extraction model is pulled automatically before you need it
 fireform: build up pull-model
 	@echo ""
 	@echo "✅ FireForm is ready!"
@@ -69,7 +73,7 @@ exec:
 	docker compose exec app python3 src/main.py
 
 pull-model:
-	docker compose exec ollama ollama pull mistral
+	docker compose exec ollama ollama pull $(OLLAMA_MODEL)
 
 # Fix — correct test directory (was src/test/ which doesn't exist)
 test:
