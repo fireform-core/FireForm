@@ -1,0 +1,20 @@
+{
+  "name": "medical_assist",
+  "input_text": "Medic 4 assisted a 67-year-old patient at 500 Pine Avenue for chest pain. The patient was transported to County General Hospital.",
+  "fields": [
+    "incident_type",
+    "incident_address",
+    "unit",
+    "patient_age",
+    "chief_complaint",
+    "transport_destination"
+  ],
+  "expected": {
+    "incident_type": "medical assist",
+    "incident_address": "500 Pine Avenue",
+    "unit": "Medic 4",
+    "patient_age": "67",
+    "chief_complaint": "chest pain",
+    "transport_destination": "County General Hospital"
+  }
+}
