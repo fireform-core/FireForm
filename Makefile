@@ -1,7 +1,11 @@
-.PHONY: help init fireform build up down logs logs-app logs-ollama shell pull-model test clean super-clean
+.PHONY: help init fireform build up up-native down logs logs-app logs-ollama shell pull-model test clean super-clean
 
-COMPOSE     = docker compose -f docker/dev/compose.yml --env-file docker/.env.dev
-ENV_DEV     = docker/.env.dev
+# Bundled Ollama is gated behind a compose profile. COMPOSE includes it by
+# default so every standard target runs the full in-Docker stack unchanged.
+# COMPOSE_NATIVE omits it for running Ollama natively on the host (see up-native).
+COMPOSE        = docker compose -f docker/dev/compose.yml --env-file docker/.env.dev --profile bundled-ollama
+COMPOSE_NATIVE = docker compose -f docker/dev/compose.yml --env-file docker/.env.dev
+ENV_DEV        = docker/.env.dev
 
 # Read OLLAMA_MODEL from .env.dev at runtime; fall back to default if file absent.
 OLLAMA_MODEL = $(shell grep -E '^OLLAMA_MODEL=' $(ENV_DEV) 2>/dev/null | cut -d= -f2 | tr -d '[:space:]' || echo qwen2.5:1.5b)
@@ -20,7 +24,8 @@ help:
 	@echo "make init         - First-time setup: check deps, create .env.dev, pick model"
 	@echo "make fireform     - Build images, start containers, pull Ollama model"
 	@echo "make build        - Build Docker images"
-	@echo "make up           - Start all containers (detached)"
+	@echo "make up           - Start all containers (detached, bundled Ollama)"
+	@echo "make up-native    - Start everything EXCEPT Ollama; use a host-native Ollama"
 	@echo "make down         - Stop all containers"
 	@echo "make logs         - Stream all container logs"
 	@echo "make logs-app     - Stream app container logs"
@@ -67,6 +72,14 @@ build:
 
 up:
 	@$(COMPOSE) up -d
+
+# Run Ollama natively on the host (Metal/GPU on Mac); everything else in Docker.
+up-native:
+	@echo "Native Ollama mode — run these on the host first:"
+	@echo "  1) OLLAMA_HOST=0.0.0.0:11434 ollama serve   (bind all interfaces)"
+	@echo "  2) ollama pull $(OLLAMA_MODEL)"
+	@echo "  3) set OLLAMA_HOST=http://host.docker.internal:11434 in $(ENV_DEV)"
+	@$(COMPOSE_NATIVE) up -d
 
 down:
 	@$(COMPOSE) down --remove-orphans

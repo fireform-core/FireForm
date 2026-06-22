@@ -21,6 +21,11 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: fireform-ollama
+    # Bundled Ollama is opt-in. Started only with the bundled-ollama profile
+    # (the Makefile's COMPOSE adds it by default). Omit the profile to run
+    # Ollama natively on the host instead — see Makefile 'up-native' and
+    # OLLAMA_HOST in .env.example.
+    profiles: ["bundled-ollama"]
     ports:
       - "127.0.0.1:11434:11434"
     volumes:
@@ -62,10 +67,15 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      ollama:
-        condition: service_healthy
       whisper:
         condition: service_started
+    # No hard dependency on Ollama: it may run as the bundled container OR
+    # natively on the host, so startup order can't be guaranteed either way.
+    # app/services/llm.py retries the connection, which covers both modes.
+    extra_hosts:
+      # Lets OLLAMA_HOST=http://host.docker.internal:11434 reach a host-native
+      # Ollama. Automatic on Docker Desktop (Mac/Win); host-gateway adds Linux.
+      - "host.docker.internal:host-gateway"
     entrypoint: ["sh", "docker/entrypoint.sh"]
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:

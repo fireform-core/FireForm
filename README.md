@@ -22,7 +22,7 @@ The result is hours of time saved per shift, per firefighter.
 ### ✨ Key Features
 - **Desktop App:** Download the native desktop app for macOS, Windows, or Linux from [Releases](https://github.com/fireform-core/FireForm/releases).
 - **Agnostic:** Works with any department's existing fillable PDF forms.
-- **AI-Powered:** Uses open-source, locally-run LLMs (Mistral) to extract data from natural language. No data ever needs to leave the local machine.
+- **AI-Powered:** Uses open-source, locally-run LLMs to extract data from natural language. No data ever needs to leave the local machine.
 - **Single Point of Entry:** Eliminates redundant data entry entirely.
 
 Open-Source (DPG): Built 100% with open-source tools to be a true Digital Public Good, freely available for any department to adopt and modify.
@@ -54,13 +54,23 @@ Grab the latest installer from the [Releases](https://github.com/fireform-core/F
 
 ### Run from Source
 
+**Backend** (needs Docker):
+
 ```bash
-cd frontend
-npm install
-npm start
+cd FireForm
+make init && make fireform   # API on http://localhost:8000
 ```
 
-> **Note:** The desktop app is a thin Electron wrapper around the same web frontend. The backend (API + Ollama) still needs to be running — see the [Deployment Guide](https://github.com/fireform-core/FireForm/wiki/DEPLOYMENT).
+**Frontend** ([separate repo](https://github.com/fireform-core/fireform-frontend)):
+
+```bash
+git clone https://github.com/fireform-core/fireform-frontend
+cd fireform-frontend
+npm install
+npm run dev
+```
+
+> **Note:** Start the backend first — the frontend needs it running.
 
 ## 🏆 Acknowledgements and Contributors
 This project was built in 48 hours for the Reboot the Earth 2025 hackathon. Thank you to the United Nations and UC Santa Cruz for hosting this incredible event and inspiring us to build solutions for a better future.
@@ -87,9 +97,9 @@ __Contributors (Accountable Entity):__
 ## 🔓 Platform Independence
 
 FireForm is built entirely on open-source technologies and has **no mandatory proprietary dependencies**, ensuring complete platform independence.
-- **Frontend:** Built with React and packaged with Electron (Node.js). Dependencies are listed in `frontend/package.json`.
+- **Frontend:** Built with React and packaged with Electron (Node.js).
 - **Backend:** Built with Python (FastAPI, SQLite). Dependencies are listed in `requirements.txt`.
-- **AI System (Optional):** Uses [Ollama](https://ollama.com/) running open-weight LLMs (e.g., Mistral), ensuring all AI processing is done locally and openly. *Note: The AI features are optional and not core to the main functionality of FireForm (which operates as a digital form and template manager). The AI extraction can be disabled in the application settings. Furthermore, this local Ollama dependency can be swapped with any other LLM service.*
+- **AI System (Optional):** Uses [Ollama](https://ollama.com/) running open-weight LLMs (plus a local Whisper service for speech-to-text), ensuring all AI processing is done locally and openly. *Note: The AI features are optional and not core to the main functionality of FireForm (which operates as a digital form and template manager). The AI extraction can be disabled in the application settings. Furthermore, this local Ollama dependency can be swapped with any other LLM service.*
 
 All dependencies can be verified through the [GitHub dependency graph (SBOM)](https://github.com/fireform-core/FireForm/network/dependencies). There are no vendor lock-ins, and any external service is designed to be replaceable with open alternatives without overhauling the core product.
 
