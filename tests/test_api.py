@@ -283,6 +283,26 @@ class TestFormEndpoints:
         assert resp.status_code == 200
         assert resp.json()["models"] == ["qwen2.5:1.5b"]
 
+    def test_pull_model_success(self, client, monkeypatch):
+        from unittest.mock import MagicMock
+        fake_response = MagicMock()
+        fake_response.raise_for_status.return_value = None
+        monkeypatch.setattr("app.api.routes.forms.requests.post", lambda *a, **k: fake_response)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "success"
+
+    def test_pull_model_failure(self, client, monkeypatch):
+        import requests
+        def boom(*a, **k):
+            raise requests.exceptions.RequestException("pull failed")
+        monkeypatch.setattr("app.api.routes.forms.requests.post", boom)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+        assert resp.status_code == 500
+        assert resp.json()["error_code"] == "MODEL_PULL_ERROR"
+
     def test_fill_form_passes_model_override(self, client, mock_controller):
         """A `model` in the request reaches Controller.fill_form but isn't persisted."""
         tpl_id = self._seed_template(client, mock_controller)

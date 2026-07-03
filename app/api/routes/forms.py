@@ -10,6 +10,7 @@ from app.api.schemas.forms import (
     FormFillResponse,
     ModelsResponse,
     TranscriptionResponse,
+    ModelPullRequest,
 )
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, BASE_DIR, RETENTION_PERIOD_DAYS
 from app.services.whisper import call_whisper_asr
@@ -84,6 +85,16 @@ def list_models():
         models.insert(0, default_model)
 
     return ModelsResponse(models=models, default=default_model)
+
+
+@router.post("/pull")
+def pull_model(req: ModelPullRequest):
+    try:
+        resp = requests.post(f"{OLLAMA_HOST}/api/pull", json={"name": req.model, "stream": False}, timeout=600)
+        resp.raise_for_status()
+        return {"status": "success", "message": f"Model {req.model} pulled successfully"}
+    except requests.exceptions.RequestException as e:
+        raise AppError(f"Failed to pull model: {e}", status_code=500, error_code="MODEL_PULL_ERROR")
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

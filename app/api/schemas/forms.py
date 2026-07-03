@@ -75,3 +75,7 @@ class AsyncJobSubmitResponse(BaseModel):
 
 class AsyncFormFillResponse(BaseModel):
     jobs: list[AsyncJobSubmitResponse]
+
+
+class ModelPullRequest(BaseModel):
+    model: str
