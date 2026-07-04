@@ -13,7 +13,7 @@ try:
 except ImportError:
     pass
 
-from commonforms import prepare_form 
+from commonforms import prepare_form
 from pypdf import PdfReader
 from controller import Controller
 
@@ -30,13 +30,13 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: str 
     It receives the raw data, runs the PDF filling logic,
     and returns the path to the newly created file.
     """
-    
+
     print("[1] Received request from frontend.")
     print(f"[2] PDF template path: {pdf_form_path}")
-    
+
     # Normalize Path/PathLike to a plain string for downstream code
     pdf_form_path = os.fspath(pdf_form_path)
-    
+
     if not os.path.exists(pdf_form_path):
         print(f"Error: PDF template not found at {pdf_form_path}")
         return None # Or raise an exception
@@ -49,16 +49,16 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: str 
             fields=definitions,
             pdf_form_path=pdf_form_path
         )
-        
+
         print("\n----------------------------------")
         print(f"✅ Process Complete.")
         print(f"Output saved to: {output_name}")
-        
+
         return output_name
-        
+
     except Exception as e:
         print(f"An error occurred during PDF generation: {e}")
-        # Re-raise the exception so the frontend can handle it
+        # Re-raise the exception so the frontend can handle i
         raise e
 if __name__ == "__main__":
     file = "./src/inputs/file.pdf"
