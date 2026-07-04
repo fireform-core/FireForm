@@ -132,7 +132,7 @@ class LLM:
                 parsed_value = value
 
             if ";" in value:
-                parsed_value = self.handle_plural_values(value)
+                pass
         if field in self._json.keys():
             self._json[field].append(parsed_value)
         else:

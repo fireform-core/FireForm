@@ -1,4 +1,3 @@
-from typing import Union
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -25,7 +24,7 @@ def input_fields(num_fields: int):
         fields.append(field)
     return fields
 
-def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: Union[str, os.PathLike]):
+def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: str | os.PathLike):
     """
     This function is called by the frontend server.
     It receives the raw data, runs the PDF filling logic,
