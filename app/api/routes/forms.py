@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import json
 import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session, select
 
 from app.api.deps import get_db, verify_api_key
@@ -10,6 +12,7 @@ from app.api.schemas.forms import (
     FormFillResponse,
     ModelsResponse,
     TranscriptionResponse,
+    ModelPullRequest,
 )
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, BASE_DIR, RETENTION_PERIOD_DAYS
 from app.services.whisper import call_whisper_asr
@@ -84,6 +87,33 @@ def list_models():
         models.insert(0, default_model)
 
     return ModelsResponse(models=models, default=default_model)
+
+
+@router.post("/pull")
+def pull_model(req: ModelPullRequest):
+    """Stream pull progress from Ollama as NDJSON.
+    Each line is a JSON object with Ollama's progress fields
+    (status, completed, total, digest). The last line will
+    have status='success' when the pull completes."""
+
+    def generate():
+        try:
+            with requests.post(
+                f"{OLLAMA_HOST}/api/pull",
+                json={"name": req.model, "stream": True},
+                stream=True,
+                timeout=600,
+            ) as r:
+                r.raise_for_status()
+                for chunk in r.iter_content(chunk_size=None):
+                    if chunk:
+                        yield chunk
+            # Signal clean completion
+            yield (json.dumps({"status": "success"}) + "\n").encode("utf-8")
+        except requests.exceptions.RequestException as e:
+            yield (json.dumps({"error": str(e)}) + "\n").encode("utf-8")
+
+    return StreamingResponse(generate(), media_type="application/x-ndjson")
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

@@ -283,6 +283,34 @@ class TestFormEndpoints:
         assert resp.status_code == 200
         assert resp.json()["models"] == ["qwen2.5:1.5b"]
 
+    def test_pull_model_success(self, client, monkeypatch):
+        from unittest.mock import MagicMock
+        fake_response = MagicMock()
+        fake_response.raise_for_status.return_value = None
+        monkeypatch.setattr("app.api.routes.forms.requests.post", lambda *a, **k: fake_response)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "success"
+
+    def test_pull_model_failure(self, client, monkeypatch):
+        """When Ollama is unreachable the stream returns 200 with an error line in the body."""
+        import requests
+        import json
+
+        def boom(*a, **k):
+            raise requests.exceptions.RequestException("pull failed")
+
+        monkeypatch.setattr("app.api.routes.forms.requests.post", boom)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+        assert resp.status_code == 200
+        # The streamed body contains an error JSON line
+        lines = [l for l in resp.text.splitlines() if l.strip()]
+        assert lines, "expected at least one NDJSON line"
+        last = json.loads(lines[-1])
+        assert "error" in last
+
     def test_fill_form_passes_model_override(self, client, mock_controller):
         """A `model` in the request reaches Controller.fill_form but isn't persisted."""
         tpl_id = self._seed_template(client, mock_controller)
