@@ -51,7 +51,7 @@ def run_pdf_fill_process(user_input: str, definitions: list, pdf_form_path: str 
         )
 
         print("\n----------------------------------")
-        print(f"✅ Process Complete.")
+        print("✅ Process Complete.")
         print(f"Output saved to: {output_name}")
 
         return output_name
