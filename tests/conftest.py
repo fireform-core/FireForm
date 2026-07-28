@@ -5,16 +5,16 @@ Uses an in-memory SQLite database and mocks the heavy dependencies
 """
 
 import io
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
-from api.main import app
+from api.db.models import FormSubmission, Template
 from api.deps import get_db
-from api.db.models import Template, FormSubmission  # noqa: F401 — registers tables
+from api.main import app
 
 # ---------------------------------------------------------------------------
 # In-memory database

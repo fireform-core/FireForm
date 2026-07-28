@@ -1,4 +1,5 @@
 import os
+
 from src.filler import Filler
 from src.llm import LLM
 
@@ -34,7 +35,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str | None = None):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
@@ -60,4 +61,4 @@ class FileManipulator:
 
         except Exception as e:
             print(f"An error occurred during PDF generation: {e}")
-            raise e
+            raise

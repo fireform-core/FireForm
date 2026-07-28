@@ -1,6 +1,9 @@
+from datetime import datetime, timezone
+
+
 from pdfrw import PdfReader, PdfWriter
+
 from src.llm import LLM
-from datetime import datetime
 
 
 class Filler:
@@ -15,7 +18,7 @@ class Filler:
         output_pdf = (
             pdf_form[:-4]
             + "_"
-            + datetime.now().strftime("%Y%m%d_%H%M%S")
+            + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
             + "_filled.pdf"
         )
 
@@ -52,7 +55,7 @@ class Filler:
                                 # Find the 'ON' state from the appearance dictionary
                                 on_state = "/Yes"  # Default assumption
                                 if annot.AP and annot.AP.N:
-                                    keys = [k for k in annot.AP.N.keys() if k != "/Off"]
+                                    keys = [k for k in annot.AP.N if k != "/Off"]
                                     if keys:
                                         on_state = keys[0]
                                         

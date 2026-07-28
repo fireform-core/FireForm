@@ -1,11 +1,12 @@
 import json
 import os
+
 import requests
-from requests.exceptions import Timeout, RequestException
+from requests.exceptions import RequestException, Timeout
 
 
 class LLM:
-    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None, model: str=None):
+    def __init__(self, transcript_text: str | None=None, target_fields: list | None=None, json_dict: dict | None=None, model: str | None=None):
         self._transcript_text = transcript_text
         self._target_fields = target_fields
         self._json = json_dict if json_dict is not None else {}
@@ -133,12 +134,11 @@ class LLM:
 
             if ";" in value:
                 pass
-        if field in self._json.keys():
+        if field in self._json:
             self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
 
-        return
 
 
     def get_data(self):

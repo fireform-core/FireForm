@@ -7,8 +7,7 @@ All heavy dependencies (LLM, commonforms, filesystem) are mocked via conftest.
 import pytest
 from sqlmodel import select
 
-from api.db.models import Template, FormSubmission
-
+from api.db.models import FormSubmission, Template
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DB model sanity
@@ -292,6 +291,7 @@ class TestFormEndpoints:
     def test_transcribe_service_unavailable(self, client, monkeypatch):
         """A down whisper service surfaces as a 503, not a 500."""
         import io
+
         import requests
 
         def fake_post(*args, **kwargs):
