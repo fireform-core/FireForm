@@ -69,11 +69,10 @@ class LLM:
                         temp_json_data = response.json()
                         parsed_response = temp_json_data["response"].strip().replace('"', "")
                         
-                        if field_type is bool:
-                            if parsed_response.lower() not in ["true", "false"]:
-                                print(f"[WARN]: LLM returned unexpected boolean value '{parsed_response}' for field '{field}' (attempt {attempt+1}). Retrying...")
-                                payload["prompt"] += "\nERROR: Your previous response was invalid. You MUST respond with ONLY the literal word True or False."
-                                continue
+                        if field_type is bool and parsed_response.lower() not in ["true", "false"]:
+                            print(f"[WARN]: LLM returned unexpected boolean value '{parsed_response}' for field '{field}' (attempt {attempt+1}). Retrying...")
+                            payload["prompt"] += "\nERROR: Your previous response was invalid. You MUST respond with ONLY the literal word True or False."
+                            continue
                                 
                         json_data = temp_json_data
                         break
