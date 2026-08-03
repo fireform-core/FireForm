@@ -5,48 +5,19 @@ from benchmark.pipelines.base import BasePipeline, PipelineExtractionOutput
 class Pipeline(BasePipeline):
     def run(self, narrative: str, template_schema: dict) -> PipelineExtractionOutput:
         '''
-        # Create a unique template ID
-        template_id = f"benchmark_template_{int(time.time())}"
-        
-        # Create the template (this is synchronous)
-        template_response = create_template(
-            name=template_id,
-            description="Benchmark template",
-            pdf_path="/tmp/empty.pdf",
-            fields=template_schema
-        )
-        
-        if not template_response:
-            raise RuntimeError("Failed to create template")
-            
-        # Submit the form fill (this is asynchronous)
-        form_response = fill_form(
-            template_id=template_response.id,
-            input_text=narrative,
-            model=OLLAMA_MODEL,
-            api_key="benchmark-key"
-        )
-        
-        if not form_response:
-            raise RuntimeError("Failed to submit form fill")
-            
-        # Wait for the job to complete (synchronous waiting)
-        job_id = form_response.job_id
-        result = wait_for_job_completion(job_id)
-        
-        if not result:
-            raise RuntimeError("Job did not complete")
-            
-        # Extract the output
-        extracted_fields = result.extracted_fields
-        field_confidence = result.field_confidence
-        latency_seconds = result.latency_seconds
-        
-        return PipelineExtractionOutput(
-            extracted_fields=extracted_fields,
-            field_confidence=field_confidence,
-            latency_seconds=latency_seconds
-        )
+        You guys should here implement the whole pipeline implementation depending on approach B or C.
+
+        Expected behavior:
+        - Create and fill templates, then wait for jobs to complete.
+        - Return extracted fields, confidence scores, and latency.
+
+        Example of a single step:
+        >>> template_id = create_template(...)
+        >>> form_response = fill_form(...)
+        >>> result = wait_for_job_completion(form_response.job_id)
+        >>> extracted = result.extracted_fields
+        >>> confidence = result.field_confidence
+        >>> latency = result.latency_seconds
         '''
         return PipelineExtractionOutput(
             extracted_fields={},
