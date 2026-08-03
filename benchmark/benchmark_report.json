@@ -1,13 +1,13 @@
 {
-  "pipeline_name": "Pipeline_2026-07-08_13h_09m_20s",
+  "pipeline_name": "Pipeline_2026-08-03_18h_16m_49s",
   "metrics": {
-    "total_latency_seconds": 2.1457672119140625e-06,
+    "total_latency_seconds": 1.1920928955078125e-06,
     "average_accuracy": 0.0
   },
   "results": [
     {
       "case_id": "ics201_1",
-      "latency_seconds": 9.5367431640625e-07,
+      "latency_seconds": 1.1920928955078125e-06,
       "accuracy_score": 0.0,
       "extracted_fields": {},
       "ground_truth": {
@@ -185,7 +185,7 @@
     },
     {
       "case_id": "ics202_1",
-      "latency_seconds": 1.1920928955078125e-06,
+      "latency_seconds": 0.0,
       "accuracy_score": 0.0,
       "extracted_fields": {},
       "ground_truth": {

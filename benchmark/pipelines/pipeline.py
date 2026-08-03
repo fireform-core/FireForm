@@ -1,8 +1,6 @@
 import time
 from benchmark.pipelines.base import BasePipeline, PipelineExtractionOutput
 
-from app.api.routes import create_template, wait_for_job_completion, fill_form
-from app.core.config import OLLAMA_MODEL
 
 class Pipeline(BasePipeline):
     def run(self, narrative: str, template_schema: dict) -> PipelineExtractionOutput:
@@ -50,4 +48,8 @@ class Pipeline(BasePipeline):
             latency_seconds=latency_seconds
         )
         '''
-        pass
+        return PipelineExtractionOutput(
+            extracted_fields={},
+            field_confidence={},
+            latency_seconds=0.0
+        )
