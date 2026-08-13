@@ -1,0 +1,81 @@
+{
+  "ics_204_ground_truth": {
+    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+    "2_operational_period": {
+      "date_from": "05/18/2026",
+      "date_to": "05/19/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_branch_division_group_staging_area": {
+      "branch": "Reservoir Skimming & Booming Branch",
+      "division": "Division Reservoir South",
+      "group": "South Arm Skimmer Division",
+      "staging_area": "Staging Area Delta (Silverwood Lake Marina)"
+    },
+    "4_operations_personnel": {
+      "operations_section_chief": {
+        "name": "Battalion Chief Kevin Ross",
+        "contact_number": "555-0515 / Ch 1"
+      },
+      "branch_director": {
+        "name": "Captain B. Walsh",
+        "contact_number": "555-0535 / Ch 2"
+      },
+      "division_group_supervisor": {
+        "name": "Lt. J. Thorne",
+        "contact_number": "555-0560 / Ch 3"
+      }
+    },
+    "5_resources_assigned": [
+      {
+        "resource_identifier": "RV-LC-01",
+        "leader": "Capt. B. Walsh",
+        "number_of_persons": "4",
+        "contact": "Radio Ch 3 (156.550 MHz / VHF 11)",
+        "reporting_location_special_equipment_remarks_notes_information": "Report to Marina Slip 4 by 18:15. 1,200 ft hard boom, drum skimmer, high-intensity LED deck searchlights."
+      },
+      {
+        "resource_identifier": "SKIM-02",
+        "leader": "Operator R. Mendez",
+        "number_of_persons": "3",
+        "contact": "Radio Ch 3",
+        "reporting_location_special_equipment_remarks_notes_information": "Operate heavy weir skimmer vessel in South arm pool. Pump oil to 5,000 gal floating bladder."
+      },
+      {
+        "resource_identifier": "AIR-MON-08",
+        "leader": "Tech A. Ross",
+        "number_of_persons": "2",
+        "contact": "Radio Ch 4",
+        "reporting_location_special_equipment_remarks_notes_information": "Conduct continuous PID benzene air monitoring on boat deck and shoreline baseline."
+      }
+    ],
+    "6_work_assignments": "Deploy and anchor 1,200 feet of hard containment boom across Sawpit Canyon inlet to isolate reservoir. Operate drum skimmers and weir skimmer vessel SKIM-02 continuously throughout night shift to recover floating crude oil slick in South arm.",
+    "7_special_instructions": "Mandatory USCG-approved PFDs for all over-water personnel. Maintain vessel deck lighting during night operations. If PID readings exceed 1 ppm benzene, mandate half-mask APR organic vapor respirators.",
+    "8_communications": [
+      {
+        "name_function": "Command Channel",
+        "primary_contact": "Radio Ch 1 (154.150 MHz)"
+      },
+      {
+        "name_function": "Marine Tactical Channel",
+        "primary_contact": "Radio Ch 3 (156.550 MHz / VHF 11)"
+      },
+      {
+        "name_function": "Safety Officer Direct",
+        "primary_contact": "Cell: 555-0588"
+      },
+      {
+        "name_function": "Water Intake Guard",
+        "primary_contact": "Radio Ch 5 (462.575 MHz)"
+      }
+    ],
+    "9_prepared_by": {
+      "name": "Captain Rachel Brooks",
+      "position_title": "Planning Section Chief",
+      "signature": "Rachel Brooks",
+      "date_time": "05/18/2026 16:30"
+    },
+    "iap_page_number": "4"
+  }
+}

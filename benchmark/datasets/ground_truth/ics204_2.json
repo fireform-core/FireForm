@@ -1,0 +1,81 @@
+{
+  "ics_204_ground_truth": {
+    "1_incident_name": "Blackwood Chemical Pipeline Breach",
+    "2_operational_period": {
+      "date_from": "08/13/2026",
+      "date_to": "08/14/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_branch_division_group_staging_area": {
+      "branch": "Pipeline Isolation Branch",
+      "division": "Division B",
+      "group": "Hot Zone Entry Group",
+      "staging_area": "Staging Area Bravo (Westside High School)"
+    },
+    "4_operations_personnel": {
+      "operations_section_chief": {
+        "name": "D. Kowalski",
+        "contact_number": "555-0210 / Ch 1"
+      },
+      "branch_director": {
+        "name": "Capt. Donald Kross",
+        "contact_number": "555-0233 / Ch 2"
+      },
+      "division_group_supervisor": {
+        "name": "Lt. R. Mendez",
+        "contact_number": "555-0255 / Ch 3"
+      }
+    },
+    "5_resources_assigned": [
+      {
+        "resource_identifier": "HZM-05",
+        "leader": "Lt. C. Webb",
+        "number_of_persons": "5",
+        "contact": "Radio Ch 3 (467.775 MHz)",
+        "reporting_location_special_equipment_remarks_notes_information": "Report to Gate 2 by 18:15. Level A encapsulated SCBA suits, pneumatic pipe clamp, thermal imaging camera."
+      },
+      {
+        "resource_identifier": "ENG-12",
+        "leader": "Capt. A. Ross",
+        "number_of_persons": "4",
+        "contact": "Radio Ch 2",
+        "reporting_location_special_equipment_remarks_notes_information": "Deploy unmanned fog nozzles at 500 ft perimeter to maintain water curtains over airborne ammonia plume."
+      },
+      {
+        "resource_identifier": "WT-03",
+        "leader": "Lt. M. Turner",
+        "number_of_persons": "2",
+        "contact": "Radio Ch 2",
+        "reporting_location_special_equipment_remarks_notes_information": "Supply continuous water feed to Engine 12 monitors."
+      }
+    ],
+    "6_work_assignments": "Enter Hot Zone at Valve Station 14-B under Level A protection to execute manual hot-tap isolation on the 8-inch pressurized line. Secure bypass manifold to stop active liquid ammonia discharge. Maintain water curtains downwind during valve mechanical manipulation.",
+    "7_special_instructions": "Level A PPE mandatory for entry team. Maintain 2-person backup entry team in Level A at Warm Zone line. If ammonia concentration exceeds 300 ppm IDLH at Warm Zone baseline, sound emergency withdrawal horn (3 long blasts).",
+    "8_communications": [
+      {
+        "name_function": "Command / Operations",
+        "primary_contact": "Radio Ch 1 (153.830 MHz)"
+      },
+      {
+        "name_function": "Pipeline Tactical",
+        "primary_contact": "Radio Ch 3 (467.775 MHz)"
+      },
+      {
+        "name_function": "Safety Officer Line",
+        "primary_contact": "Cell: 555-0288"
+      },
+      {
+        "name_function": "Decon Line",
+        "primary_contact": "Radio Ch 6 (462.625 MHz)"
+      }
+    ],
+    "9_prepared_by": {
+      "name": "Sarah L. Jenkins",
+      "position_title": "Planning Section Chief",
+      "signature": "Sarah L. Jenkins",
+      "date_time": "08/13/2026 16:30"
+    },
+    "iap_page_number": "4"
+  }
+}

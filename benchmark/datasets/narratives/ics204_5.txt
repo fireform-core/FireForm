@@ -1,0 +1,14 @@
+### Silverwood Reservoir Crude Oil Pipeline Rupture Assignment List (ICS 204)
+
+The Assignment List, designated as ICS 204 for the Silverwood Reservoir Crude Oil Pipeline Rupture incident under tracking number CalOES-EPA-R9-2026-0518, details the tactical assignments for the South Arm Skimmer Division operating within Division Reservoir South under the Reservoir Skimming & Booming Branch during Operational Period 1 (May 18, 2026, 18:00 hours to May 19, 2026, 06:00 hours).
+
+Tactical leadership for this operational unit is provided by Operations Section Chief Battalion Chief Kevin Ross (Contact: 555-0515 / Radio Ch 1), Branch Director Captain B. Walsh (Contact: 555-0535 / Radio Ch 2), and Division/Group Supervisor Lt. J. Thorne (Contact: 555-0560 / Radio Ch 3). Tactical resources staging and deployment are managed out of Staging Area Delta located at the Silverwood Lake Marina.
+
+Resources assigned to the South Arm Skimmer Division for this shift include:
+1. Clean Harbors Spill Vessel RV-LC-01, led by Capt. B. Walsh, staffing 4 personnel, contactable via Radio Ch 3 (156.550 MHz / VHF 11). Special instructions require reporting to Marina Slip 4 by 18:15 equipped with 1,200 ft hard boom, drum skimmer, and high-intensity LED deck searchlights.
+2. Heavy Vacuum Skimmer Boat SKIM-02, led by Operator R. Mendez, staffing 3 personnel, contactable via Radio Ch 3. Special instructions mandate operating heavy weir skimmer vessel in South arm pool, pumping oil into a 5,000 gal floating bladder.
+3. Air Monitoring Recon Unit AIR-MON-08, led by Tech A. Ross, staffing 2 personnel, contactable via Radio Ch 4. Special instructions require conducting continuous PID benzene air monitoring on boat deck and shoreline baseline.
+
+The specific work assignments for the South Arm Skimmer Division direct personnel to deploy and anchor 1,200 feet of hard containment boom across Sawpit Canyon inlet to isolate the reservoir, and operate drum skimmers and weir skimmer vessel SKIM-02 continuously throughout the night shift to recover floating crude oil slick in the South arm.
+
+Special safety instructions mandate USCG-approved PFDs for all over-water personnel. Maintain vessel deck lighting during night operations. If PID readings exceed 1 ppm benzene, mandate half-mask APR organic vapor respirators. Communications protocols specify Radio Ch 1 (154.150 MHz) for Command Channel, Radio Ch 3 (156.550 MHz / VHF 11) for Marine Tactical Channel, Cell 555-0588 for Safety Officer Direct, and Radio Ch 5 (462.575 MHz) for Water Intake Guard. This document serves as Page 4 of the Incident Action Plan and was prepared by Planning Section Chief Captain Rachel Brooks on May 18, 2026, at 16:30 hours.

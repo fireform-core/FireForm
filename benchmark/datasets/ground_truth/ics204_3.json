@@ -1,0 +1,81 @@
+{
+  "ics_204_ground_truth": {
+    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+    "2_operational_period": {
+      "date_from": "10/14/2026",
+      "date_to": "10/15/2026",
+      "time_from": "07:00",
+      "time_to": "19:00"
+    },
+    "3_branch_division_group_staging_area": {
+      "branch": "Vessel Salvage & Entry Branch",
+      "division": "Division C (Berth 42)",
+      "group": "Deck Neutralization Group",
+      "staging_area": "Staging Area Bravo (Jacintoport Terminal)"
+    },
+    "4_operations_personnel": {
+      "operations_section_chief": {
+        "name": "Battalion Chief A. Ross",
+        "contact_number": "555-0312 / Ch 1"
+      },
+      "branch_director": {
+        "name": "Lt. J. Thorne",
+        "contact_number": "555-0344 / Ch 2"
+      },
+      "division_group_supervisor": {
+        "name": "Lt. S. Baker",
+        "contact_number": "555-0366 / Ch 4"
+      }
+    },
+    "5_resources_assigned": [
+      {
+        "resource_identifier": "HZM-PORT-1",
+        "leader": "Capt. P. Gomez",
+        "number_of_persons": "6",
+        "contact": "Radio Ch 4 (453.225 MHz)",
+        "reporting_location_special_equipment_remarks_notes_information": "Report to Berth 42 Gangway by 07:30. Level A chemical suits, dry lime blower, pH test strips."
+      },
+      {
+        "resource_identifier": "NEUT-TRK-05",
+        "leader": "Driver E. Green",
+        "number_of_persons": "2",
+        "contact": "Radio Ch 4",
+        "reporting_location_special_equipment_remarks_notes_information": "Position at Berth 42 apron. Supply dry sodium bicarbonate powder to deck entry team."
+      },
+      {
+        "resource_identifier": "RV-AC-01",
+        "leader": "Capt. B. Walsh",
+        "number_of_persons": "4",
+        "contact": "Radio Ch 3",
+        "reporting_location_special_equipment_remarks_notes_information": "Conduct continuous water sampling and maintain acid sorbent boom around vessel hull."
+      }
+    ],
+    "6_work_assignments": "Board M/T Stolt Synergy under Level A protection. Apply dry sodium bicarbonate slurry over 4,200 gallons of pooled sulfuric acid on vessel deck until deck runoff pH stabilizes between 6.5 and 8.5. Inspect offloading manifold for structural stress.",
+    "7_special_instructions": "Strict 20-minute entry limit per technician due to heat stress (88°F/78% RH). Mandatory lime wash decon before unsuiting. Do not apply raw water directly to concentrated acid pool to prevent violent exothermic splattering.",
+    "8_communications": [
+      {
+        "name_function": "Operations Command",
+        "primary_contact": "Radio Ch 1 (156.800 MHz / VHF 16)"
+      },
+      {
+        "name_function": "Vessel Tactical",
+        "primary_contact": "Radio Ch 4 (453.225 MHz)"
+      },
+      {
+        "name_function": "Port Safety Line",
+        "primary_contact": "Cell: 555-0399"
+      },
+      {
+        "name_function": "Medical Standby",
+        "primary_contact": "Radio Ch 5 (462.600 MHz)"
+      }
+    ],
+    "9_prepared_by": {
+      "name": "Commander Richard Croft",
+      "position_title": "Planning Section Chief",
+      "signature": "Richard Croft",
+      "date_time": "10/14/2026 06:00"
+    },
+    "iap_page_number": "4"
+  }
+}
