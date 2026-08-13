@@ -1,0 +1,76 @@
+{
+  "ics_205_ground_truth": {
+    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+    "2_date_time_prepared": {
+      "date": "11/02/2026",
+      "time": "16:00"
+    },
+    "3_operational_period": {
+      "date_from": "11/02/2026",
+      "date_to": "11/03/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "4_basic_radio_channel_use": [
+      {
+        "zone_grp": "Zone Pass",
+        "channel_number": "1",
+        "function": "Command",
+        "channel_name_trunked_radio_system_talkgroup": "WSP-CMD",
+        "assignment": "Unified Command / Operations",
+        "rx_frequency_n_or_w": "154.4000 N",
+        "rx_tone_nac": "103.5",
+        "tx_frequency_n_or_w": "159.0300 N",
+        "tx_tone_nac": "103.5",
+        "mode_a_d_or_m": "A",
+        "remarks": "Stevens Pass Mountain Repeater"
+      },
+      {
+        "zone_grp": "Zone Pass",
+        "channel_number": "3",
+        "function": "Tactical",
+        "channel_name_trunked_radio_system_talkgroup": "CAPP-TAC",
+        "assignment": "Railcar Entry & Capping Team",
+        "rx_frequency_n_or_w": "462.7000 N",
+        "rx_tone_nac": "D074",
+        "tx_frequency_n_or_w": "467.7000 N",
+        "tx_tone_nac": "D074",
+        "mode_a_d_or_m": "D",
+        "remarks": "Digital cross-band repeater in ravine"
+      },
+      {
+        "zone_grp": "Zone Pass",
+        "channel_number": "4",
+        "function": "Tactical",
+        "channel_name_trunked_radio_system_talkgroup": "EVAC-TAC",
+        "assignment": "Highway 2 & Evacuation Security",
+        "rx_frequency_n_or_w": "467.5500 N",
+        "rx_tone_nac": "114.8",
+        "tx_frequency_n_or_w": "467.5500 N",
+        "tx_tone_nac": "114.8",
+        "mode_a_d_or_m": "A",
+        "remarks": "Sheriff patrol direct"
+      },
+      {
+        "zone_grp": "Zone Pass",
+        "channel_number": "6",
+        "function": "Support",
+        "channel_name_trunked_radio_system_talkgroup": "LOG-SUPP",
+        "assignment": "Decon & Staging Charlie",
+        "rx_frequency_n_or_w": "151.6250 N",
+        "rx_tone_nac": "67.0",
+        "tx_frequency_n_or_w": "151.6250 N",
+        "tx_tone_nac": "67.0",
+        "mode_a_d_or_m": "A",
+        "remarks": "Staging Area Charlie link"
+      }
+    ],
+    "5_special_instructions": "Portable cross-band repeater deployed at ravine rim to ensure coverage inside mountain shadow. Cold-weather battery packs required for all handheld portables.",
+    "6_prepared_by": {
+      "name": "B. Foster",
+      "signature": "B. Foster",
+      "date_time": "11/02/2026 16:00"
+    },
+    "iap_page_number": "5"
+  }
+}

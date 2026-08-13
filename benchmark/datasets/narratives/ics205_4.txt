@@ -1,0 +1,11 @@
+### Cascade Pass Chlorine Railcar Derailment Incident Radio Communications Plan (ICS 205)
+
+The Incident Radio Communications Plan, designated as ICS 205 for the Cascade Pass Chlorine Railcar Derailment incident under tracking number NTSB-EPA-R10-2026-1102, was prepared on November 02, 2026, at 16:00 hours. This communications blueprint governs basic radio channel assignments for Operational Period 1 (November 02, 2026, 18:00 hours through November 03, 2026, 06:00 hours).
+
+Basic radio channel allocations for this operational period are structured as follows:
+1. Channel 1 (Zone Pass): Functioned for Command, channel name WSP-CMD, assigned to Unified Command and Operations. Operates on RX frequency 154.4000 N (Tone 103.5) and TX frequency 159.0300 N (Tone 103.5) in Analog mode (A), utilizing Stevens Pass Mountain Repeater.
+2. Channel 3 (Zone Pass): Functioned for Tactical operations, channel name CAPP-TAC, assigned to Railcar Entry & Capping Team. Operates on RX frequency 462.7000 N (Tone D074) and TX frequency 467.7000 N (Tone D074) in Digital mode (D), utilizing a digital cross-band repeater deployed in the ravine.
+3. Channel 4 (Zone Pass): Functioned for Tactical operations, channel name EVAC-TAC, assigned to Highway 2 & Evacuation Security. Operates on RX frequency 467.5500 N (Tone 114.8) and TX frequency 467.5500 N (Tone 114.8) in Analog mode (A), serving Sheriff patrol direct communications.
+4. Channel 6 (Zone Pass): Functioned for Support operations, channel name LOG-SUPP, assigned to Decon & Staging Charlie. Operates on RX frequency 151.6250 N (Tone 67.0) and TX frequency 151.6250 N (Tone 67.0) in Analog mode (A), maintaining Staging Area Charlie link.
+
+Special instructions indicate that a portable cross-band repeater is deployed at the ravine rim to ensure coverage inside mountain signal shadows. Cold-weather battery packs are strictly required for all handheld portable radios. This document serves as Page 5 of the Incident Action Plan and was prepared by Communications Unit Leader B. Foster on November 02, 2026, at 16:00 hours.
