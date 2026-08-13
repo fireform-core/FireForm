@@ -1,8 +1,10 @@
-import os
 import json
+import os
 from datetime import datetime
+
 from benchmark.pipelines.pipeline import Pipeline
 from benchmark.runners.runner import Runner
+
 
 def test_pipeline_execution():
     """

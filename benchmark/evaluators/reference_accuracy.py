@@ -6,7 +6,6 @@ import requests
 
 from benchmark.evaluators.accuracy import calculate_accuracy
 
-
 PROMPT_VERSION = "1"
 SYSTEM_PROMPT = """You create reference answers for extraction benchmarks.
 Use only facts supported by the narrative, preserve source wording when practical,

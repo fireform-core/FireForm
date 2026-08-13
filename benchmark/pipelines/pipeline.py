@@ -1,4 +1,3 @@
-import time
 from benchmark.pipelines.base import BasePipeline, PipelineExtractionOutput
 
 

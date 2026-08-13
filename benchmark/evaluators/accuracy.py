@@ -1,5 +1,6 @@
 import re
 
+
 def calculate_accuracy(extracted: any, ground_truth: any) -> float:
     """
     Computes a score from 0.0 to 1.0 representing accuracy.

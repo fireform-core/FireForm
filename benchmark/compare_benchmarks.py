@@ -2,6 +2,7 @@ import json
 import os
 import sys
 
+
 def main():
     if len(sys.argv) < 3:
         print("Usage: python compare_benchmarks.py <branch_report.json> <target_report.json>")

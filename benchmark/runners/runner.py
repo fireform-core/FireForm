@@ -1,7 +1,9 @@
-import time
 import json
 import os
+import time
+
 from benchmark.evaluators.accuracy import calculate_accuracy
+
 
 class Runner:
     def __init__(self, pipeline_class, pipeline_name: str):
