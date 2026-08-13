@@ -24,7 +24,6 @@ from app.api.schemas.enums import (
 )
 from app.models import Extraction, Form, Incident, Input, Report
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

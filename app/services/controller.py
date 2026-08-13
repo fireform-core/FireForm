@@ -1,5 +1,5 @@
-from app.services.file_manipulator import FileManipulator
 from app.services.external_apis_coordinator import ExternalAPIsCoordinator
+from app.services.file_manipulator import FileManipulator
 
 
 class Controller:

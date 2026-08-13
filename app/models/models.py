@@ -1,9 +1,9 @@
 import uuid as uuid_mod
-from uuid import UUID, uuid4
 from datetime import date, datetime, timezone
+from uuid import UUID, uuid4
 
-from sqlalchemy import Column, JSON
-from sqlmodel import SQLModel, Field
+from sqlalchemy import JSON, Column
+from sqlmodel import Field, SQLModel
 from sqlmodel.sql.sqltypes import AutoString
 
 from app.api.schemas.enums import (

@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class TemplateCreate(BaseModel):
     name: str
     pdf_path: str

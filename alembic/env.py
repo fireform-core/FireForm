@@ -1,12 +1,20 @@
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
-
 from sqlmodel import SQLModel
 
+from alembic import context
 from app.core.config import DATABASE_URL
-from app.models import Extraction, Form, FormSubmission, Incident, Input, Job, Report, Template  # noqa: F401
+from app.models import (  # noqa: F401
+    Extraction,
+    Form,
+    FormSubmission,
+    Incident,
+    Input,
+    Job,
+    Report,
+    Template,
+)
 
 config = context.config
 
