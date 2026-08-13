@@ -1,0 +1,14 @@
+### Blackwood Chemical Pipeline Breach Communications List (ICS 205A)
+
+The Communications List, designated as ICS 205A for the Blackwood Chemical Pipeline Breach incident under tracking number US-EPA-R5-2026-0813, functions as the primary incident contact directory for Operational Period 1 (August 13, 2026, 18:00 hours through August 14, 2026, 06:00 hours).
+
+Basic local communications contact methods for assigned incident leadership are established as follows:
+1. Position: Incident Commander (Fire), Name: Chief R. Vance, Contact Methods: Cell: 555-0201 / Radio Ch 1.
+2. Position: Incident Commander (State EPA), Name: Officer M. Ross, Contact Methods: Cell: 555-0202 / Radio Ch 1.
+3. Position: Safety Officer, Name: Captain L. Hayes, Contact Methods: Cell: 555-0288 / Radio Ch 1.
+4. Position: Operations Section Chief, Name: D. Kowalski, Contact Methods: Cell: 555-0210 / Radio Ch 1.
+5. Position: Pipeline Branch Director, Name: Capt. Donald Kross, Contact Methods: Cell: 555-0233 / Radio Ch 2 / Vehicle: HAZ-1.
+6. Position: Entry Group Supervisor, Name: Lt. R. Mendez, Contact Methods: Cell: 555-0255 / Radio Ch 3 / Vehicle: HZM-05.
+7. Position: Planning Section Chief, Name: Sarah L. Jenkins, Contact Methods: Cell: 555-0250 / CP Ext: 201.
+
+This administrative contact directory serves as Page 6 of the Incident Action Plan package and was prepared by Communications Unit Leader K. Albright on August 13, 2026, at 16:30 hours.
