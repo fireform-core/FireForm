@@ -1,0 +1,58 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_medical_aid_stations": [
+    {
+      "name": "string",
+      "location": "string",
+      "contact_number_frequency": "string",
+      "paramedic_service": "boolean"
+    }
+  ],
+  "4_transportation_services": {
+    "ambulance_services": [
+      {
+        "name": "string",
+        "location": "string",
+        "contact_number_frequency": "string",
+        "paramedic_service": "boolean"
+      }
+    ],
+    "air_ambulance_services": [
+      {
+        "name": "string",
+        "location": "string",
+        "contact_number_frequency": "string",
+        "paramedic_service": "boolean"
+      }
+    ]
+  },
+  "5_hospitals": [
+    {
+      "hospital_name": "string",
+      "address_latitude_longitude": "string",
+      "contact_number_frequency": "string",
+      "air_ambulance_helipad": "boolean",
+      "burn_center": "boolean",
+      "trauma_center": "boolean"
+    }
+  ],
+  "6_special_medical_emergency_procedures": "string",
+  "7_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "8_approved_by_safety_officer": {
+    "name": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}
