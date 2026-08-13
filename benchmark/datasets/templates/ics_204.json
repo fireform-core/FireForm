@@ -1,0 +1,53 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_branch_division_group_staging_area": {
+    "branch": "string",
+    "division": "string",
+    "group": "string",
+    "staging_area": "string"
+  },
+  "4_operations_personnel": {
+    "operations_section_chief": {
+      "name": "string",
+      "contact_number": "string"
+    },
+    "branch_director": {
+      "name": "string",
+      "contact_number": "string"
+    },
+    "division_group_supervisor": {
+      "name": "string",
+      "contact_number": "string"
+    }
+  },
+  "5_resources_assigned": [
+    {
+      "resource_identifier": "string",
+      "leader": "string",
+      "number_of_persons": "string",
+      "contact": "string",
+      "reporting_location_special_equipment_remarks_notes_information": "string"
+    }
+  ],
+  "6_work_assignments": "string",
+  "7_special_instructions": "string",
+  "8_communications": [
+    {
+      "name_function": "string",
+      "primary_contact": "string"
+    }
+  ],
+  "9_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

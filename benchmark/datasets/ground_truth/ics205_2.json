@@ -1,0 +1,76 @@
+{
+  "ics_205_ground_truth": {
+    "1_incident_name": "Blackwood Chemical Pipeline Breach",
+    "2_date_time_prepared": {
+      "date": "08/13/2026",
+      "time": "16:00"
+    },
+    "3_operational_period": {
+      "date_from": "08/13/2026",
+      "date_to": "08/14/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "4_basic_radio_channel_use": [
+      {
+        "zone_grp": "Zone A",
+        "channel_number": "1",
+        "function": "Command",
+        "channel_name_trunked_radio_system_talkgroup": "STATE-CMD",
+        "assignment": "Unified Command / Operations",
+        "rx_frequency_n_or_w": "153.8300 N",
+        "rx_tone_nac": "131.8",
+        "tx_frequency_n_or_w": "158.9700 N",
+        "tx_tone_nac": "131.8",
+        "mode_a_d_or_m": "A",
+        "remarks": "County Repeater 4"
+      },
+      {
+        "zone_grp": "Zone A",
+        "channel_number": "2",
+        "function": "Tactical",
+        "channel_name_trunked_radio_system_talkgroup": "HAZ-TAC-1",
+        "assignment": "Hot Zone Entry Group",
+        "rx_frequency_n_or_w": "467.7750 N",
+        "rx_tone_nac": "D023",
+        "tx_frequency_n_or_w": "467.7750 N",
+        "tx_tone_nac": "D023",
+        "mode_a_d_or_m": "D",
+        "remarks": "Intrinsically safe radios only"
+      },
+      {
+        "zone_grp": "Zone A",
+        "channel_number": "3",
+        "function": "Tactical",
+        "channel_name_trunked_radio_system_talkgroup": "BOOM-TAC",
+        "assignment": "River Booming Division",
+        "rx_frequency_n_or_w": "154.2800 N",
+        "rx_tone_nac": "131.8",
+        "tx_frequency_n_or_w": "154.2800 N",
+        "tx_tone_nac": "131.8",
+        "mode_a_d_or_m": "A",
+        "remarks": "Simplex marine/land link"
+      },
+      {
+        "zone_grp": "Zone A",
+        "channel_number": "4",
+        "function": "Dispatch",
+        "channel_name_trunked_radio_system_talkgroup": "LAW-DISP",
+        "assignment": "Perimeter Evacuation / SO",
+        "rx_frequency_n_or_w": "460.1250 N",
+        "rx_tone_nac": "156.7",
+        "tx_frequency_n_or_w": "465.1250 N",
+        "tx_tone_nac": "156.7",
+        "mode_a_d_or_m": "D",
+        "remarks": "County Sheriff Dispatch"
+      }
+    ],
+    "5_special_instructions": "Only intrinsically safe portable radios (Class I, Div 1) permitted inside the 500-foot Exclusion Zone. Maintain 30-minute radio check-ins.",
+    "6_prepared_by": {
+      "name": "K. Albright",
+      "signature": "K. Albright",
+      "date_time": "08/13/2026 16:00"
+    },
+    "iap_page_number": "5"
+  }
+}

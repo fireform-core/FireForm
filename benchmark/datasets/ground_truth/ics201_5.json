@@ -1,0 +1,145 @@
+{
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_incident_number": "USCG-EPA-R6-2026-1014",
+  "3_date_time_initiated": {
+    "date": "10/14/2026",
+    "time": "11:20"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "2.5-mile radius centered around Berth 42 of the Houston Ship Channel Tank Terminal.",
+    "incident_site_area": "Tanker Berth 42 (MM 51.2, West Bank), where a manifold failure on chemical parcel tanker M/T Stolt Synergy released concentrated 98% sulfuric acid.",
+    "impacted_areas": "500-yard perimeter along Berth 42 exhibiting localized water discoloration and acidic vapor mist, extending 400 yards downwind across adjacent industrial docks.",
+    "threatened_areas": "San Jacinto Battleground Historic Site 1.2 miles down-river and Channelview Residential Neighborhood 2.0 miles downwind to the North-Northwest.",
+    "overflight_results": "USCG Air Station Houston Helicopter 6512 confirmed a localized 150-yard plume dissipating in the ship channel with continuous water sampling underway.",
+    "trajectories": "Acidic vapor mist tracking North-Northwest at 8 mph; waterborne runoff moving with ebb tide East-Southeast at 1.2 knots.",
+    "impacted_shorelines": "400 yards of concrete bulkhead and wooden fender piling at Berth 42.",
+    "graphics_and_symbology": "North oriented vertically, depicting Staging Area Bravo at Jacintoport Terminal, Spill Boom Site 1, Command Post at USCG Sector Houston-Galveston, Exclusion Zone boundaries (1,000 ft radius), and ship channel navigation safety zones."
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 10:50 CDT on 10/14/2026, a high-pressure discharge hose burst during offloading operations at Berth 42, spilling approximately 4,200 gallons of 98% sulfuric acid into secondary containment and the ship channel, generating a dense corrosive acid mist cloud.",
+    "health_and_safety_hazards": "Severe skin necrosis upon contact, permanent ocular damage, pulmonary edema from acid mist inhalation, extreme heat reaction when mixed with water, and slip hazards on degraded berth decking.",
+    "necessary_measures": "Enforce 1,000-foot Exclusion Zone; Level A chemical suit protection with SCBA for Hot Zone entries; Level B protective suits with SCBA for Warm Zone support; continuous pH water sampling and real-time acid mist sensor monitoring; mandatory dual-stage lime neutralization decontamination wash at Gate 4."
+  },
+  "6_prepared_by": {
+    "name": "Commander Richard Croft",
+    "position_title": "Planning Section Chief",
+    "signature": "Richard Croft",
+    "date_time": "10/14/2026 13:00"
+  },
+  "7_current_and_planned_objectives": [
+    "Enforce a 1,000-foot Exclusion Zone around Berth 42 and secure vessel offloading by 12:00 hours.",
+    "Complete neutralization of deck spill using sodium bicarbonate slurry by 14:00 hours.",
+    "Deploy chemical neutralization boom array at Berth 42 slip by 13:30 hours.",
+    "Monitor atmospheric acid mist levels along Channelview perimeter to ensure public safety by 15:00 hours.",
+    "Transition to Unified Command (USCG, EPA, TCEQ, RP) by 12:30 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "11:20",
+      "actions": "Initial emergency response initiated; Port Authority Fire Engines 81 and 82 respond; 1,000-foot safety perimeter set up."
+    },
+    {
+      "time": "11:45",
+      "actions": "Sector Command established by Captain H. Vance; Houston Ship Channel traffic restricted to one-way slow speed."
+    },
+    {
+      "time": "12:15",
+      "actions": "Port Hazmat Team 1 arrives on scene to establish pH monitoring grid and set up neutralization decon corridor."
+    },
+    {
+      "time": "12:50",
+      "actions": "USCG Strike Team arrives; initiates shipboard inspection and containment audit."
+    },
+    {
+      "time": "13:15",
+      "actions": "Stolt Tankers RP response vessel deploys chemical sorbent boom around M/T Stolt Synergy."
+    },
+    {
+      "time": "14:00",
+      "actions": "Planned: Entry Team Alpha under Level A PPE executes emergency valve shutdown on shipboard manifold."
+    },
+    {
+      "time": "14:30",
+      "actions": "Planned: Begin high-volume sodium bicarbonate dry-powder application on vessel deck."
+    },
+    {
+      "time": "16:00",
+      "actions": "Planned: Perform secondary overflight to confirm complete plume dissipation."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Captain H. Vance (USCG Unified Command IC)",
+      "OSC M. Reynolds (EPA Co-IC)",
+      "Chief D. Garcia (Port Authority Fire IC)",
+      "K. Lindqvist (Stolt Tankers RP IC)"
+    ],
+    "safety_officer": "Commander Thomas Blake",
+    "public_information_officer": "Laura Martinez (Port Authority)",
+    "liaison_officer": "Inspector R. Sterling (TCEQ)",
+    "operations_section_chief": "Battalion Chief A. Ross",
+    "planning_section_chief": "Commander Richard Croft",
+    "logistics_section_chief": "Sandra Keller",
+    "finance_administration_section_chief": "Wayne Miller",
+    "additional_positions": [
+      {
+        "position": "Chemical Hazards Specialist",
+        "name": "Dr. V. Patel"
+      },
+      {
+        "position": "Vessel Boarding Group Supervisor",
+        "name": "Lt. J. Thorne"
+      }
+    ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "Port Authority Hazmat Team",
+      "resource_identifier": "HZM-PORT-1",
+      "date_time_ordered": "10/14/2026 11:25",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Executing pH sampling grid and Hot Zone entry prep."
+    },
+    {
+      "resource": "Port Fire Engine",
+      "resource_identifier": "ENG-81",
+      "date_time_ordered": "10/14/2026 11:20",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Securing 1,000 ft landward perimeter and foam standby."
+    },
+    {
+      "resource": "USCG Gulf Strike Team",
+      "resource_identifier": "USCG-GST-02",
+      "date_time_ordered": "10/14/2026 11:50",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Supervising vessel entry protocol and safety verification."
+    },
+    {
+      "resource": "Chemical Response Vessel",
+      "resource_identifier": "RV-AC-01",
+      "date_time_ordered": "10/14/2026 12:00",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Deployed chemical sorbent boom around vessel berth."
+    },
+    {
+      "resource": "Lime Neutralization Truck Unit",
+      "resource_identifier": "NEUT-TRK-05",
+      "date_time_ordered": "10/14/2026 12:30",
+      "eta": "10/14/2026 14:15",
+      "arrived": false,
+      "notes": "Delivering 10 tons of dry sodium bicarbonate slurry."
+    },
+    {
+      "resource": "Mobile Air Sampling Van",
+      "resource_identifier": "AIR-SAM-02",
+      "date_time_ordered": "10/14/2026 12:10",
+      "eta": "10/14/2026 13:45",
+      "arrived": false,
+      "notes": "Transporting real-time SO3/acid mist photoionization sensors."
+    }
+  ]
+}

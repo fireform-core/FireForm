@@ -3,7 +3,12 @@ from datetime import datetime, timezone
 
 from app.core.celery import celery_app
 from app.db.database import get_session
-from app.db.repositories import get_job_by_celery_id, get_template, update_job, create_form
+from app.db.repositories import (
+    create_form,
+    get_job_by_celery_id,
+    get_template,
+    update_job,
+)
 from app.models import FormSubmission
 from app.services.controller import Controller
 

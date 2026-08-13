@@ -1,7 +1,9 @@
-from app.db.database import get_session
 from fastapi import Header, Request
+
 from app.core.config import FIREFORM_API_KEY
 from app.core.errors.base import AppError
+from app.db.database import get_session
+
 
 def get_db():
     yield from get_session()

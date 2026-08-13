@@ -1,0 +1,14 @@
+### Cascade Pass Chlorine Railcar Derailment Assignment List (ICS 204)
+
+The Assignment List, designated as ICS 204 for the Cascade Pass Chlorine Railcar Derailment incident under tracking number NTSB-EPA-R10-2026-1102, details the tactical assignments for the Railcar Entry Group 1 operating within Division Ravine under the Hazmat Capping Branch during Operational Period 1 (November 02, 2026, 18:00 hours to November 03, 2026, 06:00 hours).
+
+Tactical leadership for this operational unit is provided by Operations Section Chief Battalion Chief T. Higgins (Contact: 555-0411 / Radio Ch 1), Branch Director Capt. P. Gomez (Contact: 555-0433 / Radio Ch 2), and Division/Group Supervisor Capt. D. Ross (Contact: 555-0455 / Radio Ch 3). Tactical resources staging and deployment are managed out of Staging Area Charlie located at the Stevens Pass Maintenance Yard.
+
+Resources assigned to Railcar Entry Group 1 for this shift include:
+1. King County Hazmat 3 HZM-33, led by Lt. S. Baker, staffing 5 personnel, contactable via Radio Ch 3 (462.700 MHz). Special instructions require reporting to Ravine Checkpoint by 18:30 equipped with Level A encapsulated suits, Emergency B-Kit capping assembly, and pneumatic torque wrenches.
+2. BNSF Emergency Response Unit BNSF-ER-01, led by Spec. G. Peterson, staffing 3 personnel, contactable via Radio Ch 3. Special instructions mandate providing railcar dome technical oversight and heavy rigging hardware.
+3. Mobile Decontamination Trailer DECON-04, led by Tech M. Turner, staffing 4 personnel, contactable via Radio Ch 2. Special instructions require operating heated water decontamination trailer at Staging Area Charlie.
+
+The specific work assignments for Railcar Entry Group 1 direct personnel to descend ravine to derailed railcar BNSF-77402 under Level A protection, mount and torque Emergency B-Kit hood over damaged chlorine angle valve dome, and verify seal integrity using ammonia vapor swab test until zero leakage is detected.
+
+Special safety instructions mandate precautions for freezing temperature hazards (28°F) and icy slopes. Suit entry teams are limited to 30-minute rotations. Heated decon wash is mandatory to prevent suit freeze-up, and continuous electrochemical chlorine monitoring is required throughout the entry. Communications protocols specify Radio Ch 1 (154.400 MHz) for Command Channel, Radio Ch 3 (462.700 MHz) for Capping Tactical, Cell 555-0488 for Safety Officer Line, and Radio Ch 4 (467.550 MHz) for Evac Control Line. This document serves as Page 4 of the Incident Action Plan and was prepared by Planning Section Chief Lt. Colonel Alan Vance on November 02, 2026, at 16:30 hours.

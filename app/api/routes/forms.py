@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
 import requests
-from fastapi import APIRouter, Depends, File, UploadFile, Query
+from fastapi import APIRouter, Depends, File, Query, UploadFile
 from sqlmodel import Session, select
 
 from app.api.deps import get_db, verify_api_key
@@ -11,12 +12,17 @@ from app.api.schemas.forms import (
     ModelsResponse,
     TranscriptionResponse,
 )
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, BASE_DIR, RETENTION_PERIOD_DAYS
-from app.services.whisper import call_whisper_asr
+from app.core.config import BASE_DIR, OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
 from app.core.errors.base import AppError
-from app.db.repositories import create_form, get_template, get_form_submission, delete_form_submission
+from app.db.repositories import (
+    create_form,
+    delete_form_submission,
+    get_form_submission,
+    get_template,
+)
 from app.models import FormSubmission, Template
 from app.services.controller import Controller
+from app.services.whisper import call_whisper_asr
 
 PROJECT_ROOT = BASE_DIR
 
@@ -175,8 +181,9 @@ def get_submissions(db: Session = Depends(get_db)):
 
 @router.get("/submissions/analytics")
 def get_submissions_analytics(db: Session = Depends(get_db)):
-    from collections import Counter
     import re
+    from collections import Counter
+
     from sqlmodel import select
 
     statement = select(FormSubmission, Template.name).join(
@@ -194,9 +201,8 @@ def get_submissions_analytics(db: Session = Depends(get_db)):
         "the", "and", "a", "of", "to", "in", "is", "that", "it", "was", "for", "on",
         "as", "with", "by", "at", "an", "be", "this", "are", "from", "or", "have",
         "has", "had", "but", "not", "he", "she", "they", "we", "i", "you", "my", "his",
-        "her", "their", "our", "me", "him", "them", "us", "about", "there", "their",
-        "were", "been", "would", "could", "should", "will", "can", "no", "yes", "any",
-        "so", "very", "patient", "presents", "with", "reported", "history", "shows",
+        "her", "their", "our", "me", "him", "them", "us", "about", "there", "were", "been", "would", "could", "should", "will", "can", "no", "yes", "any",
+        "so", "very", "patient", "presents", "reported", "history", "shows",
         "left", "right", "pain", "due", "after", "before", "emergency", "department",
         "medical", "clinical"
     }

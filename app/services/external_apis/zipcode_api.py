@@ -1,5 +1,5 @@
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 from app.core.logging import get_logger
 
