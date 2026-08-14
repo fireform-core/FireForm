@@ -2,7 +2,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.templates import (

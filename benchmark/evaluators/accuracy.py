@@ -6,7 +6,7 @@ def calculate_accuracy(extracted: any, ground_truth: any) -> float:
     Computes a score from 0.0 to 1.0 representing accuracy.
     Handles nested dicts, lists, booleans, and string fuzzy matching.
     """
-    if type(extracted) != type(ground_truth):
+    if not isinstance(extracted, type(ground_truth)):
         # Allow string representations of booleans/numbers
         if isinstance(ground_truth, bool) and isinstance(extracted, str):
             extracted = extracted.lower() in ("true", "1", "yes")

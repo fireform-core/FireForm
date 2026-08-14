@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import requests
-from fastapi import APIRouter, Depends, File, UploadFile, Query
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from sqlmodel import Session
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.forms import (
@@ -18,10 +18,9 @@ from app.db.repositories import (
     get_form_submission,
     get_template,
 )
-from app.models import FormSubmission, Template
-from app.services.controller import Controller
-from app.services.whisper import call_whisper_asr
+from app.models import FormSubmission
 from app.services.form import FormService
+from app.services.whisper import call_whisper_asr
 
 PROJECT_ROOT = BASE_DIR
 
