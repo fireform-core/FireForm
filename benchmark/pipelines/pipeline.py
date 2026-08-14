@@ -2,7 +2,7 @@ from benchmark.pipelines.base import BasePipeline, PipelineExtractionOutput
 
 
 class Pipeline(BasePipeline):
-    def run(self, narrative: str, template_schema: dict) -> PipelineExtractionOutput:
+    def run(self, narrative: str, template_schema: dict, pdf_path: str) -> PipelineExtractionOutput:
         '''
         You guys should here implement the whole pipeline implementation depending on approach B or C.
 
