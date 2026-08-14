@@ -1,0 +1,55 @@
+{
+  "ics_205a_ground_truth": {
+    "1_incident_name": "Blackwood Chemical Pipeline Breach",
+    "2_operational_period": {
+      "date_from": "08/13/2026",
+      "date_to": "08/14/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_basic_local_communications_information": [
+      {
+        "incident_assigned_position": "Incident Commander (Fire)",
+        "name": "Chief R. Vance",
+        "methods_of_contact": "Cell: 555-0201 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Incident Commander (State EPA)",
+        "name": "Officer M. Ross",
+        "methods_of_contact": "Cell: 555-0202 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Safety Officer",
+        "name": "Captain L. Hayes",
+        "methods_of_contact": "Cell: 555-0288 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Operations Section Chief",
+        "name": "D. Kowalski",
+        "methods_of_contact": "Cell: 555-0210 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Pipeline Branch Director",
+        "name": "Capt. Donald Kross",
+        "methods_of_contact": "Cell: 555-0233 / Radio Ch 2 / Vehicle: HAZ-1"
+      },
+      {
+        "incident_assigned_position": "Entry Group Supervisor",
+        "name": "Lt. R. Mendez",
+        "methods_of_contact": "Cell: 555-0255 / Radio Ch 3 / Vehicle: HZM-05"
+      },
+      {
+        "incident_assigned_position": "Planning Section Chief",
+        "name": "Sarah L. Jenkins",
+        "methods_of_contact": "Cell: 555-0250 / CP Ext: 201"
+      }
+    ],
+    "4_prepared_by": {
+      "name": "K. Albright",
+      "position_title": "Communications Unit Leader",
+      "signature": "K. Albright",
+      "date_time": "08/13/2026 16:30"
+    },
+    "iap_page_number": "6"
+  }
+}

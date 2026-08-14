@@ -1,0 +1,101 @@
+# System & health check schemas
+
+HealthStatus:
+  type: object
+  required:
+    - status
+    - version
+  properties:
+    status:
+      type: string
+      enum:
+        - healthy
+        - degraded
+        - unhealthy
+    version:
+      type: string
+      description: FireForm API version
+    uptime_seconds:
+      type: integer
+    components:
+      type: object
+      properties:
+        database:
+          $ref: "#/ComponentHealth"
+        ollama:
+          $ref: "#/ComponentHealth"
+        whisper:
+          $ref: "#/ComponentHealth"
+        storage:
+          $ref: "#/ComponentHealth"
+
+ComponentHealth:
+  type: object
+  required:
+    - status
+  properties:
+    status:
+      type: string
+      enum:
+        - healthy
+        - degraded
+        - unhealthy
+    response_time_ms:
+      type: integer
+      nullable: true
+    detail:
+      type: string
+      nullable: true
+    model_loaded:
+      type: string
+      nullable: true
+      description: Currently loaded model (ollama component)
+    disk_free_gb:
+      type: number
+      nullable: true
+      description: Free disk space (storage component)
+    ollama_version:
+      type: string
+      nullable: true
+      description: Ollama server version (ollama component)
+    models_available:
+      type: array
+      nullable: true
+      description: All models pulled and available on the Ollama server (ollama component)
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          size_gb:
+            type: number
+          quantization:
+            type: string
+            nullable: true
+          loaded:
+            type: boolean
+    current_load:
+      type: object
+      nullable: true
+      description: Current processing load (ollama component)
+      properties:
+        active_requests:
+          type: integer
+        queued_requests:
+          type: integer
+
+SchemaVersion:
+  type: object
+  required:
+    - version
+    - released_at
+  properties:
+    version:
+      type: string
+    released_at:
+      type: string
+      format: date-time
+    changelog:
+      type: string
+    breaking_changes:
+      type: boolean

@@ -1,0 +1,110 @@
+openapi: 3.0.0
+
+info:
+  title: FireForm API
+  version: 1.0.0
+  description: |
+    Proposed API contract for FireForm as GSoC project 2026 by [chetanr25.in](https://chetanr25.in)
+  contact:
+    name: Chetan R
+    url: https://github.com/chetanr25
+    email: chetan250204@gmail.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local FireForm instance (default)
+
+tags:
+  - name: input
+    description: Submit voice or text incident narratives
+  - name: extraction
+    description: AI-powered data extraction from narratives into canonical JSON
+  - name: forms
+    description: Generate agency-specific PDF forms from extracted data
+  - name: incidents
+    description: Manage incident records linking inputs, extractions, and forms
+  - name: reporting
+    description: Aggregate statistics and periodic report generation
+  - name: templates
+    description: Form template configuration and management
+  - name: system
+    description: Health checks, schema introspection, and system status
+  - name: jobs
+    description: Cross-cutting async job status polling
+  - name: weather
+    description: Weather forecast lookup via external API
+  - name: zipcode
+    description: Address and postal code geocoding via external API
+
+paths:
+  # ── Layer 1: Input ──────────────────────────────────────────────
+  /api/v1/input/voice:
+    $ref: "path/input.yaml#/voice"
+  /api/v1/input/text:
+    $ref: "path/input.yaml#/text"
+  /api/v1/input/{input_id}:
+    $ref: "path/input.yaml#/input_by_id"
+
+  # ── Layer 2: AI Extraction ─────────────────────────────────────
+  /api/v1/extract/{input_id}:
+    $ref: "path/extraction.yaml#/extract_by_input"
+  /api/v1/extract/{extract_id}:
+    $ref: "path/extraction.yaml#/extract_by_id"
+  /api/v1/extract/{extract_id}/validate:
+    $ref: "path/extraction.yaml#/validate"
+
+  # ── Layer 3: Form Generation ───────────────────────────────────
+  /api/v1/forms/generate/all:
+    $ref: "path/forms.yaml#/generate_all"
+  /api/v1/forms/generate/{form_type}:
+    $ref: "path/forms.yaml#/generate_single"
+  /api/v1/forms/{form_id}:
+    $ref: "path/forms.yaml#/form_by_id"
+  /api/v1/forms/{form_id}/pdf:
+    $ref: "path/forms.yaml#/form_pdf"
+  /api/v1/forms/{form_id}/json:
+    $ref: "path/forms.yaml#/form_json"
+  /api/v1/forms/batch/{batch_id}:
+    $ref: "path/forms.yaml#/batch_by_id"
+
+  # ── Layer 4: Incident Management ───────────────────────────────
+  /api/v1/incidents:
+    $ref: "path/incidents.yaml#/incidents"
+  /api/v1/incidents/{incident_id}:
+    $ref: "path/incidents.yaml#/incident_by_id"
+
+  # ── Layer 5: Reporting & Analytics ─────────────────────────────
+  /api/v1/reports/summary:
+    $ref: "path/reporting.yaml#/summary"
+  /api/v1/reports/generate:
+    $ref: "path/reporting.yaml#/generate"
+  /api/v1/reports/{report_id}:
+    $ref: "path/reporting.yaml#/report_by_id"
+
+  # ── Layer 6: Templates & Configuration ─────────────────────────
+  /api/v1/templates:
+    $ref: "path/templates.yaml#/templates"
+  /api/v1/templates/{template_id}:
+    $ref: "path/templates.yaml#/template_by_id"
+  /api/v1/templates/{template_id}/fields:
+    $ref: "path/templates.yaml#/template_fields"
+  /api/v1/templates/pdf:
+    $ref: "path/templates.yaml#/templates_pdf"
+
+  # ── Layer 7: System ────────────────────────────────────────────
+  /api/v1/health:
+    $ref: "path/system.yaml#/health"
+  /api/v1/schema/incident:
+    $ref: "path/system.yaml#/schema_incident"
+  /api/v1/schema/incident/versions:
+    $ref: "path/system.yaml#/schema_versions"
+
+  # ── Layer 8: Async Jobs ────────────────────────────────────────
+  /api/v1/jobs/{job_id}:
+    $ref: "path/jobs.yaml#/job_by_id"
+
+  # ── Layer 9: External APIs ─────────────────────────────────────
+  /api/v1/weather/forecast:
+    $ref: "path/weather.yaml#/forecast"
+  /api/v1/zipcode/lookup-address:
+    $ref: "path/zipcode.yaml#/lookup_address"

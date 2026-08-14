@@ -1,0 +1,81 @@
+{
+  "ics_207_ground_truth": {
+    "1_incident_name": "Blackwood Chemical Pipeline Breach",
+    "2_operational_period": {
+      "date_from": "08/13/2026",
+      "date_to": "08/14/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_organization_chart": {
+      "incident_commanders": [
+        "Chief R. Vance (Blackwood Fire Dept)",
+        "Officer M. Ross (State EPA)",
+        "J. Vance (Blackwood Pipeline Co. RP)"
+      ],
+      "command_staff": {
+        "safety_officer": "Captain L. Hayes",
+        "public_information_officer": "E. Wright",
+        "liaison_officer": "Deputy K. Miller"
+      },
+      "operations_section": {
+        "chief": "D. Kowalski",
+        "staging_area_manager": "Staging Area Bravo Manager",
+        "branches_divisions_groups": [
+          {
+            "title": "Pipeline Isolation Branch Director",
+            "name": "Capt. Donald Kross"
+          },
+          {
+            "title": "Hot Zone Entry Group Supervisor",
+            "name": "Lt. R. Mendez"
+          },
+          {
+            "title": "Vapor Suppression Group Supervisor",
+            "name": "Capt. A. Ross"
+          },
+          {
+            "title": "River Spill Containment Branch Director",
+            "name": "Commander Thomas Blake"
+          }
+        ]
+      },
+      "planning_section": {
+        "chief": "Sarah L. Jenkins",
+        "resources_unit_ldr": "A. Patel",
+        "situation_unit_ldr": "C. Webb",
+        "documentation_unit_ldr": "Dr. H. Thorne",
+        "demobilization_unit_ldr": "M. Brody"
+      },
+      "logistics_section": {
+        "chief": "T. Bradley",
+        "support_branch": {
+          "director": "G. Kross",
+          "supply_unit_ldr": "H. Lin",
+          "facilities_unit_ldr": "R. Sterling",
+          "ground_spt_unit_ldr": "D. Miller"
+        },
+        "service_branch": {
+          "director": "S. Norris",
+          "comms_unit_ldr": "K. Albright",
+          "medical_unit_ldr": "Dr. T. Vance",
+          "food_unit_ldr": "A. Cho"
+        }
+      },
+      "finance_administration_section": {
+        "chief": "A. Patel",
+        "time_unit_ldr": "J. Mercer",
+        "procurement_unit_ldr": "Laura Martinez",
+        "comp_claims_unit_ldr": "Inspector R. Sterling",
+        "cost_unit_ldr": "Sandra Keller"
+      }
+    },
+    "4_prepared_by": {
+      "name": "A. Patel",
+      "position_title": "Resources Unit Leader",
+      "signature": "A. Patel",
+      "date_time": "08/13/2026 16:30"
+    },
+    "iap_page_number": "4"
+  }
+}

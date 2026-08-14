@@ -1,0 +1,49 @@
+{
+  "ics_202_ground_truth": {
+    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+    "2_operational_period": {
+      "date_from": "11/02/2026",
+      "date_to": "11/03/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_objectives": [
+      "Enforce strict Level A PPE compliance and buddy system protocols during all night operations around derailment site.",
+      "Complete installation and torque testing of Emergency B-Kit capping assembly on chlorine tank car BNSF-77402 by 22:00 hours.",
+      "Maintain perimeter chlorine air monitoring at 15-minute intervals along State Route 2 evacuation boundary.",
+      "Operate heated decontamination trailer and warm hydration station continuously at Staging Area Charlie.",
+      "Formulate environmental sampling plan and morning shift briefing package by 04:00 hours."
+    ],
+    "4_operational_period_command_emphasis": "Command emphasizes absolute safety of capping entry teams working under nighttime freezing conditions. Ensure continuous warm water decon availability to prevent suit icing.",
+    "general_situational_awareness": "Overcast skies with mountain temperatures dropping to 28°F overnight; snow flurries expected after 01:00 hours. Light winds from West at 3 mph drifting toward ravine floor. Icing hazards on rail ballast and steep access slopes. High hypothermia hazard for standing security personnel.",
+    "5_site_safety_plan_required": true,
+    "approved_site_safety_plans_located_at": "Skykomish School Gym Operations Briefing Room",
+    "6_incident_action_plan_attachments": {
+      "ics_203": true,
+      "ics_204": true,
+      "ics_205": true,
+      "ics_205a": false,
+      "ics_206": true,
+      "ics_207": true,
+      "ics_208": true,
+      "map_chart": true,
+      "weather_forecast_tides_currents": true,
+      "other_attachments": [
+        "Railcar Capping Procedure Manual",
+        "Chlorine Gas Toxicity Chart"
+      ]
+    },
+    "7_prepared_by": {
+      "name": "Lt. Colonel Alan Vance",
+      "position_title": "Planning Section Chief",
+      "signature": "Alan Vance",
+      "date_time": "11/02/2026 16:30"
+    },
+    "8_approved_by_incident_commander": {
+      "name": "Captain E. Miller",
+      "signature": "Captain E. Miller",
+      "date_time": "11/02/2026 17:15"
+    },
+    "iap_page_number": "1"
+  }
+}

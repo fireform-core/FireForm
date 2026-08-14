@@ -1,0 +1,76 @@
+lookup_address:
+  get:
+    summary: Resolve address to location
+    description: >
+      Geocode a free-form address string to one or more geographic locations.
+      Each result includes postal code (when available), latitude, longitude,
+      place name, state, county, and country.
+      The list is ordered by relevance (most relevant first, up to 10 results).
+    tags:
+      - zipcode
+    parameters:
+      - name: address
+        in: query
+        required: true
+        description: >
+          Full address string to geocode. Include as much detail as possible for accurate results.
+          Examples: "1600 Amphitheatre Parkway, Mountain View, CA, US"
+          or "100 Main St, Santa Cruz, CA".
+          City-only queries (e.g. "Santa Cruz") are supported but may return multiple ambiguous results.
+        schema:
+          type: string
+          example: "1600 Amphitheatre Parkway, Mountain View, CA, US"
+    responses:
+      '200':
+        description: >
+          List of geocoded results ordered by relevance. An empty array means
+          no results were found for the given address.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  postal_code:
+                    type: string
+                    nullable: true
+                    description: Postal/ZIP code for the location, if determinable.
+                    example: "94043"
+                  place_name:
+                    type: string
+                    description: City, town, or village name.
+                    example: "Mountain View"
+                  latitude:
+                    type: number
+                    format: float
+                    description: Latitude in decimal degrees.
+                    example: 37.4224764
+                  longitude:
+                    type: number
+                    format: float
+                    description: Longitude in decimal degrees.
+                    example: -122.0842499
+                  display_name:
+                    type: string
+                    description: Full human-readable address as returned by the geocoder.
+                    example: "1600 Amphitheatre Parkway, Mountain View, Santa Clara County, California, 94043, United States"
+                  country:
+                    type: string
+                    nullable: true
+                    description: Country name.
+                    example: "United States"
+                  state:
+                    type: string
+                    nullable: true
+                    description: State or region name.
+                    example: "California"
+                  county:
+                    type: string
+                    nullable: true
+                    description: County or district name.
+                    example: "Santa Clara County"
+      '504':
+        description: Geocoding service timed out
+      '500':
+        description: Internal server error

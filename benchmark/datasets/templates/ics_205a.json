@@ -1,0 +1,23 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_basic_local_communications_information": [
+    {
+      "incident_assigned_position": "string",
+      "name": "string",
+      "methods_of_contact": "string"
+    }
+  ],
+  "4_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

@@ -1,0 +1,313 @@
+# Layer 4 Incident Management Endpoints
+# POST /api/v1/incidents
+# GET /api/v1/incidents
+# GET /api/v1/incidents/{incident_id}
+# PATCH /api/v1/incidents/{incident_id}
+# DELETE /api/v1/incidents/{incident_id}
+
+incidents:
+  post:
+    operationId: createIncident
+    summary: Create a full incident record
+    description: |
+      Creates a permanent incident record that links input, extraction, and
+      generated forms into a single coherent unit. Assigns a permanent incident_id
+      and stores the complete incident for future retrieval and reporting.
+    tags:
+      - incidents
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/incident-record.yaml#/CreateIncidentRequest"
+          example:
+            extract_id: "550e8400-e29b-41d4-a716-446655440020"
+            incident_number: "CA-SQF-2024-0421"
+            tags:
+              - "wildland"
+              - "mutual_aid"
+              - "lightning"
+    responses:
+      "201":
+        description: Incident record created
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/incident-record.yaml#/IncidentRecord"
+            example:
+              incident_id: "550e8400-e29b-41d4-a716-446655440050"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              incident_number: "CA-SQF-2024-0421"
+              status: "draft"
+              forms_generated:
+                - form_id: "550e8400-e29b-41d4-a716-446655440040"
+                  form_type: "neris"
+                  status: "completed"
+              tags:
+                - "wildland"
+                - "mutual_aid"
+                - "lightning"
+              created_at: "2024-07-15T14:35:00Z"
+      "404":
+        description: Extract ID not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Duplicate incident number
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "DUPLICATE_INCIDENT_NUMBER"
+              message: "Incident number CA-SQF-2024-0421 already exists"
+              detail:
+                existing_incident_id: "550e8400-e29b-41d4-a716-446655440049"
+
+  get:
+    operationId: listIncidents
+    summary: List incidents with filtering
+    description: |
+      Returns a paginated list of incident records with optional filtering by
+      date range, incident type, and status. Supports sorting by date.
+      Maximum 100 results per page.
+    tags:
+      - incidents
+    parameters:
+      - name: date_from
+        in: query
+        description: Start date filter (inclusive, ISO 8601)
+        schema:
+          type: string
+          format: date
+      - name: date_to
+        in: query
+        description: End date filter (inclusive, ISO 8601)
+        schema:
+          type: string
+          format: date
+      - name: incident_type
+        in: query
+        description: Filter by incident category
+        schema:
+          $ref: "../schemas/enums.yaml#/IncidentCategory"
+      - name: status
+        in: query
+        description: Filter by report status
+        schema:
+          $ref: "../schemas/enums.yaml#/ReportStatus"
+      - name: page
+        in: query
+        description: Page number (1-based)
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Items per page (max 100)
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: sort
+        in: query
+        description: Sort order
+        schema:
+          type: string
+          enum:
+            - date_asc
+            - date_desc
+          default: date_desc
+    responses:
+      "200":
+        description: Paginated list of incidents
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/incident-record.yaml#/IncidentListResponse"
+            example:
+              data:
+                - incident_id: "550e8400-e29b-41d4-a716-446655440050"
+                  incident_number: "CA-SQF-2024-0421"
+                  status: "draft"
+                  incident_name: "Bear Creek Wildfire"
+                  incident_type: "fire"
+                  incident_date: "2024-07-10"
+                  forms_count: 3
+                  created_at: "2024-07-15T14:35:00Z"
+              pagination:
+                total: 42
+                page: 1
+                per_page: 20
+                total_pages: 3
+                has_next: true
+                has_prev: false
+      "422":
+        description: Invalid query parameter format
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "VALIDATION_ERROR"
+              message: "Invalid date format for date_from"
+              validation_errors:
+                - field: "date_from"
+                  issue: "Must be ISO 8601 date format (YYYY-MM-DD)"
+                  value: "15/07/2024"
+
+incident_by_id:
+  get:
+    operationId: getIncident
+    summary: Get full incident record
+    description: |
+      Returns the complete incident record including the linked canonical
+      extraction, all generated forms and their statuses, submission log,
+      and audit trail.
+    tags:
+      - incidents
+    parameters:
+      - name: incident_id
+        in: path
+        required: true
+        description: Unique identifier of the incident
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Full incident record
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/incident-record.yaml#/IncidentRecordFull"
+      "404":
+        description: Incident not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+  patch:
+    operationId: updateIncident
+    summary: Update incident metadata
+    description: |
+      Updates incident metadata such as status, tags, incident number, and notes.
+      Does NOT allow changing the underlying extraction data use PATCH /extract
+      for that. Submitted incidents cannot be modified.
+    tags:
+      - incidents
+    parameters:
+      - name: incident_id
+        in: path
+        required: true
+        description: Unique identifier of the incident to update
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/incident-record.yaml#/UpdateIncidentRequest"
+          example:
+            status: "approved"
+            tags:
+              - "wildland"
+              - "mutual_aid"
+              - "lightning"
+              - "reviewed"
+            notes: "Reviewed by BC Wilson. Ready for submission."
+    responses:
+      "200":
+        description: Incident updated
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/incident-record.yaml#/IncidentRecord"
+      "404":
+        description: Incident not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Cannot modify a submitted incident
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "INCIDENT_SUBMITTED"
+              message: "Cannot modify an incident that has been submitted"
+              detail:
+                submitted_at: "2024-07-15T18:00:00Z"
+
+  delete:
+    operationId: deleteIncident
+    summary: Soft-delete an incident
+    description: |
+      Performs a soft delete sets a deleted_at timestamp but never removes data.
+      Submitted incidents cannot be deleted. Soft-deleted incidents are excluded
+      from list queries by default but can be recovered.
+    tags:
+      - incidents
+    parameters:
+      - name: incident_id
+        in: path
+        required: true
+        description: Unique identifier of the incident to delete
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Incident soft-deleted
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                incident_id:
+                  type: string
+                  format: uuid
+                deleted_at:
+                  type: string
+                  format: date-time
+                recoverable:
+                  type: boolean
+            example:
+              incident_id: "550e8400-e29b-41d4-a716-446655440050"
+              deleted_at: "2024-07-16T10:00:00Z"
+              recoverable: true
+      "404":
+        description: Incident not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Cannot delete already deleted or submitted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              already_deleted:
+                summary: Incident already soft-deleted
+                value:
+                  error_code: "ALREADY_DELETED"
+                  message: "Incident has already been deleted"
+                  detail:
+                    deleted_at: "2024-07-16T09:00:00Z"
+              submitted:
+                summary: Submitted incidents cannot be deleted
+                value:
+                  error_code: "INCIDENT_SUBMITTED"
+                  message: "Submitted incidents cannot be deleted"

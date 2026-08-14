@@ -5,16 +5,25 @@ Uses an in-memory SQLite database and mocks the heavy dependencies
 """
 
 import io
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
-from api.main import app
-from api.deps import get_db
-from api.db.models import Template, FormSubmission  # noqa: F401 — registers tables
+from app.api.deps import get_db
+from app.main import app
+from app.models import (  # noqa: F401 — registers tables
+    Extraction,
+    Form,
+    FormSubmission,
+    Incident,
+    Input,
+    Job,
+    Report,
+    Template,
+)
 
 # ---------------------------------------------------------------------------
 # In-memory database
@@ -54,6 +63,12 @@ def db():
         yield session
 
 
+@pytest.fixture
+def test_engine():
+    """Expose the shared in-memory engine for tests that need to open extra sessions."""
+    return _engine
+
+
 # ---------------------------------------------------------------------------
 # Minimal PDF bytes (valid 1-page blank PDF)
 # ---------------------------------------------------------------------------
@@ -85,8 +100,8 @@ def pdf_upload(pdf_bytes):
 @pytest.fixture
 def mock_controller():
     """Patch Controller so create_template / fill_form don't touch the FS or LLM."""
-    with patch("api.routes.templates.Controller") as tpl_cls, \
-         patch("api.routes.forms.Controller") as form_cls:
+    with patch("app.api.routes.templates.Controller") as tpl_cls, \
+         patch("app.api.routes.forms.Controller") as form_cls:
         tpl_instance = MagicMock()
         tpl_instance.create_template.return_value = "src/inputs/test_template.pdf"
         tpl_cls.return_value = tpl_instance

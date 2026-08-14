@@ -1,0 +1,129 @@
+# Common schemas used across multiple endpoints
+
+ErrorResponse:
+  type: object
+  required:
+    - error_code
+    - message
+  properties:
+    error_code:
+      type: string
+      description: Machine-readable error code
+      example: "EXTRACT_NOT_FOUND"
+    message:
+      type: string
+      description: Human-readable error message
+      example: "Extraction with ID xyz not found"
+    detail:
+      type: object
+      description: Additional context specific to the error type
+      additionalProperties: true
+    retry_after_seconds:
+      type: integer
+      description: Present on 503 errors seconds to wait before retrying
+    validation_errors:
+      type: array
+      description: Present on 422 errors list of field-level validation issues
+      items:
+        $ref: "#/ValidationError"
+
+ValidationError:
+  type: object
+  properties:
+    field:
+      type: string
+      description: JSON path of the invalid field
+      example: "fire.cause_certainty"
+    issue:
+      type: string
+      description: Description of the validation issue
+      example: "Must be one of: confirmed, probable, suspected, undetermined"
+    value:
+      description: The invalid value that was provided
+
+Pagination:
+  type: object
+  properties:
+    total:
+      type: integer
+      description: Total number of items across all pages
+    page:
+      type: integer
+      description: Current page number (1-based)
+    per_page:
+      type: integer
+      description: Items per page
+    total_pages:
+      type: integer
+      description: Total number of pages
+    has_next:
+      type: boolean
+      description: Whether there is a next page
+    has_prev:
+      type: boolean
+      description: Whether there is a previous page
+
+AsyncJobResponse:
+  type: object
+  required:
+    - job_id
+    - status
+  properties:
+    job_id:
+      type: string
+      format: uuid
+      description: Unique job identifier for polling
+    job_type:
+      type: string
+      description: Type of async operation
+      enum:
+        - transcription
+        - extraction
+        - form_generation
+        - batch_form_generation
+        - report_generation
+    status:
+      $ref: "enums.yaml#/JobStatus"
+    estimated_seconds:
+      type: integer
+      description: Estimated time to completion in seconds
+    poll_url:
+      type: string
+      description: Full URL to poll for job status
+
+Job:
+  type: object
+  required:
+    - job_id
+    - job_type
+    - status
+  properties:
+    job_id:
+      type: string
+      format: uuid
+    job_type:
+      type: string
+      enum:
+        - transcription
+        - extraction
+        - form_generation
+        - batch_form_generation
+        - report_generation
+    status:
+      $ref: "enums.yaml#/JobStatus"
+    progress_percent:
+      type: integer
+      minimum: 0
+      maximum: 100
+      description: Progress percentage (0–100)
+    result_url:
+      type: string
+      description: URL of the completed result (present when status is "completed")
+    error:
+      $ref: "#/ErrorResponse"
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time

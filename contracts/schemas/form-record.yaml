@@ -1,0 +1,198 @@
+# Form generation related schemas
+
+GenerateAllRequest:
+  type: object
+  required:
+    - extract_id
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    options:
+      type: object
+      properties:
+        skip_incomplete:
+          type: boolean
+          default: true
+          description: Skip forms that fail validation
+        force_partial:
+          type: boolean
+          default: false
+          description: Generate forms even with missing fields (leaving blanks)
+
+GenerateSingleRequest:
+  type: object
+  required:
+    - extract_id
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    options:
+      type: object
+      properties:
+        output_format:
+          $ref: "../schemas/enums.yaml#/OutputFormat"
+        force_partial:
+          type: boolean
+          default: false
+        force:
+          type: boolean
+          default: false
+          description: Allow generation even if form_type is not in applicable_forms
+
+BatchGenerateResponse:
+  type: object
+  required:
+    - batch_id
+    - status
+    - extract_id
+  properties:
+    batch_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [processing]
+    extract_id:
+      type: string
+      format: uuid
+    forms_queued:
+      type: array
+      items:
+        $ref: "../schemas/enums.yaml#/FormType"
+    forms_skipped:
+      type: array
+      items:
+        type: object
+        properties:
+          form_type:
+            $ref: "../schemas/enums.yaml#/FormType"
+          reason:
+            type: string
+    estimated_seconds:
+      type: integer
+    poll_url:
+      type: string
+
+FormGenerateResponse:
+  type: object
+  required:
+    - form_id
+    - form_type
+    - status
+  properties:
+    form_id:
+      type: string
+      format: uuid
+    form_type:
+      $ref: "../schemas/enums.yaml#/FormType"
+    status:
+      type: string
+      enum: [processing, completed]
+    extract_id:
+      type: string
+      format: uuid
+    job_id:
+      type: string
+      format: uuid
+    estimated_seconds:
+      type: integer
+    poll_url:
+      type: string
+
+FormRecord:
+  type: object
+  required:
+    - form_id
+    - form_type
+    - status
+  properties:
+    form_id:
+      type: string
+      format: uuid
+    form_type:
+      $ref: "../schemas/enums.yaml#/FormType"
+    status:
+      $ref: "../schemas/enums.yaml#/FormStatus"
+    extract_id:
+      type: string
+      format: uuid
+    incident_id:
+      type: string
+      format: uuid
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+    completed_at:
+      type: string
+      format: date-time
+      nullable: true
+    pdf_ready:
+      type: boolean
+    json_ready:
+      type: boolean
+    field_mapping_summary:
+      type: object
+      properties:
+        total_form_fields:
+          type: integer
+        fields_filled:
+          type: integer
+        fields_blank:
+          type: integer
+        coverage_percent:
+          type: number
+
+FormMappedJson:
+  type: object
+  required:
+    - form_type
+    - form_id
+  properties:
+    form_type:
+      $ref: "../schemas/enums.yaml#/FormType"
+    form_version:
+      type: string
+    form_id:
+      type: string
+      format: uuid
+    extract_id:
+      type: string
+      format: uuid
+    agency_fields:
+      type: object
+      additionalProperties: true
+      description: Agency-specific field names and values as the target system expects
+
+BatchStatus:
+  type: object
+  required:
+    - batch_id
+    - status
+  properties:
+    batch_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum: [processing, completed, failed]
+    total:
+      type: integer
+    completed:
+      type: integer
+    failed:
+      type: integer
+    forms:
+      type: array
+      items:
+        type: object
+        properties:
+          form_id:
+            type: string
+            format: uuid
+          form_type:
+            $ref: "../schemas/enums.yaml#/FormType"
+          status:
+            $ref: "../schemas/enums.yaml#/FormStatus"

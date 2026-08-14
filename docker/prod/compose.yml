@@ -1,0 +1,87 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: fireform-ollama
+    ports:
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - fireform-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: fireform-whisper
+    environment:
+      - ASR_ENGINE=faster_whisper
+      - ASR_MODEL=${WHISPER_MODEL}
+      - ASR_MODEL_PATH=/data/whisper
+    volumes:
+      - whisper_models:/data/whisper
+    ports:
+      - "127.0.0.1:9000:9000"
+    networks:
+      - fireform-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:9000/docs')\" || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  app:
+    build:
+      context: ../..
+      dockerfile: docker/prod/Dockerfile
+    container_name: fireform-app
+    depends_on:
+      ollama:
+        condition: service_healthy
+      whisper:
+        condition: service_started
+    command: ["gunicorn", "app.main:app",
+              "--worker-class", "uvicorn.workers.UvicornWorker",
+              "--bind", "0.0.0.0:8000",
+              "--access-logfile", "-",
+              "--error-logfile", "-"]
+    volumes:
+      - fireform_uploads:/data/uploads
+    ports:
+      - "${APP_PORT}:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CUDA_VISIBLE_DEVICES=
+      - PYTHONPATH=/app
+      - DATABASE_URL=${DATABASE_URL}
+      - OLLAMA_HOST=${OLLAMA_HOST}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT}
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - WHISPER_HOST=${WHISPER_HOST}
+      - FIREFORM_DATA_DIR=/data/uploads
+      - FIREFORM_TEMPLATE_DIR=/data/uploads
+      - FIREFORM_DB_ECHO=false
+      - FRONTEND_ORIGINS=${FRONTEND_ORIGINS}
+      - WEB_CONCURRENCY=${GUNICORN_WORKERS}
+    networks:
+      - fireform-network
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+    driver: local
+  whisper_models:
+    driver: local
+  fireform_uploads:
+    driver: local
+
+networks:
+  fireform-network:
+    driver: bridge

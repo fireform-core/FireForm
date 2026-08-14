@@ -1,0 +1,130 @@
+# Shared enums used across the FireForm API
+
+InputStatus:
+  type: string
+  enum:
+    - queued
+    - transcribing
+    - ready
+    - failed
+  description: Status of an input record
+
+ExtractionStatus:
+  type: string
+  enum:
+    - processing
+    - completed
+    - failed
+    - needs_review
+  description: Status of an AI extraction job
+
+FormStatus:
+  type: string
+  enum:
+    - queued
+    - generating
+    - completed
+    - failed
+  description: Status of a form generation job
+
+ReportStatus:
+  type: string
+  enum:
+    - draft
+    - under_review
+    - approved
+    - submitted
+  description: Status of an incident report in the approval workflow
+
+JobStatus:
+  type: string
+  enum:
+    - queued
+    - processing
+    - completed
+    - failed
+  description: Status of any async job
+
+FormType:
+  type: string
+  enum:
+    - neris
+    - nemsis_epcr
+    - nibrs
+    - nfirs_basic
+    - nfirs_fire
+    - nfirs_structure
+    - nfirs_wildland
+    - nfirs_ems
+    - nfirs_hazmat
+    - nfirs_apparatus
+    - nfirs_personnel
+    - nfirs_arson
+    - nfirs_casualty_civilian
+    - nfirs_casualty_responder
+    - cal_fire_ics209
+    - osha_301
+    - un_ssirs
+    - state_georgia
+    - state_california
+    - state_new_york
+  description: |
+    Stable string identifier for a form type. Includes the new NERIS standard
+    (replacing NFIRS as of Feb 2026), legacy NFIRS modules, NEMSIS, NIBRS,
+    OSHA, state-specific, and international (UN SSIRS) forms.
+
+IncidentCategory:
+  type: string
+  enum:
+    - fire
+    - ems
+    - rescue
+    - hazardous_conditions
+    - service_call
+    - good_intent
+    - false_alarm
+    - law_enforcement
+  description: High-level incident category
+
+CauseCertainty:
+  type: string
+  enum:
+    - confirmed
+    - probable
+    - suspected
+    - undetermined
+  description: Certainty level of fire cause determination
+
+InjurySeverity:
+  type: string
+  enum:
+    - minor
+    - moderate
+    - severe
+    - fatal
+  description: Severity classification for injuries
+
+RateOfSpread:
+  type: string
+  enum:
+    - slow
+    - moderate
+    - rapid
+    - extreme
+  description: Rate of fire spread classification
+
+PeriodType:
+  type: string
+  enum:
+    - monthly
+    - quarterly
+    - annual
+  description: Reporting period type
+
+OutputFormat:
+  type: string
+  enum:
+    - pdf
+    - json
+    - both
+  description: Output format for generated forms

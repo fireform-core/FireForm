@@ -102,14 +102,74 @@ FireForm is designed from the ground up to ensure that all generated and collect
 
 ## 🔒 Privacy & Applicable Laws
 
-FireForm is built on a local-first architecture, ensuring that all processing (including AI extraction) occurs locally on the user's hardware. We do not collect, process, or share any Personally Identifiable Information (PII) with third parties. By keeping data completely offline, FireForm natively assists deploying organizations in complying with strict data protection laws such as **HIPAA**, **CCPA**, and **GDPR**. 
+FireForm is built on a **local-first architecture**: all processing (including AI extraction) occurs locally on the operator's hardware and nothing is transmitted to external servers by default. However, operators should be aware of the following:
 
-For complete details on our data handling, consent management procedures, and how the solution was designed to comply with HIPAA, CCPA, and GDPR, please review our public [Privacy Policy](https://fireform-core.github.io/FireForm/privacy.html).
+- **PII is processed locally.** Incident descriptions, names, dates, and other personally identifiable information are extracted by the local LLM, written into filled PDF files, and persisted in the local database (`FormSubmission` records). These files and records remain on disk until explicitly deleted.
+- **No external transmission.** Data does not leave the machine by default. Audio transcription (Whisper) and LLM inference (Ollama) are both local services.
+- **Operator responsibility.** Because PII is stored locally, the security of that data depends entirely on the operator's host system, filesystem permissions, backup practices, and access controls.
+
+For complete details on data handling and compliance guidance, please review our public [Privacy Policy](https://fireform-core.github.io/FireForm/privacy.html).
+
+## 🗑️ Data Deletion & Retention
+
+FireForm provides API endpoints and an automated purge mechanism to manage stored PII.
+
+### Deleting individual records
+
+```bash
+# Delete a single form submission (removes DB record + output PDF)
+curl -X DELETE http://localhost:8000/api/v1/forms/{submission_id} \
+  -H "X-API-Key: your-key"
+
+# Delete a template and all associated submissions
+curl -X DELETE http://localhost:8000/api/v1/templates/{template_id} \
+  -H "X-API-Key: your-key"
+```
+
+### Bulk purge
+
+```bash
+# Purge all submissions older than 30 days
+curl -X POST "http://localhost:8000/api/v1/forms/purge?days=30" \
+  -H "X-API-Key: your-key"
+```
+
+### Automated retention
+
+Set `RETENTION_PERIOD_DAYS` in `docker/.env.dev` (default: `30`). Celery Beat will automatically run a purge job every night at 03:00 UTC:
+
+```env
+RETENTION_PERIOD_DAYS=30
+```
+
+To enable the scheduler: `celery -A app.core.celery beat -l info`
+
+## 🔑 Access Control
+
+Deletion and purge endpoints can be protected by setting an API key:
+
+```env
+FIREFORM_API_KEY=your-strong-secret-key
+```
+
+When set, all `DELETE` and `POST /purge` requests must include one of:
+- **Header:** `X-API-Key: your-strong-secret-key`
+- **Bearer token:** `Authorization: Bearer your-strong-secret-key`
+
+Read-only endpoints (list, preview, fill) do **not** require authentication.
+
+## 🛡️ Operator Hardening Recommendations
+
+- **Filesystem permissions:** Restrict access to `data/inputs/` and `data/outputs/` to the application user only (`chmod 700`).
+- **Backups:** Encrypt any backups containing output PDFs.
+- **HTTPS:** Deploy behind a reverse proxy (e.g., nginx) with TLS enabled.
+- **API key rotation:** Rotate `FIREFORM_API_KEY` regularly and never commit it to version control.
+- **Retention policy:** Configure `RETENTION_PERIOD_DAYS` in line with applicable regulations (HIPAA, GDPR, CCPA).
 
 ## 🛡️ Do No Harm by Design
 
 FireForm is built to anticipate and prevent harm:
-- **Data Privacy & Security (9A):** We handle sensitive incident data entirely offline. By never transmitting data to the cloud, we natively prevent online data breaches of PII.
+- **Data Privacy & Security (9A):** We handle sensitive incident data entirely offline. By never transmitting data to the cloud, we natively prevent online data breaches of PII. Operators are responsible for securing local storage; see the Operator Hardening Recommendations above.
 - **Inappropriate Content (9B):** The application is an internal productivity tool without public social interactions or user-generated content hosting, completely mitigating the risks of public harassment or illegal content distribution.
 - **Protection from Harassment (9C):** For our open-source contributor community, we strictly enforce our [Code of Conduct](CODE_OF_CONDUCT.md) to ensure a safe, harassment-free environment for all contributors.
 

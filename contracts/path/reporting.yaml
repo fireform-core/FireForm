@@ -1,0 +1,191 @@
+# Layer 5 Reporting & Analytics Endpoints
+# GET /api/v1/reports/summary
+# POST /api/v1/reports/generate
+# GET /api/v1/reports/{report_id}
+
+summary:
+  get:
+    operationId: getReportSummary
+    summary: Get aggregate incident statistics
+    description: |
+      Returns aggregate statistics for a dashboard view total incidents,
+      breakdown by type and status, forms generated, average completeness
+      scores, and average processing times. Supports filtering by date range
+      and grouping by time period or incident type.
+    tags:
+      - reporting
+    parameters:
+      - name: date_from
+        in: query
+        description: Start date (inclusive, ISO 8601)
+        schema:
+          type: string
+          format: date
+      - name: date_to
+        in: query
+        description: End date (inclusive, ISO 8601)
+        schema:
+          type: string
+          format: date
+      - name: group_by
+        in: query
+        description: Group results by time period or incident type
+        schema:
+          type: string
+          enum:
+            - day
+            - week
+            - month
+            - incident_type
+          default: month
+    responses:
+      "200":
+        description: Aggregate statistics
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/reporting.yaml#/ReportSummary"
+            example:
+              date_from: "2024-01-01"
+              date_to: "2024-07-15"
+              total_incidents: 157
+              by_type:
+                fire: 42
+                ems: 68
+                rescue: 12
+                hazardous_conditions: 8
+                service_call: 15
+                good_intent: 7
+                false_alarm: 5
+              by_status:
+                draft: 3
+                under_review: 2
+                approved: 12
+                submitted: 140
+              forms_generated: 489
+              avg_completeness_score: 88.3
+              avg_processing_time_seconds: 47.2
+              groups:
+                - period: "2024-07"
+                  incident_count: 23
+                  forms_generated: 71
+
+generate:
+  post:
+    operationId: generateReport
+    summary: Generate a periodic report
+    description: |
+      Generates a periodic (monthly, quarterly, or annual) aggregate report
+      as PDF or JSON. This includes statistics, incident summaries, and
+      compliance metrics required by agencies like USFA/NERIS. This is an
+      async operation returns a report_id for polling.
+
+      Note: USFA encourages monthly submission but requires quarterly at minimum.
+      This endpoint supports generating reports aligned with those cadences.
+    tags:
+      - reporting
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/reporting.yaml#/GenerateReportRequest"
+          example:
+            period_type: "monthly"
+            year: 2024
+            month: 7
+            format: "pdf"
+    responses:
+      "202":
+        description: Report generation job accepted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/AsyncJobResponse"
+            example:
+              job_id: "550e8400-e29b-41d4-a716-446655440096"
+              job_type: "report_generation"
+              status: "processing"
+              estimated_seconds: 30
+              poll_url: "/api/v1/reports/550e8400-e29b-41d4-a716-446655440060"
+              report_id: "550e8400-e29b-41d4-a716-446655440060"
+      "422":
+        description: Invalid period or future date
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              future_period:
+                summary: Future period requested
+                value:
+                  error_code: "FUTURE_PERIOD"
+                  message: "Cannot generate a report for a future period"
+              invalid_quarter:
+                summary: Invalid quarter value
+                value:
+                  error_code: "VALIDATION_ERROR"
+                  message: "Invalid quarter value"
+                  validation_errors:
+                    - field: "quarter"
+                      issue: "Must be 1, 2, 3, or 4"
+                      value: 5
+
+report_by_id:
+  get:
+    operationId: getReport
+    summary: Retrieve a generated report
+    description: |
+      Returns a previously generated periodic report. If the report is still
+      being generated, returns 202 Accepted with a retry hint. When complete,
+      returns the report in the originally requested format (PDF binary or JSON).
+    tags:
+      - reporting
+    parameters:
+      - name: report_id
+        in: path
+        required: true
+        description: Unique identifier of the generated report
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Generated report (PDF or JSON depending on original request)
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              $ref: "../schemas/reporting.yaml#/PeriodicReport"
+        headers:
+          Content-Disposition:
+            description: Attachment filename for PDF downloads
+            schema:
+              type: string
+              example: 'attachment; filename="FireForm_Monthly_2024-07.pdf"'
+      "202":
+        description: Report still being generated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                status:
+                  type: string
+                retry_after_seconds:
+                  type: integer
+            example:
+              message: "Report generation is still in progress"
+              status: "processing"
+              retry_after_seconds: 10
+      "404":
+        description: Report not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"

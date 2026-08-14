@@ -1,0 +1,55 @@
+{
+  "ics_205a_ground_truth": {
+    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+    "2_operational_period": {
+      "date_from": "05/18/2026",
+      "date_to": "05/19/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_basic_local_communications_information": [
+      {
+        "incident_assigned_position": "EPA R9 Incident Commander",
+        "name": "OSC C. Martinez",
+        "methods_of_contact": "Cell: 555-0501 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "SBCo Fire Incident Commander",
+        "name": "Chief M. Thorne",
+        "methods_of_contact": "Cell: 555-0502 / Radio Ch 1 / Vehicle: FIRE-SB-1"
+      },
+      {
+        "incident_assigned_position": "Safety Officer",
+        "name": "Captain Gregory Hall",
+        "methods_of_contact": "Cell: 555-0588 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Operations Section Chief",
+        "name": "Battalion Chief Kevin Ross",
+        "methods_of_contact": "Cell: 555-0515 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Marine Skimming Branch Director",
+        "name": "Captain B. Walsh",
+        "methods_of_contact": "Cell: 555-0535 / Radio Ch 3 (VHF 11) / Vessel: RV-LC-01"
+      },
+      {
+        "incident_assigned_position": "Canyon Repair Group Supervisor",
+        "name": "Lt. J. Thorne",
+        "methods_of_contact": "Cell: 555-0560 / Radio Ch 4 / Vehicle: CREW-04"
+      },
+      {
+        "incident_assigned_position": "Planning Section Chief",
+        "name": "Captain Rachel Brooks",
+        "methods_of_contact": "Cell: 555-0550 / CP Desk Ext: 403"
+      }
+    ],
+    "4_prepared_by": {
+      "name": "Sgt. R. Hall",
+      "position_title": "Communications Unit Leader",
+      "signature": "R. Hall",
+      "date_time": "05/18/2026 16:30"
+    },
+    "iap_page_number": "6"
+  }
+}

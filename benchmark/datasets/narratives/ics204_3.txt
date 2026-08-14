@@ -1,0 +1,14 @@
+### Port of Houston Sulfuric Acid Tanker Leak Assignment List (ICS 204)
+
+The Assignment List, designated as ICS 204 for the Port of Houston Sulfuric Acid Tanker Leak incident under tracking number USCG-EPA-R6-2026-1014, details the tactical assignments for the Deck Neutralization Group operating within Division C (Berth 42) under the Vessel Salvage & Entry Branch during Operational Period 1 (October 14, 2026, 07:00 hours to October 15, 2026, 19:00 hours).
+
+Tactical leadership for this operational unit is provided by Operations Section Chief Battalion Chief A. Ross (Contact: 555-0312 / Radio Ch 1), Branch Director Lt. J. Thorne (Contact: 555-0344 / Radio Ch 2), and Division/Group Supervisor Lt. S. Baker (Contact: 555-0366 / Radio Ch 4). Tactical resources staging and deployment are managed out of Staging Area Bravo located at Jacintoport Terminal.
+
+Resources assigned to the Deck Neutralization Group for this shift include:
+1. Port Authority Hazmat Team HZM-PORT-1, led by Capt. P. Gomez, staffing 6 personnel, contactable via Radio Ch 4 (453.225 MHz). Special instructions require reporting to Berth 42 Gangway by 07:30 equipped with Level A chemical suits, dry lime blower, and pH test strips.
+2. Neutralization Truck Unit NEUT-TRK-05, led by Driver E. Green, staffing 2 personnel, contactable via Radio Ch 4. Special instructions mandate positioning at Berth 42 apron to supply dry sodium bicarbonate powder to deck entry team.
+3. Chemical Response Vessel RV-AC-01, led by Capt. B. Walsh, staffing 4 personnel, contactable via Radio Ch 3. Special instructions require conducting continuous water sampling and maintaining acid sorbent boom around vessel hull.
+
+The specific work assignments for the Deck Neutralization Group direct personnel to board M/T Stolt Synergy under Level A protection, apply dry sodium bicarbonate slurry over 4,200 gallons of pooled sulfuric acid on vessel deck until deck runoff pH stabilizes between 6.5 and 8.5, and inspect offloading manifold for structural stress.
+
+Special safety instructions mandate a strict 20-minute entry limit per technician due to heat stress (88°F/78% RH), compulsory lime wash decon before unsuiting, and prohibiting direct application of raw water to concentrated acid pool to prevent violent exothermic splattering. Communications protocols specify Radio Ch 1 (156.800 MHz / VHF 16) for Operations Command, Radio Ch 4 (453.225 MHz) for Vessel Tactical, Cell 555-0399 for Port Safety Line, and Radio Ch 5 (462.600 MHz) for Medical Standby. This document serves as Page 4 of the Incident Action Plan and was prepared by Planning Section Chief Commander Richard Croft on October 14, 2026, at 06:00 hours.

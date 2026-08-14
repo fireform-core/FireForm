@@ -1,0 +1,313 @@
+# Layer 2 AI Extraction Endpoints
+# POST /api/v1/extract/{input_id}
+# GET /api/v1/extract/{extract_id}
+# PATCH /api/v1/extract/{extract_id}
+# POST /api/v1/extract/{extract_id}/validate
+
+extract_by_input:
+  post:
+    operationId: createExtraction
+    summary: Start AI extraction from input narrative
+    description: |
+      Sends the narrative (from a previously submitted input) to the local Ollama
+      LLM with a structured prompt to extract all incident fields into the canonical
+      FireForm JSON schema. This is an asynchronous operation the LLM may take
+      30–120 seconds. Returns an extract_id and job_id for polling.
+    tags:
+      - extraction
+    parameters:
+      - name: input_id
+        in: path
+        required: true
+        description: ID of the input record to extract from
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/extraction-record.yaml#/ExtractionRequest"
+          example:
+            model_override: "llama3:8b"
+            extraction_hints:
+              incident_type: "wildland_fire"
+              state: "CA"
+    responses:
+      "202":
+        description: Extraction job queued successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/AsyncJobResponse"
+            example:
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              job_id: "550e8400-e29b-41d4-a716-446655440098"
+              job_type: "extraction"
+              status: "processing"
+              input_id: "550e8400-e29b-41d4-a716-446655440001"
+              queued_at: "2024-07-15T14:30:00Z"
+              estimated_seconds: 60
+              poll_url: "/api/v1/extract/550e8400-e29b-41d4-a716-446655440020"
+      "404":
+        description: Input ID not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "INPUT_NOT_FOUND"
+              message: "Input with ID 550e8400-e29b-41d4-a716-446655440099 not found"
+      "409":
+        description: Conflict input not ready or extraction already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              not_ready:
+                summary: Input still transcribing
+                value:
+                  error_code: "INPUT_NOT_READY"
+                  message: "Input is in 'transcribing' state. Wait until status is 'ready'."
+                  detail:
+                    current_status: "transcribing"
+              already_exists:
+                summary: Extraction already initiated for this input
+                value:
+                  error_code: "EXTRACTION_EXISTS"
+                  message: "An extraction already exists for this input"
+                  detail:
+                    existing_extract_id: "550e8400-e29b-41d4-a716-446655440020"
+      "503":
+        description: Ollama LLM service unavailable
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_UNAVAILABLE"
+              message: "Ollama LLM service is not available"
+              retry_after_seconds: 30
+              detail:
+                ollama_status: "connection_refused"
+
+extract_by_id:
+  get:
+    operationId: getExtraction
+    summary: Get extraction result by ID
+    description: |
+      Returns the full canonical FireForm JSON when extraction is complete, or
+      the current job status while still processing. When status is "completed",
+      the response body contains the entire canonical incident schema. When still
+      processing, includes a retry_after_seconds hint for polling.
+    tags:
+      - extraction
+    parameters:
+      - name: extract_id
+        in: path
+        required: true
+        description: Unique identifier of the extraction
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Extraction record (completed or in-progress)
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "../schemas/extraction-record.yaml#/ExtractionCompleted"
+                - $ref: "../schemas/extraction-record.yaml#/ExtractionProcessing"
+            examples:
+              completed:
+                summary: Extraction completed with canonical JSON
+                value:
+                  extract_id: "550e8400-e29b-41d4-a716-446655440020"
+                  input_id: "550e8400-e29b-41d4-a716-446655440001"
+                  status: "completed"
+                  completed_at: "2024-07-15T14:31:05Z"
+                  incident_contract:
+                    schema_version: "1.1.0"
+                    schema_name: "fireform_incident_contract"
+                    extraction_metadata:
+                      extract_id: "550e8400-e29b-41d4-a716-446655440020"
+                      confidence_score: 0.91
+                    incident:
+                      name: "Bear Creek Wildfire"
+              processing:
+                summary: Extraction still in progress
+                value:
+                  extract_id: "550e8400-e29b-41d4-a716-446655440020"
+                  input_id: "550e8400-e29b-41d4-a716-446655440001"
+                  status: "processing"
+                  started_at: "2024-07-15T14:30:00Z"
+                  retry_after_seconds: 5
+      "404":
+        description: Extraction not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "EXTRACT_NOT_FOUND"
+              message: "Extraction with ID 550e8400-e29b-41d4-a716-446655440099 not found"
+
+  patch:
+    operationId: updateExtraction
+    summary: Manually correct extracted fields
+    description: |
+      Allows a responder to correct any field in the canonical JSON after LLM
+      extraction. Uses JSON Merge Patch (RFC 7396) only send the fields that
+      changed. The server records an audit trail of all changes vs the original
+      LLM output and recalculates completeness scores and applicable_forms.
+    tags:
+      - extraction
+    parameters:
+      - name: extract_id
+        in: path
+        required: true
+        description: Unique identifier of the extraction to update
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      description: JSON Merge Patch (RFC 7396) only include changed fields
+      content:
+        application/merge-patch+json:
+          schema:
+            $ref: "../schemas/incident-contract.yaml#/IncidentContract"
+          example:
+            fire:
+              estimated_damage_usd: 250000
+            casualties:
+              total_responder_injuries: 2
+    responses:
+      "200":
+        description: Extraction updated returns full updated canonical JSON
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/extraction-record.yaml#/ExtractionCompleted"
+      "404":
+        description: Extraction not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Extraction is locked (already submitted)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "EXTRACT_LOCKED"
+              message: "Cannot modify extraction incident report has been submitted"
+              detail:
+                report_status: "submitted"
+                submitted_at: "2024-07-15T18:00:00Z"
+      "422":
+        description: Invalid field path or value
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "VALIDATION_ERROR"
+              message: "Invalid field path or value in patch"
+              validation_errors:
+                - field: "fire.cause_certainty"
+                  issue: "Must be one of: confirmed, probable, suspected, undetermined"
+                  value: "maybe"
+
+validate:
+  post:
+    operationId: validateExtraction
+    summary: Validate extraction against a form's requirements
+    description: |
+      Validates the canonical JSON against a specific form type's field requirements.
+      Returns whether the extraction has all required fields, which recommended
+      fields are missing, and any warnings. Useful for checking "can I generate
+      a NERIS report with what I have?" before triggering form generation.
+    tags:
+      - extraction
+    parameters:
+      - name: extract_id
+        in: path
+        required: true
+        description: Unique identifier of the extraction to validate
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - form_type
+            properties:
+              form_type:
+                $ref: "../schemas/enums.yaml#/FormType"
+          example:
+            form_type: "neris"
+    responses:
+      "200":
+        description: Validation result
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/extraction-record.yaml#/ValidationResult"
+            example:
+              valid: true
+              form_type: "neris"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              missing_required: []
+              missing_recommended:
+                - "fire.detector_present"
+                - "fire.detector_operated"
+              warnings:
+                - "fire.estimated_damage_usd is null NERIS recommends providing damage estimates"
+              field_coverage_percent: 94
+      "404":
+        description: Extraction not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "422":
+        description: Unknown form type
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "UNKNOWN_FORM_TYPE"
+              message: "Form type 'xyz' is not recognized"
+              detail:
+                valid_form_types:
+                  - neris
+                  - nemsis_epcr
+                  - nibrs
+                  - nfirs_basic
+                  - nfirs_fire
+                  - nfirs_structure
+                  - nfirs_wildland
+                  - nfirs_ems
+                  - nfirs_hazmat
+                  - nfirs_apparatus
+                  - nfirs_personnel
+                  - nfirs_arson
+                  - nfirs_casualty_civilian
+                  - nfirs_casualty_responder
+                  - cal_fire_ics209
+                  - osha_301
+                  - un_ssirs
+                  - state_georgia
+                  - state_california
+                  - state_new_york

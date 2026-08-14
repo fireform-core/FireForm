@@ -1,0 +1,930 @@
+# Canonical FireForm Incident Schema
+# This is the master superset schema single source of truth for all downstream forms
+
+IncidentContract:
+  type: object
+  description: |
+    The canonical FireForm incident data model. This is the superset schema containing
+    every field any downstream form could need. Form-specific mappers select only the
+    relevant fields for each agency template.
+  properties:
+    schema_version:
+      type: string
+      description: Schema version identifier
+      example: "1.1.0"
+    schema_name:
+      type: string
+      description: Schema name identifier
+      enum:
+        - fireform_incident_contract
+
+    extraction_metadata:
+      $ref: "#/ExtractionMetadata"
+    report_metadata:
+      $ref: "#/ReportMetadata"
+    incident:
+      $ref: "#/Incident"
+    location:
+      $ref: "#/Location"
+    fire:
+      $ref: "#/Fire"
+    wildland:
+      $ref: "#/Wildland"
+    structure:
+      $ref: "#/Structure"
+    casualties:
+      $ref: "#/Casualties"
+    ems:
+      $ref: "#/EMS"
+    hazmat:
+      $ref: "#/Hazmat"
+    arson:
+      $ref: "#/Arson"
+    responding_agencies:
+      $ref: "#/RespondingAgencies"
+    resources_deployed:
+      $ref: "#/ResourcesDeployed"
+    weather:
+      $ref: "#/Weather"
+    environmental_impact:
+      $ref: "#/EnvironmentalImpact"
+    infrastructure_impact:
+      $ref: "#/InfrastructureImpact"
+    near_miss_and_safety:
+      $ref: "#/NearMissAndSafety"
+    lessons_learned:
+      $ref: "#/LessonsLearned"
+    follow_up:
+      $ref: "#/FollowUp"
+    periodic_reporting:
+      $ref: "#/PeriodicReporting"
+    attachments:
+      $ref: "#/Attachments"
+
+# --- Sub-schemas ---
+
+ExtractionMetadata:
+  type: object
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    input_id:
+      type: string
+      format: uuid
+    input_type:
+      type: string
+      enum: [voice, text]
+    extracted_at:
+      type: string
+      format: date-time
+    llm_model:
+      type: string
+      example: "llama3:8b"
+    confidence_score:
+      type: number
+      minimum: 0
+      maximum: 1
+      description: Overall confidence score from the LLM extraction (0.0–1.0)
+    completeness:
+      $ref: "#/Completeness"
+    applicable_forms:
+      type: array
+      items:
+        $ref: "../schemas/enums.yaml#/FormType"
+
+Completeness:
+  type: object
+  description: |
+    Tells the system which forms can be fully auto-generated vs which need
+    manual review. Recalculated server-side after every PATCH /extract.
+  properties:
+    overall_percent:
+      type: integer
+      minimum: 0
+      maximum: 100
+    missing_fields:
+      type: array
+      items:
+        type: string
+      description: JSON paths of fields that have no value
+    low_confidence_fields:
+      type: array
+      items:
+        type: string
+      description: JSON paths of fields where LLM confidence is low
+    inferred_fields:
+      type: array
+      items:
+        type: string
+      description: JSON paths of fields that were inferred (not explicitly stated)
+    forms_fully_generatable:
+      type: array
+      items:
+        $ref: "../schemas/enums.yaml#/FormType"
+    forms_needing_review:
+      type: array
+      items:
+        $ref: "../schemas/enums.yaml#/FormType"
+    forms_missing_data:
+      type: array
+      items:
+        $ref: "../schemas/enums.yaml#/FormType"
+
+ReportMetadata:
+  type: object
+  properties:
+    report_id:
+      type: string
+      example: "FF-2024-CA-0157"
+    incident_number:
+      type: string
+      example: "CA-SQF-2024-0421"
+    report_date:
+      type: string
+      format: date
+    report_time:
+      type: string
+      format: time
+    report_status:
+      $ref: "../schemas/enums.yaml#/ReportStatus"
+    reporting_unit:
+      $ref: "#/ReportingUnit"
+    prepared_by:
+      type: array
+      items:
+        $ref: "#/Personnel"
+    reviewed_by:
+      type: array
+      items:
+        $ref: "#/Reviewer"
+    submission_log:
+      type: array
+      items:
+        type: object
+        properties:
+          form_type:
+            $ref: "../schemas/enums.yaml#/FormType"
+          submitted_at:
+            type: string
+            format: date-time
+          submitted_to:
+            type: string
+
+ReportingUnit:
+  type: object
+  properties:
+    station_name:
+      type: string
+    station_id:
+      type: string
+    agency_name:
+      type: string
+    agency_id:
+      type: string
+      format: uuid
+    agency_type:
+      type: string
+
+Personnel:
+  type: object
+  properties:
+    name:
+      type: string
+    badge_number:
+      type: string
+    rank:
+      type: string
+    role:
+      type: string
+    contact_number:
+      type: string
+    signature_captured:
+      type: boolean
+
+Reviewer:
+  type: object
+  properties:
+    name:
+      type: string
+    badge_number:
+      type: string
+    rank:
+      type: string
+    role:
+      type: string
+    reviewed_at:
+      type: string
+      format: date-time
+    approved:
+      type: boolean
+
+Incident:
+  type: object
+  properties:
+    name:
+      type: string
+      description: Human-readable incident name
+    types:
+      type: array
+      items:
+        $ref: "#/IncidentType"
+    start_datetime:
+      type: string
+      format: date-time
+    alarm_datetime:
+      type: string
+      format: date-time
+    first_arrival_datetime:
+      type: string
+      format: date-time
+    containment_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    controlled_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    cleared_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    total_duration_hours:
+      type: number
+      nullable: true
+    narrative:
+      type: string
+      description: Free text summary of the incident
+    raw_transcript:
+      type: string
+      description: Original voice or text input verbatim
+
+IncidentType:
+  type: object
+  properties:
+    primary:
+      type: boolean
+    category:
+      $ref: "../schemas/enums.yaml#/IncidentCategory"
+    subcategory:
+      type: string
+    neris_code:
+      type: string
+      description: NERIS incident type code (replaces NFIRS as of Feb 2026)
+    nfirs_code:
+      type: string
+      description: Legacy NFIRS incident type code
+
+Location:
+  type: object
+  properties:
+    address:
+      type: string
+      nullable: true
+    nearest_landmark:
+      type: string
+      nullable: true
+    nearest_town:
+      type: string
+      nullable: true
+    county:
+      type: string
+      nullable: true
+    state:
+      type: string
+      nullable: true
+    country:
+      type: string
+      nullable: true
+    postal_code:
+      type: string
+      nullable: true
+    coordinates:
+      $ref: "#/Coordinates"
+    ignition_point_coordinates:
+      $ref: "#/CoordinatesBasic"
+    elevation_range_ft:
+      type: string
+      nullable: true
+    legal_description:
+      type: string
+      nullable: true
+    jurisdiction:
+      type: object
+      properties:
+        federal:
+          type: boolean
+        state:
+          type: boolean
+        private:
+          type: boolean
+        tribal:
+          type: boolean
+    property_type:
+      type: string
+      nullable: true
+    property_use:
+      type: string
+      nullable: true
+    dispatch_center:
+      type: string
+      nullable: true
+
+Coordinates:
+  type: object
+  properties:
+    latitude:
+      type: number
+    longitude:
+      type: number
+    accuracy_meters:
+      type: number
+
+CoordinatesBasic:
+  type: object
+  properties:
+    latitude:
+      type: number
+    longitude:
+      type: number
+
+Fire:
+  type: object
+  properties:
+    cause_category:
+      type: string
+      nullable: true
+    cause_specific:
+      type: string
+      nullable: true
+    cause_certainty:
+      $ref: "../schemas/enums.yaml#/CauseCertainty"
+    arson_suspected:
+      type: boolean
+    material_first_ignited:
+      type: string
+      nullable: true
+    fuel_types:
+      type: array
+      items:
+        type: string
+    fire_spread_directions:
+      type: array
+      items:
+        type: string
+    rate_of_spread:
+      $ref: "../schemas/enums.yaml#/RateOfSpread"
+    flame_lengths_ft:
+      type: string
+      nullable: true
+    spotting_distance_miles:
+      type: number
+      nullable: true
+    unusual_behaviors:
+      type: array
+      items:
+        type: string
+    detector_present:
+      type: boolean
+      nullable: true
+    detector_operated:
+      type: boolean
+      nullable: true
+    suppression_system_present:
+      type: boolean
+      nullable: true
+    suppression_system_operated:
+      type: boolean
+      nullable: true
+    estimated_damage_usd:
+      type: number
+      nullable: true
+    contents_loss_usd:
+      type: number
+      nullable: true
+
+Wildland:
+  type: object
+  properties:
+    is_wildland_incident:
+      type: boolean
+    total_acres_burned:
+      type: number
+      nullable: true
+    land_ownership_breakdown:
+      type: object
+      properties:
+        federal_acres:
+          type: number
+        state_acres:
+          type: number
+        private_acres:
+          type: number
+        tribal_acres:
+          type: number
+    percent_contained:
+      type: integer
+      minimum: 0
+      maximum: 100
+    fire_lines:
+      type: object
+      properties:
+        primary_line_miles:
+          type: number
+        secondary_line_miles:
+          type: number
+        dozer_line_miles:
+          type: number
+        hand_line_miles:
+          type: number
+    aerial_operations:
+      type: object
+      properties:
+        water_drops_gallons:
+          type: integer
+        retardant_drops_gallons:
+          type: integer
+        total_flight_hours:
+          type: number
+    containment_strategies:
+      type: array
+      items:
+        type: string
+
+Structure:
+  type: object
+  properties:
+    is_structure_involved:
+      type: boolean
+    structures_threatened:
+      type: integer
+      nullable: true
+    structures_damaged:
+      type: integer
+      nullable: true
+    structures_destroyed:
+      type: integer
+      nullable: true
+    structures_protected:
+      type: integer
+      nullable: true
+    construction_type:
+      type: string
+      nullable: true
+    stories:
+      type: integer
+      nullable: true
+    area_sqft:
+      type: number
+      nullable: true
+    occupancy_at_time:
+      type: integer
+      nullable: true
+
+Casualties:
+  type: object
+  properties:
+    civilian:
+      type: array
+      items:
+        $ref: "#/CivilianCasualty"
+    responder:
+      type: array
+      items:
+        $ref: "#/ResponderCasualty"
+    total_civilian_injuries:
+      type: integer
+    total_civilian_fatalities:
+      type: integer
+    total_responder_injuries:
+      type: integer
+    total_responder_fatalities:
+      type: integer
+
+CivilianCasualty:
+  type: object
+  properties:
+    age:
+      type: integer
+      nullable: true
+    sex:
+      type: string
+      nullable: true
+    injury_type:
+      type: string
+    severity:
+      $ref: "../schemas/enums.yaml#/InjurySeverity"
+    cause:
+      type: string
+      nullable: true
+    location_at_time:
+      type: string
+      nullable: true
+    transported:
+      type: boolean
+    hospital:
+      type: string
+      nullable: true
+
+ResponderCasualty:
+  type: object
+  properties:
+    personnel_id:
+      type: string
+    agency:
+      type: string
+    role:
+      type: string
+    injury_type:
+      type: string
+    severity:
+      $ref: "../schemas/enums.yaml#/InjurySeverity"
+    treatment:
+      type: string
+      nullable: true
+    transported:
+      type: boolean
+    hospital:
+      type: string
+      nullable: true
+    return_to_duty_date:
+      type: string
+      format: date
+      nullable: true
+    osha_recordable:
+      type: boolean
+    nfirs_5_required:
+      type: boolean
+
+EMS:
+  type: object
+  properties:
+    ems_response_required:
+      type: boolean
+    patients:
+      type: array
+      items:
+        $ref: "#/EMSPatient"
+    total_patients:
+      type: integer
+    ems_agency_responded:
+      type: string
+      nullable: true
+    nemsis_report_required:
+      type: boolean
+    nemsis_report_ids:
+      type: array
+      items:
+        type: string
+
+EMSPatient:
+  type: object
+  properties:
+    patient_ref_id:
+      type: string
+    age_approx:
+      type: integer
+      nullable: true
+    sex:
+      type: string
+      nullable: true
+    chief_complaint:
+      type: string
+      nullable: true
+    disposition:
+      type: string
+      nullable: true
+    transported:
+      type: boolean
+    date_of_birth:
+      type: string
+      format: date
+      nullable: true
+    nemsis_data_captured:
+      type: boolean
+
+Hazmat:
+  type: object
+  properties:
+    involved:
+      type: boolean
+    materials:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          un_number:
+            type: string
+            nullable: true
+          quantity:
+            type: string
+            nullable: true
+    epa_reportable_quantity_exceeded:
+      type: boolean
+    spill_size_gallons:
+      type: number
+      nullable: true
+
+Arson:
+  type: object
+  properties:
+    suspected:
+      type: boolean
+    confirmed:
+      type: boolean
+    law_enforcement_notified:
+      type: boolean
+    investigation_required:
+      type: boolean
+    investigation_agency:
+      type: string
+      nullable: true
+    evidence_collected:
+      type: boolean
+    nibrs_report_required:
+      type: boolean
+    notes:
+      type: string
+      nullable: true
+
+RespondingAgencies:
+  type: object
+  properties:
+    primary_agency:
+      type: string
+    all_agencies:
+      type: array
+      items:
+        $ref: "#/RespondingAgency"
+    mutual_aid_activated:
+      type: boolean
+    mutual_aid_agencies:
+      type: array
+      items:
+        type: string
+    unified_command:
+      type: boolean
+
+RespondingAgency:
+  type: object
+  properties:
+    agency_name:
+      type: string
+    agency_type:
+      type: string
+    role:
+      type: string
+    personnel_count:
+      type: integer
+
+ResourcesDeployed:
+  type: object
+  properties:
+    total_personnel:
+      type: integer
+    personnel_breakdown:
+      type: object
+      properties:
+        firefighters:
+          type: integer
+        crew_supervisors:
+          type: integer
+        engineers:
+          type: integer
+        incident_command:
+          type: integer
+        support_staff:
+          type: integer
+    apparatus:
+      type: array
+      items:
+        $ref: "#/Apparatus"
+    crew_types:
+      type: array
+      items:
+        type: string
+
+Apparatus:
+  type: object
+  properties:
+    type:
+      type: string
+    count:
+      type: integer
+
+Weather:
+  type: object
+  properties:
+    on_arrival:
+      $ref: "#/WeatherReading"
+    worst_conditions:
+      $ref: "#/WeatherReadingExtended"
+    factors_influencing_fire:
+      type: array
+      items:
+        type: string
+
+WeatherReading:
+  type: object
+  properties:
+    datetime:
+      type: string
+      format: date-time
+    temperature_f:
+      type: number
+    relative_humidity_percent:
+      type: number
+    wind_speed_mph:
+      type: number
+    wind_direction:
+      type: string
+    haines_index:
+      type: integer
+      nullable: true
+
+WeatherReadingExtended:
+  type: object
+  properties:
+    datetime:
+      type: string
+      format: date-time
+    temperature_f:
+      type: number
+    relative_humidity_percent:
+      type: number
+    wind_speed_mph:
+      type: number
+    wind_gusts_mph:
+      type: number
+      nullable: true
+
+EnvironmentalImpact:
+  type: object
+  properties:
+    wildlife_habitat_affected_acres:
+      type: number
+      nullable: true
+    watershed_impact:
+      type: string
+      nullable: true
+    soil_erosion_risk:
+      type: string
+      nullable: true
+    sensitive_species_affected:
+      type: array
+      items:
+        type: string
+    air_quality_impact:
+      type: string
+      nullable: true
+    water_body_affected:
+      type: boolean
+      nullable: true
+
+InfrastructureImpact:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/InfrastructureItem"
+
+InfrastructureItem:
+  type: object
+  properties:
+    type:
+      type: string
+    unit:
+      type: string
+    quantity:
+      type: number
+    severity:
+      type: string
+
+NearMissAndSafety:
+  type: object
+  properties:
+    near_miss_events:
+      type: array
+      items:
+        type: object
+        properties:
+          description:
+            type: string
+          date:
+            type: string
+            format: date
+          contributing_factors:
+            type: array
+            items:
+              type: string
+          lessons_learned:
+            type: string
+            nullable: true
+          corrective_action:
+            type: string
+            nullable: true
+    safety_breaches:
+      type: integer
+    weather_related_risks:
+      type: array
+      items:
+        type: string
+
+LessonsLearned:
+  type: object
+  properties:
+    successful_tactics:
+      type: array
+      items:
+        type: string
+    areas_for_improvement:
+      type: array
+      items:
+        type: string
+    recommendations:
+      type: array
+      items:
+        type: string
+
+FollowUp:
+  type: object
+  properties:
+    mop_up:
+      type: object
+      properties:
+        percent_complete:
+          type: integer
+        estimated_completion_date:
+          type: string
+          format: date
+        personnel_assigned:
+          type: integer
+    rehabilitation:
+      type: object
+      properties:
+        erosion_control_acres:
+          type: number
+        reseeding_acres:
+          type: number
+        hazard_tree_removal_required:
+          type: boolean
+    next_inspection_date:
+      type: string
+      format: date
+      nullable: true
+    investigation_ongoing:
+      type: boolean
+
+PeriodicReporting:
+  type: object
+  properties:
+    contributes_to_monthly_report:
+      type: boolean
+    contributes_to_quarterly_report:
+      type: boolean
+    contributes_to_annual_report:
+      type: boolean
+    neris_submitted:
+      type: boolean
+    neris_submitted_at:
+      type: string
+      format: date-time
+      nullable: true
+    state_submitted:
+      type: boolean
+    state_submitted_at:
+      type: string
+      format: date-time
+      nullable: true
+
+Attachments:
+  type: object
+  properties:
+    maps:
+      type: boolean
+    photos_count:
+      type: integer
+    weather_charts:
+      type: boolean
+    resource_tracking_logs:
+      type: boolean
+    incident_action_plans:
+      type: boolean
+    attachment_refs:
+      type: array
+      items:
+        type: object
+        properties:
+          ref_id:
+            type: string
+            format: uuid
+          filename:
+            type: string
+          content_type:
+            type: string
+          size_bytes:
+            type: integer

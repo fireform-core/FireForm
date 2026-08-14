@@ -1,0 +1,150 @@
+# Incident management schemas
+
+CreateIncidentRequest:
+  type: object
+  required:
+    - extract_id
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    incident_number:
+      type: string
+      description: Optional org-assigned incident number
+    tags:
+      type: array
+      items:
+        type: string
+
+UpdateIncidentRequest:
+  type: object
+  properties:
+    status:
+      $ref: "../schemas/enums.yaml#/ReportStatus"
+    tags:
+      type: array
+      items:
+        type: string
+    incident_number:
+      type: string
+    notes:
+      type: string
+
+IncidentRecord:
+  type: object
+  required:
+    - incident_id
+    - extract_id
+    - status
+  properties:
+    incident_id:
+      type: string
+      format: uuid
+    extract_id:
+      type: string
+      format: uuid
+    incident_number:
+      type: string
+      nullable: true
+    status:
+      $ref: "../schemas/enums.yaml#/ReportStatus"
+    incident_name:
+      type: string
+      nullable: true
+    incident_type:
+      type: string
+      nullable: true
+    incident_date:
+      type: string
+      format: date
+      nullable: true
+    forms_generated:
+      type: array
+      items:
+        type: object
+        properties:
+          form_id:
+            type: string
+            format: uuid
+          form_type:
+            $ref: "../schemas/enums.yaml#/FormType"
+          status:
+            $ref: "../schemas/enums.yaml#/FormStatus"
+    tags:
+      type: array
+      items:
+        type: string
+    notes:
+      type: string
+      nullable: true
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time
+    deleted_at:
+      type: string
+      format: date-time
+      nullable: true
+
+IncidentRecordFull:
+  description: Full incident record with linked extraction and forms
+  allOf:
+    - $ref: "#/IncidentRecord"
+    - type: object
+      properties:
+        incident_contract:
+          $ref: "incident-contract.yaml#/IncidentContract"
+        forms:
+          type: array
+          items:
+            $ref: "form-record.yaml#/FormRecord"
+        submission_log:
+          type: array
+          items:
+            type: object
+            properties:
+              form_type:
+                $ref: "../schemas/enums.yaml#/FormType"
+              submitted_at:
+                type: string
+                format: date-time
+              submitted_to:
+                type: string
+              status:
+                type: string
+
+IncidentListResponse:
+  type: object
+  properties:
+    data:
+      type: array
+      items:
+        type: object
+        properties:
+          incident_id:
+            type: string
+            format: uuid
+          incident_number:
+            type: string
+            nullable: true
+          status:
+            $ref: "../schemas/enums.yaml#/ReportStatus"
+          incident_name:
+            type: string
+            nullable: true
+          incident_type:
+            type: string
+            nullable: true
+          incident_date:
+            type: string
+            format: date
+            nullable: true
+          forms_count:
+            type: integer
+          created_at:
+            type: string
+            format: date-time
+    pagination:
+      $ref: "common.yaml#/Pagination"

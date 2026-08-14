@@ -1,0 +1,134 @@
+# Extraction-related schemas
+
+ExtractionRequest:
+  type: object
+  properties:
+    model_override:
+      type: string
+      description: Override the default LLM model (e.g. "llama3:70b")
+    extraction_hints:
+      type: object
+      description: Optional hints to improve extraction accuracy
+      properties:
+        incident_type:
+          type: string
+          description: Hint about the incident type (e.g. "wildland_fire", "structure_fire")
+        state:
+          type: string
+          description: US state code to apply state-specific extraction rules
+        agency_type:
+          type: string
+          description: Agency type hint for form selection
+      additionalProperties: true
+
+ExtractionCompleted:
+  type: object
+  required:
+    - extract_id
+    - input_id
+    - status
+    - incident_contract
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    input_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum:
+        - completed
+    completed_at:
+      type: string
+      format: date-time
+    model_used:
+      type: string
+      description: LLM model that performed the extraction
+    processing_time_seconds:
+      type: number
+    incident_contract:
+      $ref: "incident-contract.yaml#/IncidentContract"
+    corrections:
+      type: array
+      description: Audit trail of manual corrections applied via PATCH
+      items:
+        type: object
+        properties:
+          field_path:
+            type: string
+          original_value: {}
+          corrected_value: {}
+          corrected_at:
+            type: string
+            format: date-time
+          corrected_by:
+            type: string
+
+ExtractionProcessing:
+  type: object
+  required:
+    - extract_id
+    - input_id
+    - status
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    input_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum:
+        - processing
+        - failed
+    started_at:
+      type: string
+      format: date-time
+    retry_after_seconds:
+      type: integer
+      description: Polling hint for clients
+    error_type:
+      type: string
+      nullable: true
+      description: Present when status is "failed"
+    error_detail:
+      type: string
+      nullable: true
+    partial_result:
+      $ref: "incident-contract.yaml#/IncidentContract"
+
+ValidationResult:
+  type: object
+  required:
+    - valid
+    - form_type
+    - extract_id
+  properties:
+    valid:
+      type: boolean
+      description: Whether all required fields for this form type are present
+    form_type:
+      $ref: "enums.yaml#/FormType"
+    extract_id:
+      type: string
+      format: uuid
+    missing_required:
+      type: array
+      items:
+        type: string
+      description: JSON paths of required fields that are missing
+    missing_recommended:
+      type: array
+      items:
+        type: string
+      description: JSON paths of recommended fields that are missing
+    warnings:
+      type: array
+      items:
+        type: string
+      description: Human-readable warnings about data quality
+    field_coverage_percent:
+      type: number
+      description: Percentage of form fields that have values

@@ -1,0 +1,29 @@
+{
+  "ics_213_ground_truth": {
+    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+    "2_to": {
+      "name": "Lt. Colonel Alan Vance",
+      "position": "Planning Section Chief"
+    },
+    "3_from": {
+      "name": "Rail Tactical Specialist George Miller",
+      "position": "Technical Specialist"
+    },
+    "4_subject": "Urgent Transport Request for Emergency B-Kit Capping Assembly",
+    "5_date": "11/02/2026",
+    "6_time": "19:00",
+    "7_message": "Capping team at car BNSF-77402 requires specialized torque wrench set and secondary seal gaskets for Emergency B-Kit capping assembly. Request immediate dispatch from Staging Area Charlie via all-terrain vehicle.",
+    "8_approved_by": {
+      "name": "Captain E. Miller",
+      "position_title": "Incident Commander",
+      "signature": "Captain E. Miller"
+    },
+    "9_reply": "Ground Support Unit dispatched ATV-02 with requested torque wrench set and B-Kit gaskets at 19:20 hours. ETA to railcar site is 19:45 hours.",
+    "10_replied_by": {
+      "name": "Lt. Colonel Alan Vance",
+      "position_title": "Planning Section Chief",
+      "signature": "Alan Vance",
+      "date_time": "11/02/2026 19:30"
+    }
+  }
+}

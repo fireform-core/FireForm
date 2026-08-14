@@ -1,0 +1,139 @@
+{
+    "1_incident_name": "Cypress Bend Tanker Collision",
+    "2_incident_number": "US-CG-D8-2026-0921",
+    "3_date_time_initiated": {
+        "date": "September 21, 2026",
+        "time": "14:15 hours"
+    },
+    "4_map_sketch": {
+        "total_area_of_operations": "4.0-mile radius centered at Intracoastal Waterway Mile Marker 245",
+        "incident_site_area": "Confluence of the Intracoastal Waterway and Cypress Bayou",
+        "impacted_areas": "300-yard containment zone surrounding a punctured double-hulled barge discharging Heavy Fuel Oil (HFO 380)",
+        "threatened_areas": "Grand Cypress Mangrove Sanctuary 2.0 miles south-southeast; Delta Commercial Oyster Leases 3.5 miles down-river",
+        "overflight_results": "Surface slick measuring 2.0 miles long by 100 yards wide moving with the ebb tide, with visible heavy sheen accumulating along the shoreline",
+        "trajectories": "Waterborne oil plume moving South-Southeast at 1.8 knots; local coastal winds blowing from Northwest at 12 knots",
+        "impacted_shorelines": "1.5 miles south along the eastern bank of Cypress Bayou",
+        "graphics_and_symbology": "Standard navigational charts and GIS symbology, oriented with North at top"
+    },
+    "5_situation_summary_health_safety_briefing": {
+        "situation_summary": "Tugboat towing two loaded asphalt barges collided with an anchored commercial tanker at 13:50 hours, rupturing Cargo Tank #2 starboard and releasing heavy fuel oil.",
+        "health_and_safety_hazards": "Hydrogen sulfide gas accumulation, hydrocarbon inhalation, direct dermal exposure, slip-and-fall hazards on oily/muddy surfaces, responder heat exhaustion in 91°F heat, and water drowning risks.",
+        "necessary_measures": "Establishment of a 1,000-foot Maritime Safety Zone, mandatory Level C PPE with half-mask organic vapor respirators and PFDs for over-water personnel, continuous H2S/PID air monitoring, mandatory work-rest hydration cycles, and vessel-based decontamination station."
+    },
+    "6_prepared_by": {
+        "name": "Commander Elena Rostova",
+        "position_title": "Initial Planning Section Chief",
+        "signature": "Commander Elena Rostova",
+        "date_time": "September 21, 2026, at 15:30 hours"
+    },
+    "7_current_and_planned_objectives": [
+        "Complete primary deflection boom deployment across the mouth of Cypress Bayou by 16:30 hours.",
+        "Secure mechanical patching or product transfer (lightering) of Cargo Tank #2 by 18:00 hours.",
+        "Deploy skimming vessels to recover free-floating surface product before nightfall at 19:30 hours.",
+        "Establish a full Joint Information Center to handle media inquiries by 20:00 hours."
+    ],
+    "8_current_and_planned_actions_strategies_tactics": [
+        {
+            "time": "14:00 hours",
+            "actions": "Coast Guard Station Cypress Bend dispatched Sector Patrol Craft and issued a Notice to Mariners closing the waterway."
+        },
+        {
+            "time": "14:30 hours",
+            "actions": "Captain M. Thorne established Incident Command and deployed first-responder skimmer boats."
+        },
+        {
+            "time": "15:00 hours",
+            "actions": "Port Authority Hazmat Teams completed initial safety sweeps and confirmed zero structural fire threats."
+        },
+        {
+            "time": "15:30 hours",
+            "actions": "Marine salvage engineers boarded the barge to inspect damage and prep transfer pumps."
+        },
+        {
+            "time": "16:00 hours",
+            "actions": "Drop 2,000 feet of hard boom across the mangrove inlet."
+        },
+        {
+            "time": "17:00 hours",
+            "actions": "Initiate lightering operations to pump fuel out of the damaged tank."
+        },
+        {
+            "time": "18:30 hours",
+            "actions": "Deploy an evening drone overflight to track thermal slick drift patterns."
+        }
+    ],
+    "9_current_organization": {
+        "incident_commanders": [
+            "Captain M. Thorne (US Coast Guard)",
+            "Director D. Sterling (State Department of Environmental Quality)",
+            "H. Vance (Cypress Towing Co., Responsible Party)"
+        ],
+        "safety_officer": "Lieutenant Commander J. Ruiz",
+        "public_information_officer": "C. Alvarez",
+        "liaison_officer": "Agent P. Brooks",
+        "operations_section_chief": "G. Morales",
+        "planning_section_chief": "Commander Elena Rostova",
+        "logistics_section_chief": "R. O'Connor",
+        "finance_administration_section_chief": "M. Lin",
+        "additional_positions": [
+            {
+                "position": "Salvage & Engineering Group Supervisor",
+                "name": "Chief Specialist K. Vance"
+            },
+            {
+                "position": "Wildlife Rescue Leader",
+                "name": "Dr. A. Mercer"
+            }
+        ]
+    },
+    "10_resource_summary": [
+        {
+            "resource": "USCG Marine Safety Detachment 1",
+            "resource_identifier": "USCG-MSD-01",
+            "date_time_ordered": "September 21, 2026, 14:00 hours",
+            "eta": "Arrived",
+            "arrived": true,
+            "notes": "Enforcing maritime safety zone and conducting gas monitoring."
+        },
+        {
+            "resource": "Cypress Port Skimmer Vessel 4",
+            "resource_identifier": "SKIM-04",
+            "date_time_ordered": "September 21, 2026, 14:10 hours",
+            "eta": "Arrived",
+            "arrived": true,
+            "notes": "Actively skimming free surface product around the barge stern."
+        },
+        {
+            "resource": "Delta Salvage Tug 'Warrior'",
+            "resource_identifier": "TUG-WARRIOR",
+            "date_time_ordered": "September 21, 2026, 14:30 hours",
+            "eta": "Arrived",
+            "arrived": true,
+            "notes": "Providing stabilizing push-support and powering transfer pumps."
+        },
+        {
+            "resource": "State DEQ Water Sampling Craft",
+            "resource_identifier": "DEQ-BOAT-2",
+            "date_time_ordered": "September 21, 2026, 14:20 hours",
+            "eta": "Arrived",
+            "arrived": true,
+            "notes": "Collecting downstream water samples and turbidity readings."
+        },
+        {
+            "resource": "National Spill Response Team Barge 8",
+            "resource_identifier": "NSRT-B-08",
+            "date_time_ordered": "September 21, 2026, 14:45 hours",
+            "eta": "16:30 hours",
+            "arrived": false,
+            "notes": "En route with 3,000 feet of ocean containment boom and heavy skimmers."
+        },
+        {
+            "resource": "Gulf Coast Wildlife Rescue Unit",
+            "resource_identifier": "GC-WILD-1",
+            "date_time_ordered": "September 21, 2026, 15:10 hours",
+            "eta": "17:15 hours",
+            "arrived": false,
+            "notes": "En route to set up an oily bird stabilization and staging facility."
+        }
+    ]
+}

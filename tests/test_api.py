@@ -4,11 +4,10 @@ Covers every endpoint and the full upload → template → fill pipeline.
 All heavy dependencies (LLM, commonforms, filesystem) are mocked via conftest.
 """
 
-import pytest
 from sqlmodel import select
 
-from api.db.models import Template, FormSubmission
-
+from app.core.config import API_PREFIX
+from app.models import FormSubmission, Template
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DB model sanity
@@ -84,7 +83,7 @@ class TestDBModels:
 class TestTemplateEndpoints:
 
     def test_list_templates_empty(self, client):
-        resp = client.get("/templates")
+        resp = client.get(f"{API_PREFIX}/templates")
         assert resp.status_code == 200
         assert resp.json() == []
 
@@ -98,7 +97,7 @@ class TestTemplateEndpoints:
                 "Location": "string",
             },
         }
-        resp = client.post("/templates/create", json=payload)
+        resp = client.post(f"{API_PREFIX}/templates/create", json=payload)
         assert resp.status_code == 200
 
         data = resp.json()
@@ -111,12 +110,12 @@ class TestTemplateEndpoints:
 
     def test_create_then_list(self, client, mock_controller):
         """Creating a template should make it appear in the list."""
-        client.post("/templates/create", json={
+        client.post(f"{API_PREFIX}/templates/create", json={
             "name": "T1",
             "pdf_path": "a.pdf",
             "fields": {"f": "string"},
         })
-        resp = client.get("/templates")
+        resp = client.get(f"{API_PREFIX}/templates")
         assert resp.status_code == 200
         assert len(resp.json()) == 1
         assert resp.json()[0]["name"] == "T1"
@@ -126,11 +125,11 @@ class TestTemplateEndpoints:
         # Point the upload directory inside tmp_path (which is inside the project
         # for the path-safety check — we monkeypatch the check).
         monkeypatch.setattr(
-            "api.routes.templates.PROJECT_ROOT",
+            "app.api.routes.templates.PROJECT_ROOT",
             tmp_path,
         )
         resp = client.post(
-            "/templates/upload",
+            f"{API_PREFIX}/templates/upload",
             files=[pdf_upload],
             data={"directory": str(tmp_path)},
         )
@@ -142,19 +141,19 @@ class TestTemplateEndpoints:
     def test_upload_non_pdf_rejected(self, client):
         import io
         bad_file = ("file", ("notes.txt", io.BytesIO(b"hello"), "text/plain"))
-        resp = client.post("/templates/upload", files=[bad_file])
+        resp = client.post(f"{API_PREFIX}/templates/upload", files=[bad_file])
         assert resp.status_code == 400
         assert "PDF" in resp.json()["detail"]
 
     def test_preview_missing_file(self, client):
-        resp = client.get("/templates/preview", params={"path": "src/inputs/nonexistent.pdf"})
+        resp = client.get(f"{API_PREFIX}/templates/preview", params={"path": "src/inputs/nonexistent.pdf"})
         assert resp.status_code == 404
 
     def test_directory_traversal_blocked(self, client):
         import io
         pdf = ("file", ("evil.pdf", io.BytesIO(b"%PDF-1.4"), "application/pdf"))
         resp = client.post(
-            "/templates/upload",
+            f"{API_PREFIX}/templates/upload",
             files=[pdf],
             data={"directory": "/etc"},
         )
@@ -170,7 +169,7 @@ class TestFormEndpoints:
 
     def _seed_template(self, client, mock_controller):
         """Helper: create a template and return its ID."""
-        resp = client.post("/templates/create", json={
+        resp = client.post(f"{API_PREFIX}/templates/create", json={
             "name": "Employee Form",
             "pdf_path": "src/inputs/employee.pdf",
             "fields": {
@@ -183,7 +182,7 @@ class TestFormEndpoints:
     def test_fill_form_success(self, client, mock_controller):
         tpl_id = self._seed_template(client, mock_controller)
 
-        resp = client.post("/forms/fill", json={
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={
             "template_id": tpl_id,
             "input_text": "The employee is John Doe, email jdoe@ucsc.edu",
         })
@@ -196,7 +195,7 @@ class TestFormEndpoints:
         mock_controller["form_ctrl"].fill_form.assert_called_once()
 
     def test_fill_form_missing_template(self, client, mock_controller):
-        resp = client.post("/forms/fill", json={
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={
             "template_id": 9999,
             "input_text": "some text",
         })
@@ -206,17 +205,23 @@ class TestFormEndpoints:
         tpl_id = self._seed_template(client, mock_controller)
         mock_controller["form_ctrl"].fill_form.side_effect = FileNotFoundError("PDF template not found")
 
-        resp = client.post("/forms/fill", json={
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={
             "template_id": tpl_id,
             "input_text": "some text",
         })
         assert resp.status_code == 500
-        assert "PDF template not found" in resp.json()["error"]
+        assert resp.json()["error_code"] == "FORM_FILL_ERROR"
+        assert "PDF template not found" in resp.json()["message"]
 
     def test_fill_form_validates_body(self, client):
-        """Missing required fields → 422."""
-        resp = client.post("/forms/fill", json={})
+        """Missing required fields → 422 with contract envelope."""
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={})
         assert resp.status_code == 422
+        body = resp.json()
+        assert body["error_code"] == "VALIDATION_ERROR"
+        assert len(body["validation_errors"]) >= 1
+        assert body["validation_errors"][0]["field"] is not None
+        assert body["validation_errors"][0]["issue"] is not None
 
     def test_transcribe_success(self, client, monkeypatch):
         """Audio is forwarded to the whisper sidecar and its text returned."""
@@ -235,10 +240,10 @@ class TestFormEndpoints:
             captured["files"] = files
             return fake_response
 
-        monkeypatch.setattr("api.routes.forms.requests.post", fake_post)
+        monkeypatch.setattr("app.api.routes.forms.requests.post", fake_post)
 
         audio = ("audio", ("recording.wav", io.BytesIO(b"RIFFfake"), "audio/wav"))
-        resp = client.post("/forms/transcribe", files=[audio])
+        resp = client.post(f"{API_PREFIX}/forms/transcribe", files=[audio])
 
         assert resp.status_code == 200
         assert resp.json()["text"] == "structure fire on main street"
@@ -247,16 +252,16 @@ class TestFormEndpoints:
         assert captured["params"]["output"] == "json"
 
     def test_list_models(self, client, monkeypatch):
-        """/forms/models lists Ollama models and always includes the default."""
+        ""f"{API_PREFIX}/forms/models lists Ollama models and always includes the default."""
         from unittest.mock import MagicMock
 
         fake_response = MagicMock()
         fake_response.json.return_value = {"models": [{"name": "qwen2.5:3b"}, {"name": "mistral:latest"}]}
         fake_response.raise_for_status.return_value = None
-        monkeypatch.setattr("api.routes.forms.requests.get", lambda *a, **k: fake_response)
+        monkeypatch.setattr("app.api.routes.forms.requests.get", lambda *a, **k: fake_response)
         monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 
-        resp = client.get("/forms/models")
+        resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
         body = resp.json()
         assert body["default"] == "qwen2.5:1.5b"
@@ -270,17 +275,17 @@ class TestFormEndpoints:
         def boom(*a, **k):
             raise requests.exceptions.ConnectionError("down")
 
-        monkeypatch.setattr("api.routes.forms.requests.get", boom)
+        monkeypatch.setattr("app.api.routes.forms.requests.get", boom)
         monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 
-        resp = client.get("/forms/models")
+        resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
         assert resp.json()["models"] == ["qwen2.5:1.5b"]
 
     def test_fill_form_passes_model_override(self, client, mock_controller):
         """A `model` in the request reaches Controller.fill_form but isn't persisted."""
         tpl_id = self._seed_template(client, mock_controller)
-        resp = client.post("/forms/fill", json={
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={
             "template_id": tpl_id,
             "input_text": "John Doe",
             "model": "qwen2.5:3b",
@@ -292,15 +297,16 @@ class TestFormEndpoints:
     def test_transcribe_service_unavailable(self, client, monkeypatch):
         """A down whisper service surfaces as a 503, not a 500."""
         import io
+
         import requests
 
         def fake_post(*args, **kwargs):
             raise requests.exceptions.ConnectionError("no service")
 
-        monkeypatch.setattr("api.routes.forms.requests.post", fake_post)
+        monkeypatch.setattr("app.api.routes.forms.requests.post", fake_post)
 
         audio = ("audio", ("recording.wav", io.BytesIO(b"data"), "audio/wav"))
-        resp = client.post("/forms/transcribe", files=[audio])
+        resp = client.post(f"{API_PREFIX}/forms/transcribe", files=[audio])
         assert resp.status_code == 503
 
 
@@ -316,9 +322,9 @@ class TestE2EPipeline:
 
     def test_full_flow(self, client, mock_controller, pdf_upload, tmp_path, monkeypatch, db):
         # -- Step 1: Upload a PDF --
-        monkeypatch.setattr("api.routes.templates.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.api.routes.templates.PROJECT_ROOT", tmp_path)
         upload_resp = client.post(
-            "/templates/upload",
+            f"{API_PREFIX}/templates/upload",
             files=[pdf_upload],
             data={"directory": str(tmp_path)},
         )
@@ -327,7 +333,7 @@ class TestE2EPipeline:
         assert uploaded_path.endswith(".pdf")
 
         # -- Step 2: Create a template from the uploaded PDF --
-        create_resp = client.post("/templates/create", json={
+        create_resp = client.post(f"{API_PREFIX}/templates/create", json={
             "name": "Incident Report",
             "pdf_path": uploaded_path,
             "fields": {
@@ -343,13 +349,13 @@ class TestE2EPipeline:
         assert template_id is not None
 
         # -- Step 3: Verify template appears in list --
-        list_resp = client.get("/templates")
+        list_resp = client.get(f"{API_PREFIX}/templates")
         assert list_resp.status_code == 200
         templates = list_resp.json()
         assert any(t["id"] == template_id for t in templates)
 
         # -- Step 4: Fill the form --
-        fill_resp = client.post("/forms/fill", json={
+        fill_resp = client.post(f"{API_PREFIX}/forms/fill", json={
             "template_id": template_id,
             "input_text": (
                 "Officer Jane Smith, badge 4521. On January 15 2025 at "

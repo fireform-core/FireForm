@@ -1,0 +1,348 @@
+# Layer 3 Form Generation Endpoints
+# POST /api/v1/forms/generate/all
+# POST /api/v1/forms/generate/{form_type}
+# GET /api/v1/forms/{form_id}
+# GET /api/v1/forms/{form_id}/pdf
+# GET /api/v1/forms/{form_id}/json
+# GET /api/v1/forms/batch/{batch_id}
+
+generate_all:
+  post:
+    operationId: generateAllForms
+    summary: Generate all applicable forms from an extraction
+    description: |
+      Triggers batch generation of ALL forms listed in the extraction's
+      extraction_metadata.applicable_forms. This is an async batch job.
+      Use skip_incomplete to skip forms that fail validation, or force_partial
+      to generate forms with blank fields where data is missing.
+    tags:
+      - forms
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/form-record.yaml#/GenerateAllRequest"
+          example:
+            extract_id: "550e8400-e29b-41d4-a716-446655440020"
+            options:
+              skip_incomplete: true
+              force_partial: false
+    responses:
+      "202":
+        description: Batch form generation job accepted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/BatchGenerateResponse"
+            example:
+              batch_id: "550e8400-e29b-41d4-a716-446655440030"
+              status: "processing"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              forms_queued:
+                - "neris"
+                - "nfirs_basic"
+                - "nfirs_wildland"
+              forms_skipped:
+                - form_type: "nemsis_epcr"
+                  reason: "Missing required fields: ems.patients[0].date_of_birth"
+              estimated_seconds: 45
+              poll_url: "/api/v1/forms/batch/550e8400-e29b-41d4-a716-446655440030"
+      "404":
+        description: Extract ID not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Extraction not yet completed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "EXTRACT_NOT_COMPLETED"
+              message: "Extraction is still processing. Wait until status is 'completed'."
+              detail:
+                current_status: "processing"
+      "422":
+        description: No applicable forms found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "NO_APPLICABLE_FORMS"
+              message: "No forms are applicable for this extraction's incident type"
+
+generate_single:
+  post:
+    operationId: generateSingleForm
+    summary: Generate one specific form type
+    description: |
+      Generates a single agency-specific form from the canonical extraction data.
+      The form_type path parameter specifies which form to generate. If the extraction
+      is missing required fields for this form, returns 422 unless force_partial is true.
+    tags:
+      - forms
+    parameters:
+      - name: form_type
+        in: path
+        required: true
+        description: Type of form to generate
+        schema:
+          $ref: "../schemas/enums.yaml#/FormType"
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/form-record.yaml#/GenerateSingleRequest"
+          example:
+            extract_id: "550e8400-e29b-41d4-a716-446655440020"
+            options:
+              output_format: "pdf"
+              force_partial: false
+    responses:
+      "202":
+        description: Form generation job accepted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/FormGenerateResponse"
+            example:
+              form_id: "550e8400-e29b-41d4-a716-446655440040"
+              form_type: "neris"
+              status: "processing"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              job_id: "550e8400-e29b-41d4-a716-446655440097"
+              estimated_seconds: 15
+              poll_url: "/api/v1/forms/550e8400-e29b-41d4-a716-446655440040"
+      "404":
+        description: Extract ID not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "422":
+        description: Validation failure or form not in applicable list
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "FORM_VALIDATION_FAILED"
+              message: "Extraction is missing required fields for NERIS form"
+              detail:
+                form_type: "neris"
+                missing_fields:
+                  - "incident.types[0].neris_code"
+                  - "location.coordinates"
+              validation_errors:
+                - field: "incident.types[0].neris_code"
+                  issue: "Required field is null"
+
+form_by_id:
+  get:
+    operationId: getForm
+    summary: Get form metadata and status
+    description: |
+      Returns the form record including generation status, associated extract and
+      incident IDs, and a field_mapping_summary showing how canonical fields were
+      mapped to the form's agency-specific fields (for audit/transparency).
+    tags:
+      - forms
+    parameters:
+      - name: form_id
+        in: path
+        required: true
+        description: Unique identifier of the generated form
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Form record found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/FormRecord"
+            example:
+              form_id: "550e8400-e29b-41d4-a716-446655440040"
+              form_type: "neris"
+              status: "completed"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              incident_id: "550e8400-e29b-41d4-a716-446655440050"
+              created_at: "2024-07-15T14:32:00Z"
+              completed_at: "2024-07-15T14:32:12Z"
+              pdf_ready: true
+              json_ready: true
+              field_mapping_summary:
+                total_form_fields: 85
+                fields_filled: 72
+                fields_blank: 13
+                coverage_percent: 84.7
+      "404":
+        description: Form not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+form_pdf:
+  get:
+    operationId: downloadFormPdf
+    summary: Download filled PDF form
+    description: |
+      Returns the filled PDF binary file for the specified form. If the form
+      generation is still in progress, returns 202 Accepted with a retry_after
+      hint. The Content-Disposition header is set for browser download.
+    tags:
+      - forms
+    parameters:
+      - name: form_id
+        in: path
+        required: true
+        description: Unique identifier of the form to download
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Filled PDF file
+        content:
+          application/pdf:
+            schema:
+              type: string
+              format: binary
+        headers:
+          Content-Disposition:
+            description: Attachment filename for download
+            schema:
+              type: string
+              example: 'attachment; filename="NERIS_FF-2024-CA-0157.pdf"'
+      "202":
+        description: Form generation still in progress
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                status:
+                  type: string
+                retry_after_seconds:
+                  type: integer
+            example:
+              message: "Form generation is still in progress"
+              status: "processing"
+              retry_after_seconds: 5
+      "404":
+        description: Form not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "500":
+        description: PDF generation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "PDF_GENERATION_FAILED"
+              message: "Failed to generate PDF for form"
+              detail:
+                reason: "Template file corrupted or missing"
+
+form_json:
+  get:
+    operationId: getFormJson
+    summary: Get form-specific field-mapped JSON
+    description: |
+      Returns the form-specific JSON with fields mapped to the agency's expected
+      format not the canonical FireForm schema, but the actual field names and
+      structure that the target agency system expects. Useful for future direct
+      API submission to agency systems.
+    tags:
+      - forms
+    parameters:
+      - name: form_id
+        in: path
+        required: true
+        description: Unique identifier of the form
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Form-specific mapped JSON
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/FormMappedJson"
+            example:
+              form_type: "neris"
+              form_version: "2.0"
+              form_id: "550e8400-e29b-41d4-a716-446655440040"
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              agency_fields:
+                incident_type: "wildland-fire"
+                incident_date: "2024-07-10"
+                alarm_time: "13:52"
+                acres_burned: 1247
+                cause: "natural"
+      "404":
+        description: Form not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+batch_by_id:
+  get:
+    operationId: getBatchStatus
+    summary: Get batch form generation status
+    description: |
+      Returns the status of a batch form generation job including progress
+      for each individual form. Poll this endpoint after POST /forms/generate/all.
+    tags:
+      - forms
+    parameters:
+      - name: batch_id
+        in: path
+        required: true
+        description: Unique identifier of the batch job
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Batch job status
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/BatchStatus"
+            example:
+              batch_id: "550e8400-e29b-41d4-a716-446655440030"
+              status: "completed"
+              total: 3
+              completed: 3
+              failed: 0
+              forms:
+                - form_id: "550e8400-e29b-41d4-a716-446655440040"
+                  form_type: "neris"
+                  status: "completed"
+                - form_id: "550e8400-e29b-41d4-a716-446655440041"
+                  form_type: "nfirs_basic"
+                  status: "completed"
+                - form_id: "550e8400-e29b-41d4-a716-446655440042"
+                  form_type: "nfirs_wildland"
+                  status: "completed"
+      "404":
+        description: Batch job not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"

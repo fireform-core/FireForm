@@ -27,3 +27,6 @@ frontend/release/
 
 # Local Claude Code instructions
 CLAUDE.md
+
+*temp/
+*.env*
