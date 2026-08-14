@@ -15,7 +15,7 @@ class Runner:
         narratives_dir = os.path.join(datasets_dir, "narratives")
         ground_truth_dir = os.path.join(datasets_dir, "ground_truth")
         templates_dir = os.path.join(datasets_dir, "templates")
-        pdfs_dir = os.path.join(templates_dir, "pdfs")
+        pdfs_dir = os.path.join(datasets_dir, "pdfs")
 
         results = []
         total_latency = 0.0
@@ -23,7 +23,8 @@ class Runner:
         # Scan narratives directory to find matching ground_truth and template files
         narrative_files = [f for f in os.listdir(narratives_dir) if f.endswith(".txt")]
 
-        for narrative_file in sorted(narrative_files):
+        total = len(narrative_files)
+        for idx, narrative_file in enumerate(sorted(narrative_files), start=1):
             case_name = os.path.splitext(narrative_file)[0]
             # Match ics201_1.txt -> ics201_1.json or ics201.json
             # Find matching ground truth file
@@ -62,12 +63,14 @@ class Runner:
             with open(template_path, "r") as f:
                 template_schema = json.load(f)
 
+            print(f"  [{idx}/{total}] Running {case_name} ...", flush=True)
             start_time = time.time()
             output = self.pipeline.run(narrative_text, template_schema, pdf_path)
             latency = time.time() - start_time
             total_latency += latency
 
             accuracy = calculate_accuracy(output.extracted_fields, gt_content)
+            print(f"  [{idx}/{total}] {case_name} done — latency={latency:.2f}s  accuracy={accuracy:.3f}", flush=True)
 
             results.append({
                 "case_id": case_name,
@@ -76,6 +79,8 @@ class Runner:
                 "extracted_fields": output.extracted_fields,
                 "ground_truth": gt_content
             })
+
+        print(f"\n[Runner] Iterations completed: {len(results)} / {len(narrative_files)} narratives")
 
         avg_accuracy = sum(r["accuracy_score"] for r in results) / len(results) if results else 0.0
 
