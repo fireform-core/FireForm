@@ -20,7 +20,7 @@ SQLModel.metadata.create_all(_engine)
 
 
 class Pipeline(BasePipeline):
-    def run(self, narrative: str, template_schema: dict) -> PipelineExtractionOutput:
+    def run(self, narrative: str, template_schema: dict, pdf_path: str) -> PipelineExtractionOutput:
         with Session(_engine) as session:
             # 1. Seed a Template row from the JSON schema
             template = TemplateService().create_template(session, TemplateCreate(

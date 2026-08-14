@@ -14,5 +14,5 @@ class BasePipeline(ABC):
     """Base class for all extraction pipelines."""
 
     @abstractmethod
-    def run(self, narrative: str, template_schema: dict) -> PipelineExtractionOutput: 
+    def run(self, narrative: str, template_schema: dict, pdf_path: str) -> PipelineExtractionOutput: 
         pass
