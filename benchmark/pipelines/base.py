@@ -6,7 +6,6 @@ from dataclasses import dataclass
 class PipelineExtractionOutput:
     """Output structure for extraction pipelines."""
     extracted_fields: dict[str, any]
-    field_confidence: dict[str, float]
     latency_seconds: float
 
 

@@ -44,6 +44,5 @@ class Pipeline(BasePipeline):
 
             return PipelineExtractionOutput(
                 extracted_fields=extracted,
-                field_confidence={},
                 latency_seconds=latency,
             )
