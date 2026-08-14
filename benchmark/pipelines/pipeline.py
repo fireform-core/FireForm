@@ -24,8 +24,8 @@ class Pipeline(BasePipeline):
         with Session(_engine) as session:
             # 1. Seed a Template row from the JSON schema
             template = TemplateService().create_template(session, TemplateCreate(
-                name="benchmark_template",                                  # SOLVE
-                pdf_path="benchmark/datasets/templates/placeholder.pdf",    # SOLVE
+                name=pdf_path,
+                pdf_path=pdf_path,
                 fields=template_schema,
             ))
 
