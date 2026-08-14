@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class TemplateCreate(BaseModel):
@@ -16,14 +16,13 @@ class MakeFillableResponse(BaseModel):
     field_count: int | None = None
 
 class TemplateResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     pdf_path: str
     fields: dict
     field_count: int | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class ExtractedField(BaseModel):
