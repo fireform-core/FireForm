@@ -15,6 +15,7 @@ class Runner:
         narratives_dir = os.path.join(datasets_dir, "narratives")
         ground_truth_dir = os.path.join(datasets_dir, "ground_truth")
         templates_dir = os.path.join(datasets_dir, "templates")
+        pdfs_dir = os.path.join(templates_dir, "pdfs")
 
         results = []
         total_latency = 0.0
@@ -45,8 +46,9 @@ class Runner:
             narrative_path = os.path.join(narratives_dir, narrative_file)
             gt_path = os.path.join(ground_truth_dir, gt_file) if gt_file else ""
             template_path = os.path.join(templates_dir, template_file)
+            pdf_path = os.path.join(pdfs_dir, template_file.replace(".json", ".pdf"))
 
-            if not os.path.exists(gt_path) or not os.path.exists(template_path):
+            if not os.path.exists(gt_path) or not os.path.exists(template_path) or not os.path.exists(pdf_path):
                 continue
 
             with open(narrative_path, "r") as f:
@@ -62,7 +64,7 @@ class Runner:
                 template_schema = json.load(f)
 
             start_time = time.time()
-            output = self.pipeline.run(narrative_text, template_schema)
+            output = self.pipeline.run(narrative_text, template_schema, pdf_path)
             latency = time.time() - start_time
             total_latency += latency
 
