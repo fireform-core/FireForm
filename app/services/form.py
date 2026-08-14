@@ -76,10 +76,13 @@ class FormService:
             model=model,
         )
 
+        extracted_fields = self.controller.file_manipulator.llm._json
+
         submission = FormSubmission(
             template_id=template.id,
             input_id=input_id,
             input_text=transcript,
+            extracted_fields=extracted_fields,
             output_pdf_path=path,
         )
         return create_form(session, submission)

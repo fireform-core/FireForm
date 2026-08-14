@@ -40,7 +40,7 @@ class Pipeline(BasePipeline):
             latency = time.perf_counter() - t0
 
             # 3. Pull extracted fields out of the filled submission
-            extracted = submission.output_pdf_path  # parse JSON fields here
+            extracted = submission.extracted_fields
 
             return PipelineExtractionOutput(
                 extracted_fields=extracted,

@@ -32,6 +32,7 @@ class FormSubmission(SQLModel, table=True):
     template_id: int = Field(foreign_key="template.id")
     input_id: UUID | None = Field(default=None, foreign_key="inputs.input_id")
     input_text: str
+    extracted_fields: dict | None = Field(default=None, sa_column=Column(JSON))
     output_pdf_path: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
