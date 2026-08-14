@@ -3,7 +3,8 @@ from uuid import UUID
 
 from sqlmodel import Session, select
 
-from app.models import Template, FormSubmission, Job, Input
+from app.models import FormSubmission, Input, Job, Template
+
 
 # Templates
 def create_template(session: Session, template: Template) -> Template:

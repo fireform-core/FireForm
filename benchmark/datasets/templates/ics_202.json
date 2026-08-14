@@ -1,0 +1,38 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_objectives": ["string"],
+  "4_operational_period_command_emphasis": "string",
+  "general_situational_awareness": "string",
+  "5_site_safety_plan_required": "boolean",
+  "approved_site_safety_plans_located_at": "string",
+  "6_incident_action_plan_attachments": {
+    "ics_203": "boolean",
+    "ics_204": "boolean",
+    "ics_205": "boolean",
+    "ics_205a": "boolean",
+    "ics_206": "boolean",
+    "ics_207": "boolean",
+    "ics_208": "boolean",
+    "map_chart": "boolean",
+    "weather_forecast_tides_currents": "boolean",
+    "other_attachments": ["string"]
+  },
+  "7_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "8_approved_by_incident_commander": {
+    "name": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

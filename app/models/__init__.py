@@ -12,12 +12,12 @@ from app.models.models import (
 )
 
 __all__ = [
-    "Template",
-    "FormSubmission",
-    "Job",
-    "Input",
     "Extraction",
-    "Incident",
     "Form",
+    "FormSubmission",
+    "Incident",
+    "Input",
+    "Job",
     "Report",
+    "Template",
 ]

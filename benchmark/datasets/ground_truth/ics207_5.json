@@ -1,0 +1,82 @@
+{
+  "ics_207_ground_truth": {
+    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+    "2_operational_period": {
+      "date_from": "05/18/2026",
+      "date_to": "05/19/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_organization_chart": {
+      "incident_commanders": [
+        "OSC C. Martinez (EPA R9 Co-IC)",
+        "Chief M. Thorne (SBCo Fire IC)",
+        "Chief Inspector A. Kim (Cal OES)",
+        "W. Vance (Pipeline RP IC)"
+      ],
+      "command_staff": {
+        "safety_officer": "Captain Gregory Hall",
+        "public_information_officer": "Samantha Norris (Cal OES)",
+        "liaison_officer": "Ranger D. Stevens (State Parks)"
+      },
+      "operations_section": {
+        "chief": "Battalion Chief Kevin Ross",
+        "staging_area_manager": "Staging Area Delta Manager",
+        "branches_divisions_groups": [
+          {
+            "title": "Canyon Pipeline Repair Branch Director",
+            "name": "Capt. Gregory Hall"
+          },
+          {
+            "title": "Clamp Repair Group Supervisor",
+            "name": "Capt. A. Ross"
+          },
+          {
+            "title": "Reservoir Skimming & Booming Branch Director",
+            "name": "Captain B. Walsh"
+          },
+          {
+            "title": "South Arm Skimmer Division Supervisor",
+            "name": "Capt. B. Walsh"
+          }
+        ]
+      },
+      "planning_section": {
+        "chief": "Captain Rachel Brooks",
+        "resources_unit_ldr": "Jason Wu",
+        "situation_unit_ldr": "Battalion Chief Kevin Ross",
+        "documentation_unit_ldr": "Dr. L. Arispe",
+        "demobilization_unit_ldr": "Captain B. Walsh"
+      },
+      "logistics_section": {
+        "chief": "Megan Taylor",
+        "support_branch": {
+          "director": "Capt. P. Gomez",
+          "supply_unit_ldr": "Lt. S. Baker",
+          "facilities_unit_ldr": "Capt. D. Ross",
+          "ground_spt_unit_ldr": "Lt. M. Turner"
+        },
+        "service_branch": {
+          "director": "Capt. H. Nelson",
+          "comms_unit_ldr": "Sgt. R. Hall",
+          "medical_unit_ldr": "Dr. N. Howard",
+          "food_unit_ldr": "L. King"
+        }
+      },
+      "finance_administration_section": {
+        "chief": "Jason Wu",
+        "time_unit_ldr": "J. Myers",
+        "procurement_unit_ldr": "S. Taylor",
+        "comp_claims_unit_ldr": "C. Adams",
+        "cost_unit_ldr": "M. Evans"
+      }
+    },
+    "4_prepared_by": {
+      "name": "Jason Wu",
+      "position_title": "Resources Unit Leader",
+      "signature": "Jason Wu",
+      "date_time": "05/18/2026 16:30"
+    },
+    "iap_page_number": "4"
+  }
+}

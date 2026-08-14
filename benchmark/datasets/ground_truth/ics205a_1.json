@@ -1,0 +1,55 @@
+{
+  "ics_205a_ground_truth": {
+    "1_incident_name": "Whispering Pines Derailment",
+    "2_operational_period": {
+      "date_from": "07/07/2026",
+      "date_to": "07/08/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_basic_local_communications_information": [
+      {
+        "incident_assigned_position": "Incident Commander (County Fire)",
+        "name": "Chief J. Thomas",
+        "methods_of_contact": "Cell: 555-0101 / Radio Ch 1 / Vehicle: FIRE-CMD-1"
+      },
+      {
+        "incident_assigned_position": "Co-Incident Commander (State DEQ)",
+        "name": "S. Albright",
+        "methods_of_contact": "Cell: 555-0102 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Co-Incident Commander (CSX RP)",
+        "name": "D. Miller",
+        "methods_of_contact": "Cell: 555-0103 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Safety Officer",
+        "name": "Captain R. Mendez",
+        "methods_of_contact": "Cell: 555-0177 / Radio Ch 1 & 4"
+      },
+      {
+        "incident_assigned_position": "Operations Section Chief",
+        "name": "B. Reynolds",
+        "methods_of_contact": "Cell: 555-0192 / Radio Ch 1"
+      },
+      {
+        "incident_assigned_position": "Hazmat Branch Director",
+        "name": "Lt. T. Kincaid",
+        "methods_of_contact": "Cell: 555-0144 / Radio Ch 3 & 4 / Vehicle: HZM-01"
+      },
+      {
+        "incident_assigned_position": "Planning Section Chief",
+        "name": "Marcus Vance",
+        "methods_of_contact": "Cell: 555-0150 / CP Desk Ext: 104"
+      }
+    ],
+    "4_prepared_by": {
+      "name": "R. Lee",
+      "position_title": "Communications Unit Leader",
+      "signature": "R. Lee",
+      "date_time": "07/07/2026 16:30"
+    },
+    "iap_page_number": "6"
+  }
+}

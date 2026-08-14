@@ -1,7 +1,8 @@
 from pathlib import Path
+
 import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.forms import (
@@ -10,10 +11,16 @@ from app.api.schemas.forms import (
     ModelsResponse,
     TranscriptionResponse,
 )
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, BASE_DIR, RETENTION_PERIOD_DAYS
-from app.services.whisper import call_whisper_asr
+from app.core.config import BASE_DIR, OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
 from app.core.errors.base import AppError
-from app.db.repositories import get_template, get_form_submission, delete_form_submission
+from app.db.repositories import (
+    delete_form_submission,
+    get_form_submission,
+    get_template,
+)
+from app.models import FormSubmission, Template
+from app.services.controller import Controller
+from app.services.whisper import call_whisper_asr
 from app.services.form import FormService
 
 PROJECT_ROOT = BASE_DIR

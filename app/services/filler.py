@@ -1,6 +1,8 @@
-from pdfrw import PdfReader, PdfWriter
-from app.services.llm import LLM
 from datetime import datetime
+
+from pdfrw import PdfReader, PdfWriter
+
+from app.services.llm import LLM
 
 
 def _pdf_text(value) -> str:

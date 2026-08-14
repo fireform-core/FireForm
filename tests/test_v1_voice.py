@@ -191,7 +191,7 @@ class TestTranscribeAudioTask:
         assert inp.status == InputStatus.ready
         assert inp.transcript == "Incident at Main St, two casualties."
         assert inp.character_count == len("Incident at Main St, two casualties.")
-        assert inp.word_count == len("Incident at Main St, two casualties.".split())
+        assert inp.word_count == len(["Incident", "at", "Main", "St,", "two", "casualties."])
 
     def test_success_job_becomes_completed_with_result_url(self, db, test_engine):
         inp, job = _seed_input_and_job(db)

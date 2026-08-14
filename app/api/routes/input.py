@@ -21,7 +21,8 @@ from app.core.config import (
     INPUT_POLL_INTERVAL_SECONDS,
 )
 from app.core.errors.base import AppError
-from app.db.repositories import create_input, get_input as repo_get_input
+from app.db.repositories import create_input
+from app.db.repositories import get_input as repo_get_input
 from app.services.input import InputService
 from app.services.whisper import check_whisper_available
 

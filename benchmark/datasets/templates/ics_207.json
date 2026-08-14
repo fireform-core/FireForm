@@ -1,0 +1,63 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_organization_chart": {
+    "incident_commanders": ["string"],
+    "command_staff": {
+      "safety_officer": "string",
+      "public_information_officer": "string",
+      "liaison_officer": "string"
+    },
+    "operations_section": {
+      "chief": "string",
+      "staging_area_manager": "string",
+      "branches_divisions_groups": [
+        {
+          "title": "string",
+          "name": "string"
+        }
+      ]
+    },
+    "planning_section": {
+      "chief": "string",
+      "resources_unit_ldr": "string",
+      "situation_unit_ldr": "string",
+      "documentation_unit_ldr": "string",
+      "demobilization_unit_ldr": "string"
+    },
+    "logistics_section": {
+      "chief": "string",
+      "support_branch": {
+        "director": "string",
+        "supply_unit_ldr": "string",
+        "facilities_unit_ldr": "string",
+        "ground_spt_unit_ldr": "string"
+      },
+      "service_branch": {
+        "director": "string",
+        "comms_unit_ldr": "string",
+        "medical_unit_ldr": "string",
+        "food_unit_ldr": "string"
+      }
+    },
+    "finance_administration_section": {
+      "chief": "string",
+      "time_unit_ldr": "string",
+      "procurement_unit_ldr": "string",
+      "comp_claims_unit_ldr": "string",
+      "cost_unit_ldr": "string"
+    }
+  },
+  "4_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

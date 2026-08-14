@@ -1,0 +1,29 @@
+{
+  "ics_213_ground_truth": {
+    "1_incident_name": "Blackwood Chemical Pipeline Breach",
+    "2_to": {
+      "name": "Sarah L. Jenkins",
+      "position": "Planning Section Chief"
+    },
+    "3_from": {
+      "name": "Division Supervisor Alan Cole",
+      "position": "Division A Supervisor"
+    },
+    "4_subject": "Downstream Municipal Water Intake Precautionary Shutoff Notice",
+    "5_date": "08/13/2026",
+    "6_time": "19:30",
+    "7_message": "Field water monitoring team at Boom Site 2 reports low-level dissolved ammonia readings reaching 0.05 ppm near Blackwood River mile 14. Recommend immediately notifying Blackwood Water Authority to initiate precautionary intake gate closure.",
+    "8_approved_by": {
+      "name": "Chief R. Henderson",
+      "position_title": "Incident Commander",
+      "signature": "Chief R. Henderson"
+    },
+    "9_reply": "Liaison Officer contacted Blackwood Water Authority at 19:50 hours. Water intake gates closed at 20:00 hours. Alternate reservoir supply activated.",
+    "10_replied_by": {
+      "name": "Sarah L. Jenkins",
+      "position_title": "Planning Section Chief",
+      "signature": "Sarah L. Jenkins",
+      "date_time": "08/13/2026 20:10"
+    }
+  }
+}

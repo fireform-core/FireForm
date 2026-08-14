@@ -1,0 +1,88 @@
+{
+  "1_incident_name": "string",
+  "2_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "3_incident_commander_and_command_staff": {
+    "ic_ucs": ["string"],
+    "deputy": "string",
+    "safety_officer": "string",
+    "public_info_officer": "string",
+    "liaison_officer": "string"
+  },
+  "4_agency_organization_representatives": [
+    {
+      "agency_organization": "string",
+      "name": "string"
+    }
+  ],
+  "5_planning_section": {
+    "chief": "string",
+    "deputy": "string",
+    "resources_unit": "string",
+    "situation_unit": "string",
+    "documentation_unit": "string",
+    "demobilization_unit": "string",
+    "technical_specialists": [
+      {
+        "specialty": "string",
+        "name": "string"
+      }
+    ]
+  },
+  "6_logistics_section": {
+    "chief": "string",
+    "deputy": "string",
+    "support_branch": {
+      "director": "string",
+      "supply_unit": "string",
+      "facilities_unit": "string",
+      "ground_support_unit": "string"
+    },
+    "service_branch": {
+      "director": "string",
+      "communications_unit": "string",
+      "medical_unit": "string",
+      "food_unit": "string"
+    }
+  },
+  "7_operations_section": {
+    "chief": "string",
+    "deputy": "string",
+    "staging_area": "string",
+    "branches": [
+      {
+        "branch_name": "string",
+        "branch_director": "string",
+        "deputy": "string",
+        "divisions_groups": [
+          {
+            "identifier": "string",
+            "supervisor": "string"
+          }
+        ]
+      }
+    ],
+    "air_operations_branch": {
+      "air_ops_branch_dir": "string"
+    }
+  },
+  "8_finance_administration_section": {
+    "chief": "string",
+    "deputy": "string",
+    "time_unit": "string",
+    "procurement_unit": "string",
+    "comp_claims_unit": "string",
+    "cost_unit": "string"
+  },
+  "9_prepared_by": {
+    "name": "string",
+    "position_title": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

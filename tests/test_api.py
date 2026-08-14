@@ -11,7 +11,7 @@ from sqlmodel import select
 from app.api.schemas.enums import InputStatus, InputType
 from app.models import Template, FormSubmission, Input
 from app.core.config import API_PREFIX
-
+from app.models import FormSubmission, Template
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DB model sanity
@@ -363,6 +363,7 @@ class TestFormEndpoints:
     def test_transcribe_service_unavailable(self, client, monkeypatch):
         """A down whisper service surfaces as a 503, not a 500."""
         import io
+
         import requests
 
         def fake_post(*args, **kwargs):
