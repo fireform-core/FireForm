@@ -9,15 +9,14 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.core.celery import celery_app
-from app.core.config import BASE_DIR, RETENTION_PERIOD_DAYS
+from app.core.config import RETENTION_PERIOD_DAYS
+from app.core.paths import PROJECT_ROOT
 from app.db.database import get_session
 from app.db.repositories import delete_form_submission
 from app.models import FormSubmission
 from sqlmodel import select
 
 logger = logging.getLogger(__name__)
-
-PROJECT_ROOT = BASE_DIR
 
 
 def _safe_delete_file(file_path: str) -> bool:

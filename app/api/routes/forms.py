@@ -1,4 +1,3 @@
-from pathlib import Path
 import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
 from sqlmodel import Session
@@ -10,29 +9,12 @@ from app.api.schemas.forms import (
     ModelsResponse,
     TranscriptionResponse,
 )
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, BASE_DIR, RETENTION_PERIOD_DAYS
+from app.core import paths
+from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
 from app.services.whisper import call_whisper_asr
 from app.core.errors.base import AppError
 from app.db.repositories import get_template, get_form_submission, delete_form_submission
 from app.services.form import FormService
-
-PROJECT_ROOT = BASE_DIR
-
-def _resolve_project_file(file_path: str) -> Path:
-    raw_path = (file_path or "").strip()
-    if not raw_path:
-        raise AppError("Path is required", status_code=400)
-
-    candidate = Path(raw_path)
-    if not candidate.is_absolute():
-        candidate = (PROJECT_ROOT / candidate).resolve()
-    else:
-        candidate = candidate.resolve()
-
-    if candidate != PROJECT_ROOT and PROJECT_ROOT not in candidate.parents:
-        raise AppError("Path must be inside the project", status_code=400)
-
-    return candidate
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
@@ -106,7 +88,7 @@ def delete_submission_endpoint(submission_id: int, db: Session = Depends(get_db)
 
     if sub.output_pdf_path:
         try:
-            resolved_out = _resolve_project_file(sub.output_pdf_path)
+            resolved_out = paths._resolve_project_file(sub.output_pdf_path)
             if resolved_out.exists() and resolved_out.is_file():
                 resolved_out.unlink()
         except Exception:

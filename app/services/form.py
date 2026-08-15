@@ -1,13 +1,11 @@
 import re
 from collections import Counter
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 from uuid import UUID
 
 from sqlmodel import Session
 
-from app.core.config import BASE_DIR
-from app.core.errors.base import AppError
+from app.core import paths
 from app.db.repositories import (
     create_form,
     delete_form_submission,
@@ -19,8 +17,6 @@ from app.models import FormSubmission, Template
 from app.services.controller import Controller
 from app.services.input import InputService
 
-PROJECT_ROOT = BASE_DIR
-
 _STOPWORDS = {
     "the", "and", "a", "of", "to", "in", "is", "that", "it", "was", "for", "on",
     "as", "with", "by", "at", "an", "be", "this", "are", "from", "or", "have",
@@ -31,23 +27,6 @@ _STOPWORDS = {
     "left", "right", "pain", "due", "after", "before", "emergency", "department",
     "medical", "clinical"
 }
-
-
-def _resolve_project_file(file_path: str) -> Path:
-    raw_path = (file_path or "").strip()
-    if not raw_path:
-        raise AppError("Path is required", status_code=400)
-
-    candidate = Path(raw_path)
-    if not candidate.is_absolute():
-        candidate = (PROJECT_ROOT / candidate).resolve()
-    else:
-        candidate = candidate.resolve()
-
-    if candidate != PROJECT_ROOT and PROJECT_ROOT not in candidate.parents:
-        raise AppError("Path must be inside the project", status_code=400)
-
-    return candidate
 
 
 class FormService:
@@ -140,7 +119,7 @@ class FormService:
         for sub in submissions:
             if sub.output_pdf_path:
                 try:
-                    resolved_out = _resolve_project_file(sub.output_pdf_path)
+                    resolved_out = paths._resolve_project_file(sub.output_pdf_path)
                     if resolved_out.exists() and resolved_out.is_file():
                         resolved_out.unlink()
                 except Exception:

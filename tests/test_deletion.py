@@ -69,7 +69,7 @@ class TestDeleteTemplate:
 
     def test_delete_template_deletes_pdf_file(self, client, tmp_path, monkeypatch):
         """Verify the template PDF file is removed from disk on delete."""
-        monkeypatch.setattr("app.services.template.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
         pdf_file = tmp_path / "myform.pdf"
         pdf_file.write_bytes(b"%PDF-1.4 fake")
 
@@ -81,7 +81,7 @@ class TestDeleteTemplate:
 
     def test_delete_template_deletes_submission_output_pdfs(self, client, db, tmp_path, monkeypatch):
         """Output PDFs of related submissions should be wiped on template deletion."""
-        monkeypatch.setattr("app.services.template.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
 
         out_pdf = tmp_path / "filled.pdf"
         out_pdf.write_bytes(b"%PDF-1.4 filled")
@@ -117,7 +117,7 @@ class TestDeleteSubmission:
         assert resp.status_code == 404
 
     def test_delete_submission_removes_output_pdf(self, client, db, tmp_path, monkeypatch):
-        monkeypatch.setattr("app.api.routes.forms.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
         out_pdf = tmp_path / "filled_out.pdf"
         out_pdf.write_bytes(b"%PDF-1.4")
 
@@ -167,7 +167,7 @@ class TestPurgeSubmissions:
         assert resp.json()["purged_count"] == 0
 
     def test_purge_removes_output_pdf_file(self, client, db, tmp_path, monkeypatch):
-        monkeypatch.setattr("app.services.form.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
         out_pdf = tmp_path / "old_filled.pdf"
         out_pdf.write_bytes(b"%PDF-1.4")
 

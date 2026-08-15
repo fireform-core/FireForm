@@ -1,23 +1,7 @@
 from pdfrw import PdfReader, PdfWriter
+from app.core.pdf_utils import _pdf_text
 from app.services.llm import LLM
 from datetime import datetime
-
-
-def _pdf_text(value) -> str:
-    """Decode a pdfrw string (field name / tooltip) to plain text.
-
-    Duplicated from app.services.template._pdf_text — importing it directly
-    would create a circular import (template -> controller ->
-    file_manipulator -> filler -> template). Keep these in sync: this must
-    normalize a widget name exactly the way template.py normalizes it when
-    it names the widget, so textbox_answers keys and widget names compare
-    equal.
-    """
-    if value is None:
-        return ""
-    if hasattr(value, "to_unicode"):
-        return value.to_unicode().strip()
-    return str(value).strip()
 
 
 class Filler:

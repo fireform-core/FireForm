@@ -138,7 +138,7 @@ class TestTemplateEndpoints:
         # Point the upload directory inside tmp_path (which is inside the project
         # for the path-safety check — we monkeypatch the check).
         monkeypatch.setattr(
-            "app.services.template.PROJECT_ROOT",
+            "app.core.paths.PROJECT_ROOT",
             tmp_path,
         )
         resp = client.post(
@@ -387,7 +387,7 @@ class TestE2EPipeline:
 
     def test_full_flow(self, client, mock_controller, pdf_upload, tmp_path, monkeypatch, db):
         # -- Step 1: Upload a PDF --
-        monkeypatch.setattr("app.services.template.PROJECT_ROOT", tmp_path)
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
         upload_resp = client.post(
             f"{API_PREFIX}/templates/upload",
             files=[pdf_upload],
