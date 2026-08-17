@@ -1,0 +1,114 @@
+{
+  "1 Incident Name_5": {
+    "type": "string",
+    "description": "ICS 202: extract the official incident name from the incident narrative."
+  },
+  "3 Objectives": {
+    "type": "string",
+    "description": "List the incident objectives for this operational period, preserving their operational meaning and deadlines."
+  },
+  "4 Operational Period Command Emphasis": {
+    "type": "string",
+    "description": "ICS 202: extract the operational period command emphasis from the incident narrative."
+  },
+  "5 Site Safety Plan Required Yes No Approved Site Safety Plans Located at": {
+    "type": "string",
+    "description": "ICS 202: extract the approved site safety plans located at from the incident narrative."
+  },
+  "7 Prepared by Name": {
+    "type": "string",
+    "description": "ICS 202 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "8 Approved by Incident Commander Name": {
+    "type": "string",
+    "description": "ICS 202 approved by incident commander: extract the assigned person name from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 202 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 202 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_5": {
+    "type": "string",
+    "description": "ICS 202 approved by incident commander: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "General Situational Awareness": {
+    "type": "string",
+    "description": "ICS 202: extract the general situational awareness from the incident narrative."
+  },
+  "IAP Page": {
+    "type": "string",
+    "description": "ICS 202: extract the IAP page number from the incident narrative."
+  },
+  "ICS 203": {
+    "type": "checkbox",
+    "description": "Whether ics 203 is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 204": {
+    "type": "checkbox",
+    "description": "Whether ics 204 is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 205": {
+    "type": "checkbox",
+    "description": "Whether ics 205 is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 205A": {
+    "type": "checkbox",
+    "description": "Whether ics 205a is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 206": {
+    "type": "checkbox",
+    "description": "Whether ics 206 is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 207": {
+    "type": "checkbox",
+    "description": "Whether ics 207 is included with the Incident Action Plan. Return yes or no."
+  },
+  "ICS 208": {
+    "type": "checkbox",
+    "description": "Whether ics 208 is included with the Incident Action Plan. Return yes or no."
+  },
+  "Map/Chart": {
+    "type": "checkbox",
+    "description": "Whether map chart is included with the Incident Action Plan. Return yes or no."
+  },
+  "Other Attachments 1": {
+    "type": "string",
+    "description": "ICS 202 incident action plan attachments: extract the other attachments entry 1 from the incident narrative."
+  },
+  "Other Attachments 2": {
+    "type": "string",
+    "description": "ICS 202 incident action plan attachments: extract the other attachments entry 2 from the incident narrative."
+  },
+  "PositionTitle_5": {
+    "type": "string",
+    "description": "ICS 202 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Signature_5": {
+    "type": "signature",
+    "description": "ICS 202 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Signature_6": {
+    "type": "signature",
+    "description": "ICS 202 approved by incident commander: extract the name represented by the signature from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 202 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 202 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  },
+  "Weather Forecast/Tides/Current": {
+    "type": "checkbox",
+    "description": "Whether weather forecast tides currents is included with the Incident Action Plan. Return yes or no."
+  },
+  "Yes": {
+    "type": "checkbox",
+    "description": "Whether the Site Safety Plan Required answer is yes. Return yes or no."
+  }
+}

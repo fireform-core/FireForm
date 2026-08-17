@@ -1,0 +1,126 @@
+{
+  "1 Incident Name_9": {
+    "type": "string",
+    "description": "ICS 205A: extract the official incident name from the incident narrative."
+  },
+  "4 Prepared by Name": {
+    "type": "string",
+    "description": "ICS 205A prepared by: extract the assigned person name from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 205A operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 205A operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_9": {
+    "type": "string",
+    "description": "ICS 205A prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "IAP Page_5": {
+    "type": "string",
+    "description": "ICS 205A: extract the IAP page number from the incident narrative."
+  },
+  "Incident Assigned PositionRow1": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 1: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow2": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 2: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow3": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 3: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow4": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 4: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow5": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 5: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow6": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 6: extract the incident assigned position from the incident narrative."
+  },
+  "Incident Assigned PositionRow7": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 7: extract the incident assigned position from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow1": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 1: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow2": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 2: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow3": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 3: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow4": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 4: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow5": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 5: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow6": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 6: extract the methods of contact from the incident narrative."
+  },
+  "Methods of Contact phone pager cell etcRow7": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 7: extract the methods of contact from the incident narrative."
+  },
+  "Name AlphabetizedRow1": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 1: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow2": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 2: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow3": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 3: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow4": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 4: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow5": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 5: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow6": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 6: extract the assigned person name from the incident narrative."
+  },
+  "Name AlphabetizedRow7": {
+    "type": "string",
+    "description": "ICS 205A basic local communications information entry 7: extract the assigned person name from the incident narrative."
+  },
+  "PositionTitle_8": {
+    "type": "string",
+    "description": "ICS 205A prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Signature_10": {
+    "type": "signature",
+    "description": "ICS 205A prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 205A operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 205A operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  }
+}

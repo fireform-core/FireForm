@@ -1,0 +1,270 @@
+{
+  "1 Incident Name": {
+    "type": "string",
+    "description": "ICS 203: extract the official incident name from the incident narrative."
+  },
+  "3 Incident Commanders and Command StaffRow2": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the ic ucs entry 2 from the incident narrative."
+  },
+  "3 Incident Commanders and Command StaffRow3": {
+    "type": "string",
+    "description": "Name of the third Incident Commander or Unified Command member on ICS 203."
+  },
+  "5 Planning SectionRow8": {
+    "type": "string",
+    "description": "ICS 203 planning section, technical specialists entry 1: extract the assigned person name from the incident narrative."
+  },
+  "5 Planning SectionRow9": {
+    "type": "string",
+    "description": "ICS 203 planning section, technical specialists entry 2: extract the assigned person name from the incident narrative."
+  },
+  "9 Prepared by Name": {
+    "type": "string",
+    "description": "ICS 203 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "AgencyOrganizationRow1": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 1: extract the represented agency or organization from the incident narrative."
+  },
+  "AgencyOrganizationRow2": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 2: extract the represented agency or organization from the incident narrative."
+  },
+  "AgencyOrganizationRow3": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 3: extract the represented agency or organization from the incident narrative."
+  },
+  "Air Ops Branch Dir": {
+    "type": "string",
+    "description": "ICS 203 operations section, air operations branch: extract the air ops branch dir from the incident narrative."
+  },
+  "Branch Director 1": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1: extract the branch name from the incident narrative."
+  },
+  "Branch Director 2": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1: extract the branch director from the incident narrative."
+  },
+  "Branch Director 3": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2: extract the branch name from the incident narrative."
+  },
+  "Branch Director 4": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2: extract the branch director from the incident narrative."
+  },
+  "Branch Director Deputy 2": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1: extract the assigned deputy name from the incident narrative."
+  },
+  "Branch Director Deputy 4": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2: extract the assigned deputy name from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 203 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 203 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_6": {
+    "type": "string",
+    "description": "ICS 203 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "Deputy_2": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the assigned deputy name from the incident narrative."
+  },
+  "Division/Group Identifier 1": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1, divisions groups entry 1: extract the division or group identifier from the incident narrative."
+  },
+  "DivisionGroup  Identifier 2": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1, divisions groups entry 2: extract the division or group identifier from the incident narrative."
+  },
+  "DivisionGroup Identifier 6": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2, divisions groups entry 1: extract the division or group identifier from the incident narrative."
+  },
+  "DivisionGroup Identifier 7": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2, divisions groups entry 2: extract the division or group identifier from the incident narrative."
+  },
+  "DivisionGroup Name 1": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1, divisions groups entry 1: extract the assigned division or group supervisor name from the incident narrative."
+  },
+  "DivisionGroup Name 2": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 1, divisions groups entry 2: extract the assigned division or group supervisor name from the incident narrative."
+  },
+  "DivisionGroup Name 6": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2, divisions groups entry 1: extract the assigned division or group supervisor name from the incident narrative."
+  },
+  "DivisionGroup Name 7": {
+    "type": "string",
+    "description": "ICS 203 operations section, branches entry 2, divisions groups entry 2: extract the assigned division or group supervisor name from the incident narrative."
+  },
+  "Finance/Adminsitration Section Chief": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the assigned section chief name from the incident narrative."
+  },
+  "Finance/Adminsitration Section CompClaims Unit": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the comp claims unit from the incident narrative."
+  },
+  "Finance/Adminsitration Section Cost Unit": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the cost unit from the incident narrative."
+  },
+  "Finance/Adminsitration Section Deputy": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the assigned deputy name from the incident narrative."
+  },
+  "Finance/Adminsitration Section Procurement Unit": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the procurement unit from the incident narrative."
+  },
+  "Finance/Adminsitration Section Time Unit": {
+    "type": "string",
+    "description": "ICS 203 finance administration section: extract the time unit from the incident narrative."
+  },
+  "IAP Page_2": {
+    "type": "string",
+    "description": "ICS 203: extract the IAP page number from the incident narrative."
+  },
+  "ICUCs": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the ic ucs entry 1 from the incident narrative."
+  },
+  "Liaison Officer_2": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the liaison officer from the incident narrative."
+  },
+  "Logistics Section Chief": {
+    "type": "string",
+    "description": "ICS 203 logistics section: extract the assigned section chief name from the incident narrative."
+  },
+  "Logistics Section Deputy": {
+    "type": "string",
+    "description": "ICS 203 logistics section: extract the assigned deputy name from the incident narrative."
+  },
+  "NameRow1": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 1: extract the assigned person name from the incident narrative."
+  },
+  "NameRow2": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 2: extract the assigned person name from the incident narrative."
+  },
+  "NameRow3": {
+    "type": "string",
+    "description": "ICS 203 agency organization representatives entry 3: extract the assigned person name from the incident narrative."
+  },
+  "Operations Section Chief 2": {
+    "type": "string",
+    "description": "ICS 203 operations section: extract the assigned section chief name from the incident narrative."
+  },
+  "Operations Section Deputy 2": {
+    "type": "string",
+    "description": "ICS 203 operations section: extract the assigned deputy name from the incident narrative."
+  },
+  "Operations Section Staging Area 2": {
+    "type": "string",
+    "description": "ICS 203 operations section: extract the staging area from the incident narrative."
+  },
+  "Planning Section Chief": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the assigned section chief name from the incident narrative."
+  },
+  "Planning Section Demobilization Unit": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the demobilization unit from the incident narrative."
+  },
+  "Planning Section Deputy": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the assigned deputy name from the incident narrative."
+  },
+  "Planning Section Documentation Unit": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the documentation unit from the incident narrative."
+  },
+  "Planning Section Resources Unit": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the resources unit from the incident narrative."
+  },
+  "Planning Section Situation Unit": {
+    "type": "string",
+    "description": "ICS 203 planning section: extract the situation unit from the incident narrative."
+  },
+  "PositionTitle_6": {
+    "type": "string",
+    "description": "ICS 203 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Public Info Officer": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the public info officer from the incident narrative."
+  },
+  "Safety Officer_3": {
+    "type": "string",
+    "description": "ICS 203 incident commander and command staff: extract the safety officer from the incident narrative."
+  },
+  "Service Branch Communications Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, service branch: extract the communications unit from the incident narrative."
+  },
+  "Service Branch Director": {
+    "type": "string",
+    "description": "ICS 203 logistics section, service branch: extract the assigned branch director name from the incident narrative."
+  },
+  "Service Branch Food Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, service branch: extract the food unit from the incident narrative."
+  },
+  "Service Branch Medical Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, service branch: extract the medical unit from the incident narrative."
+  },
+  "Signature_7": {
+    "type": "signature",
+    "description": "ICS 203 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Support Branch Director": {
+    "type": "string",
+    "description": "ICS 203 logistics section, support branch: extract the assigned branch director name from the incident narrative."
+  },
+  "Support Branch Facilities Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, support branch: extract the facilities unit from the incident narrative."
+  },
+  "Support Branch Ground Support Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, support branch: extract the ground support unit from the incident narrative."
+  },
+  "Support Branch Supply Unit": {
+    "type": "string",
+    "description": "ICS 203 logistics section, support branch: extract the supply unit from the incident narrative."
+  },
+  "Technical SpecialistsRow1": {
+    "type": "string",
+    "description": "ICS 203 planning section, technical specialists entry 1: extract the technical specialist role or specialty from the incident narrative."
+  },
+  "Technical SpecialistsRow2": {
+    "type": "string",
+    "description": "ICS 203 planning section, technical specialists entry 2: extract the technical specialist role or specialty from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 203 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 203 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  }
+}

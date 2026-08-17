@@ -108,6 +108,7 @@ def mock_controller():
 
         form_instance = MagicMock()
         form_instance.fill_form.return_value = "src/outputs/filled_output.pdf"
+        form_instance.file_manipulator.llm._json = {}
         form_cls.return_value = form_instance
 
         yield {

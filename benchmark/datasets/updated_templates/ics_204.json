@@ -1,0 +1,170 @@
+{
+  "1 Incident Name_7": {
+    "type": "string",
+    "description": "ICS 204: extract the official incident name from the incident narrative."
+  },
+  "3 Branch": {
+    "type": "string",
+    "description": "ICS 204 branch division group staging area: extract the branch from the incident narrative."
+  },
+  "3 Division": {
+    "type": "string",
+    "description": "ICS 204 branch division group staging area: extract the division from the incident narrative."
+  },
+  "3 Group": {
+    "type": "string",
+    "description": "ICS 204 branch division group staging area: extract the group from the incident narrative."
+  },
+  "3 Staging Area": {
+    "type": "string",
+    "description": "ICS 204 branch division group staging area: extract the staging area from the incident narrative."
+  },
+  "6 Work Assignments": {
+    "type": "string",
+    "description": "ICS 204: extract the work assignments from the incident narrative."
+  },
+  "7 Special Instructions": {
+    "type": "string",
+    "description": "ICS 204: extract the special instructions from the incident narrative."
+  },
+  "9 Prepared by Name_2": {
+    "type": "string",
+    "description": "ICS 204 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "Branch Director_4": {
+    "type": "string",
+    "description": "Name of the Branch Director responsible for this ICS 204 assignment."
+  },
+  "Contact eg phone pager radio frequency etc": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 1: extract the contact method, phone number, pager, or radio frequency from the incident narrative."
+  },
+  "Contact eg phone pager radio frequency etc_2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 2: extract the contact method, phone number, pager, or radio frequency from the incident narrative."
+  },
+  "Contact eg phone pager radio frequency etc_3": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 3: extract the contact method, phone number, pager, or radio frequency from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 204 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 204 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_7": {
+    "type": "string",
+    "description": "ICS 204 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DivisionGroup Supervisor": {
+    "type": "string",
+    "description": "Name of the Division or Group Supervisor responsible for this ICS 204 assignment."
+  },
+  "IAP Page_3": {
+    "type": "string",
+    "description": "ICS 204: extract the IAP page number from the incident narrative."
+  },
+  "LeaderRow1": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 1: extract the assigned resource leader name from the incident narrative."
+  },
+  "LeaderRow2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 2: extract the assigned resource leader name from the incident narrative."
+  },
+  "LeaderRow3": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 3: extract the assigned resource leader name from the incident narrative."
+  },
+  "Name/Function1": {
+    "type": "string",
+    "description": "ICS 204 communications entry 1: extract the name function from the incident narrative."
+  },
+  "Name/Function2": {
+    "type": "string",
+    "description": "ICS 204 communications entry 2: extract the name function from the incident narrative."
+  },
+  "Name/Function3": {
+    "type": "string",
+    "description": "ICS 204 communications entry 3: extract the name function from the incident narrative."
+  },
+  "Name/Function4": {
+    "type": "string",
+    "description": "ICS 204 communications entry 4: extract the name function from the incident narrative."
+  },
+  "Number of Persons, Row 1": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 1: extract the number of assigned personnel from the incident narrative."
+  },
+  "Number of Persons, Row 2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 2: extract the number of assigned personnel from the incident narrative."
+  },
+  "Number of Persons, Row 3": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 3: extract the number of assigned personnel from the incident narrative."
+  },
+  "Operations Section Chief_3": {
+    "type": "string",
+    "description": "Name of the Operations Section Chief for this ICS 204 assignment."
+  },
+  "PositionTitle_7": {
+    "type": "string",
+    "description": "ICS 204 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Primary Contact  indicate cell pager or radio frequencysystemchannel 1": {
+    "type": "string",
+    "description": "ICS 204 communications entry 1: extract the primary contact method, phone number, pager, or radio channel from the incident narrative."
+  },
+  "Primary Contact  indicate cell pager or radio frequencysystemchannel 2": {
+    "type": "string",
+    "description": "ICS 204 communications entry 2: extract the primary contact method, phone number, pager, or radio channel from the incident narrative."
+  },
+  "Primary Contact  indicate cell pager or radio frequencysystemchannel 3": {
+    "type": "string",
+    "description": "ICS 204 communications entry 3: extract the primary contact method, phone number, pager, or radio channel from the incident narrative."
+  },
+  "Primary Contact  indicate cell pager or radio frequencysystemchannel 4": {
+    "type": "string",
+    "description": "ICS 204 communications entry 4: extract the primary contact method, phone number, pager, or radio channel from the incident narrative."
+  },
+  "Reporting Location Special Equipment and Supplies Remarks Notes Information": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 1: extract the reporting location special equipment remarks notes information from the incident narrative."
+  },
+  "Reporting Location Special Equipment and Supplies Remarks Notes Information_2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 2: extract the reporting location special equipment remarks notes information from the incident narrative."
+  },
+  "Reporting Location Special Equipment and Supplies Remarks Notes Information_3": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 3: extract the reporting location special equipment remarks notes information from the incident narrative."
+  },
+  "Resource IdentifierRow1_2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 1: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow2_2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 2: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow3_2": {
+    "type": "string",
+    "description": "ICS 204 resources assigned entry 3: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Signature_8": {
+    "type": "signature",
+    "description": "ICS 204 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 204 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 204 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  }
+}

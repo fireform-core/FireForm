@@ -13,8 +13,8 @@ class Runner:
     def run_benchmark(self) -> dict[str, any]:
         datasets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datasets")
         narratives_dir = os.path.join(datasets_dir, "narratives")
-        ground_truth_dir = os.path.join(datasets_dir, "ground_truth")
-        templates_dir = os.path.join(datasets_dir, "templates")
+        ground_truth_dir = os.path.join(datasets_dir, "updated_ground_truth")
+        templates_dir = os.path.join(datasets_dir, "updated_templates")
         pdfs_dir = os.path.join(datasets_dir, "pdfs")
 
         results = []
@@ -22,46 +22,41 @@ class Runner:
 
         # Scan narratives directory to find matching ground_truth and template files
         narrative_files = [f for f in os.listdir(narratives_dir) if f.endswith(".txt")]
+        case_filter = os.getenv("BENCHMARK_CASE")
+        if case_filter:
+            narrative_files = [
+                filename
+                for filename in narrative_files
+                if os.path.splitext(filename)[0] == case_filter
+            ]
+            if not narrative_files:
+                raise ValueError(f"Unknown BENCHMARK_CASE: {case_filter}")
 
         total = len(narrative_files)
         for idx, narrative_file in enumerate(sorted(narrative_files), start=1):
             case_name = os.path.splitext(narrative_file)[0]
-            # Match ics201_1.txt -> ics201_1.json or ics201.json
-            # Find matching ground truth file
-            possible_gts = [case_name + ".json", case_name.split("_")[0] + "_1.json"]
-            gt_file = None
-            for p in possible_gts:
-                if os.path.exists(os.path.join(ground_truth_dir, p)):
-                    gt_file = p
-                    break
-
-            # Find matching template file
-            # e.g., ics201_1 -> ics_201.json
+            gt_file = case_name + ".json"
             base_form_name = case_name.split("_")[0]
-            # convert ics201 to ics_201 if needed
             if "ics" in base_form_name and "_" not in base_form_name:
                 base_form_name = "ics_" + base_form_name[3:]
-            template_file = f"{base_form_name}.json"
 
             narrative_path = os.path.join(narratives_dir, narrative_file)
-            gt_path = os.path.join(ground_truth_dir, gt_file) if gt_file else ""
-            template_path = os.path.join(templates_dir, template_file)
-            pdf_path = os.path.join(pdfs_dir, template_file.replace(".json", ".pdf"))
+            gt_path = os.path.join(ground_truth_dir, gt_file)
+            template_path = os.path.join(templates_dir, f"{base_form_name}.json")
+            pdf_path = os.path.join(pdfs_dir, f"{base_form_name}.pdf")
 
-            if not os.path.exists(gt_path) or not os.path.exists(template_path) or not os.path.exists(pdf_path):
+            if not all(os.path.exists(path) for path in (gt_path, template_path, pdf_path)):
                 continue
 
             with open(narrative_path, "r") as f:
                 narrative_text = f.read()
 
             with open(gt_path, "r") as f:
-                gt_data = json.load(f)
-                # Unwrap the outer wrapper key if present
-                gt_key = list(gt_data.keys())[0]
-                gt_content = gt_data[gt_key]
+                gt_content = json.load(f)
 
             with open(template_path, "r") as f:
-                template_schema = json.load(f)
+                template_fields = json.load(f)
+            template_schema = {name: template_fields[name] for name in gt_content}
 
             print(f"  [{idx}/{total}] Running {case_name} ...", flush=True)
             start_time = time.time()

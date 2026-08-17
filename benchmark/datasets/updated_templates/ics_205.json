@@ -1,0 +1,222 @@
+{
+  "1 Incident Name_8": {
+    "type": "string",
+    "description": "ICS 205: extract the official incident name from the incident narrative."
+  },
+  "2 Date/Time Prepared": {
+    "type": "string",
+    "description": "ICS 205 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "5 Special Instructions": {
+    "type": "string",
+    "description": "ICS 205: extract the special instructions from the incident narrative."
+  },
+  "6 Prepared by Communications Unit Leader Name": {
+    "type": "string",
+    "description": "ICS 205 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "AssignmentRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the assignment from the incident narrative."
+  },
+  "AssignmentRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the assignment from the incident narrative."
+  },
+  "AssignmentRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the assignment from the incident narrative."
+  },
+  "AssignmentRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the assignment from the incident narrative."
+  },
+  "Ch Row1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the channel number from the incident narrative."
+  },
+  "Ch Row2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the channel number from the incident narrative."
+  },
+  "Ch Row3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the channel number from the incident narrative."
+  },
+  "Ch Row4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the channel number from the incident narrative."
+  },
+  "Channel NameTrunked Radio System TalkgroupRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the channel name trunked radio system talkgroup from the incident narrative."
+  },
+  "Channel NameTrunked Radio System TalkgroupRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the channel name trunked radio system talkgroup from the incident narrative."
+  },
+  "Channel NameTrunked Radio System TalkgroupRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the channel name trunked radio system talkgroup from the incident narrative."
+  },
+  "Channel NameTrunked Radio System TalkgroupRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the channel name trunked radio system talkgroup from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 205 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 205 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_8": {
+    "type": "string",
+    "description": "ICS 205 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "FunctionRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the function from the incident narrative."
+  },
+  "FunctionRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the function from the incident narrative."
+  },
+  "FunctionRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the function from the incident narrative."
+  },
+  "FunctionRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the function from the incident narrative."
+  },
+  "IAP Page_4": {
+    "type": "string",
+    "description": "ICS 205: extract the IAP page number from the incident narrative."
+  },
+  "Mode A D or MRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the mode a d or m from the incident narrative."
+  },
+  "Mode A D or MRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the mode a d or m from the incident narrative."
+  },
+  "Mode A D or MRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the mode a d or m from the incident narrative."
+  },
+  "Mode A D or MRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the mode a d or m from the incident narrative."
+  },
+  "RX Freq N or WRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the rx frequency n or w from the incident narrative."
+  },
+  "RX Freq N or WRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the rx frequency n or w from the incident narrative."
+  },
+  "RX Freq N or WRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the rx frequency n or w from the incident narrative."
+  },
+  "RX Freq N or WRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the rx frequency n or w from the incident narrative."
+  },
+  "RX ToneNACRow1": {
+    "type": "string",
+    "description": "ICS 205 radio-channel row 1: extract the receive (RX) tone or NAC from the incident narrative."
+  },
+  "RX ToneNACRow2": {
+    "type": "string",
+    "description": "ICS 205 radio-channel row 2: extract the receive (RX) tone or NAC from the incident narrative."
+  },
+  "RX ToneNACRow3": {
+    "type": "string",
+    "description": "ICS 205 radio-channel row 3: extract the receive (RX) tone or NAC from the incident narrative."
+  },
+  "RX ToneNACRow4": {
+    "type": "string",
+    "description": "ICS 205 radio-channel row 4: extract the receive (RX) tone or NAC from the incident narrative."
+  },
+  "RemarksRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the remarks from the incident narrative."
+  },
+  "RemarksRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the remarks from the incident narrative."
+  },
+  "RemarksRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the remarks from the incident narrative."
+  },
+  "RemarksRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the remarks from the incident narrative."
+  },
+  "Signature_9": {
+    "type": "signature",
+    "description": "ICS 205 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "TX Freq N or WRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the tx frequency n or w from the incident narrative."
+  },
+  "TX Freq N or WRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the tx frequency n or w from the incident narrative."
+  },
+  "TX Freq N or WRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the tx frequency n or w from the incident narrative."
+  },
+  "TX Freq N or WRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the tx frequency n or w from the incident narrative."
+  },
+  "TX ToneNACRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the tx tone nac from the incident narrative."
+  },
+  "TX ToneNACRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the tx tone nac from the incident narrative."
+  },
+  "TX ToneNACRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the tx tone nac from the incident narrative."
+  },
+  "TX ToneNACRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the tx tone nac from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 205 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 205 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  },
+  "Zone GrpRow1": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 1: extract the zone grp from the incident narrative."
+  },
+  "Zone GrpRow2": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 2: extract the zone grp from the incident narrative."
+  },
+  "Zone GrpRow3": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 3: extract the zone grp from the incident narrative."
+  },
+  "Zone GrpRow4": {
+    "type": "string",
+    "description": "ICS 205 basic radio channel use entry 4: extract the zone grp from the incident narrative."
+  }
+}

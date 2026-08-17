@@ -1,0 +1,142 @@
+{
+  "1 Incident Name_11": {
+    "type": "string",
+    "description": "ICS 207: extract the official incident name from the incident narrative."
+  },
+  "4 Prepared by Name_2": {
+    "type": "string",
+    "description": "ICS 207 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "Comms Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, service branch: extract the comms unit ldr from the incident narrative."
+  },
+  "CompClaims Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, finance administration section: extract the comp claims unit ldr from the incident narrative."
+  },
+  "Cost Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, finance administration section: extract the cost unit ldr from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 207 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 207 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_11": {
+    "type": "string",
+    "description": "ICS 207 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "Demobilization Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, planning section: extract the demobilization unit ldr from the incident narrative."
+  },
+  "Documentation Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, planning section: extract the documentation unit ldr from the incident narrative."
+  },
+  "Facilities Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, support branch: extract the facilities unit ldr from the incident narrative."
+  },
+  "FinanceAdmin Section Chief": {
+    "type": "string",
+    "description": "ICS 207 organization chart, finance administration section: extract the assigned section chief name from the incident narrative."
+  },
+  "Food Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, service branch: extract the food unit ldr from the incident narrative."
+  },
+  "Ground Spt Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, support branch: extract the ground spt unit ldr from the incident narrative."
+  },
+  "IAP Page_6": {
+    "type": "string",
+    "description": "ICS 207: extract the IAP page number from the incident narrative."
+  },
+  "Incident Commanders_2": {
+    "type": "string",
+    "description": "Names of all Incident Commanders or Unified Command members shown at the top of the ICS 207 organization chart."
+  },
+  "Liaison Officer_3": {
+    "type": "string",
+    "description": "ICS 207 organization chart, command staff: extract the liaison officer from the incident narrative."
+  },
+  "Logistics Section Chief_2": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section: extract the assigned section chief name from the incident narrative."
+  },
+  "Medical Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, service branch: extract the medical unit ldr from the incident narrative."
+  },
+  "Operations Section ChiefRow1": {
+    "type": "string",
+    "description": "ICS 207 organization chart, operations section: extract the assigned section chief name from the incident narrative."
+  },
+  "Planning Section Chief_3": {
+    "type": "string",
+    "description": "ICS 207 organization chart, planning section: extract the assigned section chief name from the incident narrative."
+  },
+  "PositionTitle_9": {
+    "type": "string",
+    "description": "ICS 207 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Procurement Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, finance administration section: extract the procurement unit ldr from the incident narrative."
+  },
+  "Public Information Officer_2": {
+    "type": "string",
+    "description": "ICS 207 organization chart, command staff: extract the public information officer from the incident narrative."
+  },
+  "Resources Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, planning section: extract the resources unit ldr from the incident narrative."
+  },
+  "Safety Officer_4": {
+    "type": "string",
+    "description": "ICS 207 organization chart, command staff: extract the safety officer from the incident narrative."
+  },
+  "Service Branch Dir": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, service branch: extract the assigned branch director name from the incident narrative."
+  },
+  "Signature_13": {
+    "type": "signature",
+    "description": "ICS 207 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Situation Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, planning section: extract the situation unit ldr from the incident narrative."
+  },
+  "Staging Area Manager": {
+    "type": "string",
+    "description": "ICS 207 organization chart, operations section: extract the staging area manager from the incident narrative."
+  },
+  "Supply Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, support branch: extract the supply unit ldr from the incident narrative."
+  },
+  "Support Branch Dir": {
+    "type": "string",
+    "description": "ICS 207 organization chart, logistics section, support branch: extract the assigned branch director name from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 207 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 207 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  },
+  "Time Unit Ldr": {
+    "type": "string",
+    "description": "ICS 207 organization chart, finance administration section: extract the time unit ldr from the incident narrative."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "1 Incident Name_12": {
+    "type": "string",
+    "description": "ICS 208: extract the official incident name from the incident narrative."
+  },
+  "3 Safety MessageExpanded Safety Message Safety Plan Site Safety Plan": {
+    "type": "string",
+    "description": "ICS 208: extract the safety message expanded safety message safety plan site safety plan from the incident narrative."
+  },
+  "4 Site Safety Plan Required Yes No Approved Site Safety Plans Located At": {
+    "type": "string",
+    "description": "ICS 208: extract the approved site safety plan located at from the incident narrative."
+  },
+  "5 Prepared by Name": {
+    "type": "string",
+    "description": "ICS 208 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 208 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 208 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_12": {
+    "type": "string",
+    "description": "ICS 208 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "IAP Page_7": {
+    "type": "string",
+    "description": "ICS 208: extract the IAP page number from the incident narrative."
+  },
+  "PositionTitle_10": {
+    "type": "string",
+    "description": "ICS 208 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Signature_14": {
+    "type": "signature",
+    "description": "ICS 208 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Site Safety Plan Required? Yes": {
+    "type": "checkbox",
+    "description": "Whether the Site Safety Plan Required answer is yes. Return yes or no."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 208 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 208 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  }
+}

@@ -18,7 +18,12 @@ class LLM:
         # Optional per-request model override; falls back to OLLAMA_MODEL env.
         self._model = model
 
-    def build_prompt(self, current_field: str, current_type: str = "string"):
+    def build_prompt(
+        self,
+        current_field: str,
+        current_type: str = "string",
+        description: str = "",
+    ):
         """
         This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
         @params: current_field -> represents the current element of the json that is being prompted.
@@ -28,15 +33,26 @@ class LLM:
         with open(prompt_path, "r") as f:
             template = f.read()
 
-        return template.format(field=current_field, type=current_type, text=self._transcript_text)
+        return template.format(
+            field=current_field,
+            type=current_type,
+            description=description or current_field,
+            text=self._transcript_text,
+        )
 
     def main_loop(self):
         timeout = 45
         max_retries = 3
 
         total_fields = len(self._target_fields)
-        for i, (field, field_type) in enumerate(self._target_fields.items(), 1):
-            prompt = self.build_prompt(field, field_type if isinstance(field_type, str) else "string")
+        for i, (field, field_definition) in enumerate(self._target_fields.items(), 1):
+            if isinstance(field_definition, dict):
+                field_type = field_definition.get("field_type", field_definition.get("type", "string"))
+                description = field_definition.get("description", field)
+            else:
+                field_type = field_definition if isinstance(field_definition, str) else "string"
+                description = field
+            prompt = self.build_prompt(field, field_type, description)
             ollama_url = f"{OLLAMA_HOST}/api/generate"
             ollama_model = self._model or OLLAMA_MODEL
 

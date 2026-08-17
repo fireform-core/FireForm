@@ -1,0 +1,62 @@
+{
+  "1 Incident Name Optional": {
+    "type": "string",
+    "description": "ICS 213: extract the official incident name from the incident narrative."
+  },
+  "10 Replied by Name": {
+    "type": "string",
+    "description": "ICS 213 replied by: extract the assigned person name from the incident narrative."
+  },
+  "2 To Name and Position": {
+    "type": "string",
+    "description": "Name and organizational position of the person receiving the ICS 213 message."
+  },
+  "3 From Name and Position": {
+    "type": "string",
+    "description": "Name and organizational position of the person sending the ICS 213 message."
+  },
+  "4 Subject": {
+    "type": "string",
+    "description": "ICS 213: extract the message subject from the incident narrative."
+  },
+  "5 Date": {
+    "type": "string",
+    "description": "ICS 213: extract the calendar date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "6 Time": {
+    "type": "string",
+    "description": "ICS 213: extract the time from the incident narrative. Return HH:MM."
+  },
+  "7 Message": {
+    "type": "string",
+    "description": "ICS 213: extract the complete message text from the incident narrative."
+  },
+  "8 Approved by Name": {
+    "type": "string",
+    "description": "ICS 213 approved by: extract the assigned person name from the incident narrative."
+  },
+  "9 Reply": {
+    "type": "string",
+    "description": "ICS 213: extract the complete reply text from the incident narrative."
+  },
+  "DateTime_14": {
+    "type": "string",
+    "description": "ICS 213 replied by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "PositionTitle_13": {
+    "type": "string",
+    "description": "ICS 213 approved by: extract the assigned person position or title from the incident narrative."
+  },
+  "PositionTitle_14": {
+    "type": "string",
+    "description": "ICS 213 replied by: extract the assigned person position or title from the incident narrative."
+  },
+  "Signature_19": {
+    "type": "signature",
+    "description": "ICS 213 approved by: extract the name represented by the signature from the incident narrative."
+  },
+  "Signature_20": {
+    "type": "signature",
+    "description": "ICS 213 replied by: extract the name represented by the signature from the incident narrative."
+  }
+}

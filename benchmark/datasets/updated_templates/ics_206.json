@@ -1,0 +1,182 @@
+{
+  "1 Incident Name_10": {
+    "type": "string",
+    "description": "ICS 206: extract the official incident name from the incident narrative."
+  },
+  "7 Prepared by Medical Unit Leader Name": {
+    "type": "string",
+    "description": "ICS 206 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "8 Approved by Safety Officer Name": {
+    "type": "string",
+    "description": "ICS 206 approved by safety officer: extract the assigned person name from the incident narrative."
+  },
+  "Address Latitude  Longitude if HelipadRow1": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 1: extract the address and, when stated, helipad latitude and longitude from the incident narrative."
+  },
+  "Address Latitude  Longitude if HelipadRow2": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 2: extract the address and, when stated, helipad latitude and longitude from the incident narrative."
+  },
+  "Ambulance ServiceRow1": {
+    "type": "string",
+    "description": "Name of the ground ambulance service listed in ICS 206 transportation-services row 1."
+  },
+  "Ambulance ServiceRow2": {
+    "type": "string",
+    "description": "Name of the ground ambulance service listed in ICS 206 transportation-services row 2."
+  },
+  "Ambulance ServiceRow3": {
+    "type": "string",
+    "description": "Name of the air ambulance service listed in ICS 206 transportation-services row 3."
+  },
+  "Check Box Burn Center No 1": {
+    "type": "checkbox",
+    "description": "Whether the Burn Center answer for hospital row 1 is no. Return yes or no."
+  },
+  "Check Box Burn Center Yes 2": {
+    "type": "checkbox",
+    "description": "Whether the Burn Center answer for hospital row 2 is yes. Return yes or no."
+  },
+  "Check Box Helipad Yes 1": {
+    "type": "checkbox",
+    "description": "Whether the Helipad answer for hospital row 1 is yes. Return yes or no."
+  },
+  "Check Box Helipad Yes 2": {
+    "type": "checkbox",
+    "description": "Whether the Helipad answer for hospital row 2 is yes. Return yes or no."
+  },
+  "Check Box Trauma Center 1": {
+    "type": "checkbox",
+    "description": "Whether hospital row 1 is identified as a trauma center. Return yes or no."
+  },
+  "Check Box Trauma Center 2": {
+    "type": "checkbox",
+    "description": "Whether hospital row 2 is identified as a trauma center. Return yes or no."
+  },
+  "Check Box1 Level of Service - ALS": {
+    "type": "checkbox",
+    "description": "Whether medical-aid-station row 1 provides ALS level of service. Return yes or no."
+  },
+  "Check Box2 Level of Service - ALS": {
+    "type": "checkbox",
+    "description": "Whether medical-aid-station row 2 provides ALS level of service. Return yes or no."
+  },
+  "Check Box2 Level of Service - BLS": {
+    "type": "checkbox",
+    "description": "Whether medical-aid-station row 2 provides BLS level of service. Return yes or no."
+  },
+  "Check Box3 Level of Service - ALS": {
+    "type": "checkbox",
+    "description": "Whether medical-aid-station row 3 provides ALS level of service. Return yes or no."
+  },
+  "Contact Numbers FrequencyRow1": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 1: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact Numbers FrequencyRow2": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 2: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact NumbersFrequencyRow1": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 1: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact NumbersFrequencyRow1_2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, ambulance services entry 1: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact NumbersFrequencyRow2": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 2: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact NumbersFrequencyRow2_2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, ambulance services entry 2: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Contact NumbersFrequencyRow3_2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, air ambulance services entry 1: extract the contact telephone number or radio frequency from the incident narrative."
+  },
+  "Date From": {
+    "type": "string",
+    "description": "ICS 206 operational period: extract the operational-period start date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "Date To": {
+    "type": "string",
+    "description": "ICS 206 operational period: extract the operational-period end date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime_10": {
+    "type": "string",
+    "description": "ICS 206 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "Hospital NameRow1": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 1: extract the hospital name from the incident narrative."
+  },
+  "Hospital NameRow2": {
+    "type": "string",
+    "description": "ICS 206 hospitals entry 2: extract the hospital name from the incident narrative."
+  },
+  "IAP Page_6": {
+    "type": "string",
+    "description": "ICS 206: extract the IAP page number from the incident narrative."
+  },
+  "LocationRow1": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 1: extract the assigned location from the incident narrative."
+  },
+  "LocationRow1-2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, ambulance services entry 1: extract the assigned location from the incident narrative."
+  },
+  "LocationRow2": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 2: extract the assigned location from the incident narrative."
+  },
+  "LocationRow2-2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, ambulance services entry 2: extract the assigned location from the incident narrative."
+  },
+  "LocationRow3-2": {
+    "type": "string",
+    "description": "ICS 206 transportation services, air ambulance services entry 1: extract the assigned location from the incident narrative."
+  },
+  "NameRow1": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 1: extract the assigned person name from the incident narrative."
+  },
+  "NameRow2": {
+    "type": "string",
+    "description": "ICS 206 medical aid stations entry 2: extract the assigned person name from the incident narrative."
+  },
+  "Paramedics on Site - Yes, Row 1": {
+    "type": "checkbox",
+    "description": "Whether the Paramedics on Site answer for medical-aid-station row 1 is yes. Return yes or no."
+  },
+  "Paramedics on Site - Yes, Row 2": {
+    "type": "checkbox",
+    "description": "Whether the Paramedics on Site answer for medical-aid-station row 2 is yes. Return yes or no."
+  },
+  "Signature_11": {
+    "type": "signature",
+    "description": "ICS 206 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Signature_12": {
+    "type": "signature",
+    "description": "ICS 206 approved by safety officer: extract the name represented by the signature from the incident narrative."
+  },
+  "Special Medical Emergency Procedures": {
+    "type": "string",
+    "description": "ICS 206: extract the special medical emergency procedures from the incident narrative."
+  },
+  "Time From": {
+    "type": "string",
+    "description": "ICS 206 operational period: extract the operational-period start time from the incident narrative. Return HH:MM."
+  },
+  "Time To": {
+    "type": "string",
+    "description": "ICS 206 operational period: extract the operational-period end time from the incident narrative. Return HH:MM."
+  }
+}

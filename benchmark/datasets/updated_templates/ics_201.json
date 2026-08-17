@@ -1,0 +1,358 @@
+{
+  "4 MapSketch include sketch showing the total area of operations the incident sitearea impacted and threatened areas overflight results trajectories impacted shorelines or other graphics depicting situational status and resource assignment": {
+    "type": "string",
+    "description": "Complete ICS 201 map and sketch narrative: describe the area of operations, incident site, impacted and threatened areas, overflight results, trajectories, shorelines, and relevant map features."
+  },
+  "5 Situation Summary and Health and Safety Briefing for briefings or transfer of command Recognize potential incident Health and Safety Hazards and develop necessary measures remove hazard provide personal protective equipment warn people of the hazard to protect responders from those hazards": {
+    "type": "string",
+    "description": "Complete ICS 201 situation and safety briefing: summarize the incident, identify responder health and safety hazards, and state the required protective or hazard-control measures."
+  },
+  "6 Prepared by Name": {
+    "type": "string",
+    "description": "ICS 201 prepared by: extract the assigned person name from the incident narrative."
+  },
+  "7 Current and Planned Objectives": {
+    "type": "string",
+    "description": "List all current and planned incident objectives for ICS 201, including stated deadlines or completion targets."
+  },
+  "9 Current Organization fill in additional organization as appropriate Incident Commanders Operations Section Chief Planning Section Chief Logistics Section Chief FinanceAdministration Section Chief Safety Officer Public Information Officer Liaison Officer": {
+    "type": "string",
+    "description": "List additional ICS 201 organization positions and assigned people not already captured in the named command and general staff fields."
+  },
+  "ActionsRow1": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 1: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow2": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 2: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow3": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 3: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow4": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 4: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow5": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 5: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow6": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 6: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow7": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 7: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow8": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 8: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "ActionsRow9": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 9: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+  },
+  "Check Box1": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 1 has arrived on scene. Return yes or no."
+  },
+  "Check Box2": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 2 has arrived on scene. Return yes or no."
+  },
+  "Check Box3": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 3 has arrived on scene. Return yes or no."
+  },
+  "Check Box4": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 4 has arrived on scene. Return yes or no."
+  },
+  "Check Box5": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 5 has arrived on scene. Return yes or no."
+  },
+  "Check Box8": {
+    "type": "checkbox",
+    "description": "Whether the resource in ICS 201 resource-summary row 8 has arrived on scene. Return yes or no."
+  },
+  "Date": {
+    "type": "string",
+    "description": "ICS 201 date time initiated: extract the calendar date from the incident narrative. Return MM/DD/YYYY."
+  },
+  "DateTime": {
+    "type": "string",
+    "description": "ICS 201 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow1": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 1: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow2": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 2: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow3": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 3: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow4": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 4: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow5": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 5: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow6": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 6: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow7": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 7: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow8": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 8: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "DateTime OrderedRow9": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 9: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+  },
+  "ETARow1": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 1: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow2": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 2: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow3": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 3: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow4": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 4: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow5": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 5: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow6": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 6: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow7": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 7: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow8": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 8: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "ETARow9": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 9: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+  },
+  "FinanceAdministration Section Chief": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the finance administration section chief from the incident narrative."
+  },
+  "Incident Commanders": {
+    "type": "string",
+    "description": "Names and represented agencies of every Incident Commander or Unified Command member."
+  },
+  "Incident Name": {
+    "type": "string",
+    "description": "ICS 201: extract the official incident name from the incident narrative."
+  },
+  "Incident Number": {
+    "type": "string",
+    "description": "ICS 201: extract the official incident identifier or incident number from the incident narrative."
+  },
+  "Liaison Officer": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the liaison officer from the incident narrative."
+  },
+  "Logistics Section Chief": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the logistics section chief from the incident narrative."
+  },
+  "Notes locationassignmentstatus": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 1: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatusRow8": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 8: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatusRow9": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 9: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_2": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 2: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_3": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 3: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_4": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 4: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_5": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 5: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_6": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 6: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Notes locationassignmentstatus_7": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 7: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+  },
+  "Operations Section Chief_2": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the operations section chief from the incident narrative."
+  },
+  "Planning Section Chief_2": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the planning section chief from the incident narrative."
+  },
+  "PositionTitle": {
+    "type": "string",
+    "description": "ICS 201 prepared by: extract the assigned person position or title from the incident narrative."
+  },
+  "Public Information Officer": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the public information officer from the incident narrative."
+  },
+  "Resource IdentifierRow1": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 1: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow2": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 2: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow3": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 3: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow4": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 4: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow5": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 5: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow6": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 6: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow7": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 7: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow8": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 8: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "Resource IdentifierRow9": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 9: extract the resource identifier, unit name, or call sign from the incident narrative."
+  },
+  "ResourceRow1": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 1: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow2": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 2: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow3": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 3: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow4": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 4: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow5": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 5: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow6": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 6: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow7": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 7: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow8": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 8: extract the resource type or category from the incident narrative."
+  },
+  "ResourceRow9": {
+    "type": "string",
+    "description": "ICS 201 resource summary entry 9: extract the resource type or category from the incident narrative."
+  },
+  "Safety Officer": {
+    "type": "string",
+    "description": "ICS 201 current organization: extract the safety officer from the incident narrative."
+  },
+  "Signature": {
+    "type": "signature",
+    "description": "ICS 201 prepared by: extract the name represented by the signature from the incident narrative."
+  },
+  "Time": {
+    "type": "string",
+    "description": "ICS 201 date time initiated: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow1": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 1: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow2": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 2: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow3": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 3: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow4": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 4: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow5": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 5: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow6": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 6: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow7": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 7: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow8": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 8: extract the time from the incident narrative. Return HH:MM."
+  },
+  "TimeRow9": {
+    "type": "string",
+    "description": "ICS 201 current and planned actions strategies tactics entry 9: extract the time from the incident narrative. Return HH:MM."
+  }
+}
