@@ -100,6 +100,11 @@ services:
       - fireform_uploads:/data/uploads
     ports:
       - "${APP_PORT:-8000}:8000"
+    # Everything in the env file reaches the container, so a new setting works
+    # without being listed twice. The block below still wins where a container
+    # needs a different value than the host (service names, data dirs).
+    env_file:
+      - ../.env.dev
     environment:
       - PYTHONUNBUFFERED=1
       - CUDA_VISIBLE_DEVICES=
@@ -136,6 +141,8 @@ services:
     volumes:
       - ../..:/app
       - fireform_uploads:/data/uploads
+    env_file:
+      - ../.env.dev
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
