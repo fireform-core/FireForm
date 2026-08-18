@@ -163,11 +163,25 @@ class TestCreateExtraction:
     def test_409_extraction_already_exists(self, client, db):
         inp = _ready_input(db)
         existing = create_extraction(db, Extraction(input_id=inp.input_id))
-        resp, _ = self._post(client, inp.input_id)
+        # Pinned rather than left to the environment, so a developer running
+        # with the rerun flag on still tests the shipped behaviour.
+        with patch("app.api.routes.extraction.EXTRACTION_ALLOW_RERUN", False):
+            resp, _ = self._post(client, inp.input_id)
         assert resp.status_code == 409
         body = resp.json()
         assert body["error_code"] == "EXTRACTION_EXISTS"
         assert body["detail"]["existing_extract_id"] == str(existing.extract_id)
+
+    def test_202_rerun_allowed_when_flag_is_on(self, client, db):
+        # Development escape hatch: the same narrative can be extracted again
+        # instead of having to be re-uploaded. The earlier extraction stays.
+        inp = _ready_input(db)
+        existing = create_extraction(db, Extraction(input_id=inp.input_id))
+        with patch("app.api.routes.extraction.EXTRACTION_ALLOW_RERUN", True):
+            resp, _ = self._post(client, inp.input_id)
+        assert resp.status_code == 202
+        assert resp.json()["extract_id"] != str(existing.extract_id)
+        assert get_extraction(db, existing.extract_id) is not None
 
     def test_503_ollama_unavailable(self, client, db):
         inp = _ready_input(db)
