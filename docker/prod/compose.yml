@@ -56,6 +56,11 @@ services:
       - fireform_uploads:/data/uploads
     ports:
       - "${APP_PORT}:8000"
+    # Everything in the env file reaches the container, so a new setting works
+    # without being listed twice. The block below still wins where a container
+    # needs a different value than the host.
+    env_file:
+      - ../.env.prod
     environment:
       - PYTHONUNBUFFERED=1
       - CUDA_VISIBLE_DEVICES=
