@@ -188,3 +188,16 @@ AUDIO_CONTENT_TYPES: dict[str, str] = {
     "webm": "audio/webm",
 }
 ALLOWED_AUDIO_EXTENSIONS: frozenset[str] = frozenset(AUDIO_CONTENT_TYPES)
+
+# --- Generated form storage -------------------------------------------------
+# Filled form PDFs land here: {FORMS_OUTPUT_DIR}/{form_id}.pdf. Form.pdf_path
+# stores this DATA_DIR-relative, same convention as FormTemplate.pdf_template_ref.
+FORMS_OUTPUT_DIR = DATA_DIR / "forms" / "generated"
+
+# Advisory estimate returned in the 202 body of POST /forms/generate. Filling
+# is pure lookup-and-draw (no LLM), so this is far below the extraction estimate.
+ESTIMATED_FORM_GENERATION_SECONDS = int(os.getenv("ESTIMATED_FORM_GENERATION_SECONDS", "10"))
+
+# Polling hint returned by GET /forms/{id}/pdf while generation is still in
+# progress. Matches the contract example (contracts/path/forms.yaml).
+FORM_GENERATION_POLL_INTERVAL_SECONDS = 5

@@ -43,6 +43,7 @@ celery_app.conf.include = [
     "app.tasks.transcribe",
     "app.tasks.extract",
     "app.tasks.detect_fields",
+    "app.tasks.generate_forms",
 ]
 
 # Optional Celery Beat schedule — runs purge_old_submissions once a day.

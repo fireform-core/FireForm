@@ -11,6 +11,8 @@ httpx
 numpy<2
 openai
 pypdf
+reportlab
+Pillow
 python-multipart
 celery[redis]
 redis
