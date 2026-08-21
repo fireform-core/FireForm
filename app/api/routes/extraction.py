@@ -17,6 +17,7 @@ from app.api.schemas.extraction import (
 from app.api.schemas.incident_contract import IncidentContract
 from app.core.config import (
     ESTIMATED_EXTRACTION_SECONDS,
+    EXTRACTION_ALLOW_RERUN,
     EXTRACTION_POLL_INTERVAL_SECONDS,
 )
 from app.core.errors.base import AppError
@@ -91,7 +92,7 @@ def create_extraction(
         )
 
     existing = get_extraction_by_input(db, input_id)
-    if existing is not None:
+    if existing is not None and not EXTRACTION_ALLOW_RERUN:
         raise AppError(
             "An extraction already exists for this input",
             status_code=409,

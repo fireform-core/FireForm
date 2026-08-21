@@ -123,6 +123,12 @@ EXTRACTION_MAX_PARALLEL = int(
 # manual entry rather than guessed at.
 EXTRACTION_CHUNK_RETRIES = int(os.getenv("EXTRACTION_CHUNK_RETRIES", "1"))
 
+# One input gets one extraction, which makes re-testing the same narrative mean
+# re-uploading it. Switching this on lets a repeat run through; every run still
+# gets its own extraction and its own draft incident, so the old ones stay put.
+# Development only, leave it off anywhere real.
+EXTRACTION_ALLOW_RERUN = os.getenv("EXTRACTION_ALLOW_RERUN", "false").strip().lower() == "true"
+
 # The contract file the chunk registry reads its tiers and triggers from.
 INCIDENT_CONTRACT_PATH = Path(
     os.getenv("INCIDENT_CONTRACT_PATH", BASE_DIR / "contracts" / "schemas" / "incident-contract.yaml")
