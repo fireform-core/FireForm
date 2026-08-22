@@ -5,6 +5,7 @@ from app.api.routes import (
     form_generation,
     forms,
     form_templates,
+    incidents,
     input,
     jobs,
     system,
@@ -29,3 +30,4 @@ api_router.include_router(weather.router, prefix=API_PREFIX)
 api_router.include_router(zipcode.router, prefix=API_PREFIX)
 api_router.include_router(input.router, prefix=API_PREFIX)
 api_router.include_router(extraction.router, prefix=API_PREFIX)
+api_router.include_router(incidents.router, prefix=API_PREFIX)
