@@ -112,8 +112,6 @@ def _write_incident(session: Session, extraction, contract: dict[str, Any]):
     promoted = promote(contract)
     for column in PROMOTED_COLUMNS:
         setattr(incident, column, promoted[column])
-    incident_section = contract.get("incident") or {}
-    incident.incident_name = incident_section.get("name")
     incident.updated_at = _now()
     return update_incident(session, incident)
 

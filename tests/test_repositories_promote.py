@@ -117,9 +117,10 @@ class TestPromoteEmptyContract:
 
 FULL_CONTRACT = {
     "incident": {
+        "name": "Bear Creek Wildfire",
         "types": [
-            {"primary": False, "category": "ems"},
-            {"primary": True, "category": "fire"},
+            {"primary": False, "category": "ems", "subcategory": "medical_assist"},
+            {"primary": True, "category": "fire", "subcategory": "wildland_fire"},
         ],
         "alarm_datetime": "2024-07-10T13:50:00-07:00",
         "start_datetime": "2024-07-10T13:40:00-07:00",
@@ -166,6 +167,14 @@ class TestPromoteFullContract:
 
     def test_category_from_primary_type(self):
         assert self.result["incident_category"] == "fire"
+
+    def test_name_promoted(self):
+        assert self.result["incident_name"] == "Bear Creek Wildfire"
+
+    def test_type_is_the_primary_subcategory(self):
+        # Both come off the same entry, so they can never describe two
+        # different types: the non-primary ems/medical_assist pair is ignored.
+        assert self.result["incident_type"] == "wildland_fire"
 
     def test_incident_datetime_prefers_alarm(self):
         # Alarm wins over start and dispatch call-received.
