@@ -137,7 +137,9 @@ form_pdf:
     description: |
       Returns the filled PDF binary file for the specified form. If the form
       generation is still in progress, returns 202 Accepted with a retry_after
-      hint. The Content-Disposition header is set for browser download.
+      hint. The Content-Disposition header is set for browser download, naming
+      the file "{form_type}_{incident_number}.pdf", the same name the batch zip
+      uses for its entries. Incidents without a number fall back to the form id.
     tags:
       - forms
     parameters:
@@ -235,12 +237,40 @@ form_json:
                 alarm_time: "13:52"
                 acres_burned: 1247
                 cause: "natural"
+      "202":
+        description: Form generation still in progress
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                status:
+                  type: string
+                retry_after_seconds:
+                  type: integer
+            example:
+              message: "Form generation is still in progress"
+              status: "processing"
+              retry_after_seconds: 5
       "404":
         description: Form not found
         content:
           application/json:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
+      "500":
+        description: Form generation failed, so there is no JSON to return
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "FORM_GENERATION_FAILED"
+              message: "Failed to generate form"
+              detail:
+                reason: "Template file corrupted or missing"
 
 batch_by_id:
   get:
