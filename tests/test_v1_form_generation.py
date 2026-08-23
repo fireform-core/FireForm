@@ -61,7 +61,7 @@ def _field(name, source="schema", required=True, layout=None, **extra) -> dict:
     return field
 
 
-def _incident(db, contract=None) -> Incident:
+def _incident(db, contract=None, incident_number=None) -> Incident:
     now = datetime.now(timezone.utc)
     inp = create_input(
         db,
@@ -88,6 +88,7 @@ def _incident(db, contract=None) -> Incident:
             extract_id=extraction.extract_id,
             status=ReportStatus.draft,
             incident_contract=_CONTRACT if contract is None else contract,
+            incident_number=incident_number,
         ),
     )
 
@@ -443,26 +444,50 @@ class TestGetFormPdf:
         assert resp.status_code == 500
         assert resp.json()["error_code"] == "PDF_GENERATION_FAILED"
 
-    def test_200_serves_the_pdf_file(self, client, db, monkeypatch, tmp_path, pdf_bytes):
-        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
-        incident = _incident(db)
-        template = _template(db)
-
+    def _completed_pdf_form(self, db, tmp_path, pdf_bytes, incident, template):
         pdf_file = tmp_path / "forms" / "generated" / "x.pdf"
-        pdf_file.parent.mkdir(parents=True)
+        pdf_file.parent.mkdir(parents=True, exist_ok=True)
         pdf_file.write_bytes(pdf_bytes)
-
-        form = _form(
+        return _form(
             db, incident, template,
             status=FormStatus.completed,
             pdf_ready=True,
             pdf_path="forms/generated/x.pdf",
         )
 
+    def test_200_serves_the_pdf_file(self, client, db, monkeypatch, tmp_path, pdf_bytes):
+        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db, incident_number="FF-2024-CA-0157")
+        template = _template(db)
+        form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
+
         resp = client.get(f"{FORMS_URL}/{form.form_id}/pdf")
         assert resp.status_code == 200
         assert resp.headers["content-type"] == "application/pdf"
         assert resp.content == pdf_bytes
+        assert 'filename="neris_FF-2024-CA-0157.pdf"' in resp.headers["content-disposition"]
+
+    def test_filename_falls_back_to_form_id_without_an_incident_number(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db)
+        template = _template(db)
+        form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
+
+        resp = client.get(f"{FORMS_URL}/{form.form_id}/pdf")
+        assert f'filename="{form.form_id}.pdf"' in resp.headers["content-disposition"]
+
+    def test_filename_strips_characters_an_incident_number_should_not_carry(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db, incident_number='../2024 "07"/0157')
+        template = _template(db)
+        form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
+
+        resp = client.get(f"{FORMS_URL}/{form.form_id}/pdf")
+        assert 'filename="neris_2024-07-0157.pdf"' in resp.headers["content-disposition"]
 
     def test_404_path_escaping_data_dir_is_rejected(self, client, db, monkeypatch, tmp_path):
         monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
@@ -500,15 +525,26 @@ class TestGetFormJson:
         body = resp.json()
         assert body["form_id"] == str(form.form_id)
         assert body["agency_fields"]["incident_name"] == "Bear Creek Wildfire"
+        assert body["form_version"] == template.version
 
-    def test_404_when_not_ready_yet(self, client, db):
+    def test_202_while_still_generating(self, client, db):
         incident = _incident(db)
         template = _template(db)
         form = _form(db, incident, template, status=FormStatus.queued)
 
         resp = client.get(f"{FORMS_URL}/{form.form_id}/json")
-        assert resp.status_code == 404
-        assert resp.json()["error_code"] == "FORM_JSON_NOT_READY"
+        assert resp.status_code == 202
+        assert resp.json()["status"] == "queued"
+        assert resp.json()["retry_after_seconds"] == 5
+
+    def test_500_when_form_failed(self, client, db):
+        incident = _incident(db)
+        template = _template(db)
+        form = _form(db, incident, template, status=FormStatus.failed)
+
+        resp = client.get(f"{FORMS_URL}/{form.form_id}/json")
+        assert resp.status_code == 500
+        assert resp.json()["error_code"] == "FORM_GENERATION_FAILED"
 
     def test_404_unknown_form(self, client, db):
         resp = client.get(f"{FORMS_URL}/{uuid4()}/json")
