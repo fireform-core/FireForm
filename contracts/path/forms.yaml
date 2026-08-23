@@ -379,3 +379,14 @@ batch_download:
           application/json:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
+      "500":
+        description: Every form in the batch failed, so there is nothing to bundle
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "FORM_GENERATION_FAILED"
+              message: "Every form in the batch failed to generate"
+              detail:
+                reason: "No PDFs were produced for this batch"
