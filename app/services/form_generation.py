@@ -13,22 +13,27 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from io import BytesIO
+from pathlib import Path
 from uuid import UUID, uuid4
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import FormStatus
+from app.api.schemas.enums import FormStatus, TemplateStatus
 from app.api.schemas.form_generation import GenerateFormsOptions, GenerateFormsRequest
+from app.core.config import DATA_DIR
 from app.core.errors.base import AppError
 from app.db.repositories import (
     create_generated_form,
     create_job,
     get_form_template,
     get_incident,
+    list_form_templates,
     update_form,
     update_job,
 )
-from app.models import Form, Job
+from app.models import Form, FormTemplate, Job
 from app.services.extraction_readiness import gaps_for
 from app.services.form_templates import require_template
 from app.tasks.generate_forms import generate_forms_batch_task
@@ -68,6 +73,13 @@ def _slug(value: str) -> str:
     return _UNSAFE_IN_FILENAME.sub("-", value).strip("-")
 
 
+def _pdf_filename(form: Form, incident_number: str | None) -> str:
+    number = _slug(incident_number) if incident_number else ""
+    if not number:
+        return f"{form.form_id}.pdf"
+    return f"{_slug(form.form_type)}_{number}.pdf"
+
+
 def download_filename(session: Session, form: Form) -> str:
     """The name a downloaded PDF is saved under.
 
@@ -77,10 +89,7 @@ def download_filename(session: Session, form: Form) -> str:
     once the department has one, so the form id stands in when it is missing.
     """
     incident = get_incident(session, form.incident_id)
-    number = _slug(incident.incident_number) if incident and incident.incident_number else ""
-    if not number:
-        return f"{form.form_id}.pdf"
-    return f"{_slug(form.form_type)}_{number}.pdf"
+    return _pdf_filename(form, incident.incident_number if incident else None)
 
 
 def form_version(session: Session, form: Form) -> str | None:
@@ -94,7 +103,96 @@ def form_version(session: Session, form: Form) -> str | None:
     return template.version if template else None
 
 
+def batch_state(forms: list[Form]) -> str:
+    """processing, completed or failed, derived from the batch's Form rows.
+
+    There is no Batch table, so both the status endpoint and the zip download
+    read the batch's state from the same place. Per design a single failed form
+    does not fail the batch: it reads completed as long as every form reached a
+    terminal state and at least one succeeded, and the per-form list still shows
+    which ones failed.
+    """
+    total = len(forms)
+    completed = sum(1 for f in forms if f.status == FormStatus.completed)
+    failed = sum(1 for f in forms if f.status == FormStatus.failed)
+    if completed + failed < total:
+        return "processing"
+    return "failed" if failed == total else "completed"
+
+
+def resolve_form_pdf(form: Form) -> Path | None:
+    """The form's PDF on disk, or None if it is not there to serve.
+
+    pdf_path is stored relative to the data directory, so a value that climbs
+    out of it is refused rather than read. Single downloads turn a None into a
+    404; the batch zip just leaves that form out.
+    """
+    if not form.pdf_ready or not form.pdf_path:
+        return None
+    path = (DATA_DIR / form.pdf_path).resolve()
+    if not path.is_relative_to(DATA_DIR) or not path.is_file():
+        return None
+    return path
+
+
+def batch_pdfs(session: Session, forms: list[Form]) -> list[tuple[str, Path]]:
+    """Every finished PDF in the batch, as (name in the archive, path on disk).
+
+    Forms that failed, or whose file has gone missing under the data directory,
+    are left out rather than failing the whole download. One incident lookup
+    covers the batch because every form in it is filled from the same incident.
+    """
+    if not forms:
+        return []
+
+    incident = get_incident(session, forms[0].incident_id)
+    number = incident.incident_number if incident else None
+
+    entries: list[tuple[str, Path]] = []
+    for form in forms:
+        if form.status != FormStatus.completed:
+            continue
+        path = resolve_form_pdf(form)
+        if path is not None:
+            entries.append((_pdf_filename(form, number), path))
+    return entries
+
+
+def batch_zip(session: Session, batch_id: UUID, forms: list[Form]) -> tuple[bytes, str]:
+    """The batch's PDFs as one zip, with the name to serve it under.
+
+    Built in memory: a batch is one incident's report pack, so it is a handful
+    of PDFs rather than something worth spooling to disk.
+    """
+    entries = batch_pdfs(session, forms)
+    incident = get_incident(session, forms[0].incident_id) if forms else None
+    number = _slug(incident.incident_number) if incident and incident.incident_number else ""
+
+    buffer = BytesIO()
+    with ZipFile(buffer, "w", ZIP_DEFLATED) as archive:
+        for name, path in entries:
+            archive.write(path, arcname=name)
+
+    return buffer.getvalue(), f"fireform_batch_{number or batch_id}.zip"
+
+
 class FormGenerationService:
+    def _candidates(self, session: Session, request: GenerateFormsRequest) -> list[FormTemplate]:
+        """The templates this request is about, before readiness is considered.
+
+        An explicit selection is taken as given, including a legacy or draft
+        template the user deliberately picked. With no selection the candidates
+        are the active templates, the same set the readiness matrix offers on
+        the selection screen, so "generate everything ready" cannot pull in a
+        retired form nobody chose.
+
+        Every requested template is resolved before anything is written: a bad
+        template_id 404s cleanly instead of leaving a partial batch behind.
+        """
+        if request.template_ids is not None:
+            return [require_template(session, tid) for tid in request.template_ids]
+        return [t for t in list_form_templates(session) if t.status == TemplateStatus.active]
+
     def start_generation(self, session: Session, request: GenerateFormsRequest) -> GenerationResult:
         incident = get_incident(session, request.incident_id)
         if incident is None:
@@ -104,9 +202,7 @@ class FormGenerationService:
                 error_code="INCIDENT_NOT_FOUND",
             )
 
-        # Resolve every requested template before writing anything: a bad
-        # template_id 404s cleanly instead of leaving a partial batch behind.
-        templates = [require_template(session, tid) for tid in request.template_ids]
+        templates = self._candidates(session, request)
 
         options = request.options or GenerateFormsOptions()
         contract = incident.incident_contract or {}
@@ -139,10 +235,16 @@ class FormGenerationService:
             result.queued.append(create_generated_form(session, form))
 
         if not result.queued:
+            # Two ways to end up here, and the caller needs to tell them apart:
+            # a selection whose every template turned out to be blocked, or no
+            # selection at all with nothing in the registry ready to generate.
             raise AppError(
-                "No templates were selected and none are ready",
+                "None of the selected templates are ready"
+                if request.template_ids is not None
+                else "No templates were selected and none are ready",
                 status_code=422,
                 error_code="NO_FORMS_TO_GENERATE",
+                detail={"skipped": [s.reason for s in result.skipped]},
             )
 
         job = Job(celery_task_id="", job_type="batch_form_generation", status="queued")

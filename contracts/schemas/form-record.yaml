@@ -194,4 +194,5 @@ BatchStatus:
       type: string
       nullable: true
       description: Zip bundle of all completed PDFs, present once the batch
-        finishes (GET /api/v1/forms/batch/{batch_id}/download)
+        finishes with at least one PDF to bundle
+        (GET /api/v1/forms/batch/{batch_id}/download)

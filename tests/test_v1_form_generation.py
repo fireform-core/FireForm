@@ -8,8 +8,10 @@ against Form rows seeded directly.
 """
 
 from datetime import datetime, timezone
+from io import BytesIO
 from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
+from zipfile import ZipFile
 
 from app.api.schemas.enums import (
     ExtractionStatus,
@@ -17,6 +19,7 @@ from app.api.schemas.enums import (
     InputStatus,
     InputType,
     ReportStatus,
+    TemplateStatus,
 )
 from app.core.config import API_PREFIX
 from app.db.repositories import (
@@ -93,12 +96,13 @@ def _incident(db, contract=None, incident_number=None) -> Incident:
     )
 
 
-def _template(db, form_type="neris", fields=None) -> FormTemplate:
+def _template(db, form_type="neris", fields=None, status=TemplateStatus.active) -> FormTemplate:
     return create_form_template(
         db,
         FormTemplate(
             form_type=form_type,
             display_name=form_type.upper(),
+            status=status,
             fields=fields if fields is not None else [_field("incident_name")],
         ),
     )
@@ -316,6 +320,101 @@ class TestGenerateForms:
             )
         assert resp.status_code == 422
         assert resp.json()["error_code"] == "NO_FORMS_TO_GENERATE"
+        assert resp.json()["message"] == "None of the selected templates are ready"
+        assert resp.json()["detail"]["skipped"]
+
+
+# ---------------------------------------------------------------------------
+# POST /forms/generate with template_ids omitted
+# ---------------------------------------------------------------------------
+
+class TestGenerateEverythingReady:
+
+    def _generate_all(self, client, incident, **options):
+        body = {"incident_id": str(incident.incident_id)}
+        if options:
+            body["options"] = options
+        with NoCelery():
+            return client.post(f"{FORMS_URL}/generate", json=body)
+
+    def test_202_queues_every_ready_active_template(self, client, db):
+        incident = _incident(db)
+        _template(db, form_type="neris")
+        _template(db, form_type="nfirs_basic")
+
+        resp = self._generate_all(client, incident)
+
+        assert resp.status_code == 202
+        queued = {f["form_type"] for f in resp.json()["forms_queued"]}
+        assert queued == {"neris", "nfirs_basic"}
+
+    def test_legacy_and_draft_templates_are_not_candidates(self, client, db):
+        incident = _incident(db)
+        _template(db, form_type="neris")
+        _template(db, form_type="old_county", status=TemplateStatus.legacy)
+        _template(db, form_type="half_built", status=TemplateStatus.draft)
+
+        resp = self._generate_all(client, incident)
+
+        body = resp.json()
+        assert [f["form_type"] for f in body["forms_queued"]] == ["neris"]
+        assert body["forms_skipped"] == []
+
+    def test_a_legacy_template_still_generates_when_asked_for_by_id(self, client, db):
+        incident = _incident(db)
+        template = _template(db, form_type="old_county", status=TemplateStatus.legacy)
+
+        with NoCelery():
+            resp = client.post(
+                f"{FORMS_URL}/generate",
+                json={
+                    "incident_id": str(incident.incident_id),
+                    "template_ids": [str(template.template_id)],
+                },
+            )
+
+        assert resp.status_code == 202
+        assert len(resp.json()["forms_queued"]) == 1
+
+    def test_not_ready_template_is_skipped_with_a_reason(self, client, db):
+        incident = _incident(db)
+        _template(db, form_type="neris")
+        _template(
+            db,
+            form_type="state_texas",
+            fields=[_field("marshal_signature_name", source="manual", required=True)],
+        )
+
+        body = self._generate_all(client, incident).json()
+
+        assert [f["form_type"] for f in body["forms_queued"]] == ["neris"]
+        assert len(body["forms_skipped"]) == 1
+        assert body["forms_skipped"][0]["form_type"] == "state_texas"
+        assert "marshal_signature_name" in body["forms_skipped"][0]["reason"]
+
+    def test_force_partial_queues_the_not_ready_ones_too(self, client, db):
+        incident = _incident(db)
+        _template(db, form_type="neris")
+        _template(
+            db,
+            form_type="state_texas",
+            fields=[_field("marshal_signature_name", source="manual", required=True)],
+        )
+
+        body = self._generate_all(client, incident, force_partial=True).json()
+
+        assert {f["form_type"] for f in body["forms_queued"]} == {"neris", "state_texas"}
+        assert body["forms_skipped"] == []
+
+    def test_422_when_the_registry_has_nothing_ready(self, client, db):
+        incident = _incident(db)
+        _template(db, form_type="old_county", status=TemplateStatus.legacy)
+
+        resp = self._generate_all(client, incident)
+
+        assert resp.status_code == 422
+        assert resp.json()["error_code"] == "NO_FORMS_TO_GENERATE"
+        assert resp.json()["message"] == "No templates were selected and none are ready"
 
 
 # ---------------------------------------------------------------------------
@@ -349,6 +448,7 @@ class TestBatchStatus:
 
         resp = client.get(f"{FORMS_URL}/batch/{batch_id}")
         assert resp.json()["status"] == "completed"
+        assert resp.json()["download_url"] == f"/api/v1/forms/batch/{batch_id}/download"
 
     def test_completed_when_terminal_with_a_partial_failure(self, client, db):
         """One failed form doesn't fail the batch — matches the per-form isolation design."""
@@ -372,11 +472,144 @@ class TestBatchStatus:
 
         resp = client.get(f"{FORMS_URL}/batch/{batch_id}")
         assert resp.json()["status"] == "failed"
+        assert resp.json()["download_url"] is None
 
     def test_404_unknown_batch(self, client, db):
         resp = client.get(f"{FORMS_URL}/batch/{uuid4()}")
         assert resp.status_code == 404
         assert resp.json()["error_code"] == "BATCH_NOT_FOUND"
+
+
+# ---------------------------------------------------------------------------
+# GET /forms/batch/{batch_id}/download
+# ---------------------------------------------------------------------------
+
+class TestBatchDownload:
+
+    def _pdf_form(self, db, tmp_path, pdf_bytes, incident, template, batch_id, name, **kwargs):
+        pdf_file = tmp_path / "forms" / "generated" / name
+        pdf_file.parent.mkdir(parents=True, exist_ok=True)
+        pdf_file.write_bytes(pdf_bytes)
+        return _form(
+            db, incident, template,
+            batch_id=batch_id,
+            status=FormStatus.completed,
+            pdf_ready=True,
+            pdf_path=f"forms/generated/{name}",
+            **kwargs,
+        )
+
+    def test_202_while_the_batch_is_still_generating(self, client, db):
+        incident = _incident(db)
+        template = _template(db)
+        batch_id = uuid4()
+        _form(db, incident, template, batch_id=batch_id, status=FormStatus.queued)
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+        assert resp.status_code == 202
+        assert resp.json()["status"] == "processing"
+        assert resp.json()["retry_after_seconds"] == 5
+
+    def test_500_when_every_form_failed(self, client, db):
+        incident = _incident(db)
+        template = _template(db)
+        batch_id = uuid4()
+        _form(db, incident, template, batch_id=batch_id, status=FormStatus.failed)
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+        assert resp.status_code == 500
+        assert resp.json()["error_code"] == "FORM_GENERATION_FAILED"
+
+    def test_404_unknown_batch(self, client, db):
+        resp = client.get(f"{FORMS_URL}/batch/{uuid4()}/download")
+        assert resp.status_code == 404
+        assert resp.json()["error_code"] == "BATCH_NOT_FOUND"
+
+    def test_200_bundles_every_pdf_under_its_download_name(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db, incident_number="FF-2024-CA-0157")
+        batch_id = uuid4()
+        self._pdf_form(
+            db, tmp_path, pdf_bytes, incident, _template(db, form_type="neris"), batch_id, "a.pdf"
+        )
+        self._pdf_form(
+            db, tmp_path, pdf_bytes, incident, _template(db, form_type="nfirs"), batch_id, "b.pdf"
+        )
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "application/zip"
+        assert 'filename="fireform_batch_FF-2024-CA-0157.zip"' in resp.headers[
+            "content-disposition"
+        ]
+        with ZipFile(BytesIO(resp.content)) as archive:
+            assert sorted(archive.namelist()) == [
+                "neris_FF-2024-CA-0157.pdf",
+                "nfirs_FF-2024-CA-0157.pdf",
+            ]
+            assert archive.read("neris_FF-2024-CA-0157.pdf") == pdf_bytes
+
+    def test_a_failed_form_is_left_out_of_the_zip(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db, incident_number="FF-2024-CA-0157")
+        batch_id = uuid4()
+        self._pdf_form(
+            db, tmp_path, pdf_bytes, incident, _template(db, form_type="neris"), batch_id, "a.pdf"
+        )
+        _form(
+            db, incident, _template(db, form_type="nfirs"),
+            batch_id=batch_id, status=FormStatus.failed,
+        )
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+
+        assert resp.status_code == 200
+        with ZipFile(BytesIO(resp.content)) as archive:
+            assert archive.namelist() == ["neris_FF-2024-CA-0157.pdf"]
+
+    def test_a_pdf_missing_off_disk_is_left_out_rather_than_failing(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db, incident_number="FF-2024-CA-0157")
+        batch_id = uuid4()
+        self._pdf_form(
+            db, tmp_path, pdf_bytes, incident, _template(db, form_type="neris"), batch_id, "a.pdf"
+        )
+        _form(
+            db, incident, _template(db, form_type="nfirs"),
+            batch_id=batch_id,
+            status=FormStatus.completed,
+            pdf_ready=True,
+            pdf_path="forms/generated/gone.pdf",
+        )
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+
+        assert resp.status_code == 200
+        with ZipFile(BytesIO(resp.content)) as archive:
+            assert archive.namelist() == ["neris_FF-2024-CA-0157.pdf"]
+
+    def test_zip_name_falls_back_to_the_batch_id_without_an_incident_number(
+        self, client, db, monkeypatch, tmp_path, pdf_bytes
+    ):
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
+        incident = _incident(db)
+        batch_id = uuid4()
+        form = self._pdf_form(
+            db, tmp_path, pdf_bytes, incident, _template(db), batch_id, "a.pdf"
+        )
+
+        resp = client.get(f"{FORMS_URL}/batch/{batch_id}/download")
+
+        assert f'filename="fireform_batch_{batch_id}.zip"' in resp.headers["content-disposition"]
+        with ZipFile(BytesIO(resp.content)) as archive:
+            assert archive.namelist() == [f"{form.form_id}.pdf"]
 
 
 # ---------------------------------------------------------------------------
@@ -456,7 +689,7 @@ class TestGetFormPdf:
         )
 
     def test_200_serves_the_pdf_file(self, client, db, monkeypatch, tmp_path, pdf_bytes):
-        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
         incident = _incident(db, incident_number="FF-2024-CA-0157")
         template = _template(db)
         form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
@@ -470,7 +703,7 @@ class TestGetFormPdf:
     def test_filename_falls_back_to_form_id_without_an_incident_number(
         self, client, db, monkeypatch, tmp_path, pdf_bytes
     ):
-        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
         incident = _incident(db)
         template = _template(db)
         form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
@@ -481,7 +714,7 @@ class TestGetFormPdf:
     def test_filename_strips_characters_an_incident_number_should_not_carry(
         self, client, db, monkeypatch, tmp_path, pdf_bytes
     ):
-        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
         incident = _incident(db, incident_number='../2024 "07"/0157')
         template = _template(db)
         form = self._completed_pdf_form(db, tmp_path, pdf_bytes, incident, template)
@@ -490,7 +723,7 @@ class TestGetFormPdf:
         assert 'filename="neris_2024-07-0157.pdf"' in resp.headers["content-disposition"]
 
     def test_404_path_escaping_data_dir_is_rejected(self, client, db, monkeypatch, tmp_path):
-        monkeypatch.setattr("app.api.routes.form_generation.DATA_DIR", tmp_path)
+        monkeypatch.setattr("app.services.form_generation.DATA_DIR", tmp_path)
         incident = _incident(db)
         template = _template(db)
         form = _form(

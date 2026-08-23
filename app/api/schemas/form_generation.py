@@ -30,12 +30,13 @@ class GenerateFormsOptions(BaseModel):
 class GenerateFormsRequest(BaseModel):
     """POST /forms/generate body.
 
-    template_ids is required in this build: omitting it (generate every
-    template the readiness matrix reports as ready) is #554, not built here.
+    Omitting template_ids generates every template the readiness matrix
+    reports as ready. An empty list is a different thing from an absent one
+    and is rejected: it reads as a selection screen that sent nothing.
     """
 
     incident_id: UUID
-    template_ids: list[UUID] = Field(min_length=1)
+    template_ids: list[UUID] | None = Field(default=None, min_length=1)
     options: GenerateFormsOptions | None = None
 
 
@@ -122,7 +123,7 @@ class BatchStatus(BaseModel):
     completed: int
     failed: int
     forms: list[BatchFormEntry] = Field(default_factory=list)
-    # Zip bundling of a batch's PDFs is #554; always null here.
+    # Set once the batch has finished with at least one PDF to bundle.
     download_url: str | None = None
 
 
