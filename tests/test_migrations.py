@@ -205,7 +205,6 @@ def test_incidents_columns(alembic_cfg, alembic_engine):
         "status",
         "incident_name",
         "incident_type",
-        "incident_date",
         "tags",
         "notes",
         "incident_contract",
@@ -462,9 +461,13 @@ def test_forms_extract_id_removed(alembic_cfg, alembic_engine):
 
 
 def test_downgrade_005(alembic_cfg, alembic_engine):
-    """Downgrade by one step from head restores 004's forms shape."""
+    """Downgrade to 004 restores 004's forms shape.
+
+    Targets "004" explicitly rather than "-1": 006 now sits on top of head, so
+    a relative one-step downgrade only undoes 006, not 005.
+    """
     command.upgrade(alembic_cfg, "head")
-    command.downgrade(alembic_cfg, "-1")
+    command.downgrade(alembic_cfg, "004")
 
     inspector = inspect(alembic_engine)
     columns = {c["name"]: c for c in inspector.get_columns("forms")}
@@ -483,7 +486,7 @@ def test_downgrade_005(alembic_cfg, alembic_engine):
 
 def test_round_trip_005(alembic_cfg, alembic_engine):
     command.upgrade(alembic_cfg, "head")
-    command.downgrade(alembic_cfg, "-1")
+    command.downgrade(alembic_cfg, "004")
     command.upgrade(alembic_cfg, "head")
 
     inspector = inspect(alembic_engine)
@@ -491,3 +494,41 @@ def test_round_trip_005(alembic_cfg, alembic_engine):
     assert "template_id" in columns
     assert "batch_id" in columns
     assert "extract_id" not in columns
+
+
+def test_incidents_indexes(alembic_cfg, alembic_engine):
+    """006 adds the two indexes GET /incidents and the number check rely on."""
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    indexes = {ix["name"]: ix for ix in inspector.get_indexes("incidents")}
+
+    assert indexes["ix_incidents_live_datetime"]["column_names"] == [
+        "deleted_at",
+        "incident_datetime",
+    ]
+    assert indexes["ix_incidents_number_live"]["unique"]
+
+
+def test_downgrade_006(alembic_cfg, alembic_engine):
+    """Downgrade to 005 drops the indexes and puts incident_date back."""
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "005")
+
+    inspector = inspect(alembic_engine)
+    assert "incident_date" in {c["name"] for c in inspector.get_columns("incidents")}
+    assert "ix_incidents_live_datetime" not in {
+        ix["name"] for ix in inspector.get_indexes("incidents")
+    }
+
+
+def test_round_trip_006(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "005")
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    assert "incident_date" not in {c["name"] for c in inspector.get_columns("incidents")}
+    assert "ix_incidents_number_live" in {
+        ix["name"] for ix in inspector.get_indexes("incidents")
+    }

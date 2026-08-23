@@ -13,6 +13,8 @@ from typing import Any
 # Keys of the value dict returned by ``promote``. Kept explicit so callers can
 # apply the result to an Incident row without guessing field names.
 PROMOTED_COLUMNS = (
+    "incident_name",
+    "incident_type",
     "incident_category",
     "incident_datetime",
     "city",
@@ -66,16 +68,22 @@ def _seconds_between(start: Any, end: Any) -> int | None:
     return int(delta)
 
 
-def _primary_category(incident: dict) -> str | None:
-    """Category of the incident type flagged primary, else the first type's."""
+def _primary_type(incident: dict) -> dict:
+    """The incident type flagged primary, else the first one, else empty.
+
+    Both `incident_category` and `incident_type` come off this single entry, so
+    they can never describe two different types.
+    """
     types = incident.get("types")
-    if not isinstance(types, list) or not types:
-        return None
+    if not isinstance(types, list):
+        return {}
     entries = [t for t in types if isinstance(t, dict)]
+    if not entries:
+        return {}
     for entry in entries:
         if entry.get("primary"):
-            return entry.get("category")
-    return entries[0].get("category") if entries else None
+            return entry
+    return entries[0]
 
 
 def _incident_datetime(incident: dict, dispatch: dict) -> datetime | None:
@@ -158,9 +166,12 @@ def promote(contract: dict | None) -> dict[str, Any]:
     call_received = dispatch.get("call_received_datetime") or incident.get("alarm_datetime")
     first_arrival = incident.get("first_arrival_datetime")
     first_unit = _first_unit(contract)
+    primary_type = _primary_type(incident)
 
     return {
-        "incident_category": _primary_category(incident),
+        "incident_name": incident.get("name"),
+        "incident_type": primary_type.get("subcategory"),
+        "incident_category": primary_type.get("category"),
         "incident_datetime": _incident_datetime(incident, dispatch),
         "city": location.get("city"),
         "state": location.get("state"),

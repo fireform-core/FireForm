@@ -2,7 +2,7 @@ import uuid as uuid_mod
 from uuid import UUID, uuid4
 from datetime import date, datetime, timezone
 
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, Index, JSON, text
 from sqlmodel import SQLModel, Field
 from sqlmodel.sql.sqltypes import AutoString
 
@@ -108,6 +108,23 @@ class Extraction(SQLModel, table=True):
 
 class Incident(SQLModel, table=True):
     __tablename__ = "incidents"
+    __table_args__ = (
+        # A department's incident number identifies one live incident. Partial
+        # so a soft-deleted row does not keep its number reserved forever, and
+        # so the many rows still awaiting a number do not collide on NULL.
+        Index(
+            "ix_incidents_number_live",
+            "incident_number",
+            unique=True,
+            postgresql_where=text("incident_number IS NOT NULL AND deleted_at IS NULL"),
+            sqlite_where=text("incident_number IS NOT NULL AND deleted_at IS NULL"),
+        ),
+        # Covers GET /incidents: every query excludes soft-deleted rows and
+        # then sorts on incident_datetime. The status and incident_category
+        # filters are left unindexed on purpose, they are low cardinality and
+        # a department-sized table does not need them.
+        Index("ix_incidents_live_datetime", "deleted_at", "incident_datetime"),
+    )
 
     incident_id: UUID = Field(default_factory=uuid4, primary_key=True)
     extract_id: UUID = Field(foreign_key="extractions.extract_id")
@@ -117,7 +134,6 @@ class Incident(SQLModel, table=True):
     )
     incident_name: str | None = None
     incident_type: str | None = None
-    incident_date: date | None = None
     tags: list | None = Field(default=None, sa_column=Column(JSON))
     notes: str | None = None
     # The single store of the incident contract. Created as a draft when

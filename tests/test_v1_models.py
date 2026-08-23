@@ -245,17 +245,11 @@ class TestIncidentModel:
         fetched = db.get(Incident, row.incident_id)
         assert fetched.deleted_at is not None
 
-    def test_incident_date_field(self, db):
-        row = self._make(db, incident_date=date(2026, 5, 15))
-        fetched = db.get(Incident, row.incident_id)
-        assert fetched.incident_date == date(2026, 5, 15)
-
     def test_all_nullable_fields_default_none(self, db):
         row = self._make(db)
         assert row.incident_number is None
         assert row.incident_name is None
         assert row.incident_type is None
-        assert row.incident_date is None
         assert row.notes is None
 
     def test_incident_contract_json_roundtrip(self, db):

@@ -95,9 +95,9 @@ incidents:
         schema:
           type: string
           format: date
-      - name: incident_type
+      - name: incident_category
         in: query
-        description: Filter by incident category
+        description: Filter by the incident's primary category
         schema:
           $ref: "../schemas/enums.yaml#/IncidentCategory"
       - name: status
@@ -142,7 +142,8 @@ incidents:
                   incident_number: "CA-SQF-2024-0421"
                   status: "draft"
                   incident_name: "Bear Creek Wildfire"
-                  incident_type: "fire"
+                  incident_type: "wildland_fire"
+                  incident_category: "fire"
                   incident_datetime: "2024-07-10T13:52:00-07:00"
                   forms_count: 3
                   created_at: "2024-07-15T14:35:00Z"
