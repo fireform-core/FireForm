@@ -96,6 +96,9 @@ class FormMappedJson(BaseModel):
     """GET /forms/{form_id}/json response."""
 
     form_type: str
+    # The template's version, read at request time. Null when the template has
+    # since been deleted out of the registry.
+    form_version: str | None = None
     form_id: UUID
     template_id: UUID
     incident_id: UUID

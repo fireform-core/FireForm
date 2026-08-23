@@ -38,7 +38,11 @@ from app.core.config import (
 )
 from app.core.errors.base import AppError
 from app.db.repositories import get_form, list_forms_by_batch
-from app.services.form_generation import FormGenerationService
+from app.services.form_generation import (
+    FormGenerationService,
+    download_filename,
+    form_version,
+)
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
@@ -151,7 +155,9 @@ def download_form_pdf(form_id: UUID, db: Session = Depends(get_db)):
     if not path.is_relative_to(DATA_DIR) or not path.is_file():
         raise AppError(f"Form {form_id} not found", status_code=404, error_code="FORM_NOT_FOUND")
 
-    return FileResponse(path, media_type="application/pdf", filename=path.name)
+    return FileResponse(
+        path, media_type="application/pdf", filename=download_filename(db, form)
+    )
 
 
 @router.get("/{form_id}/json", response_model=FormMappedJson)
@@ -160,15 +166,30 @@ def get_form_json(form_id: UUID, db: Session = Depends(get_db)):
     if not form:
         raise AppError(f"Form {form_id} not found", status_code=404, error_code="FORM_NOT_FOUND")
 
-    if not form.json_ready or form.json_data is None:
+    # Same three answers as /pdf, so a client polling both after one generate
+    # call reads them the same way: 500 once the fill failed, 202 while it is
+    # still running, the payload once it is there.
+    if form.status == FormStatus.failed:
         raise AppError(
-            f"Form {form_id} has no JSON output yet",
-            status_code=404,
-            error_code="FORM_JSON_NOT_READY",
+            f"Form {form_id} failed to generate",
+            status_code=500,
+            error_code="FORM_GENERATION_FAILED",
+            detail={"reason": "Form generation failed"},
+        )
+
+    if not form.json_ready or form.json_data is None:
+        return JSONResponse(
+            status_code=202,
+            content={
+                "message": "Form generation is still in progress",
+                "status": form.status,
+                "retry_after_seconds": FORM_GENERATION_POLL_INTERVAL_SECONDS,
+            },
         )
 
     return FormMappedJson(
         form_type=form.form_type,
+        form_version=form_version(db, form),
         form_id=form.form_id,
         template_id=form.template_id,
         incident_id=form.incident_id,
