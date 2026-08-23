@@ -15,7 +15,7 @@ gets read as a form_id.
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi.responses import FileResponse, JSONResponse
 from sqlmodel import Session
 
@@ -32,7 +32,6 @@ from app.api.schemas.form_generation import (
     SkippedForm,
 )
 from app.core.config import (
-    DATA_DIR,
     ESTIMATED_FORM_GENERATION_SECONDS,
     FORM_GENERATION_POLL_INTERVAL_SECONDS,
 )
@@ -40,8 +39,11 @@ from app.core.errors.base import AppError
 from app.db.repositories import get_form, list_forms_by_batch
 from app.services.form_generation import (
     FormGenerationService,
+    batch_state,
+    batch_zip,
     download_filename,
     form_version,
+    resolve_form_pdf,
 )
 
 router = APIRouter(prefix="/forms", tags=["forms"])
@@ -75,17 +77,7 @@ def get_batch_status(batch_id: UUID, db: Session = Depends(get_db)):
     completed = sum(1 for f in forms if f.status == FormStatus.completed)
     failed = sum(1 for f in forms if f.status == FormStatus.failed)
     total = len(forms)
-    done = completed + failed
-    if done < total:
-        status = "processing"
-    elif failed == total:
-        status = "failed"
-    else:
-        # Per design, a per-form failure doesn't fail the batch: the Job (and
-        # this status) reads "completed" as long as every form reached a
-        # terminal state and at least one succeeded — the forms list below
-        # still shows exactly which ones failed.
-        status = "completed"
+    status = batch_state(forms)
 
     return BatchStatus(
         batch_id=batch_id,
@@ -102,7 +94,44 @@ def get_batch_status(batch_id: UUID, db: Session = Depends(get_db)):
             )
             for f in forms
         ],
-        download_url=None,
+        # Only offered once there is something to bundle: a batch where every
+        # form failed has no PDFs behind the link.
+        download_url=(
+            f"/api/v1/forms/batch/{batch_id}/download" if status == "completed" else None
+        ),
+    )
+
+
+@router.get("/batch/{batch_id}/download")
+def download_batch_zip(batch_id: UUID, db: Session = Depends(get_db)):
+    forms = list_forms_by_batch(db, batch_id)
+    if not forms:
+        raise AppError(f"Batch {batch_id} not found", status_code=404, error_code="BATCH_NOT_FOUND")
+
+    status = batch_state(forms)
+    if status == "processing":
+        return JSONResponse(
+            status_code=202,
+            content={
+                "message": "Batch is still generating",
+                "status": status,
+                "retry_after_seconds": FORM_GENERATION_POLL_INTERVAL_SECONDS,
+            },
+        )
+
+    if status == "failed":
+        raise AppError(
+            f"Every form in batch {batch_id} failed to generate",
+            status_code=500,
+            error_code="FORM_GENERATION_FAILED",
+            detail={"reason": "No PDFs were produced for this batch"},
+        )
+
+    archive, filename = batch_zip(db, batch_id, forms)
+    return Response(
+        content=archive,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
 
 
@@ -151,8 +180,8 @@ def download_form_pdf(form_id: UUID, db: Session = Depends(get_db)):
             },
         )
 
-    path = (DATA_DIR / form.pdf_path).resolve()
-    if not path.is_relative_to(DATA_DIR) or not path.is_file():
+    path = resolve_form_pdf(form)
+    if path is None:
         raise AppError(f"Form {form_id} not found", status_code=404, error_code="FORM_NOT_FOUND")
 
     return FileResponse(
