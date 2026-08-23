@@ -10,6 +10,7 @@ HTTP handler and calls straight into here.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
@@ -22,6 +23,7 @@ from app.core.errors.base import AppError
 from app.db.repositories import (
     create_generated_form,
     create_job,
+    get_form_template,
     get_incident,
     update_form,
     update_job,
@@ -30,6 +32,12 @@ from app.models import Form, Job
 from app.services.extraction_readiness import gaps_for
 from app.services.form_templates import require_template
 from app.tasks.generate_forms import generate_forms_batch_task
+
+# Anything outside this set is replaced in a download filename. Incident
+# numbers are free text typed by a responder, so they can carry slashes,
+# spaces or quotes, none of which belong in a Content-Disposition header.
+# Dots go too: the only one in the name should be the one before "pdf".
+_UNSAFE_IN_FILENAME = re.compile(r"[^A-Za-z0-9_-]+")
 
 
 @dataclass
@@ -54,6 +62,36 @@ def _skip_reason(gaps) -> str:
     way the contract's own example names a single field."""
     gap = gaps.missing_required[0]
     return f"Not ready: {gap.field_name} ({gap.source.value}) has no value"
+
+
+def _slug(value: str) -> str:
+    return _UNSAFE_IN_FILENAME.sub("-", value).strip("-")
+
+
+def download_filename(session: Session, form: Form) -> str:
+    """The name a downloaded PDF is saved under.
+
+    "{form_type}_{incident_number}.pdf", the same name the batch zip gives its
+    entries, so a form downloaded on its own and the same form pulled out of a
+    batch land as one file. Incident numbers are optional and are only assigned
+    once the department has one, so the form id stands in when it is missing.
+    """
+    incident = get_incident(session, form.incident_id)
+    number = _slug(incident.incident_number) if incident and incident.incident_number else ""
+    if not number:
+        return f"{form.form_id}.pdf"
+    return f"{_slug(form.form_type)}_{number}.pdf"
+
+
+def form_version(session: Session, form: Form) -> str | None:
+    """The version of the template the form was generated from.
+
+    Read live off the template rather than stamped on the form: templates are
+    versioned in place, so this reports the registry's current version, not the
+    one in force at fill time.
+    """
+    template = get_form_template(session, form.template_id)
+    return template.version if template else None
 
 
 class FormGenerationService:
