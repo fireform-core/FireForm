@@ -1,0 +1,145 @@
+{
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_incident_number": "CalOES-EPA-R9-2026-0518",
+  "3_date_time_initiated": {
+    "date": "05/18/2026",
+    "time": "13:10"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "4.0-mile radius including Trans-California Pipeline MM 87.3, Sawpit Canyon, and Silverwood Reservoir basin.",
+    "incident_site_area": "Valve Station 12 along Trans-California Pipeline MM 87.3 in Sawpit Canyon, where a 12-inch pressurized crude line ruptured.",
+    "impacted_areas": "800 yards of Sawpit Canyon creek bed carrying crude oil towards Silverwood Lake, with a 30-acre surface oil sheen in reservoir South arm.",
+    "threatened_areas": "Mojave Water Agency Municipal Pumping Plant (1.5 miles North) and Silverwood Lake State Recreation Area campgrounds (0.8 miles West).",
+    "overflight_results": "Cal FIRE Recon Aircraft 240 confirmed heavy black crude pooling in Sawpit Canyon and a 400-yard wide oil ribbon entering Silverwood Lake.",
+    "trajectories": "Waterborne crude oil slick moving North at 1.0 knot towards main reservoir basin; airborne volatile organic cloud tracking Southeast at 7 mph into canyon slopes.",
+    "impacted_shorelines": "1.2 miles of rocky reservoir shoreline and marsh vegetation along Sawpit Canyon inlet.",
+    "graphics_and_symbology": "North oriented vertically, depicting Staging Area Delta at Silverwood Lake Marina, Incident Command Post at Hesperia Fire Station 30, 1,000-foot Exclusion Zone perimeter, Deflection Boom Sites A and B, and municipal water intake protection zones."
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 12:40 PDT on 05/18/2026, a hillside land movement ruptured a 12-inch crude oil pipeline at MM 87.3, discharging approximately 12,000 gallons of heavy crude oil into Sawpit Canyon creek before automated valves shut off flow. The oil flowed downstream into Silverwood Reservoir, threatening southern California drinking water supplies.",
+    "health_and_safety_hazards": "Toxic benzene vapor inhalation, volatile organic compound exposure, acute flammability (flash point 65°F), wildfire ignition risk in dry brush, slip-and-fall hazards on oily terrain, and severe heat exhaustion (ambient temp 94°F).",
+    "necessary_measures": "Mandatory 1,000-foot Exclusion Zone; Level B PPE with SCBA for initial Hot Zone creek entry; Level C PPE with organic vapor respirators for shoreline booming teams; continuous PID air monitoring downwind; mandatory wildland fire standby team with AFFF foam; establishment of dual-basin wash decontamination at Marina Ramp 2."
+  },
+  "6_prepared_by": {
+    "name": "Captain Rachel Brooks",
+    "position_title": "Planning Section Chief",
+    "signature": "Rachel Brooks",
+    "date_time": "05/18/2026 15:30"
+  },
+  "7_current_and_planned_objectives": [
+    "Enforce 1,000-foot Exclusion Zone and secure pipeline isolation by 14:00 hours.",
+    "Deploy 2,000 feet of containment boom across Sawpit Canyon inlet by 16:30 hours to prevent oil migration to water intake.",
+    "Evacuate Silverwood Lake State Recreation Area campgrounds by 15:00 hours.",
+    "Initiate skimmer boat oil recovery in South arm of reservoir by 17:00 hours.",
+    "Establish Unified Command (Cal OES, EPA R9, USFS, San Bernardino County Fire, Pipeline RP) by 14:30 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "13:10",
+      "actions": "Alarm dispatch; San Bernardino County Fire Engine 30 and USFS Crew 4 respond to set up initial safety perimeter."
+    },
+    {
+      "time": "13:40",
+      "actions": "Local Command established by Chief M. Thorne; Trans-California Pipeline operators confirm remote valve isolation at MM 85 and MM 90."
+    },
+    {
+      "time": "14:15",
+      "actions": "State Parks Rangers complete full evacuation of Silverwood Lake campgrounds (150 visitors evacuated)."
+    },
+    {
+      "time": "14:45",
+      "actions": "Cal OES and EPA OSC arrive on scene; Unified Command established at Station 30."
+    },
+    {
+      "time": "15:15",
+      "actions": "Clean Harbors Spill Response Vessel deploys 1,200 feet of hard boom at Sawpit Inlet (Boom Site A)."
+    },
+    {
+      "time": "16:00",
+      "actions": "Planned: Deploy secondary sorbent deflection boom array at Boom Site B upstream of Mojave Water Intake."
+    },
+    {
+      "time": "17:00",
+      "actions": "Planned: Vacuum skimmer vessel Lake Clean 1 initiates surface crude extraction in South arm."
+    },
+    {
+      "time": "18:30",
+      "actions": "Planned: Complete initial shoreline oiling assessment along Sawpit Canyon inlet."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "OSC C. Martinez (EPA R9 Co-IC)",
+      "Chief M. Thorne (SBCo Fire IC)",
+      "Chief Inspector A. Kim (Cal OES)",
+      "W. Vance (Pipeline RP IC)"
+    ],
+    "safety_officer": "Captain Gregory Hall",
+    "public_information_officer": "Samantha Norris (Cal OES)",
+    "liaison_officer": "Ranger D. Stevens (State Parks)",
+    "operations_section_chief": "Battalion Chief Kevin Ross",
+    "planning_section_chief": "Captain Rachel Brooks",
+    "logistics_section_chief": "Megan Taylor",
+    "finance_administration_section_chief": "Jason Wu",
+    "additional_positions": [
+      {
+        "position": "Environmental Unit Leader",
+        "name": "Dr. L. Arispe (USFS)"
+      },
+      {
+        "position": "Waterborne Recovery Supervisor",
+        "name": "Captain B. Walsh (Clean Harbors)"
+      }
+    ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "San Bernardino Hazmat Engine",
+      "resource_identifier": "ENG-30",
+      "date_time_ordered": "05/18/2026 13:10",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Operating perimeter vapor monitoring and fire standby."
+    },
+    {
+      "resource": "USFS Wildland Handcrew",
+      "resource_identifier": "CREW-04",
+      "date_time_ordered": "05/18/2026 13:15",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Clearing brush and building containment dikes in Sawpit Canyon."
+    },
+    {
+      "resource": "State Parks Ranger Unit",
+      "resource_identifier": "PARK-12",
+      "date_time_ordered": "05/18/2026 13:20",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Completed campground evacuations and road closures."
+    },
+    {
+      "resource": "Clean Harbors Spill Vessel",
+      "resource_identifier": "RV-LC-01",
+      "date_time_ordered": "05/18/2026 14:00",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Deployed 1,200 ft hard boom at Sawpit Canyon inlet."
+    },
+    {
+      "resource": "Heavy Vacuum Skimmer Boat",
+      "resource_identifier": "SKIM-02",
+      "date_time_ordered": "05/18/2026 14:30",
+      "eta": "05/18/2026 16:45",
+      "arrived": false,
+      "notes": "En route from San Pedro for reservoir skimmer recovery."
+    },
+    {
+      "resource": "Air Monitoring Recon Unit",
+      "resource_identifier": "AIR-MON-08",
+      "date_time_ordered": "05/18/2026 14:10",
+      "eta": "05/18/2026 15:45",
+      "arrived": false,
+      "notes": "En route with photoionization detectors and benzene gas sensors."
+    }
+  ]
+}

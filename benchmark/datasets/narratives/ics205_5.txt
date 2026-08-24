@@ -1,0 +1,11 @@
+### Silverwood Reservoir Crude Oil Pipeline Rupture Incident Radio Communications Plan (ICS 205)
+
+The Incident Radio Communications Plan, designated as ICS 205 for the Silverwood Reservoir Crude Oil Pipeline Rupture incident under tracking number CalOES-EPA-R9-2026-0518, was prepared on May 18, 2026, at 16:00 hours. This communications blueprint governs basic radio channel assignments for Operational Period 1 (May 18, 2026, 18:00 hours through May 19, 2026, 06:00 hours).
+
+Basic radio channel allocations for this operational period are structured as follows:
+1. Channel 1 (Zone Lake): Functioned for Command, channel name FIRE-CMD, assigned to Unified Command and Station 30. Operates on RX frequency 154.1500 N (Tone 146.2) and TX frequency 158.8500 N (Tone 146.2) in Analog mode (A), utilizing County Station 30 Repeater.
+2. Channel 3 (Zone Lake): Functioned for Tactical operations, channel name MARINE-11, assigned to Reservoir Skimmer Fleet. Operates on RX frequency 156.5500 W (Tone None) and TX frequency 156.5500 W (Tone None) in Analog mode (A), using VHF Channel 11 Marine Simplex.
+3. Channel 4 (Zone Lake): Functioned for Tactical operations, channel name PIPE-TAC, assigned to Canyon Pipeline Repair Group. Operates on RX frequency 462.5750 N (Tone D115) and TX frequency 467.5750 N (Tone D115) in Digital mode (D), linking Sawpit Canyon tactical operations.
+4. Channel 5 (Zone Lake): Functioned for Support operations, channel name PARK-SUPP, assigned to State Parks & Water Intake Guard. Operates on RX frequency 151.4000 N (Tone 146.2) and TX frequency 151.4000 N (Tone 146.2) in Analog mode (A), maintaining communication with Mojave Water Agency and Park Rangers.
+
+Special instructions dictate that all marine vessels must maintain continuous watch on VHF Channel 11. Emergency Mayday calls will be monitored by Command on Channel 1. This document serves as Page 5 of the Incident Action Plan and was prepared by Communications Unit Leader Sgt. R. Hall on May 18, 2026, at 16:00 hours.

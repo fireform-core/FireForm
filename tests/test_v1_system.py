@@ -13,7 +13,6 @@ import requests as requests_lib
 import app.api.routes.system as system_mod
 from app.services.llm.models import ModelInfo, ProviderHealth
 
-
 # ---------------------------------------------------------------------------
 # Low-level helpers
 # ---------------------------------------------------------------------------

@@ -1,0 +1,144 @@
+{
+  "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+  "2_incident_number": "NTSB-EPA-R10-2026-1102",
+  "3_date_time_initiated": {
+    "date": "11/02/2026",
+    "time": "04:45"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "5.0-mile radius centered around BNSF Railway Milepost 218.4 near Skykomish, WA.",
+    "incident_site_area": "BNSF Rail Milepost 218.4; 5 freight cars derailed including pressurized tank car DOT-105J500W (BNSF-77402) containing liquefied chlorine gas with damaged protective valve housing.",
+    "impacted_areas": "1,500-foot vapor dispersion zone along the rail right-of-way and adjacent State Route 2.",
+    "threatened_areas": "Town of Skykomish (1.8 miles West downwind) and South Fork Skykomish River salmon spawning habitat (300 feet South).",
+    "overflight_results": "WSP FLIR Helicopter WSP-AIR-2 confirmed a localized green-yellow chlorine cloud hugging the ravine floor and drifting West-Northwest at 4 mph.",
+    "trajectories": "Airborne toxic plume tracking West-Northwest along State Route 2 corridor at 4 mph; zero liquid chemical runoff entering waterways.",
+    "impacted_shorelines": "None; ground contamination restricted to northern ravine embankment slopes.",
+    "graphics_and_symbology": "North oriented vertically, depicting Staging Area Charlie at Stevens Pass Maintenance Yard, Mobile Command Post at Skykomish School District Gym, 1.5-mile Exclusion Zone boundary, and State Route 2 traffic closure checkpoints."
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 04:15 PST on 11/02/2026, a mountain derailment caused 5 freight cars to leave the tracks. Tank car BNSF-77402 sustained severe dome housing damage, resulting in a low-rate pressurized vapor release of toxic chlorine at approximately 15 lbs/min. State Route 2 was closed and mandatory evacuation issued for 250 residents of Skykomish.",
+    "health_and_safety_hazards": "Severe pulmonary edema risk from chlorine gas inhalation, ocular and skin chemical burns, acute respiratory collapse, mountain hypothermia (ambient temp 34°F), and steep terrain slip hazards.",
+    "necessary_measures": "Enforce 1.5-mile Exclusion Zone; mandatory Level A vapor-tight encapsulated suits with SCBA for Hot Zone entry personnel; Level B suits for Warm Zone support; continuous electrochemical chlorine sensor monitoring at CP baselines; mandatory indoor shelter-in-place for outer perimeters; heated wet-decontamination trailer wash at Staging Area Charlie."
+  },
+  "6_prepared_by": {
+    "name": "Lt. Colonel Alan Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "Alan Vance",
+    "date_time": "11/02/2026 07:15"
+  },
+  "7_current_and_planned_objectives": [
+    "Complete mandatory evacuation of Skykomish township within 1.5-mile radius by 07:30 hours.",
+    "Perform Hot Zone entry to apply Emergency B-Kit capping assembly on chlorine railcar dome by 09:30 hours.",
+    "Establish continuous multi-point perimeter air monitoring along State Route 2 by 08:00 hours.",
+    "Secure rail right-of-way and establish Unified Command by 07:00 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "04:45",
+      "actions": "Initial alarm dispatch; Skykomish Fire and King County Sheriff units respond, closing State Route 2 at Milepost 215."
+    },
+    {
+      "time": "05:15",
+      "actions": "Local Command established by Chief D. Olson; mandatory evacuation sirens activated across Skykomish."
+    },
+    {
+      "time": "05:50",
+      "actions": "Regional Hazmat Team 3 and BNSF Response Team arrived on scene to initiate perimeter air testing."
+    },
+    {
+      "time": "06:30",
+      "actions": "WSP FLIR helicopter completed thermal overflight mapping plume dispersion."
+    },
+    {
+      "time": "07:00",
+      "actions": "Unified Command established at Skykomish School Gym with EPA Region 10 and BNSF RP."
+    },
+    {
+      "time": "08:15",
+      "actions": "Planned: Entry Team 1 under Level A PPE initiates B-Kit capping tool installation on railcar valve dome."
+    },
+    {
+      "time": "09:30",
+      "actions": "Planned: Perform pressure test and seal verification of capping assembly."
+    },
+    {
+      "time": "11:00",
+      "actions": "Planned: Complete environmental health review to evaluate lifting outer zone evacuation orders."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Captain E. Miller (WSP Unified Command IC)",
+      "OSC R. Brooks (EPA R10 Co-IC)",
+      "Chief D. Olson (Skykomish Fire IC)",
+      "M. Campbell (BNSF Railway RP IC)"
+    ],
+    "safety_officer": "Captain Marcus Vance",
+    "public_information_officer": "Jennifer Hayes (WSDOT)",
+    "liaison_officer": "Deputy S. Kowalski (KCSO)",
+    "operations_section_chief": "Battalion Chief T. Higgins",
+    "planning_section_chief": "Lt. Colonel Alan Vance",
+    "logistics_section_chief": "David Sterling",
+    "finance_administration_section_chief": "Patricia Ross",
+    "additional_positions": [
+      {
+        "position": "Rail Hazmat Specialist",
+        "name": "G. Peterson (BNSF)"
+      },
+      {
+        "position": "Evacuation Group Supervisor",
+        "name": "Sgt. H. Lin (KCSO)"
+      }
+    ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "King County Hazmat 3",
+      "resource_identifier": "HZM-33",
+      "date_time_ordered": "11/02/2026 05:00",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Preparing Level A Entry Team 1 and Emergency B-Kit capping assembly."
+    },
+    {
+      "resource": "Skykomish Engine 11",
+      "resource_identifier": "ENG-11",
+      "date_time_ordered": "11/02/2026 04:45",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Securing State Route 2 East closure checkpoint."
+    },
+    {
+      "resource": "BNSF Emergency Response Unit",
+      "resource_identifier": "BNSF-ER-01",
+      "date_time_ordered": "11/02/2026 05:15",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "On scene with railcar specialized capping kits."
+    },
+    {
+      "resource": "WSP Aviation FLIR Helicopter",
+      "resource_identifier": "WSP-AIR-2",
+      "date_time_ordered": "11/02/2026 05:30",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Completed thermal imagery mapping of plume drift."
+    },
+    {
+      "resource": "Mobile Decontamination Trailer",
+      "resource_identifier": "DECON-04",
+      "date_time_ordered": "11/02/2026 05:45",
+      "eta": "11/02/2026 08:30",
+      "arrived": false,
+      "notes": "En route to establish warm water decon at Staging Area Charlie."
+    },
+    {
+      "resource": "Hazmat Air Monitoring Recon",
+      "resource_identifier": "AIR-MON-10",
+      "date_time_ordered": "11/02/2026 06:00",
+      "eta": "11/02/2026 07:45",
+      "arrived": false,
+      "notes": "En route with multi-gas chlorine sensors."
+    }
+  ]
+}

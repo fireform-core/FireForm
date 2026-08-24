@@ -1,0 +1,29 @@
+{
+  "ics_213_ground_truth": {
+    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+    "2_to": {
+      "name": "Commander Richard Croft",
+      "position": "Planning Section Chief"
+    },
+    "3_from": {
+      "name": "Hazmat Group Supervisor Mark Ross",
+      "position": "Hazmat Group Supervisor"
+    },
+    "4_subject": "Authorization for Sodium Bicarbonate Neutralization Slurry Application",
+    "5_date": "10/14/2026",
+    "6_time": "08:45",
+    "7_message": "Hazmat entry team has contained deck pooling at Berth 42. Request formal authorization from UC to apply 10 tons of dry sodium bicarbonate slurry to deck pooling to neutralize concentrated sulfuric acid prior to washdown.",
+    "8_approved_by": {
+      "name": "Captain H. Vance",
+      "position_title": "Incident Commander",
+      "signature": "Captain H. Vance"
+    },
+    "9_reply": "Unified Command approves application of 10 tons sodium bicarbonate slurry. Technical Specialists from TCEQ are monitoring runoff pH at Berth 42 outfall.",
+    "10_replied_by": {
+      "name": "Commander Richard Croft",
+      "position_title": "Planning Section Chief",
+      "signature": "Richard Croft",
+      "date_time": "10/14/2026 09:15"
+    }
+  }
+}

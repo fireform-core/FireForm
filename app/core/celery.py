@@ -48,7 +48,8 @@ celery_app.conf.include = [
 
 # Optional Celery Beat schedule — runs purge_old_submissions once a day.
 # Enable by running: celery -A app.core.celery beat
-from celery.schedules import crontab  # noqa: E402
+from celery.schedules import crontab
+
 celery_app.conf.beat_schedule = {
     "daily-submission-purge": {
         "task": "purge_old_submissions",

@@ -1,0 +1,145 @@
+{
+  "1_incident_name": "Delaware Bay Container Vessel Collision & Fuel Oil Spill",
+  "2_incident_number": "USCG-D5-2026-0629",
+  "3_date_time_initiated": {
+    "date": "06/29/2026",
+    "time": "22:40"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "6.0-mile radius centered at Delaware Bay Shipping Channel Buoy 14 near Lewes, DE.",
+    "incident_site_area": "Delaware Bay Channel Buoy 14 (38.85°N, 75.12°W), where container vessel M/V Atlantic Voyager collided with a bulk carrier, breaching fuel tank #3 port side.",
+    "impacted_areas": "3.5-mile long heavy oil sheen extending East-Southeast across the bay channel towards Cape Henlopen State Park.",
+    "threatened_areas": "Prime Hook National Wildlife Refuge (4.0 miles Northwest) and Cape Henlopen Tidal Salt Marshes (2.5 miles South).",
+    "overflight_results": "USCG HC-144 Ocean Sentry aircraft confirmed a 300-yard wide slick of Intermediate Fuel Oil (IFO 380) drifting with the flood tide.",
+    "trajectories": "Waterborne oil slick migrating East-Southeast at 2.2 knots toward Cape Henlopen under coastal winds of 14 knots from West-Northwest.",
+    "impacted_shorelines": "2.0 miles of outer sandy beach and dune lines along Cape Henlopen State Park.",
+    "graphics_and_symbology": "North oriented vertically, depicting Staging Area Echo at Lewes Ferry Terminal, Incident Command Post at USCG Sector Delaware Bay Headquarters, 1,000-yard Maritime Safety Zone, Boom Sites 1, 2, and 3, and wildlife protection zones."
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 22:15 EDT on 06/29/2026, container vessel M/V Atlantic Voyager collided with anchored bulk carrier M/V Pacific Trader near Buoy 14. Port fuel tank #3 breached, discharging approximately 25,000 gallons of heavy Intermediate Fuel Oil (IFO 380) before internal fuel transfer halted the release.",
+    "health_and_safety_hazards": "Hydrocarbon vapor exposure (benzene/H2S), direct dermal toxicity, severe slip hazards on oily vessel hulls and shorelines, nighttime over-water operations, water drowning risk, and wildlife exposure risks.",
+    "necessary_measures": "Establish 1,000-yard Maritime Safety Zone; mandatory Level C PPE with PFDs and half-mask organic vapor respirators for maritime responders; continuous H2S and PID air monitoring on response vessels; compulsory work-rest hydration cycles; mobile vessel decontamination station established at Lewes Pier."
+  },
+  "6_prepared_by": {
+    "name": "Commander James Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "James Vance",
+    "date_time": "06/30/2026 01:30"
+  },
+  "7_current_and_planned_objectives": [
+    "Secure maritime safety perimeter and stabilize damaged vessel by 01:00 hours.",
+    "Deploy protective booming across Cape Henlopen salt marsh inlets by 04:00 hours.",
+    "Initiate offshore skimming operations using MSRC oil recovery vessels by 05:30 hours.",
+    "Activate wildlife rescue and rehab operations with Tri-State Bird Rescue by 06:00 hours.",
+    "Establish Unified Command (USCG, EPA, Delaware DNREC, M/V Atlantic Voyager RP) by 02:00 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "22:40",
+      "actions": "Initial alarm dispatch; USCG Station Lewes response boats 45601 and 45602 respond to establish maritime safety zone."
+    },
+    {
+      "time": "23:15",
+      "actions": "Local Command established by Captain P. Hayes; Sector Delaware Bay requests MSRC oil spill response vessel mobilization."
+    },
+    {
+      "time": "23:50",
+      "actions": "M/V Atlantic Voyager crew completes internal fuel transfer, halting active discharge from fuel tank #3."
+    },
+    {
+      "time": "00:30",
+      "actions": "USCG HC-144 overflight completes IR sensor oil slick mapping."
+    },
+    {
+      "time": "01:15",
+      "actions": "Delaware DNREC response team arrives at Lewes Command Post; Unified Command established."
+    },
+    {
+      "time": "03:00",
+      "actions": "Planned: MSRC Response Vessel Delaware Responder deploys 2,500 feet of ocean containment boom at Buoy 14."
+    },
+    {
+      "time": "04:30",
+      "actions": "Planned: Deploy sorbent diversion boom at Cape Henlopen Inlet (Boom Site 2)."
+    },
+    {
+      "time": "06:00",
+      "actions": "Planned: Tri-State Bird Rescue team commences shoreline wildlife search along Cape Henlopen beaches."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Captain P. Hayes (USCG Unified Command IC)",
+      "OSC T. Gallagher (EPA R3)",
+      "Secretary A. Lawson (Delaware DNREC)",
+      "H. Lindemann (Atlantic Shipping RP IC)"
+    ],
+    "safety_officer": "Lt. Commander Mark Reynolds",
+    "public_information_officer": "Chief Petty Officer Kelly Adams",
+    "liaison_officer": "Inspector R. Thorne (DNREC)",
+    "operations_section_chief": "Commander Frank Miller",
+    "planning_section_chief": "Commander James Vance",
+    "logistics_section_chief": "Laura Bennett",
+    "finance_administration_section_chief": "Charles Foster",
+    "additional_positions": [
+      {
+        "position": "Scientific Support Coordinator",
+        "name": "Dr. E. Sullivan (NOAA)"
+      },
+      {
+        "position": "Wildlife Branch Director",
+        "name": "Dr. C. Jenkins (Tri-State)"
+      }
+    ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "USCG Response Boat Medium",
+      "resource_identifier": "RBM-45601",
+      "date_time_ordered": "06/29/2026 22:40",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Maintaining 1,000-yard safety zone around damaged vessel."
+    },
+    {
+      "resource": "USCG Station Lewes RBM",
+      "resource_identifier": "RBM-45602",
+      "date_time_ordered": "06/29/2026 22:40",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Conducting water sampling and perimeter safety watch."
+    },
+    {
+      "resource": "MSRC Spill Vessel Delaware Responder",
+      "resource_identifier": "RV-MSRC-01",
+      "date_time_ordered": "06/29/2026 23:00",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Deployed 2,500 ft ocean boom and preparing offshore skimmer."
+    },
+    {
+      "resource": "USCG Ocean Sentry Aircraft",
+      "resource_identifier": "USCG-HC144",
+      "date_time_ordered": "06/29/2026 23:10",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Completed IR slick mapping and overflight tracking."
+    },
+    {
+      "resource": "Mobile Wildlife Rehabilitation Trailer",
+      "resource_identifier": "WILD-REHAB-1",
+      "date_time_ordered": "06/30/2026 00:15",
+      "eta": "06/30/2026 05:45",
+      "arrived": false,
+      "notes": "En route to establish bird cleaning station at Lewes Pier."
+    },
+    {
+      "resource": "Shoreline Cleanup Strike Team",
+      "resource_identifier": "SCAT-TEAM-1",
+      "date_time_ordered": "06/30/2026 00:45",
+      "eta": "06/30/2026 06:30",
+      "arrived": false,
+      "notes": "Mobilizing for Cape Henlopen beach oil assessment."
+    }
+  ]
+}

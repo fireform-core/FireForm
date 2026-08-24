@@ -1,0 +1,35 @@
+{
+  "1_incident_name": "string",
+  "2_date_time_prepared": {
+    "date": "string",
+    "time": "string"
+  },
+  "3_operational_period": {
+    "date_from": "string",
+    "date_to": "string",
+    "time_from": "string",
+    "time_to": "string"
+  },
+  "4_basic_radio_channel_use": [
+    {
+      "zone_grp": "string",
+      "channel_number": "string",
+      "function": "string",
+      "channel_name_trunked_radio_system_talkgroup": "string",
+      "assignment": "string",
+      "rx_frequency_n_or_w": "string",
+      "rx_tone_nac": "string",
+      "tx_frequency_n_or_w": "string",
+      "tx_tone_nac": "string",
+      "mode_a_d_or_m": "string",
+      "remarks": "string"
+    }
+  ],
+  "5_special_instructions": "string",
+  "6_prepared_by": {
+    "name": "string",
+    "signature": "string",
+    "date_time": "string"
+  },
+  "iap_page_number": "string"
+}

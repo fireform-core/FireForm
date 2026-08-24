@@ -1,6 +1,6 @@
 import uuid as uuid_mod
-from uuid import UUID, uuid4
 from datetime import date, datetime, timezone
+from uuid import UUID, uuid4
 
 from sqlalchemy import Column, Index, JSON, text
 from sqlmodel import SQLModel, Field

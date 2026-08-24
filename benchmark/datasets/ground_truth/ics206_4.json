@@ -1,0 +1,80 @@
+{
+  "ics_206_ground_truth": {
+    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+    "2_operational_period": {
+      "date_from": "11/02/2026",
+      "date_to": "11/03/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_medical_aid_stations": [
+      {
+        "name": "Staging Area Charlie Medical Station",
+        "location": "Skykomish School Gym Briefing Room",
+        "contact_number_frequency": "461.2250 MHz / Ch 1",
+        "paramedic_service": true
+      },
+      {
+        "name": "Warm Decon Hydration & Medical Aid Station",
+        "location": "State Route 2 Derailment Overlook",
+        "contact_number_frequency": "466.2250 MHz / Ch 2",
+        "paramedic_service": true
+      }
+    ],
+    "4_transportation_services": {
+      "ambulance_services": [
+        {
+          "name": "Cascade Regional EMS Medic 3",
+          "location": "Staging Area Charlie",
+          "contact_number_frequency": "(555) 567-8901 / Ch 1",
+          "paramedic_service": true
+        },
+        {
+          "name": "Skykomish Volunteer Fire Department Ambulance 8",
+          "location": "Skykomish Fire Station",
+          "contact_number_frequency": "(555) 567-8902 / Ch 1",
+          "paramedic_service": false
+        }
+      ],
+      "air_ambulance_services": [
+        {
+          "name": "Airlift Northwest Helicopter 1",
+          "location": "Arlington Regional Helipad",
+          "contact_number_frequency": "(555) 666-5432 / VHF 155.355 MHz",
+          "paramedic_service": true
+        }
+      ]
+    },
+    "5_hospitals": [
+      {
+        "hospital_name": "Everett General Hospital",
+        "address_latitude_longitude": "1330 Colby Ave, Everett, 47.9789 N, 122.2012 W",
+        "contact_number_frequency": "(555) 901-3300 / State EMS Ch 4",
+        "air_ambulance_helipad": true,
+        "burn_center": false,
+        "trauma_center": true
+      },
+      {
+        "hospital_name": "Harborview Medical Center",
+        "address_latitude_longitude": "325 9th Ave, Seattle, 47.6042 N, 122.3242 W",
+        "contact_number_frequency": "(555) 901-9900 / State EMS Ch 8",
+        "air_ambulance_helipad": true,
+        "burn_center": true,
+        "trauma_center": true
+      }
+    ],
+    "6_special_medical_emergency_procedures": "Under freezing night conditions (28°F overnight) and toxic Chlorine threat, heated water decontamination trailers and active warming blankets must be operated continuously at the Warm Decon Station to prevent suit icing and hypothermia. Any exposure to Chlorine vapor requires immediate inhalation treatment with humidified oxygen and urgent transport to Harborview Medical Center. Airlift Northwest Helicopter 1 is positioned at Skykomish High School Football Field LZ.",
+    "7_prepared_by": {
+      "name": "Captain David Miller",
+      "position_title": "Medical Unit Leader",
+      "signature": "David Miller",
+      "date_time": "11/02/2026 16:30"
+    },
+    "8_approved_by_safety_officer": {
+      "name": "Safety Officer Carl Stevens",
+      "signature": "Carl Stevens",
+      "date_time": "11/02/2026 17:15"
+    },
+    "iap_page_number": "5"
+  }
+}

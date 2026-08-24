@@ -1,0 +1,21 @@
+{
+  "ics_208_ground_truth": {
+    "1_incident_name": "Whispering Pines Derailment",
+    "2_operational_period": {
+      "date_from": "07/07/2026",
+      "date_to": "07/08/2026",
+      "time_from": "18:00",
+      "time_to": "06:00"
+    },
+    "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Place primary tactical focus on air-monitoring metrics and localized vapor suppression, particularly during the transition into night-shift hours when atmospheric inversion layers can trap Benzene vapors closer to the ground. Mandate Level B SCBA PPE within the 300-foot exclusion zone. Mandatory buddy system and continuous photoionization detector air monitoring required for all entry crews along creek banks.",
+    "4_site_safety_plan_required": true,
+    "approved_site_safety_plan_located_at": "Mobile Command Post inside the Forward Operations Briefing Trailer",
+    "5_prepared_by": {
+      "name": "Captain R. Mendez",
+      "position_title": "Safety Officer",
+      "signature": "R. Mendez",
+      "date_time": "07/07/2026 16:30"
+    },
+    "iap_page_number": "6"
+  }
+}

@@ -1,6 +1,7 @@
 """Tests for async job submission and status endpoints."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from app.core.config import API_PREFIX
 
 
