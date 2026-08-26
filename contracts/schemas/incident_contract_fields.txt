@@ -1,0 +1,1522 @@
+================================================================================
+FIREFORM INCIDENT CONTRACT - ALL FIELDS REFERENCE
+================================================================================
+
+Total Unique Field Paths: 677
+Total Top-Level Sections: 37
+
+TOP-LEVEL SECTIONS OVERVIEW:
+----------------------------------------
+  • schema_version
+  • schema_name
+  • extraction_metadata
+  • report_metadata
+  • incident
+  • dispatch
+  • location
+  • actions_taken
+  • responding_agencies
+  • units
+  • resources_summary
+  • fire
+  • explosion
+  • risk_reduction
+  • structure
+  • wildland
+  • exposures
+  • casualties
+  • rescues
+  • evacuation_displacement
+  • ems
+  • hazmat
+  • emerging_hazards
+  • investigation
+  • persons_involved
+  • mobile_property
+  • losses
+  • weather
+  • environmental_impact
+  • infrastructure_impact
+  • near_miss_and_safety
+  • situation_status
+  • lessons_learned
+  • follow_up
+  • periodic_reporting
+  • attachments
+  • custom_fields
+
+================================================================================
+1. HIERARCHICAL STRUCTURE (OUTLINE VIEW)
+================================================================================
+
+schema_version
+schema_name
+extraction_metadata:
+  extract_id
+  input_id
+  input_type
+  extracted_at
+  llm_model
+  confidence_score
+  completeness:
+    overall_percent
+    missing_fields (list)
+    low_confidence_fields (list)
+    inferred_fields (list)
+report_metadata:
+  report_id
+  incident_number
+  external_ids (list):
+    scheme
+    value
+  report_date
+  report_time
+  report_status
+  reporting_unit:
+    station_name
+    station_id
+    agency_name
+    agency_id
+    agency_type
+  prepared_by (list):
+    name
+    badge_number
+    rank
+    role
+    assignment
+    contact_number
+    signature_captured
+  officer_in_charge:
+    name
+    badge_number
+    rank
+    role
+    assignment
+    contact_number
+    signature_captured
+  reviewed_by (list):
+    name
+    badge_number
+    rank
+    role
+    reviewed_at
+    approved
+  submission_log (list):
+    form_type
+    submitted_at
+    submitted_to
+incident:
+  name
+  types (list):
+    primary
+    category
+    subcategory
+    codes (list):
+      scheme
+      code
+      label
+  special_modifiers (list)
+  false_alarm:
+    reason
+    reason_description
+  special_service_type
+  chimney_fire
+  timezone
+  discovered_datetime
+  how_discovered
+  delay_ignition_to_discovery
+  delay_discovery_to_call
+  start_datetime
+  alarm_datetime
+  first_arrival_datetime
+  command_established_datetime
+  sizeup_complete_datetime
+  water_on_fire_datetime
+  primary_search_begin_datetime
+  primary_search_complete_datetime
+  knocked_down_datetime
+  containment_datetime
+  controlled_datetime
+  extrication_complete_datetime
+  suppression_complete_datetime
+  loss_stopped_datetime
+  stop_message_datetime
+  cleared_datetime
+  closed_datetime
+  total_duration_hours
+  alarm_level
+  shift_or_platoon
+  district
+  people_present
+  animals_rescued
+  animals_deceased
+  narrative
+  narrative_impediment
+  narrative_outcome
+  raw_transcript
+dispatch:
+  psap_id
+  dispatch_center
+  cad_event_id
+  call_received_datetime
+  call_answered_datetime
+  call_created_datetime
+  first_unit_dispatched_datetime
+  call_origin
+  automatic_alarm
+  incident_type_at_dispatch
+  determinate_code
+  priority_at_call
+  dispatcher_comments (list):
+    comment
+    timestamp
+location:
+  location_type
+  address
+  cross_streets (list)
+  nearest_landmark
+  city
+  district_or_zone
+  county
+  state
+  country
+  postal_code
+  census_area
+  coordinates:
+    latitude
+    longitude
+    accuracy_meters
+  ignition_point_coordinates:
+    latitude
+    longitude
+    accuracy_meters
+  grid_reference:
+    scheme
+    value
+  elevation_m
+  legal_description
+  jurisdiction:
+    federal
+    state
+    private
+    tribal
+  ownership_at_origin
+  population_density
+  property_type
+  property_use
+  property_use_codes (list):
+    scheme
+    code
+    label
+  mixed_use
+  over_border:
+    is_over_border
+    other_service_name
+    other_service_incident_number
+actions_taken:
+  actions (list):
+    category
+    description
+    codes (list):
+      scheme
+      code
+      label
+  no_action_reason
+responding_agencies:
+  primary_agency
+  all_agencies (list):
+    agency_name
+    agency_type
+    role
+    personnel_count
+    incident_number_at_agency
+  mutual_aid_activated
+  aid_direction
+  aid_type
+  non_fd_entities (list)
+  unified_command
+  incident_commander:
+    name
+    agency
+    position
+units (list):
+  unit_id
+  unit_name
+  agency_name
+  apparatus_type
+  use
+  personnel_count
+  personnel (list):
+    personnel_id
+    name
+    rank
+    role
+  response_mode
+  canceled_enroute
+  dispatched_datetime
+  enroute_datetime
+  arrived_datetime
+  staged_datetime
+  at_patient_datetime
+  enroute_hospital_datetime
+  arrived_hospital_datetime
+  transfer_of_care_datetime
+  cleared_datetime
+  in_service_datetime
+  turnout_seconds
+  travel_seconds
+  transport_mode
+  hospital_destination
+  actions_taken (list)
+resources_summary:
+  total_personnel
+  personnel_breakdown:
+    firefighters
+    officers
+    engineers_operators
+    ems_personnel
+    incident_command
+    support_staff
+  apparatus_counts:
+    suppression
+    ems
+    other
+  crew_types (list)
+  counts_include_aid_received
+fire:
+  cause_category
+  cause_specific
+  cause_codes (list):
+    scheme
+    code
+    label
+  cause_certainty
+  arson_suspected
+  area_of_origin
+  heat_source
+  ignition_power_source
+  item_first_ignited
+  material_first_ignited
+  multiple_seats_of_fire
+  human_factors (list)
+  person_involved_age
+  person_involved_sex
+  contributing_factors (list)
+  equipment_involved:
+    involved
+    equipment_type
+    brand
+    model
+    serial_number
+    year
+    power_source
+    portability
+  on_site_materials (list)
+  fuel_types (list)
+  fire_spread_directions (list)
+  rate_of_spread
+  rate_of_spread_m_per_min
+  flame_length_m
+  spotting_distance_km
+  unusual_behaviors (list)
+  rapid_growth_cause
+  fire_suppression_factors (list)
+  suppression_operations:
+    water_supply_type
+    water_used_l
+    extinguishing_agents (list)
+    suppression_appliances (list)
+    equipment_used (list):
+      equipment_type
+      count
+    ba_wearers_count
+    firefighting_delay:
+      occurred
+      reason
+    public_action_before_arrival
+explosion:
+  occurred
+  cause
+  stage
+  containers_involved (list)
+risk_reduction:
+  smoke_alarm:
+    presence
+    alarm_type
+    power_supply
+    working
+    operation
+    effectiveness
+    failure_reason
+    occupant_response
+  fire_alarm:
+    presence
+    alarm_type
+    monitored
+    operation
+    failure_reason
+  other_alarm:
+    presence
+    alarm_type
+  suppression_system:
+    presence
+    system_type
+    coverage
+    operation
+    sprinkler_heads_activated
+    effective
+    failure_reason
+  cooking_suppression:
+    presence
+    system_type
+  fixed_firefighting_facilities (list):
+    facility_type
+    used
+    worked
+    failure_reason
+structure:
+  is_structure_involved
+  structures_threatened
+  structures_damaged
+  structures_destroyed
+  structures_protected
+  buildings_involved
+  building_status
+  construction_type
+  construction_codes (list):
+    scheme
+    code
+    label
+  special_construction_method
+  stories_above_grade
+  stories_below_grade
+  total_floor_area_m2
+  main_floor_area_m2
+  residential_units
+  occupancy_at_time
+  fire_safety_regulations_apply
+  means_of_escape_condition
+  compartmentation_effective
+  story_of_origin
+  room_of_origin
+  room_of_origin_area_m2
+  floor_of_origin_area_m2
+  fire_spread_extent
+  item_contributing_most_to_spread
+  material_contributing_most_to_spread
+  arrival_conditions
+  progressed_beyond_arrival
+  smoke_damage_only
+  stories_damaged:
+    minor
+    significant
+    heavy
+    extreme
+  damage_area_on_arrival_m2
+  damage_area_at_stop_m2
+wildland:
+  is_wildland_incident
+  discovery_datetime
+  area_type
+  area_burned_ha
+  land_ownership_breakdown:
+    federal_ha
+    state_ha
+    private_ha
+    tribal_ha
+    other_ha
+  percent_contained
+  fire_danger_rating
+  fuel_model
+  fuel_moisture_percent
+  complexity_level
+  slope_position
+  aspect
+  person_responsible:
+    status
+    age
+    sex
+    activity
+  right_of_way:
+    row_type
+    distance_m
+  crops_burned (list)
+  fire_lines:
+    primary_line_km
+    secondary_line_km
+    dozer_line_km
+    hand_line_km
+  aerial_operations:
+    water_dropped_l
+    retardant_dropped_l
+    total_flight_hours
+  containment_strategies (list)
+exposures (list):
+  exposure_number
+  exposure_type
+  item_damaged
+  address
+  coordinates:
+    latitude
+    longitude
+    accuracy_meters
+  property_use
+  people_present
+  damage_rating
+  people_displaced
+casualties:
+  civilian (list):
+    name
+    age
+    date_of_birth
+    sex
+    race_ethnicity
+    affiliation
+    injury_datetime
+    injury_type
+    primary_symptom
+    primary_body_part
+    severity
+    cause
+    human_factors (list)
+    contributing_factors (list)
+    activity_when_injured
+    location_at_ignition
+    story_at_start
+    story_where_injured
+    location_where_found
+    cause_of_failure_to_escape
+    disposition
+    transported
+    hospital
+    fatal_circumstances
+    death_certificate_reconciled
+  responder (list):
+    personnel_id
+    name
+    age
+    sex
+    agency
+    role
+    rank
+    career_or_volunteer
+    years_of_service
+    usual_assignment
+    physical_condition_prior
+    prior_responses_24h
+    injury_datetime
+    injury_type
+    primary_symptom
+    primary_body_part
+    severity
+    cause
+    contributing_factor
+    object_involved
+    activity_at_injury
+    where_occurred
+    story_where_injured
+    protective_equipment_failure:
+      failed
+      item
+      problem
+    duty_status
+    treatment
+    taken_to
+    transported
+    hospital
+    hospitalized_overnight
+    return_to_duty_date
+    osha_recordable
+    exposure_only
+  total_civilian_injuries
+  total_civilian_fatalities
+  total_responder_injuries
+  total_responder_fatalities
+rescues (list):
+  person_type
+  rescue_type
+  presence_known_beforehand
+  age
+  sex
+  primary_mode
+  actions (list)
+  impediments (list)
+  room_type
+  elevation
+  removal_path
+  relative_time_to_suppression
+  gas_isolation
+  mayday:
+    called
+    relative_time
+    rit_activated
+  resulting_casualty
+evacuation_displacement:
+  evacuation_occurred
+  evacuation_status
+  people_evacuated_without_assistance
+  people_evacuated_with_assistance
+  people_assisted_by_fd
+  total_people_evacuated
+  buildings_evacuated
+  evacuation_delay_reason
+  evacuation_completion_minutes
+  people_sheltering_in_place
+  people_in_temporary_shelters
+  people_trapped
+  people_missing
+  people_displaced
+  displacement_causes (list)
+ems:
+  ems_response_required
+  patients (list):
+    patient_ref_id
+    nemsis_report_id
+    age_approx
+    date_of_birth
+    sex
+    chief_complaint
+    provider_impression
+    injury_intent
+    body_sites (list):
+      site
+      injury_type
+    procedures (list)
+    cardiac_arrest:
+      occurred
+      pre_arrival
+      witnessed
+      bystander_cpr
+      initial_rhythm
+    safety_equipment_used (list)
+    highest_care_level_on_scene
+    patient_status
+    at_patient_datetime
+    transfer_of_care_datetime
+    disposition
+    transported
+    hospital_destination
+  total_patients
+  ems_agency_responded
+  nemsis_report_required
+  nemsis_report_ids (list)
+hazmat:
+  involved
+  materials (list):
+    name
+    un_number
+    dot_hazard_class
+    cas_number
+    physical_state
+    container_type
+    container_capacity:
+      value
+      unit
+    released
+    amount_released:
+      value
+      unit
+    released_into
+    released_from_story
+    released_inside_structure
+  ignition_or_release_first
+  release_cause
+  release_factors (list)
+  mitigation_factors (list)
+  actions_taken (list)
+  equipment_involved_in_release:
+    involved
+    equipment_type
+    brand
+    model
+    year
+  area_affected:
+    value
+    unit
+  area_evacuated:
+    value
+    unit
+  epa_reportable_quantity_exceeded
+  disposition
+emerging_hazards (list):
+  category
+  subtype
+  source_or_target
+  suppression_approach
+  reignition_occurred
+  ev_crash_involved
+  lightning_suspected
+  notes
+investigation:
+  investigation_needed
+  investigation_types (list)
+  investigation_ongoing
+  case_status
+  agency_referred_to:
+    name
+    case_number
+  law_enforcement_notified
+  evidence_collected
+  laboratory_used
+  nibrs_report_required
+  arson:
+    suspected
+    confirmed
+    motivation_factors (list)
+    group_involvement
+    entry_method
+    extent_of_involvement_on_arrival
+    incendiary_device:
+      container
+      ignition_delay_mechanism
+      fuel
+    material_availability
+    initial_observations (list)
+    other_indicators (list)
+    juvenile_firesetter:
+      involved
+      subjects (list):
+        age
+        sex
+        family_type
+        risk_factors (list)
+        disposition
+  notes
+persons_involved (list):
+  role
+  name
+  business_name
+  address
+  same_address_as_incident
+  phone
+  email
+  insurance:
+    insured
+    company
+    policy_number
+mobile_property (list):
+  involvement
+  property_type
+  make
+  model
+  year
+  fuel_type
+  license_plate
+  license_region
+  vin
+  dot_icc_number
+  reported_stolen
+  appeared_abandoned
+  occupants
+  extrication:
+    performed
+    method
+    vehicle_position
+    time_taken_minutes
+losses:
+  no_loss
+  property_loss
+  contents_loss
+  pre_incident_property_value:
+    amount
+    currency
+  pre_incident_contents_value:
+    amount
+    currency
+  property_saved
+  other_costs:
+    amount
+    currency
+  estimate_method
+weather:
+  on_arrival:
+    datetime
+    temperature_c
+    relative_humidity_percent
+    wind_speed_kph
+    wind_gusts_kph
+    wind_direction
+    haines_index
+  worst_conditions:
+    datetime
+    temperature_c
+    relative_humidity_percent
+    wind_speed_kph
+    wind_gusts_kph
+    wind_direction
+    haines_index
+  weather_type
+  factors_influencing_fire (list)
+environmental_impact:
+  habitat_affected_ha
+  watershed_impact
+  soil_erosion_risk
+  sensitive_species_affected (list)
+  air_quality_impact
+  water_body_affected
+infrastructure_impact:
+  items (list):
+    infrastructure_type
+    unit
+    quantity
+    severity
+near_miss_and_safety:
+  near_miss_events (list):
+    description
+    date
+    contributing_factors (list)
+    lessons_learned
+    corrective_action
+  safety_breaches
+  maydays_count
+  attacks_on_personnel:
+    occurred
+    attack_type
+    serious_injuries
+    slight_injuries
+  weather_related_risks (list)
+situation_status:
+  report_version
+  report_number
+  period_from
+  period_to
+  complexity_level
+  imt_type
+  significant_events
+  primary_hazards
+  threat_management (list)
+  projected_activity:
+    next_12_hours
+    next_24_hours
+    next_48_hours
+    next_72_hours
+    beyond_72_hours
+  strategic_objectives
+  threat_summary
+  critical_resource_needs (list)
+  planned_actions
+  projected_final_size_ha
+  anticipated_completion_date
+  demobilization_start_date
+  costs_to_date:
+    amount
+    currency
+  projected_final_cost:
+    amount
+    currency
+lessons_learned:
+  successful_tactics (list)
+  areas_for_improvement (list)
+  recommendations (list)
+follow_up:
+  mop_up:
+    percent_complete
+    estimated_completion_date
+    personnel_assigned
+  rehabilitation:
+    erosion_control_ha
+    reseeding_ha
+    hazard_tree_removal_required
+  next_inspection_date
+periodic_reporting:
+  contributes_to_monthly_report
+  contributes_to_quarterly_report
+  contributes_to_annual_report
+  neris_submitted
+  neris_submitted_at
+  state_submitted
+  state_submitted_at
+attachments:
+  maps
+  photos_count
+  weather_charts
+  resource_tracking_logs
+  incident_action_plans
+  attachment_refs (list):
+    ref_id
+    filename
+    content_type
+    size_bytes
+custom_fields:
+
+================================================================================
+2. FLAT DOT-NOTATION PATHS
+================================================================================
+
+schema_version
+schema_name
+extraction_metadata.extract_id
+extraction_metadata.input_id
+extraction_metadata.input_type
+extraction_metadata.extracted_at
+extraction_metadata.llm_model
+extraction_metadata.confidence_score
+extraction_metadata.completeness.overall_percent
+extraction_metadata.completeness.missing_fields[]
+extraction_metadata.completeness.low_confidence_fields[]
+extraction_metadata.completeness.inferred_fields[]
+report_metadata.report_id
+report_metadata.incident_number
+report_metadata.external_ids[].scheme
+report_metadata.external_ids[].value
+report_metadata.report_date
+report_metadata.report_time
+report_metadata.report_status
+report_metadata.reporting_unit.station_name
+report_metadata.reporting_unit.station_id
+report_metadata.reporting_unit.agency_name
+report_metadata.reporting_unit.agency_id
+report_metadata.reporting_unit.agency_type
+report_metadata.prepared_by[].name
+report_metadata.prepared_by[].badge_number
+report_metadata.prepared_by[].rank
+report_metadata.prepared_by[].role
+report_metadata.prepared_by[].assignment
+report_metadata.prepared_by[].contact_number
+report_metadata.prepared_by[].signature_captured
+report_metadata.officer_in_charge.name
+report_metadata.officer_in_charge.badge_number
+report_metadata.officer_in_charge.rank
+report_metadata.officer_in_charge.role
+report_metadata.officer_in_charge.assignment
+report_metadata.officer_in_charge.contact_number
+report_metadata.officer_in_charge.signature_captured
+report_metadata.reviewed_by[].name
+report_metadata.reviewed_by[].badge_number
+report_metadata.reviewed_by[].rank
+report_metadata.reviewed_by[].role
+report_metadata.reviewed_by[].reviewed_at
+report_metadata.reviewed_by[].approved
+report_metadata.submission_log[].form_type
+report_metadata.submission_log[].submitted_at
+report_metadata.submission_log[].submitted_to
+incident.name
+incident.types[].primary
+incident.types[].category
+incident.types[].subcategory
+incident.types[].codes[].scheme
+incident.types[].codes[].code
+incident.types[].codes[].label
+incident.special_modifiers[]
+incident.false_alarm.reason
+incident.false_alarm.reason_description
+incident.special_service_type
+incident.chimney_fire
+incident.timezone
+incident.discovered_datetime
+incident.how_discovered
+incident.delay_ignition_to_discovery
+incident.delay_discovery_to_call
+incident.start_datetime
+incident.alarm_datetime
+incident.first_arrival_datetime
+incident.command_established_datetime
+incident.sizeup_complete_datetime
+incident.water_on_fire_datetime
+incident.primary_search_begin_datetime
+incident.primary_search_complete_datetime
+incident.knocked_down_datetime
+incident.containment_datetime
+incident.controlled_datetime
+incident.extrication_complete_datetime
+incident.suppression_complete_datetime
+incident.loss_stopped_datetime
+incident.stop_message_datetime
+incident.cleared_datetime
+incident.closed_datetime
+incident.total_duration_hours
+incident.alarm_level
+incident.shift_or_platoon
+incident.district
+incident.people_present
+incident.animals_rescued
+incident.animals_deceased
+incident.narrative
+incident.narrative_impediment
+incident.narrative_outcome
+incident.raw_transcript
+dispatch.psap_id
+dispatch.dispatch_center
+dispatch.cad_event_id
+dispatch.call_received_datetime
+dispatch.call_answered_datetime
+dispatch.call_created_datetime
+dispatch.first_unit_dispatched_datetime
+dispatch.call_origin
+dispatch.automatic_alarm
+dispatch.incident_type_at_dispatch
+dispatch.determinate_code
+dispatch.priority_at_call
+dispatch.dispatcher_comments[].comment
+dispatch.dispatcher_comments[].timestamp
+location.location_type
+location.address
+location.cross_streets[]
+location.nearest_landmark
+location.city
+location.district_or_zone
+location.county
+location.state
+location.country
+location.postal_code
+location.census_area
+location.coordinates.latitude
+location.coordinates.longitude
+location.coordinates.accuracy_meters
+location.ignition_point_coordinates.latitude
+location.ignition_point_coordinates.longitude
+location.ignition_point_coordinates.accuracy_meters
+location.grid_reference.scheme
+location.grid_reference.value
+location.elevation_m
+location.legal_description
+location.jurisdiction.federal
+location.jurisdiction.state
+location.jurisdiction.private
+location.jurisdiction.tribal
+location.ownership_at_origin
+location.population_density
+location.property_type
+location.property_use
+location.property_use_codes[].scheme
+location.property_use_codes[].code
+location.property_use_codes[].label
+location.mixed_use
+location.over_border.is_over_border
+location.over_border.other_service_name
+location.over_border.other_service_incident_number
+actions_taken.actions[].category
+actions_taken.actions[].description
+actions_taken.actions[].codes[].scheme
+actions_taken.actions[].codes[].code
+actions_taken.actions[].codes[].label
+actions_taken.no_action_reason
+responding_agencies.primary_agency
+responding_agencies.all_agencies[].agency_name
+responding_agencies.all_agencies[].agency_type
+responding_agencies.all_agencies[].role
+responding_agencies.all_agencies[].personnel_count
+responding_agencies.all_agencies[].incident_number_at_agency
+responding_agencies.mutual_aid_activated
+responding_agencies.aid_direction
+responding_agencies.aid_type
+responding_agencies.non_fd_entities[]
+responding_agencies.unified_command
+responding_agencies.incident_commander.name
+responding_agencies.incident_commander.agency
+responding_agencies.incident_commander.position
+units[].unit_id
+units[].unit_name
+units[].agency_name
+units[].apparatus_type
+units[].use
+units[].personnel_count
+units[].personnel[].personnel_id
+units[].personnel[].name
+units[].personnel[].rank
+units[].personnel[].role
+units[].response_mode
+units[].canceled_enroute
+units[].dispatched_datetime
+units[].enroute_datetime
+units[].arrived_datetime
+units[].staged_datetime
+units[].at_patient_datetime
+units[].enroute_hospital_datetime
+units[].arrived_hospital_datetime
+units[].transfer_of_care_datetime
+units[].cleared_datetime
+units[].in_service_datetime
+units[].turnout_seconds
+units[].travel_seconds
+units[].transport_mode
+units[].hospital_destination
+units[].actions_taken[]
+resources_summary.total_personnel
+resources_summary.personnel_breakdown.firefighters
+resources_summary.personnel_breakdown.officers
+resources_summary.personnel_breakdown.engineers_operators
+resources_summary.personnel_breakdown.ems_personnel
+resources_summary.personnel_breakdown.incident_command
+resources_summary.personnel_breakdown.support_staff
+resources_summary.apparatus_counts.suppression
+resources_summary.apparatus_counts.ems
+resources_summary.apparatus_counts.other
+resources_summary.crew_types[]
+resources_summary.counts_include_aid_received
+fire.cause_category
+fire.cause_specific
+fire.cause_codes[].scheme
+fire.cause_codes[].code
+fire.cause_codes[].label
+fire.cause_certainty
+fire.arson_suspected
+fire.area_of_origin
+fire.heat_source
+fire.ignition_power_source
+fire.item_first_ignited
+fire.material_first_ignited
+fire.multiple_seats_of_fire
+fire.human_factors[]
+fire.person_involved_age
+fire.person_involved_sex
+fire.contributing_factors[]
+fire.equipment_involved.involved
+fire.equipment_involved.equipment_type
+fire.equipment_involved.brand
+fire.equipment_involved.model
+fire.equipment_involved.serial_number
+fire.equipment_involved.year
+fire.equipment_involved.power_source
+fire.equipment_involved.portability
+fire.on_site_materials[]
+fire.fuel_types[]
+fire.fire_spread_directions[]
+fire.rate_of_spread
+fire.rate_of_spread_m_per_min
+fire.flame_length_m
+fire.spotting_distance_km
+fire.unusual_behaviors[]
+fire.rapid_growth_cause
+fire.fire_suppression_factors[]
+fire.suppression_operations.water_supply_type
+fire.suppression_operations.water_used_l
+fire.suppression_operations.extinguishing_agents[]
+fire.suppression_operations.suppression_appliances[]
+fire.suppression_operations.equipment_used[].equipment_type
+fire.suppression_operations.equipment_used[].count
+fire.suppression_operations.ba_wearers_count
+fire.suppression_operations.firefighting_delay.occurred
+fire.suppression_operations.firefighting_delay.reason
+fire.suppression_operations.public_action_before_arrival
+explosion.occurred
+explosion.cause
+explosion.stage
+explosion.containers_involved[]
+risk_reduction.smoke_alarm.presence
+risk_reduction.smoke_alarm.alarm_type
+risk_reduction.smoke_alarm.power_supply
+risk_reduction.smoke_alarm.working
+risk_reduction.smoke_alarm.operation
+risk_reduction.smoke_alarm.effectiveness
+risk_reduction.smoke_alarm.failure_reason
+risk_reduction.smoke_alarm.occupant_response
+risk_reduction.fire_alarm.presence
+risk_reduction.fire_alarm.alarm_type
+risk_reduction.fire_alarm.monitored
+risk_reduction.fire_alarm.operation
+risk_reduction.fire_alarm.failure_reason
+risk_reduction.other_alarm.presence
+risk_reduction.other_alarm.alarm_type
+risk_reduction.suppression_system.presence
+risk_reduction.suppression_system.system_type
+risk_reduction.suppression_system.coverage
+risk_reduction.suppression_system.operation
+risk_reduction.suppression_system.sprinkler_heads_activated
+risk_reduction.suppression_system.effective
+risk_reduction.suppression_system.failure_reason
+risk_reduction.cooking_suppression.presence
+risk_reduction.cooking_suppression.system_type
+risk_reduction.fixed_firefighting_facilities[].facility_type
+risk_reduction.fixed_firefighting_facilities[].used
+risk_reduction.fixed_firefighting_facilities[].worked
+risk_reduction.fixed_firefighting_facilities[].failure_reason
+structure.is_structure_involved
+structure.structures_threatened
+structure.structures_damaged
+structure.structures_destroyed
+structure.structures_protected
+structure.buildings_involved
+structure.building_status
+structure.construction_type
+structure.construction_codes[].scheme
+structure.construction_codes[].code
+structure.construction_codes[].label
+structure.special_construction_method
+structure.stories_above_grade
+structure.stories_below_grade
+structure.total_floor_area_m2
+structure.main_floor_area_m2
+structure.residential_units
+structure.occupancy_at_time
+structure.fire_safety_regulations_apply
+structure.means_of_escape_condition
+structure.compartmentation_effective
+structure.story_of_origin
+structure.room_of_origin
+structure.room_of_origin_area_m2
+structure.floor_of_origin_area_m2
+structure.fire_spread_extent
+structure.item_contributing_most_to_spread
+structure.material_contributing_most_to_spread
+structure.arrival_conditions
+structure.progressed_beyond_arrival
+structure.smoke_damage_only
+structure.stories_damaged.minor
+structure.stories_damaged.significant
+structure.stories_damaged.heavy
+structure.stories_damaged.extreme
+structure.damage_area_on_arrival_m2
+structure.damage_area_at_stop_m2
+wildland.is_wildland_incident
+wildland.discovery_datetime
+wildland.area_type
+wildland.area_burned_ha
+wildland.land_ownership_breakdown.federal_ha
+wildland.land_ownership_breakdown.state_ha
+wildland.land_ownership_breakdown.private_ha
+wildland.land_ownership_breakdown.tribal_ha
+wildland.land_ownership_breakdown.other_ha
+wildland.percent_contained
+wildland.fire_danger_rating
+wildland.fuel_model
+wildland.fuel_moisture_percent
+wildland.complexity_level
+wildland.slope_position
+wildland.aspect
+wildland.person_responsible.status
+wildland.person_responsible.age
+wildland.person_responsible.sex
+wildland.person_responsible.activity
+wildland.right_of_way.row_type
+wildland.right_of_way.distance_m
+wildland.crops_burned[]
+wildland.fire_lines.primary_line_km
+wildland.fire_lines.secondary_line_km
+wildland.fire_lines.dozer_line_km
+wildland.fire_lines.hand_line_km
+wildland.aerial_operations.water_dropped_l
+wildland.aerial_operations.retardant_dropped_l
+wildland.aerial_operations.total_flight_hours
+wildland.containment_strategies[]
+exposures[].exposure_number
+exposures[].exposure_type
+exposures[].item_damaged
+exposures[].address
+exposures[].coordinates.latitude
+exposures[].coordinates.longitude
+exposures[].coordinates.accuracy_meters
+exposures[].property_use
+exposures[].people_present
+exposures[].damage_rating
+exposures[].people_displaced
+casualties.civilian[].name
+casualties.civilian[].age
+casualties.civilian[].date_of_birth
+casualties.civilian[].sex
+casualties.civilian[].race_ethnicity
+casualties.civilian[].affiliation
+casualties.civilian[].injury_datetime
+casualties.civilian[].injury_type
+casualties.civilian[].primary_symptom
+casualties.civilian[].primary_body_part
+casualties.civilian[].severity
+casualties.civilian[].cause
+casualties.civilian[].human_factors[]
+casualties.civilian[].contributing_factors[]
+casualties.civilian[].activity_when_injured
+casualties.civilian[].location_at_ignition
+casualties.civilian[].story_at_start
+casualties.civilian[].story_where_injured
+casualties.civilian[].location_where_found
+casualties.civilian[].cause_of_failure_to_escape
+casualties.civilian[].disposition
+casualties.civilian[].transported
+casualties.civilian[].hospital
+casualties.civilian[].fatal_circumstances
+casualties.civilian[].death_certificate_reconciled
+casualties.responder[].personnel_id
+casualties.responder[].name
+casualties.responder[].age
+casualties.responder[].sex
+casualties.responder[].agency
+casualties.responder[].role
+casualties.responder[].rank
+casualties.responder[].career_or_volunteer
+casualties.responder[].years_of_service
+casualties.responder[].usual_assignment
+casualties.responder[].physical_condition_prior
+casualties.responder[].prior_responses_24h
+casualties.responder[].injury_datetime
+casualties.responder[].injury_type
+casualties.responder[].primary_symptom
+casualties.responder[].primary_body_part
+casualties.responder[].severity
+casualties.responder[].cause
+casualties.responder[].contributing_factor
+casualties.responder[].object_involved
+casualties.responder[].activity_at_injury
+casualties.responder[].where_occurred
+casualties.responder[].story_where_injured
+casualties.responder[].protective_equipment_failure.failed
+casualties.responder[].protective_equipment_failure.item
+casualties.responder[].protective_equipment_failure.problem
+casualties.responder[].duty_status
+casualties.responder[].treatment
+casualties.responder[].taken_to
+casualties.responder[].transported
+casualties.responder[].hospital
+casualties.responder[].hospitalized_overnight
+casualties.responder[].return_to_duty_date
+casualties.responder[].osha_recordable
+casualties.responder[].exposure_only
+casualties.total_civilian_injuries
+casualties.total_civilian_fatalities
+casualties.total_responder_injuries
+casualties.total_responder_fatalities
+rescues[].person_type
+rescues[].rescue_type
+rescues[].presence_known_beforehand
+rescues[].age
+rescues[].sex
+rescues[].primary_mode
+rescues[].actions[]
+rescues[].impediments[]
+rescues[].room_type
+rescues[].elevation
+rescues[].removal_path
+rescues[].relative_time_to_suppression
+rescues[].gas_isolation
+rescues[].mayday.called
+rescues[].mayday.relative_time
+rescues[].mayday.rit_activated
+rescues[].resulting_casualty
+evacuation_displacement.evacuation_occurred
+evacuation_displacement.evacuation_status
+evacuation_displacement.people_evacuated_without_assistance
+evacuation_displacement.people_evacuated_with_assistance
+evacuation_displacement.people_assisted_by_fd
+evacuation_displacement.total_people_evacuated
+evacuation_displacement.buildings_evacuated
+evacuation_displacement.evacuation_delay_reason
+evacuation_displacement.evacuation_completion_minutes
+evacuation_displacement.people_sheltering_in_place
+evacuation_displacement.people_in_temporary_shelters
+evacuation_displacement.people_trapped
+evacuation_displacement.people_missing
+evacuation_displacement.people_displaced
+evacuation_displacement.displacement_causes[]
+ems.ems_response_required
+ems.patients[].patient_ref_id
+ems.patients[].nemsis_report_id
+ems.patients[].age_approx
+ems.patients[].date_of_birth
+ems.patients[].sex
+ems.patients[].chief_complaint
+ems.patients[].provider_impression
+ems.patients[].injury_intent
+ems.patients[].body_sites[].site
+ems.patients[].body_sites[].injury_type
+ems.patients[].procedures[]
+ems.patients[].cardiac_arrest.occurred
+ems.patients[].cardiac_arrest.pre_arrival
+ems.patients[].cardiac_arrest.witnessed
+ems.patients[].cardiac_arrest.bystander_cpr
+ems.patients[].cardiac_arrest.initial_rhythm
+ems.patients[].safety_equipment_used[]
+ems.patients[].highest_care_level_on_scene
+ems.patients[].patient_status
+ems.patients[].at_patient_datetime
+ems.patients[].transfer_of_care_datetime
+ems.patients[].disposition
+ems.patients[].transported
+ems.patients[].hospital_destination
+ems.total_patients
+ems.ems_agency_responded
+ems.nemsis_report_required
+ems.nemsis_report_ids[]
+hazmat.involved
+hazmat.materials[].name
+hazmat.materials[].un_number
+hazmat.materials[].dot_hazard_class
+hazmat.materials[].cas_number
+hazmat.materials[].physical_state
+hazmat.materials[].container_type
+hazmat.materials[].container_capacity.value
+hazmat.materials[].container_capacity.unit
+hazmat.materials[].released
+hazmat.materials[].amount_released.value
+hazmat.materials[].amount_released.unit
+hazmat.materials[].released_into
+hazmat.materials[].released_from_story
+hazmat.materials[].released_inside_structure
+hazmat.ignition_or_release_first
+hazmat.release_cause
+hazmat.release_factors[]
+hazmat.mitigation_factors[]
+hazmat.actions_taken[]
+hazmat.equipment_involved_in_release.involved
+hazmat.equipment_involved_in_release.equipment_type
+hazmat.equipment_involved_in_release.brand
+hazmat.equipment_involved_in_release.model
+hazmat.equipment_involved_in_release.year
+hazmat.area_affected.value
+hazmat.area_affected.unit
+hazmat.area_evacuated.value
+hazmat.area_evacuated.unit
+hazmat.epa_reportable_quantity_exceeded
+hazmat.disposition
+emerging_hazards[].category
+emerging_hazards[].subtype
+emerging_hazards[].source_or_target
+emerging_hazards[].suppression_approach
+emerging_hazards[].reignition_occurred
+emerging_hazards[].ev_crash_involved
+emerging_hazards[].lightning_suspected
+emerging_hazards[].notes
+investigation.investigation_needed
+investigation.investigation_types[]
+investigation.investigation_ongoing
+investigation.case_status
+investigation.agency_referred_to.name
+investigation.agency_referred_to.case_number
+investigation.law_enforcement_notified
+investigation.evidence_collected
+investigation.laboratory_used
+investigation.nibrs_report_required
+investigation.arson.suspected
+investigation.arson.confirmed
+investigation.arson.motivation_factors[]
+investigation.arson.group_involvement
+investigation.arson.entry_method
+investigation.arson.extent_of_involvement_on_arrival
+investigation.arson.incendiary_device.container
+investigation.arson.incendiary_device.ignition_delay_mechanism
+investigation.arson.incendiary_device.fuel
+investigation.arson.material_availability
+investigation.arson.initial_observations[]
+investigation.arson.other_indicators[]
+investigation.arson.juvenile_firesetter.involved
+investigation.arson.juvenile_firesetter.subjects[].age
+investigation.arson.juvenile_firesetter.subjects[].sex
+investigation.arson.juvenile_firesetter.subjects[].family_type
+investigation.arson.juvenile_firesetter.subjects[].risk_factors[]
+investigation.arson.juvenile_firesetter.subjects[].disposition
+investigation.notes
+persons_involved[].role
+persons_involved[].name
+persons_involved[].business_name
+persons_involved[].address
+persons_involved[].same_address_as_incident
+persons_involved[].phone
+persons_involved[].email
+persons_involved[].insurance.insured
+persons_involved[].insurance.company
+persons_involved[].insurance.policy_number
+mobile_property[].involvement
+mobile_property[].property_type
+mobile_property[].make
+mobile_property[].model
+mobile_property[].year
+mobile_property[].fuel_type
+mobile_property[].license_plate
+mobile_property[].license_region
+mobile_property[].vin
+mobile_property[].dot_icc_number
+mobile_property[].reported_stolen
+mobile_property[].appeared_abandoned
+mobile_property[].occupants
+mobile_property[].extrication.performed
+mobile_property[].extrication.method
+mobile_property[].extrication.vehicle_position
+mobile_property[].extrication.time_taken_minutes
+losses.no_loss
+losses.property_loss
+losses.contents_loss
+losses.pre_incident_property_value.amount
+losses.pre_incident_property_value.currency
+losses.pre_incident_contents_value.amount
+losses.pre_incident_contents_value.currency
+losses.property_saved
+losses.other_costs.amount
+losses.other_costs.currency
+losses.estimate_method
+weather.on_arrival.datetime
+weather.on_arrival.temperature_c
+weather.on_arrival.relative_humidity_percent
+weather.on_arrival.wind_speed_kph
+weather.on_arrival.wind_gusts_kph
+weather.on_arrival.wind_direction
+weather.on_arrival.haines_index
+weather.worst_conditions.datetime
+weather.worst_conditions.temperature_c
+weather.worst_conditions.relative_humidity_percent
+weather.worst_conditions.wind_speed_kph
+weather.worst_conditions.wind_gusts_kph
+weather.worst_conditions.wind_direction
+weather.worst_conditions.haines_index
+weather.weather_type
+weather.factors_influencing_fire[]
+environmental_impact.habitat_affected_ha
+environmental_impact.watershed_impact
+environmental_impact.soil_erosion_risk
+environmental_impact.sensitive_species_affected[]
+environmental_impact.air_quality_impact
+environmental_impact.water_body_affected
+infrastructure_impact.items[].infrastructure_type
+infrastructure_impact.items[].unit
+infrastructure_impact.items[].quantity
+infrastructure_impact.items[].severity
+near_miss_and_safety.near_miss_events[].description
+near_miss_and_safety.near_miss_events[].date
+near_miss_and_safety.near_miss_events[].contributing_factors[]
+near_miss_and_safety.near_miss_events[].lessons_learned
+near_miss_and_safety.near_miss_events[].corrective_action
+near_miss_and_safety.safety_breaches
+near_miss_and_safety.maydays_count
+near_miss_and_safety.attacks_on_personnel.occurred
+near_miss_and_safety.attacks_on_personnel.attack_type
+near_miss_and_safety.attacks_on_personnel.serious_injuries
+near_miss_and_safety.attacks_on_personnel.slight_injuries
+near_miss_and_safety.weather_related_risks[]
+situation_status.report_version
+situation_status.report_number
+situation_status.period_from
+situation_status.period_to
+situation_status.complexity_level
+situation_status.imt_type
+situation_status.significant_events
+situation_status.primary_hazards
+situation_status.threat_management[]
+situation_status.projected_activity.next_12_hours
+situation_status.projected_activity.next_24_hours
+situation_status.projected_activity.next_48_hours
+situation_status.projected_activity.next_72_hours
+situation_status.projected_activity.beyond_72_hours
+situation_status.strategic_objectives
+situation_status.threat_summary
+situation_status.critical_resource_needs[]
+situation_status.planned_actions
+situation_status.projected_final_size_ha
+situation_status.anticipated_completion_date
+situation_status.demobilization_start_date
+situation_status.costs_to_date.amount
+situation_status.costs_to_date.currency
+situation_status.projected_final_cost.amount
+situation_status.projected_final_cost.currency
+lessons_learned.successful_tactics[]
+lessons_learned.areas_for_improvement[]
+lessons_learned.recommendations[]
+follow_up.mop_up.percent_complete
+follow_up.mop_up.estimated_completion_date
+follow_up.mop_up.personnel_assigned
+follow_up.rehabilitation.erosion_control_ha
+follow_up.rehabilitation.reseeding_ha
+follow_up.rehabilitation.hazard_tree_removal_required
+follow_up.next_inspection_date
+periodic_reporting.contributes_to_monthly_report
+periodic_reporting.contributes_to_quarterly_report
+periodic_reporting.contributes_to_annual_report
+periodic_reporting.neris_submitted
+periodic_reporting.neris_submitted_at
+periodic_reporting.state_submitted
+periodic_reporting.state_submitted_at
+attachments.maps
+attachments.photos_count
+attachments.weather_charts
+attachments.resource_tracking_logs
+attachments.incident_action_plans
+attachments.attachment_refs[].ref_id
+attachments.attachment_refs[].filename
+attachments.attachment_refs[].content_type
+attachments.attachment_refs[].size_bytes
