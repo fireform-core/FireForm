@@ -3,7 +3,6 @@ import os
 
 import requests
 from requests.exceptions import RequestException, Timeout
-
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
 from app.core.logging import get_logger
 
@@ -11,22 +10,38 @@ logger = get_logger(__name__)
 
 
 class LLM:
-    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None, model: str=None):
+    def __init__(self, transcript_text: str | None=None, target_fields: list | None=None, json_dict: dict | None=None, model: str | None=None):
         self._transcript_text = transcript_text
         self._target_fields = target_fields
         self._json = json_dict if json_dict is not None else {}
         # Optional per-request model override; falls back to OLLAMA_MODEL env.
         self._model = model
 
-    def build_prompt(self, current_field: str, current_type: str = "string"):
+    def build_prompt(self, current_field: str, field_type: type = str):
         """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        @params: current_type  -> hint to the LLM about the expected value shape (date, number, etc.).
+        This method is in charge of the prompt engineering. It creates a specific prompt
+        for each target field, taking into account the expected field type.
+
+        If the field type is `bool`, the LLM is explicitly instructed to return only
+        the literal string `True` or `False` — no fuzzy values like 'yes' or '1'.
+
+        @params:
+            current_field -> the name of the JSON field to extract.
+            field_type    -> the expected Python type (e.g. str, bool).
         """
         prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
         with open(prompt_path, "r") as f:
             template = f.read()
+            
+        current_type = "boolean" if field_type is bool else "string"
+
+        if field_type is bool:
+            bool_instruction = (
+                "\nIMPORTANT: This field is a boolean (checkbox or radio button). "
+                "You MUST respond with ONLY the literal word True or False. "
+                "Do not use 'Checked', 'yes', 'no', '1', '0', 'X', or any other value."
+            )
+            return template.format(field=current_field, type=current_type, text=self._transcript_text) + bool_instruction
 
         return template.format(field=current_field, type=current_type, text=self._transcript_text)
 
@@ -35,8 +50,9 @@ class LLM:
         max_retries = 3
 
         total_fields = len(self._target_fields)
-        for i, (field, field_type) in enumerate(self._target_fields.items(), 1):
-            prompt = self.build_prompt(field, field_type if isinstance(field_type, str) else "string")
+        for i, (field, field_val) in enumerate(self._target_fields.items(), 1):
+            field_type = field_val if isinstance(field_val, type) else str
+            prompt = self.build_prompt(field, field_type=field_type)
             ollama_url = f"{OLLAMA_HOST}/api/generate"
             ollama_model = self._model or OLLAMA_MODEL
 
@@ -52,7 +68,16 @@ class LLM:
                     try:
                         response = requests.post(ollama_url, json=payload, timeout=timeout)
                         response.raise_for_status()
-                        json_data = response.json()
+                        
+                        temp_json_data = response.json()
+                        parsed_response = temp_json_data["response"].strip().replace('"', "")
+                        
+                        if field_type is bool and parsed_response.lower() not in ["true", "false"]:
+                            print(f"[WARN]: LLM returned unexpected boolean value '{parsed_response}' for field '{field}' (attempt {attempt+1}). Retrying...")
+                            payload["prompt"] += "\nERROR: Your previous response was invalid. You MUST respond with ONLY the literal word True or False."
+                            continue
+                                
+                        json_data = temp_json_data
                         break
                     except Timeout:
                         logger.warning("Ollama request timed out (attempt %d) for field '%s'. Retrying...", attempt + 1, field)
@@ -79,16 +104,36 @@ class LLM:
 
     def add_response_to_json(self, field: str, value: str):
         """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
+        Adds the LLM response under the specified field in the JSON dict.
+
+        If the field type in _target_fields is `bool`, the response is strictly
+        coerced: only the literal strings 'True' and 'False' (case-insensitive)
+        are accepted. Any other value is treated as None (unanswered).
         """
         value = value.strip().replace('"', "")
         parsed_value = None
 
-        if value != "-1":
-            parsed_value = value
+        # Determine expected type for this field
+        field_type = self._target_fields.get(field) if isinstance(self._target_fields, dict) else str
+        if not isinstance(field_type, type):
+            field_type = str
 
-        if field in self._json.keys():
+        if field_type is bool:
+            # Strictly enforce True/False — no fuzzy matching
+            if value.lower() == "true":
+                parsed_value = True
+            elif value.lower() == "false":
+                parsed_value = False
+            else:
+                print(f"[WARN]: Boolean field '{field}' received unexpected value '{value}'. Defaulting to None.")
+                parsed_value = None
+        else:
+            if value != "-1":
+                parsed_value = value
+
+            if ";" in value:
+                pass
+        if field in self._json:
             self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
