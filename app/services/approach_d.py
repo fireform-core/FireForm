@@ -229,10 +229,11 @@ class ApproachD:
         payload = {
             "model": "qwen2.5:1.5b",
             "prompt": whole_prompt,
+            "format": "json",
             "stream": False,
         }
 
-        response = requests.post("http://localhost:11434/api/generate", json=payload, timeout=45)
+        response = requests.post("http://localhost:11434/api/generate", json=payload, timeout=60)
         response.raise_for_status()
 
         json_data = response.json() 
@@ -245,7 +246,18 @@ class ApproachD:
         elif "```" in response_str:
             response_str = response_str.split("```")[1].split("```")[0].strip()
 
-        extracted_json = json.loads(response_str)
+        try:
+            extracted_json = json.loads(response_str)
+        except json.JSONDecodeError:
+            start = response_str.find("{")
+            end = response_str.rfind("}")
+            if start != -1 and end != -1 and end > start:
+                try:
+                    extracted_json = json.loads(response_str[start : end + 1])
+                except Exception:
+                    extracted_json = {}
+            else:
+                extracted_json = {}
 
 
         def flatten_json_values(obj):
