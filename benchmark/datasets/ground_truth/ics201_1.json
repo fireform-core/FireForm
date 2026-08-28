@@ -1,221 +1,172 @@
 {
-    "ics_201_ground_truth": {
-        "1_incident_name": "Whispering Pines Derailment",
-        "2_incident_number": "US-EPA-R4-2026-0707",
-        "3_date_time_initiated": {
-            "date": "07/07/2026",
-            "time": "06:30"
-        },
-        "4_map_sketch": {
-            "total_area_of_operations": "1.5-mile radius from the intersection of CSX Rail Milepost 142.5 and Highway 411",
-            "incident_site_area": "Rail Milepost 142.5; 7 cars derailed; Car #14 breached and leaking Benzene; Car #15 LPG threatened by fire",
-            "impacted_areas": "500 meters downstream of Whispering Pines Creek actively sheening; air monitoring shows elevated VOCs within 300 feet downwind East",
-            "threatened_areas": "Whispering Pines Municipal Water Intake (2 miles downstream); Whispering Pines Nature Reserve Wetlands (1 mile downstream)",
-            "overflight_results": "Drone mapping downstream sheen trajectory and pinpointing structural damage to Car #14",
-            "trajectories": "Plume traveling East-Southeast at 5 mph; water containment trajectory moving at 1.5 knots East",
-            "impacted_shorelines": "Whispering Pines Creek banks",
-            "graphics_and_symbology": "North at top, showing County Line Road, Creek Road, Highway 411, CSX Rail Line, Staging Area at County Fairgrounds, and Boom locations 1 and 2"
-        },
-        "5_situation_summary_health_safety_briefing": {
-            "situation_summary": "At 05:45 hours, a CSX freight train suffered a mechanical failure leading to the derailment of 7 cars. Car #14 is breached, leaking Benzene into Whispering Pines Creek at an estimated rate of 20 gpm. A secondary brush fire (~0.5 acres) is burning adjacent to an intact LPG tank car. Local residential evacuation of a 0.5-mile downwind radius is underway.",
-            "health_and_safety_hazards": "Benzene exposure (carcinogen, vapor hazard, inhalation/dermal risk), flash fire hazard from pooling product, heavy machinery/rail movement, heat stress (88°F), and uneven terrain near the creek bed.",
-            "necessary_measures": "Isolate and deny entry with a 300-foot Exclusion Zone; continuous air monitoring for LEL, O2, and PID; Level B PPE (SCBA + chemical-resistant clothing) for Hot Zone, Level C for warm zone (<1 ppm VOCs); full structural turnout gear with SCBA for fire personnel; establish a formal wet-decon corridor at the Warm/Cold zone interface."
-        },
-        "6_prepared_by": {
-            "name": "Marcus Vance",
-            "position_title": "Planning Section Chief (Initial)",
-            "signature": "Marcus Vance",
-            "date_time": "07/07/2026 08:00"
-        },
-        "7_current_and_planned_objectives": [
-            "Ensure the life safety of all emergency responders and the public within the affected perimeter by 09:00 hours.",
-            "Complete evacuation of the 0.5-mile downwind hazard zone by 09:30 hours.",
-            "Suppress the brush fire adjacent to the LPG tank car to prevent thermal impingement by 10:00 hours.",
-            "Deploy containment and deflection booming across Whispering Pines Creek at designated points to prevent downstream migration to the municipal water intake.",
-            "Establish a Unified Command structure involving Federal, State, Local, and Responsible Party entities by 10:30 hours."
-        ],
-        "8_current_and_planned_actions_strategies_tactics": [
-            {
-                "time": "06:00",
-                "actions": "Initial dispatch of County Fire and Sheriff Dept. Exclusion zone established at 500 feet."
-            },
-            {
-                "time": "06:15",
-                "actions": "Command established by Fire Chief Thomas. Notification sent to State DEQ, EPA, and CSX Railroad."
-            },
-            {
-                "time": "06:45",
-                "actions": "Sheriff Dept begins door-to-door mandatory evacuations of 45 homes within the downwind path."
-            },
-            {
-                "time": "07:15",
-                "actions": "Hazmat Team 1 arrives. Begins setting up air monitoring perimeter and evaluating tank car integrity."
-            },
-            {
-                "time": "07:30",
-                "actions": "Engine 41 and Tanker 5 begin defensive fire suppression on the right-of-way brush fire using foam blankets."
-            },
-            {
-                "time": "07:45",
-                "actions": "State DEQ and CSX advance response teams arrive on scene. Initiated creek booming strategy."
-            },
-            {
-                "time": "08:15",
-                "actions": "Planned: Deploy Spill Response Team to install 500 feet of deflection boom at Boom Site 1."
-            },
-            {
-                "time": "08:45",
-                "actions": "Planned: Initiate drone overflight to map downstream sheen trajectory and pinpoint structural damage to Car #14."
-            },
-            {
-                "time": "09:30",
-                "actions": "Planned: Complete transition from Local Command to Unified Command at the designated Mobile Command Post."
-            }
-        ],
-        "9_current_organization": {
-            "incident_commanders": [
-                "Chief J. Thomas (County Fire)",
-                "S. Albright (State DEQ)",
-                "D. Miller (CSX Railroad RP)"
-            ],
-            "safety_officer": "Captain R. Mendez",
-            "public_information_officer": "A. Cho (County)",
-            "liaison_officer": "Inspector G. Sims (SO)",
-            "operations_section_chief": "B. Reynolds (State)",
-            "planning_section_chief": "Marcus Vance",
-            "logistics_section_chief": "K. Dunavan",
-            "finance_administration_section_chief": "",
-            "additional_positions": [
-                {
-                    "position": "Hazmat Group Supervisor",
-                    "name": "Lt. T. Kincaid (Regional Team 1)"
-                },
-                {
-                    "position": "Fire Suppression Division Commander",
-                    "name": "Batt. Chief E. Walters"
-                }
-            ]
-        },
-        "10_resource_summary": [
-            {
-                "resource": "Hazmat Type 1",
-                "resource_identifier": "Regional Hazmat Team 1",
-                "date_time_ordered": "07/07/2026 06:00",
-                "eta": "07:00",
-                "arrived": true,
-                "notes": "Positioned at Cold Zone boundary. Conducting air monitoring and plugging entry."
-            },
-            {
-                "resource": "Engine Co.",
-                "resource_identifier": "County Engine 41",
-                "date_time_ordered": "07/07/2026 05:48",
-                "eta": "06:00",
-                "arrived": true,
-                "notes": "Assigned to Fire Suppression Division. Suppressing brush fire near rail line."
-            },
-            {
-                "resource": "Engine Co.",
-                "resource_identifier": "County Engine 45",
-                "date_time_ordered": "07/07/2026 05:48",
-                "eta": "06:05",
-                "arrived": true,
-                "notes": "Providing water supply support to Engine 41."
-            },
-            {
-                "resource": "Water Tender",
-                "resource_identifier": "County Tanker 5",
-                "date_time_ordered": "07/07/2026 06:02",
-                "eta": "06:20",
-                "arrived": true,
-                "notes": "Supplying continuous water flow for foam application."
-            },
-            {
-                "resource": "Law Enforcement",
-                "resource_identifier": "County Sheriff (4 Units)",
-                "date_time_ordered": "07/07/2026 05:48",
-                "eta": "05:55",
-                "arrived": true,
-                "notes": "Establishing traffic control points, roadblocks on Creek Rd, and evacuating residents."
-            },
-            {
-                "resource": "Spill Contractor",
-                "resource_identifier": "HEPACO Spill Team A",
-                "date_time_ordered": "07/07/2026 06:45",
-                "eta": "08:15",
-                "arrived": false,
-                "notes": "En route with 1,000 ft containment boom and vacuum trucks. Assigned to Ops / Creek booming."
-            },
-            {
-                "resource": "UAS (Drone)",
-                "resource_identifier": "State DEQ Drone Unit 1",
-                "date_time_ordered": "07/07/2026 07:10",
-                "eta": "08:30",
-                "arrived": false,
-                "notes": "En route. Will launch from Staging Area to provide real-time thermal imaging and plume visuals."
-            },
-            {
-                "resource": "Ambulance",
-                "resource_identifier": "County EMS Unit 12",
-                "date_time_ordered": "07/07/2026 06:00",
-                "eta": "06:12",
-                "arrived": true,
-                "notes": "Standing by at Rehab/Staging for emergency medical support or responder heat issues."
-            },
-            {
-                "resource": "Vacuum Truck",
-                "resource_identifier": "CSX Contractor TechRad",
-                "date_time_ordered": "07/07/2026 07:15",
-                "eta": "09:30",
-                "arrived": false,
-                "notes": "Ordered by Responsible Party for offloading breached car contents once stable."
-            }
-        ]
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_incident_number": "US-EPA-R4-2026-0707",
+  "3_date_time_initiated": {
+    "date": "07/07/2026",
+    "time": "06:30"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "1.5-mile radius from the intersection of CSX Rail Milepost 142.5 and Highway 411",
+    "incident_site_area": "Rail Milepost 142.5; 7 cars derailed; Car #14 breached and leaking Benzene; Car #15 LPG threatened by fire",
+    "impacted_areas": "500 meters downstream of Whispering Pines Creek actively sheening; air monitoring shows elevated VOCs within 300 feet downwind East",
+    "threatened_areas": "Whispering Pines Municipal Water Intake (2 miles downstream); Whispering Pines Nature Reserve Wetlands (1 mile downstream)",
+    "overflight_results": "Drone mapping downstream sheen trajectory and pinpointing structural damage to Car #14",
+    "trajectories": "Plume traveling East-Southeast at 5 mph; water containment trajectory moving at 1.5 knots East",
+    "impacted_shorelines": "Whispering Pines Creek banks",
+    "graphics_and_symbology": "North at top, showing County Line Road, Creek Road, Highway 411, CSX Rail Line, Staging Area at County Fairgrounds, and Boom locations 1 and 2"
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 05:45 hours, a CSX freight train suffered a mechanical failure leading to the derailment of 7 cars. Car #14 is breached, leaking Benzene into Whispering Pines Creek at an estimated rate of 20 gpm. A secondary brush fire (~0.5 acres) is burning adjacent to an intact LPG tank car. Local residential evacuation of a 0.5-mile downwind radius is underway.",
+    "health_and_safety_hazards": "Benzene exposure (carcinogen, vapor hazard, inhalation/dermal risk), flash fire hazard from pooling product, heavy machinery/rail movement, heat stress (88\u00b0F), and uneven terrain near the creek bed.",
+    "necessary_measures": "Isolate and deny entry with a 300-foot Exclusion Zone; continuous air monitoring for LEL, O2, and PID; Level B PPE (SCBA + chemical-resistant clothing) for Hot Zone, Level C for warm zone (<1 ppm VOCs); full structural turnout gear with SCBA for fire personnel; establish a formal wet-decon corridor at the Warm/Cold zone interface."
+  },
+  "6_prepared_by": {
+    "name": "Marcus Vance",
+    "position_title": "Planning Section Chief (Initial)",
+    "signature": "Marcus Vance",
+    "date_time": "07/07/2026 08:00"
+  },
+  "7_current_and_planned_objectives": [
+    "Ensure the life safety of all emergency responders and the public within the affected perimeter by 09:00 hours.",
+    "Complete evacuation of the 0.5-mile downwind hazard zone by 09:30 hours.",
+    "Suppress the brush fire adjacent to the LPG tank car to prevent thermal impingement by 10:00 hours.",
+    "Deploy containment and deflection booming across Whispering Pines Creek at designated points to prevent downstream migration to the municipal water intake.",
+    "Establish a Unified Command structure involving Federal, State, Local, and Responsible Party entities by 10:30 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "06:00",
+      "actions": "Initial dispatch of County Fire and Sheriff Dept. Exclusion zone established at 500 feet."
     },
-    "ics_202_ground_truth": {
-        "1_incident_name": "Whispering Pines Derailment",
-        "2_operational_period": {
-            "date_from": "07/07/2026",
-            "date_to": "07/08/2026",
-            "time_from": "18:00",
-            "time_to": "06:00"
-        },
-        "3_objectives": [
-            "Maintain a zero-incident safety record for all response personnel by enforcing mandatory air monitoring and strict personal protective equipment compliance throughout the entirety of the night shift.",
-            "Deploy an additional five hundred feet of underflow and sorbent booming at designated downstream check-points on Whispering Pines Creek by 22:00 hours to intercept any escaping Benzene sheen.",
-            "Complete the structural stabilization and grounding of the breached Car #14 by 01:00 hours to prepare the vessel for safe product offloading.",
-            "Establish a continuous, telemetry-linked vapor monitoring perimeter around the eastern residential boundary by 20:00 hours to guarantee community safety.",
-            "Finalize the morning resource allocation and shift rotation plan by 04:00 hours to ensure seamless operational continuity."
-        ],
-        "4_operational_period_command_emphasis": "Place primary tactical focus on air-monitoring metrics and localized vapor suppression, particularly during the transition into night-shift hours when atmospheric inversion layers can trap hazardous vapors closer to the ground. Command explicitly prioritizes the safety of the hazardous materials entry teams working in low-visibility conditions near the creek bed over speed of recovery.",
-        "general_situational_awareness": "The local weather forecast predicts clearing skies with a significant ambient temperature drop to 62°F by midnight, accompanied by winds shifting from the Northwest at three to five miles per hour. This wind shift introduces a critical safety warning regarding the potential accumulation of heavy Benzene vapors in low-lying drainage ditches and creek pockets east of the derailment site. Field crews must remain highly vigilant for low-visibility hazards, uneven muddy terrain along the banks, and potential wildlife hazards native to the adjacent wetlands.",
-        "5_site_safety_plan_required": true,
-        "approved_site_safety_plans_located_at": "Mobile Command Post inside the Forward Operations Briefing Trailer",
-        "6_incident_action_plan_attachments": {
-            "ics_203": true,
-            "ics_204": true,
-            "ics_205": true,
-            "ics_205a": false,
-            "ics_206": true,
-            "ics_207": false,
-            "ics_208": true,
-            "map_chart": true,
-            "weather_forecast_tides_currents": true,
-            "other_attachments": [
-                "EPA Plume Trajectory Analysis Sheet",
-                "CSX Tank Car Cargo Manifest"
-            ]
-        },
-        "7_prepared_by": {
-            "name": "Marcus Vance",
-            "position_title": "Planning Section Chief",
-            "signature": "Marcus Vance",
-            "date_time": "07/07/2026 16:30"
-        },
-        "8_approved_by_incident_commander": {
-            "name": "Chief J. Thomas",
-            "signature": "Chief J. Thomas",
-            "date_time": "07/07/2026 17:00"
-        },
-        "iap_page_number": "1"
+    {
+      "time": "06:15",
+      "actions": "Command established by Fire Chief Thomas. Notification sent to State DEQ, EPA, and CSX Railroad."
+    },
+    {
+      "time": "06:45",
+      "actions": "Sheriff Dept begins door-to-door mandatory evacuations of 45 homes within the downwind path."
+    },
+    {
+      "time": "07:15",
+      "actions": "Hazmat Team 1 arrives. Begins setting up air monitoring perimeter and evaluating tank car integrity."
+    },
+    {
+      "time": "07:30",
+      "actions": "Engine 41 and Tanker 5 begin defensive fire suppression on the right-of-way brush fire using foam blankets."
+    },
+    {
+      "time": "07:45",
+      "actions": "State DEQ and CSX advance response teams arrive on scene. Initiated creek booming strategy."
+    },
+    {
+      "time": "08:15",
+      "actions": "Planned: Deploy Spill Response Team to install 500 feet of deflection boom at Boom Site 1."
+    },
+    {
+      "time": "08:45",
+      "actions": "Planned: Initiate drone overflight to map downstream sheen trajectory and pinpoint structural damage to Car #14."
+    },
+    {
+      "time": "09:30",
+      "actions": "Planned: Complete transition from Local Command to Unified Command at the designated Mobile Command Post."
     }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Chief J. Thomas (County Fire)",
+      "S. Albright (State DEQ)",
+      "D. Miller (CSX Railroad RP)"
+    ],
+    "safety_officer": "Captain R. Mendez",
+    "public_information_officer": "A. Cho (County)",
+    "liaison_officer": "Inspector G. Sims (SO)",
+    "operations_section_chief": "B. Reynolds (State)",
+    "planning_section_chief": "Marcus Vance",
+    "logistics_section_chief": "K. Dunavan",
+    "finance_administration_section_chief": "",
+    "additional_positions": [
+      {
+        "position": "Hazmat Group Supervisor",
+        "name": "Lt. T. Kincaid (Regional Team 1)"
+      },
+      {
+        "position": "Fire Suppression Division Commander",
+        "name": "Batt. Chief E. Walters"
+      }
+    ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "Hazmat Type 1",
+      "resource_identifier": "Regional Hazmat Team 1",
+      "date_time_ordered": "07/07/2026 06:00",
+      "eta": "07:00",
+      "arrived": true,
+      "notes": "Positioned at Cold Zone boundary. Conducting air monitoring and plugging entry."
+    },
+    {
+      "resource": "Engine Co.",
+      "resource_identifier": "County Engine 41",
+      "date_time_ordered": "07/07/2026 05:48",
+      "eta": "06:00",
+      "arrived": true,
+      "notes": "Assigned to Fire Suppression Division. Suppressing brush fire near rail line."
+    },
+    {
+      "resource": "Engine Co.",
+      "resource_identifier": "County Engine 45",
+      "date_time_ordered": "07/07/2026 05:48",
+      "eta": "06:05",
+      "arrived": true,
+      "notes": "Providing water supply support to Engine 41."
+    },
+    {
+      "resource": "Water Tender",
+      "resource_identifier": "County Tanker 5",
+      "date_time_ordered": "07/07/2026 06:02",
+      "eta": "06:20",
+      "arrived": true,
+      "notes": "Supplying continuous water flow for foam application."
+    },
+    {
+      "resource": "Law Enforcement",
+      "resource_identifier": "County Sheriff (4 Units)",
+      "date_time_ordered": "07/07/2026 05:48",
+      "eta": "05:55",
+      "arrived": true,
+      "notes": "Establishing traffic control points, roadblocks on Creek Rd, and evacuating residents."
+    },
+    {
+      "resource": "Spill Contractor",
+      "resource_identifier": "HEPACO Spill Team A",
+      "date_time_ordered": "07/07/2026 06:45",
+      "eta": "08:15",
+      "arrived": false,
+      "notes": "En route with 1,000 ft containment boom and vacuum trucks. Assigned to Ops / Creek booming."
+    },
+    {
+      "resource": "UAS (Drone)",
+      "resource_identifier": "State DEQ Drone Unit 1",
+      "date_time_ordered": "07/07/2026 07:10",
+      "eta": "08:30",
+      "arrived": false,
+      "notes": "En route. Will launch from Staging Area to provide real-time thermal imaging and plume visuals."
+    },
+    {
+      "resource": "Ambulance",
+      "resource_identifier": "County EMS Unit 12",
+      "date_time_ordered": "07/07/2026 06:00",
+      "eta": "06:12",
+      "arrived": true,
+      "notes": "Standing by at Rehab/Staging for emergency medical support or responder heat issues."
+    },
+    {
+      "resource": "Vacuum Truck",
+      "resource_identifier": "CSX Contractor TechRad",
+      "date_time_ordered": "07/07/2026 07:15",
+      "eta": "09:30",
+      "arrived": false,
+      "notes": "Ordered by Responsible Party for offloading breached car contents once stable."
+    }
+  ]
 }

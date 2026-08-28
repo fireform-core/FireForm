@@ -1,81 +1,79 @@
 {
-  "ics_207_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_operational_period": {
-      "date_from": "07/07/2026",
-      "date_to": "07/08/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_operational_period": {
+    "date_from": "07/07/2026",
+    "date_to": "07/08/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_organization_chart": {
+    "incident_commanders": [
+      "Chief J. Thomas (County Fire)",
+      "S. Albright (State DEQ)",
+      "D. Miller (CSX Railroad RP)"
+    ],
+    "command_staff": {
+      "safety_officer": "Captain R. Mendez",
+      "public_information_officer": "A. Cho (County OEM)",
+      "liaison_officer": "Inspector G. Sims (SO)"
     },
-    "3_organization_chart": {
-      "incident_commanders": [
-        "Chief J. Thomas (County Fire)",
-        "S. Albright (State DEQ)",
-        "D. Miller (CSX Railroad RP)"
-      ],
-      "command_staff": {
-        "safety_officer": "Captain R. Mendez",
-        "public_information_officer": "A. Cho (County OEM)",
-        "liaison_officer": "Inspector G. Sims (SO)"
-      },
-      "operations_section": {
-        "chief": "B. Reynolds",
-        "staging_area_manager": "Staging Area Alpha Manager",
-        "branches_divisions_groups": [
-          {
-            "title": "Hazardous Materials Branch Director",
-            "name": "Lt. T. Kincaid"
-          },
-          {
-            "title": "Hazmat Entry Group Supervisor",
-            "name": "Capt. P. Gomez"
-          },
-          {
-            "title": "Decontamination Group Supervisor",
-            "name": "Lt. S. Baker"
-          },
-          {
-            "title": "Fire Suppression Branch Director",
-            "name": "Batt. Chief E. Walters"
-          }
-        ]
-      },
-      "planning_section": {
-        "chief": "Marcus Vance",
-        "resources_unit_ldr": "T. Jenkins",
-        "situation_unit_ldr": "E. Brooks",
-        "documentation_unit_ldr": "H. Martinez",
-        "demobilization_unit_ldr": "R. Sterling"
-      },
-      "logistics_section": {
-        "chief": "K. Dunavan",
-        "support_branch": {
-          "director": "J. Myers",
-          "supply_unit_ldr": "S. Taylor",
-          "facilities_unit_ldr": "C. Adams",
-          "ground_spt_unit_ldr": "M. Evans"
+    "operations_section": {
+      "chief": "B. Reynolds",
+      "staging_area_manager": "Staging Area Alpha Manager",
+      "branches_divisions_groups": [
+        {
+          "title": "Hazardous Materials Branch Director",
+          "name": "Lt. T. Kincaid"
         },
-        "service_branch": {
-          "director": "B. Foster",
-          "comms_unit_ldr": "R. Lee",
-          "medical_unit_ldr": "Dr. N. Howard",
-          "food_unit_ldr": "L. King"
+        {
+          "title": "Hazmat Entry Group Supervisor",
+          "name": "Capt. P. Gomez"
+        },
+        {
+          "title": "Decontamination Group Supervisor",
+          "name": "Lt. S. Baker"
+        },
+        {
+          "title": "Fire Suppression Branch Director",
+          "name": "Batt. Chief E. Walters"
         }
+      ]
+    },
+    "planning_section": {
+      "chief": "Marcus Vance",
+      "resources_unit_ldr": "T. Jenkins",
+      "situation_unit_ldr": "E. Brooks",
+      "documentation_unit_ldr": "H. Martinez",
+      "demobilization_unit_ldr": "R. Sterling"
+    },
+    "logistics_section": {
+      "chief": "K. Dunavan",
+      "support_branch": {
+        "director": "J. Myers",
+        "supply_unit_ldr": "S. Taylor",
+        "facilities_unit_ldr": "C. Adams",
+        "ground_spt_unit_ldr": "M. Evans"
       },
-      "finance_administration_section": {
-        "chief": "Robert Sterling",
-        "time_unit_ldr": "C. White",
-        "procurement_unit_ldr": "G. Scott",
-        "comp_claims_unit_ldr": "E. Green",
-        "cost_unit_ldr": "W. Harris"
+      "service_branch": {
+        "director": "B. Foster",
+        "comms_unit_ldr": "R. Lee",
+        "medical_unit_ldr": "Dr. N. Howard",
+        "food_unit_ldr": "L. King"
       }
     },
-    "4_prepared_by": {
-      "name": "T. Jenkins",
-      "position_title": "Resources Unit Leader",
-      "signature": "T. Jenkins",
-      "date_time": "07/07/2026 16:30"
-    },
-    "iap_page_number": "4"
-  }
+    "finance_administration_section": {
+      "chief": "Robert Sterling",
+      "time_unit_ldr": "C. White",
+      "procurement_unit_ldr": "G. Scott",
+      "comp_claims_unit_ldr": "E. Green",
+      "cost_unit_ldr": "W. Harris"
+    }
+  },
+  "4_prepared_by": {
+    "name": "T. Jenkins",
+    "position_title": "Resources Unit Leader",
+    "signature": "T. Jenkins",
+    "date_time": "07/07/2026 16:30"
+  },
+  "iap_page_number": "4"
 }

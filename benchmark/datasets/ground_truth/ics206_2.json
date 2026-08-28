@@ -1,80 +1,78 @@
 {
-  "ics_206_ground_truth": {
-    "1_incident_name": "Blackwood Chemical Pipeline Breach",
-    "2_operational_period": {
-      "date_from": "08/13/2026",
-      "date_to": "08/14/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Blackwood Chemical Pipeline Breach",
+  "2_operational_period": {
+    "date_from": "08/13/2026",
+    "date_to": "08/14/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_medical_aid_stations": [
+    {
+      "name": "Blackwood Command Post Medical Station",
+      "location": "Station 12 Briefing Trailer",
+      "contact_number_frequency": "453.2125 MHz / Ch 1",
+      "paramedic_service": true
     },
-    "3_medical_aid_stations": [
+    {
+      "name": "Hot Zone Emergency Decon Aid Station",
+      "location": "Pipeline Gate 4 Access Point",
+      "contact_number_frequency": "458.2125 MHz / Ch 2",
+      "paramedic_service": true
+    }
+  ],
+  "4_transportation_services": {
+    "ambulance_services": [
       {
-        "name": "Blackwood Command Post Medical Station",
-        "location": "Station 12 Briefing Trailer",
-        "contact_number_frequency": "453.2125 MHz / Ch 1",
+        "name": "Blackwood County EMS Unit 10",
+        "location": "Station 12 Staging Area",
+        "contact_number_frequency": "(555) 345-6789 / Ch 1",
         "paramedic_service": true
       },
       {
-        "name": "Hot Zone Emergency Decon Aid Station",
-        "location": "Pipeline Gate 4 Access Point",
-        "contact_number_frequency": "458.2125 MHz / Ch 2",
+        "name": "Metro West Medic 5",
+        "location": "Route 104 Checkpoint",
+        "contact_number_frequency": "(555) 345-6790 / Ch 1",
         "paramedic_service": true
       }
     ],
-    "4_transportation_services": {
-      "ambulance_services": [
-        {
-          "name": "Blackwood County EMS Unit 10",
-          "location": "Station 12 Staging Area",
-          "contact_number_frequency": "(555) 345-6789 / Ch 1",
-          "paramedic_service": true
-        },
-        {
-          "name": "Metro West Medic 5",
-          "location": "Route 104 Checkpoint",
-          "contact_number_frequency": "(555) 345-6790 / Ch 1",
-          "paramedic_service": true
-        }
-      ],
-      "air_ambulance_services": [
-        {
-          "name": "AirEvac Response Helicopter 3",
-          "location": "Blackwood Airport Helipad",
-          "contact_number_frequency": "(555) 888-1234 / VHF 155.400 MHz",
-          "paramedic_service": true
-        }
-      ]
-    },
-    "5_hospitals": [
+    "air_ambulance_services": [
       {
-        "hospital_name": "Blackwood Community Hospital",
-        "address_latitude_longitude": "45 River Road, Blackwood, 39.8765 N, 84.1234 W",
-        "contact_number_frequency": "(555) 678-1100 / Med Net 1",
-        "air_ambulance_helipad": true,
-        "burn_center": false,
-        "trauma_center": true
-      },
-      {
-        "hospital_name": "Valley Regional Toxicology & Trauma Center",
-        "address_latitude_longitude": "1200 Health Park Way, Dayton, 39.7500 N, 84.2000 W",
-        "contact_number_frequency": "(555) 678-9900 / Med Net 4",
-        "air_ambulance_helipad": true,
-        "burn_center": true,
-        "trauma_center": true
+        "name": "AirEvac Response Helicopter 3",
+        "location": "Blackwood Airport Helipad",
+        "contact_number_frequency": "(555) 888-1234 / VHF 155.400 MHz",
+        "paramedic_service": true
       }
-    ],
-    "6_special_medical_emergency_procedures": "In the event of an acute respiratory exposure to Anhydrous Ammonia, responders must immediately evacuate the patient upwind to the Hot Zone Emergency Decon Aid Station at Gate 4. Continuous high-flow oxygen administration and eye/skin water irrigation must commence immediately during technical decon. AirEvac Response Helicopter 3 is available at LZ Bravo near Gate 4 for rapid transfer to Valley Regional Toxicology Center.",
-    "7_prepared_by": {
-      "name": "Dr. Aris Thorne",
-      "position_title": "Medical Unit Leader",
-      "signature": "Aris Thorne",
-      "date_time": "08/13/2026 16:30"
+    ]
+  },
+  "5_hospitals": [
+    {
+      "hospital_name": "Blackwood Community Hospital",
+      "address_latitude_longitude": "45 River Road, Blackwood, 39.8765 N, 84.1234 W",
+      "contact_number_frequency": "(555) 678-1100 / Med Net 1",
+      "air_ambulance_helipad": true,
+      "burn_center": false,
+      "trauma_center": true
     },
-    "8_approved_by_safety_officer": {
-      "name": "Safety Officer Mark Davis",
-      "signature": "Mark Davis",
-      "date_time": "08/13/2026 17:15"
-    },
-    "iap_page_number": "5"
-  }
+    {
+      "hospital_name": "Valley Regional Toxicology & Trauma Center",
+      "address_latitude_longitude": "1200 Health Park Way, Dayton, 39.7500 N, 84.2000 W",
+      "contact_number_frequency": "(555) 678-9900 / Med Net 4",
+      "air_ambulance_helipad": true,
+      "burn_center": true,
+      "trauma_center": true
+    }
+  ],
+  "6_special_medical_emergency_procedures": "In the event of an acute respiratory exposure to Anhydrous Ammonia, responders must immediately evacuate the patient upwind to the Hot Zone Emergency Decon Aid Station at Gate 4. Continuous high-flow oxygen administration and eye/skin water irrigation must commence immediately during technical decon. AirEvac Response Helicopter 3 is available at LZ Bravo near Gate 4 for rapid transfer to Valley Regional Toxicology Center.",
+  "7_prepared_by": {
+    "name": "Dr. Aris Thorne",
+    "position_title": "Medical Unit Leader",
+    "signature": "Aris Thorne",
+    "date_time": "08/13/2026 16:30"
+  },
+  "8_approved_by_safety_officer": {
+    "name": "Safety Officer Mark Davis",
+    "signature": "Mark Davis",
+    "date_time": "08/13/2026 17:15"
+  },
+  "iap_page_number": "5"
 }

@@ -1,19 +1,54 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "string",
-  "4_site_safety_plan_required": "boolean",
-  "approved_site_safety_plan_located_at": "string",
-  "5_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
+    },
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
+        }
+      }
+    },
+    "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": {
+      "type": "string"
+    },
+    "4_site_safety_plan_required": {
+      "type": "boolean"
+    },
+    "approved_site_safety_plan_located_at": {
+      "type": "string"
+    },
+    "5_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
+    }
+  }
 }

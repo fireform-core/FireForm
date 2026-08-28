@@ -1,58 +1,153 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_medical_aid_stations": [
-    {
-      "name": "string",
-      "location": "string",
-      "contact_number_frequency": "string",
-      "paramedic_service": "boolean"
-    }
-  ],
-  "4_transportation_services": {
-    "ambulance_services": [
-      {
-        "name": "string",
-        "location": "string",
-        "contact_number_frequency": "string",
-        "paramedic_service": "boolean"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
+    },
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
+        }
       }
-    ],
-    "air_ambulance_services": [
-      {
-        "name": "string",
-        "location": "string",
-        "contact_number_frequency": "string",
-        "paramedic_service": "boolean"
+    },
+    "3_medical_aid_stations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "contact_number_frequency": {
+            "type": "string"
+          },
+          "paramedic_service": {
+            "type": "boolean"
+          }
+        }
       }
-    ]
-  },
-  "5_hospitals": [
-    {
-      "hospital_name": "string",
-      "address_latitude_longitude": "string",
-      "contact_number_frequency": "string",
-      "air_ambulance_helipad": "boolean",
-      "burn_center": "boolean",
-      "trauma_center": "boolean"
+    },
+    "4_transportation_services": {
+      "type": "object",
+      "properties": {
+        "ambulance_services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "contact_number_frequency": {
+                "type": "string"
+              },
+              "paramedic_service": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "air_ambulance_services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "location": {
+                "type": "string"
+              },
+              "contact_number_frequency": {
+                "type": "string"
+              },
+              "paramedic_service": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "5_hospitals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hospital_name": {
+            "type": "string"
+          },
+          "address_latitude_longitude": {
+            "type": "string"
+          },
+          "contact_number_frequency": {
+            "type": "string"
+          },
+          "air_ambulance_helipad": {
+            "type": "boolean"
+          },
+          "burn_center": {
+            "type": "boolean"
+          },
+          "trauma_center": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "6_special_medical_emergency_procedures": {
+      "type": "string"
+    },
+    "7_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "8_approved_by_safety_officer": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
     }
-  ],
-  "6_special_medical_emergency_procedures": "string",
-  "7_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "8_approved_by_safety_officer": {
-    "name": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  }
 }

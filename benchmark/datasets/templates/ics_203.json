@@ -1,88 +1,240 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_incident_commander_and_command_staff": {
-    "ic_ucs": ["string"],
-    "deputy": "string",
-    "safety_officer": "string",
-    "public_info_officer": "string",
-    "liaison_officer": "string"
-  },
-  "4_agency_organization_representatives": [
-    {
-      "agency_organization": "string",
-      "name": "string"
-    }
-  ],
-  "5_planning_section": {
-    "chief": "string",
-    "deputy": "string",
-    "resources_unit": "string",
-    "situation_unit": "string",
-    "documentation_unit": "string",
-    "demobilization_unit": "string",
-    "technical_specialists": [
-      {
-        "specialty": "string",
-        "name": "string"
-      }
-    ]
-  },
-  "6_logistics_section": {
-    "chief": "string",
-    "deputy": "string",
-    "support_branch": {
-      "director": "string",
-      "supply_unit": "string",
-      "facilities_unit": "string",
-      "ground_support_unit": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
     },
-    "service_branch": {
-      "director": "string",
-      "communications_unit": "string",
-      "medical_unit": "string",
-      "food_unit": "string"
-    }
-  },
-  "7_operations_section": {
-    "chief": "string",
-    "deputy": "string",
-    "staging_area": "string",
-    "branches": [
-      {
-        "branch_name": "string",
-        "branch_director": "string",
-        "deputy": "string",
-        "divisions_groups": [
-          {
-            "identifier": "string",
-            "supervisor": "string"
-          }
-        ]
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
+        }
       }
-    ],
-    "air_operations_branch": {
-      "air_ops_branch_dir": "string"
+    },
+    "3_incident_commander_and_command_staff": {
+      "type": "object",
+      "properties": {
+        "ic_ucs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deputy": {
+          "type": "string"
+        },
+        "safety_officer": {
+          "type": "string"
+        },
+        "public_info_officer": {
+          "type": "string"
+        },
+        "liaison_officer": {
+          "type": "string"
+        }
+      }
+    },
+    "4_agency_organization_representatives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "agency_organization": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "5_planning_section": {
+      "type": "object",
+      "properties": {
+        "chief": {
+          "type": "string"
+        },
+        "deputy": {
+          "type": "string"
+        },
+        "resources_unit": {
+          "type": "string"
+        },
+        "situation_unit": {
+          "type": "string"
+        },
+        "documentation_unit": {
+          "type": "string"
+        },
+        "demobilization_unit": {
+          "type": "string"
+        },
+        "technical_specialists": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "specialty": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "6_logistics_section": {
+      "type": "object",
+      "properties": {
+        "chief": {
+          "type": "string"
+        },
+        "deputy": {
+          "type": "string"
+        },
+        "support_branch": {
+          "type": "object",
+          "properties": {
+            "director": {
+              "type": "string"
+            },
+            "supply_unit": {
+              "type": "string"
+            },
+            "facilities_unit": {
+              "type": "string"
+            },
+            "ground_support_unit": {
+              "type": "string"
+            }
+          }
+        },
+        "service_branch": {
+          "type": "object",
+          "properties": {
+            "director": {
+              "type": "string"
+            },
+            "communications_unit": {
+              "type": "string"
+            },
+            "medical_unit": {
+              "type": "string"
+            },
+            "food_unit": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "7_operations_section": {
+      "type": "object",
+      "properties": {
+        "chief": {
+          "type": "string"
+        },
+        "deputy": {
+          "type": "string"
+        },
+        "staging_area": {
+          "type": "string"
+        },
+        "branches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "branch_name": {
+                "type": "string"
+              },
+              "branch_director": {
+                "type": "string"
+              },
+              "deputy": {
+                "type": "string"
+              },
+              "divisions_groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "identifier": {
+                      "type": "string"
+                    },
+                    "supervisor": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "air_operations_branch": {
+          "type": "object",
+          "properties": {
+            "air_ops_branch_dir": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "8_finance_administration_section": {
+      "type": "object",
+      "properties": {
+        "chief": {
+          "type": "string"
+        },
+        "deputy": {
+          "type": "string"
+        },
+        "time_unit": {
+          "type": "string"
+        },
+        "procurement_unit": {
+          "type": "string"
+        },
+        "comp_claims_unit": {
+          "type": "string"
+        },
+        "cost_unit": {
+          "type": "string"
+        }
+      }
+    },
+    "9_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
     }
-  },
-  "8_finance_administration_section": {
-    "chief": "string",
-    "deputy": "string",
-    "time_unit": "string",
-    "procurement_unit": "string",
-    "comp_claims_unit": "string",
-    "cost_unit": "string"
-  },
-  "9_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  }
 }

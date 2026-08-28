@@ -1,21 +1,19 @@
 {
-  "ics_208_ground_truth": {
-    "1_incident_name": "Blackwood Chemical Pipeline Breach",
-    "2_operational_period": {
-      "date_from": "08/13/2026",
-      "date_to": "08/14/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
-    },
-    "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Focus tactical operations on maintaining river boom integrity under rising night tides and ensuring strict atmospheric air monitoring during the overnight temperature drop when Anhydrous Ammonia vapors hug low ground. SCBA Level B PPE is mandatory within the 500-foot exclusion zone. Vigilance required for reduced visibility, riverbank slip hazards, and toxic vapor pockets.",
-    "4_site_safety_plan_required": true,
-    "approved_site_safety_plan_located_at": "Mobile Command Post Briefing Trailer at Station 12",
-    "5_prepared_by": {
-      "name": "Captain L. Hayes",
-      "position_title": "Safety Officer",
-      "signature": "L. Hayes",
-      "date_time": "08/13/2026 16:30"
-    },
-    "iap_page_number": "6"
-  }
+  "1_incident_name": "Blackwood Chemical Pipeline Breach",
+  "2_operational_period": {
+    "date_from": "08/13/2026",
+    "date_to": "08/14/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Focus tactical operations on maintaining river boom integrity under rising night tides and ensuring strict atmospheric air monitoring during the overnight temperature drop when Anhydrous Ammonia vapors hug low ground. SCBA Level B PPE is mandatory within the 500-foot exclusion zone. Vigilance required for reduced visibility, riverbank slip hazards, and toxic vapor pockets.",
+  "4_site_safety_plan_required": true,
+  "approved_site_safety_plan_located_at": "Mobile Command Post Briefing Trailer at Station 12",
+  "5_prepared_by": {
+    "name": "Captain L. Hayes",
+    "position_title": "Safety Officer",
+    "signature": "L. Hayes",
+    "date_time": "08/13/2026 16:30"
+  },
+  "iap_page_number": "6"
 }

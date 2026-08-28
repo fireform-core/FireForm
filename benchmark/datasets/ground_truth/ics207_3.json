@@ -1,82 +1,80 @@
 {
-  "ics_207_ground_truth": {
-    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
-    "2_operational_period": {
-      "date_from": "10/14/2026",
-      "date_to": "10/15/2026",
-      "time_from": "07:00",
-      "time_to": "19:00"
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_operational_period": {
+    "date_from": "10/14/2026",
+    "date_to": "10/15/2026",
+    "time_from": "07:00",
+    "time_to": "19:00"
+  },
+  "3_organization_chart": {
+    "incident_commanders": [
+      "Captain H. Vance (USCG Unified Command IC)",
+      "OSC M. Reynolds (EPA Co-IC)",
+      "Chief D. Garcia (Port Authority Fire IC)",
+      "K. Lindqvist (Stolt Tankers RP IC)"
+    ],
+    "command_staff": {
+      "safety_officer": "Commander Thomas Blake",
+      "public_information_officer": "Laura Martinez (Port Authority)",
+      "liaison_officer": "Inspector R. Sterling (TCEQ)"
     },
-    "3_organization_chart": {
-      "incident_commanders": [
-        "Captain H. Vance (USCG Unified Command IC)",
-        "OSC M. Reynolds (EPA Co-IC)",
-        "Chief D. Garcia (Port Authority Fire IC)",
-        "K. Lindqvist (Stolt Tankers RP IC)"
-      ],
-      "command_staff": {
-        "safety_officer": "Commander Thomas Blake",
-        "public_information_officer": "Laura Martinez (Port Authority)",
-        "liaison_officer": "Inspector R. Sterling (TCEQ)"
-      },
-      "operations_section": {
-        "chief": "Battalion Chief A. Ross",
-        "staging_area_manager": "Staging Area Bravo Manager",
-        "branches_divisions_groups": [
-          {
-            "title": "Vessel Salvage & Entry Branch Director",
-            "name": "Lt. J. Thorne"
-          },
-          {
-            "title": "Deck Neutralization Group Supervisor",
-            "name": "Lt. S. Baker"
-          },
-          {
-            "title": "Manifold Isolation Team Supervisor",
-            "name": "Capt. D. Ross"
-          },
-          {
-            "title": "Ship Channel Protection Branch Director",
-            "name": "Capt. Donald Kross"
-          }
-        ]
-      },
-      "planning_section": {
-        "chief": "Commander Richard Croft",
-        "resources_unit_ldr": "Dr. V. Patel",
-        "situation_unit_ldr": "Sandra Keller",
-        "documentation_unit_ldr": "Wayne Miller",
-        "demobilization_unit_ldr": "Battalion Chief A. Ross"
-      },
-      "logistics_section": {
-        "chief": "Sandra Keller",
-        "support_branch": {
-          "director": "Capt. H. Nelson",
-          "supply_unit_ldr": "C. White",
-          "facilities_unit_ldr": "G. Scott",
-          "ground_spt_unit_ldr": "E. Green"
+    "operations_section": {
+      "chief": "Battalion Chief A. Ross",
+      "staging_area_manager": "Staging Area Bravo Manager",
+      "branches_divisions_groups": [
+        {
+          "title": "Vessel Salvage & Entry Branch Director",
+          "name": "Lt. J. Thorne"
         },
-        "service_branch": {
-          "director": "W. Harris",
-          "comms_unit_ldr": "J. Myers",
-          "medical_unit_ldr": "Dr. A. Chen",
-          "food_unit_ldr": "S. Taylor"
+        {
+          "title": "Deck Neutralization Group Supervisor",
+          "name": "Lt. S. Baker"
+        },
+        {
+          "title": "Manifold Isolation Team Supervisor",
+          "name": "Capt. D. Ross"
+        },
+        {
+          "title": "Ship Channel Protection Branch Director",
+          "name": "Capt. Donald Kross"
         }
+      ]
+    },
+    "planning_section": {
+      "chief": "Commander Richard Croft",
+      "resources_unit_ldr": "Dr. V. Patel",
+      "situation_unit_ldr": "Sandra Keller",
+      "documentation_unit_ldr": "Wayne Miller",
+      "demobilization_unit_ldr": "Battalion Chief A. Ross"
+    },
+    "logistics_section": {
+      "chief": "Sandra Keller",
+      "support_branch": {
+        "director": "Capt. H. Nelson",
+        "supply_unit_ldr": "C. White",
+        "facilities_unit_ldr": "G. Scott",
+        "ground_spt_unit_ldr": "E. Green"
       },
-      "finance_administration_section": {
-        "chief": "Wayne Miller",
-        "time_unit_ldr": "C. Adams",
-        "procurement_unit_ldr": "M. Evans",
-        "comp_claims_unit_ldr": "B. Foster",
-        "cost_unit_ldr": "R. Lee"
+      "service_branch": {
+        "director": "W. Harris",
+        "comms_unit_ldr": "J. Myers",
+        "medical_unit_ldr": "Dr. A. Chen",
+        "food_unit_ldr": "S. Taylor"
       }
     },
-    "4_prepared_by": {
-      "name": "Dr. V. Patel",
-      "position_title": "Resources Unit Leader",
-      "signature": "Dr. V. Patel",
-      "date_time": "10/14/2026 06:00"
-    },
-    "iap_page_number": "4"
-  }
+    "finance_administration_section": {
+      "chief": "Wayne Miller",
+      "time_unit_ldr": "C. Adams",
+      "procurement_unit_ldr": "M. Evans",
+      "comp_claims_unit_ldr": "B. Foster",
+      "cost_unit_ldr": "R. Lee"
+    }
+  },
+  "4_prepared_by": {
+    "name": "Dr. V. Patel",
+    "position_title": "Resources Unit Leader",
+    "signature": "Dr. V. Patel",
+    "date_time": "10/14/2026 06:00"
+  },
+  "iap_page_number": "4"
 }

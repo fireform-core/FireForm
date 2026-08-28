@@ -1,29 +1,27 @@
 {
-  "ics_213_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_to": {
-      "name": "Marcus Vance",
-      "position": "Planning Section Chief"
-    },
-    "3_from": {
-      "name": "Commander Eric Sterling",
-      "position": "Operations Section Chief"
-    },
-    "4_subject": "Request for Additional Vapor Suppression Foam and Boom Resources",
-    "5_date": "07/07/2026",
-    "6_time": "19:15",
-    "7_message": "Due to increased ambient vapor concentrations of Benzene detected downwind along Whispering Pines Creek, Operations urgently requests five additional totes (1,250 gallons) of fluoroprotein vapor suppression foam and 500 feet of sorbent boom to reinforce Checkpoint Bravo before 22:00 hours.",
-    "8_approved_by": {
-      "name": "Chief J. Thomas",
-      "position_title": "Incident Commander",
-      "signature": "Chief J. Thomas"
-    },
-    "9_reply": "Supply Unit has authorized immediate dispatch of five totes of foam and 500 feet of sorbent boom from Regional Logistics Depot. ETA to Staging Area Alpha is 21:00 hours.",
-    "10_replied_by": {
-      "name": "Marcus Vance",
-      "position_title": "Planning Section Chief",
-      "signature": "Marcus Vance",
-      "date_time": "07/07/2026 19:45"
-    }
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_to": {
+    "name": "Marcus Vance",
+    "position": "Planning Section Chief"
+  },
+  "3_from": {
+    "name": "Commander Eric Sterling",
+    "position": "Operations Section Chief"
+  },
+  "4_subject": "Request for Additional Vapor Suppression Foam and Boom Resources",
+  "5_date": "07/07/2026",
+  "6_time": "19:15",
+  "7_message": "Due to increased ambient vapor concentrations of Benzene detected downwind along Whispering Pines Creek, Operations urgently requests five additional totes (1,250 gallons) of fluoroprotein vapor suppression foam and 500 feet of sorbent boom to reinforce Checkpoint Bravo before 22:00 hours.",
+  "8_approved_by": {
+    "name": "Chief J. Thomas",
+    "position_title": "Incident Commander",
+    "signature": "Chief J. Thomas"
+  },
+  "9_reply": "Supply Unit has authorized immediate dispatch of five totes of foam and 500 feet of sorbent boom from Regional Logistics Depot. ETA to Staging Area Alpha is 21:00 hours.",
+  "10_replied_by": {
+    "name": "Marcus Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "Marcus Vance",
+    "date_time": "07/07/2026 19:45"
   }
 }

@@ -1,38 +1,115 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_objectives": ["string"],
-  "4_operational_period_command_emphasis": "string",
-  "general_situational_awareness": "string",
-  "5_site_safety_plan_required": "boolean",
-  "approved_site_safety_plans_located_at": "string",
-  "6_incident_action_plan_attachments": {
-    "ics_203": "boolean",
-    "ics_204": "boolean",
-    "ics_205": "boolean",
-    "ics_205a": "boolean",
-    "ics_206": "boolean",
-    "ics_207": "boolean",
-    "ics_208": "boolean",
-    "map_chart": "boolean",
-    "weather_forecast_tides_currents": "boolean",
-    "other_attachments": ["string"]
-  },
-  "7_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "8_approved_by_incident_commander": {
-    "name": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
+    },
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
+        }
+      }
+    },
+    "3_objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "4_operational_period_command_emphasis": {
+      "type": "string"
+    },
+    "general_situational_awareness": {
+      "type": "string"
+    },
+    "5_site_safety_plan_required": {
+      "type": "boolean"
+    },
+    "approved_site_safety_plans_located_at": {
+      "type": "string"
+    },
+    "6_incident_action_plan_attachments": {
+      "type": "object",
+      "properties": {
+        "ics_203": {
+          "type": "boolean"
+        },
+        "ics_204": {
+          "type": "boolean"
+        },
+        "ics_205": {
+          "type": "boolean"
+        },
+        "ics_205a": {
+          "type": "boolean"
+        },
+        "ics_206": {
+          "type": "boolean"
+        },
+        "ics_207": {
+          "type": "boolean"
+        },
+        "ics_208": {
+          "type": "boolean"
+        },
+        "map_chart": {
+          "type": "boolean"
+        },
+        "weather_forecast_tides_currents": {
+          "type": "boolean"
+        },
+        "other_attachments": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "7_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "8_approved_by_incident_commander": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
+    }
+  }
 }

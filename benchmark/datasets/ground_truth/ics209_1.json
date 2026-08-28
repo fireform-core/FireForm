@@ -1,0 +1,131 @@
+{
+  "1_incident_header": {
+    "incident_name": "Blackwood Canyon Wildfire",
+    "incident_number": "CA-TNF-003891",
+    "report_version": "Update Report #4",
+    "report_number": "ICS 209",
+    "incident_commanders": [
+      "R. Sterling",
+      "M. Torres"
+    ],
+    "incident_start_datetime": "2026-08-11T14:15:00Z",
+    "current_size_acres": 4250,
+    "percent_contained": 35,
+    "incident_definition": "Wildfire burning through mixed conifer and heavy timber",
+    "complexity_level": "Level 1",
+    "reporting_period": {
+      "from": "2026-08-14T06:00:00Z",
+      "to": "2026-08-14T18:00:00Z"
+    }
+  },
+  "2_approval_and_location": {
+    "prepared_by": {
+      "name": "J. Vance",
+      "role": "Situation Unit Leader",
+      "datetime": "2026-08-14T17:30:00Z"
+    },
+    "approved_by": {
+      "name": "R. Sterling",
+      "role": "Incident Commander"
+    },
+    "sent_to": "Sierra Front Interagency Dispatch Center",
+    "location": {
+      "state": "CA",
+      "county": "Placer",
+      "city": "Tahoe City",
+      "latitude": "39\u00b008'42N",
+      "longitude": "-120\u00b009'35W",
+      "short_description": "Placer County, California, near Tahoe City"
+    },
+    "geospatial_data_attached": "blackwood_perim_20260814_1600.shp"
+  },
+  "3_damage_assessment": {
+    "single_residences": {
+      "threatened_72h": 12,
+      "damaged": 2,
+      "destroyed": 5
+    },
+    "commercial_properties": {
+      "threatened_72h": 3,
+      "damaged": 1,
+      "destroyed": 8
+    },
+    "minor_structures": {
+      "threatened_72h": 5,
+      "damaged": 0,
+      "destroyed": 0
+    }
+  },
+  "4_status_summaries": {
+    "civilians": {
+      "injuries_this_period": 2,
+      "injuries_total": 5,
+      "evacuated_total": 150,
+      "in_shelters_current": 85,
+      "fatalities_total": 0
+    },
+    "responders": {
+      "injuries_this_period": 1,
+      "injuries_total": 3,
+      "fatalities_total": 0
+    },
+    "active_threat_management_flags": [
+      "Mass Notifications Completed",
+      "Evacuations in Progress",
+      "Area Restrictions in Effect (Highway 89 lane restrictions)"
+    ]
+  },
+  "5_projections_and_objectives": {
+    "weather_synopsis": "Temperatures at 92\u00b0F, relative humidity 11%, gusty winds from the Southwest at 18 mph (gusting to 30 mph). Red Flag Warning active until 22:00 PDT.",
+    "projected_activity": {
+      "12_hours": "Fire expected to breach Ridge Line 4, pushing toward Ward Creek.",
+      "24_hours": "Threatens 45 additional homes in Alpine Meadows.",
+      "48_hours": "Potential to cross Highway 89 if winds persist.",
+      "72_hours": "Expected growth up to 6,000 acres"
+    },
+    "strategic_objectives": "Establish full perimeter containment along the western flank, protect critical power transmission infrastructure, and safely repopulate Blackwood Canyon by August 18, 2026.",
+    "critical_resource_needs": {
+      "12_hours": [
+        "Type 1 Strike Teams (Engines), 2 Type 1 Helicopters"
+      ],
+      "24_hours": [
+        "3 Type 1 Hand Crews"
+      ],
+      "48_hours": [
+        "1 Mobile Communications Unit"
+      ]
+    }
+  },
+  "6_financials_and_timeline": {
+    "estimated_costs_to_date_usd": 4850000,
+    "projected_final_cost_usd": 9200000,
+    "anticipated_completion_date": "2026-08-20",
+    "demobilization_start_date": "2026-08-18"
+  },
+  "7_resource_commitment": [
+    {
+      "agency": "CAL FIRE",
+      "resource_type": "Type 1 Fire Engines",
+      "count": 12,
+      "personnel_count": 48
+    },
+    {
+      "agency": "US Forest Service",
+      "resource_type": "Type 2 Hand Crews",
+      "count": 6,
+      "personnel_count": 120
+    },
+    {
+      "agency": "Placer County Sheriff",
+      "resource_type": "Law Enforcement Units",
+      "count": 8,
+      "personnel_count": 16
+    },
+    {
+      "agency": "N/A",
+      "resource_type": "Unassigned Management/Overhead Personnel",
+      "count": 25,
+      "personnel_count": 0
+    }
+  ]
+}

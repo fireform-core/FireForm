@@ -1,82 +1,80 @@
 {
-  "ics_207_ground_truth": {
-    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
-    "2_operational_period": {
-      "date_from": "11/02/2026",
-      "date_to": "11/03/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+  "2_operational_period": {
+    "date_from": "11/02/2026",
+    "date_to": "11/03/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_organization_chart": {
+    "incident_commanders": [
+      "Captain E. Miller (WSP Unified Command IC)",
+      "OSC R. Brooks (EPA R10 Co-IC)",
+      "Chief D. Olson (Skykomish Fire IC)",
+      "M. Campbell (BNSF Railway RP IC)"
+    ],
+    "command_staff": {
+      "safety_officer": "Captain Marcus Vance",
+      "public_information_officer": "Jennifer Hayes (WSDOT)",
+      "liaison_officer": "Deputy S. Kowalski (KCSO)"
     },
-    "3_organization_chart": {
-      "incident_commanders": [
-        "Captain E. Miller (WSP Unified Command IC)",
-        "OSC R. Brooks (EPA R10 Co-IC)",
-        "Chief D. Olson (Skykomish Fire IC)",
-        "M. Campbell (BNSF Railway RP IC)"
-      ],
-      "command_staff": {
-        "safety_officer": "Captain Marcus Vance",
-        "public_information_officer": "Jennifer Hayes (WSDOT)",
-        "liaison_officer": "Deputy S. Kowalski (KCSO)"
-      },
-      "operations_section": {
-        "chief": "Battalion Chief T. Higgins",
-        "staging_area_manager": "Staging Area Charlie Manager",
-        "branches_divisions_groups": [
-          {
-            "title": "Hazmat Capping Branch Director",
-            "name": "Capt. P. Gomez"
-          },
-          {
-            "title": "Railcar Entry Group 1 Supervisor",
-            "name": "Capt. D. Ross"
-          },
-          {
-            "title": "Decontamination Group Supervisor",
-            "name": "Lt. M. Turner"
-          },
-          {
-            "title": "Evacuation & Security Branch Director",
-            "name": "Sgt. H. Lin"
-          }
-        ]
-      },
-      "planning_section": {
-        "chief": "Lt. Colonel Alan Vance",
-        "resources_unit_ldr": "Patricia Ross",
-        "situation_unit_ldr": "Battalion Chief T. Higgins",
-        "documentation_unit_ldr": "Sgt. H. Lin",
-        "demobilization_unit_ldr": "G. Peterson"
-      },
-      "logistics_section": {
-        "chief": "David Sterling",
-        "support_branch": {
-          "director": "L. King",
-          "supply_unit_ldr": "J. Myers",
-          "facilities_unit_ldr": "S. Taylor",
-          "ground_spt_unit_ldr": "C. Adams"
+    "operations_section": {
+      "chief": "Battalion Chief T. Higgins",
+      "staging_area_manager": "Staging Area Charlie Manager",
+      "branches_divisions_groups": [
+        {
+          "title": "Hazmat Capping Branch Director",
+          "name": "Capt. P. Gomez"
         },
-        "service_branch": {
-          "director": "M. Evans",
-          "comms_unit_ldr": "B. Foster",
-          "medical_unit_ldr": "Dr. N. Howard",
-          "food_unit_ldr": "R. Lee"
+        {
+          "title": "Railcar Entry Group 1 Supervisor",
+          "name": "Capt. D. Ross"
+        },
+        {
+          "title": "Decontamination Group Supervisor",
+          "name": "Lt. M. Turner"
+        },
+        {
+          "title": "Evacuation & Security Branch Director",
+          "name": "Sgt. H. Lin"
         }
+      ]
+    },
+    "planning_section": {
+      "chief": "Lt. Colonel Alan Vance",
+      "resources_unit_ldr": "Patricia Ross",
+      "situation_unit_ldr": "Battalion Chief T. Higgins",
+      "documentation_unit_ldr": "Sgt. H. Lin",
+      "demobilization_unit_ldr": "G. Peterson"
+    },
+    "logistics_section": {
+      "chief": "David Sterling",
+      "support_branch": {
+        "director": "L. King",
+        "supply_unit_ldr": "J. Myers",
+        "facilities_unit_ldr": "S. Taylor",
+        "ground_spt_unit_ldr": "C. Adams"
       },
-      "finance_administration_section": {
-        "chief": "Patricia Ross",
-        "time_unit_ldr": "W. Harris",
-        "procurement_unit_ldr": "C. White",
-        "comp_claims_unit_ldr": "G. Scott",
-        "cost_unit_ldr": "E. Green"
+      "service_branch": {
+        "director": "M. Evans",
+        "comms_unit_ldr": "B. Foster",
+        "medical_unit_ldr": "Dr. N. Howard",
+        "food_unit_ldr": "R. Lee"
       }
     },
-    "4_prepared_by": {
-      "name": "Patricia Ross",
-      "position_title": "Resources Unit Leader",
-      "signature": "Patricia Ross",
-      "date_time": "11/02/2026 16:30"
-    },
-    "iap_page_number": "4"
-  }
+    "finance_administration_section": {
+      "chief": "Patricia Ross",
+      "time_unit_ldr": "W. Harris",
+      "procurement_unit_ldr": "C. White",
+      "comp_claims_unit_ldr": "G. Scott",
+      "cost_unit_ldr": "E. Green"
+    }
+  },
+  "4_prepared_by": {
+    "name": "Patricia Ross",
+    "position_title": "Resources Unit Leader",
+    "signature": "Patricia Ross",
+    "date_time": "11/02/2026 16:30"
+  },
+  "iap_page_number": "4"
 }

@@ -1,55 +1,53 @@
 {
-  "ics_205a_ground_truth": {
-    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
-    "2_operational_period": {
-      "date_from": "10/14/2026",
-      "date_to": "10/15/2026",
-      "time_from": "07:00",
-      "time_to": "19:00"
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_operational_period": {
+    "date_from": "10/14/2026",
+    "date_to": "10/15/2026",
+    "time_from": "07:00",
+    "time_to": "19:00"
+  },
+  "3_basic_local_communications_information": [
+    {
+      "incident_assigned_position": "USCG Unified Commander",
+      "name": "Captain H. Vance",
+      "methods_of_contact": "Cell: 555-0301 / VHF Ch 16 / Vessel: CG-45601"
     },
-    "3_basic_local_communications_information": [
-      {
-        "incident_assigned_position": "USCG Unified Commander",
-        "name": "Captain H. Vance",
-        "methods_of_contact": "Cell: 555-0301 / VHF Ch 16 / Vessel: CG-45601"
-      },
-      {
-        "incident_assigned_position": "EPA Co-Incident Commander",
-        "name": "OSC M. Reynolds",
-        "methods_of_contact": "Cell: 555-0302 / Radio Ch 1"
-      },
-      {
-        "incident_assigned_position": "Safety Officer",
-        "name": "Commander Thomas Blake",
-        "methods_of_contact": "Cell: 555-0399 / VHF Ch 16"
-      },
-      {
-        "incident_assigned_position": "Operations Section Chief",
-        "name": "Battalion Chief A. Ross",
-        "methods_of_contact": "Cell: 555-0312 / VHF Ch 16"
-      },
-      {
-        "incident_assigned_position": "Vessel Salvage Branch Director",
-        "name": "Lt. J. Thorne",
-        "methods_of_contact": "Cell: 555-0344 / VHF Ch 11"
-      },
-      {
-        "incident_assigned_position": "Deck Entry Supervisor",
-        "name": "Lt. S. Baker",
-        "methods_of_contact": "Cell: 555-0366 / Radio Ch 4 / Vehicle: HZM-PORT-1"
-      },
-      {
-        "incident_assigned_position": "Planning Section Chief",
-        "name": "Commander Richard Croft",
-        "methods_of_contact": "Cell: 555-0350 / Sector Ext: 305"
-      }
-    ],
-    "4_prepared_by": {
-      "name": "J. Myers",
-      "position_title": "Communications Unit Leader",
-      "signature": "J. Myers",
-      "date_time": "10/14/2026 06:15"
+    {
+      "incident_assigned_position": "EPA Co-Incident Commander",
+      "name": "OSC M. Reynolds",
+      "methods_of_contact": "Cell: 555-0302 / Radio Ch 1"
     },
-    "iap_page_number": "6"
-  }
+    {
+      "incident_assigned_position": "Safety Officer",
+      "name": "Commander Thomas Blake",
+      "methods_of_contact": "Cell: 555-0399 / VHF Ch 16"
+    },
+    {
+      "incident_assigned_position": "Operations Section Chief",
+      "name": "Battalion Chief A. Ross",
+      "methods_of_contact": "Cell: 555-0312 / VHF Ch 16"
+    },
+    {
+      "incident_assigned_position": "Vessel Salvage Branch Director",
+      "name": "Lt. J. Thorne",
+      "methods_of_contact": "Cell: 555-0344 / VHF Ch 11"
+    },
+    {
+      "incident_assigned_position": "Deck Entry Supervisor",
+      "name": "Lt. S. Baker",
+      "methods_of_contact": "Cell: 555-0366 / Radio Ch 4 / Vehicle: HZM-PORT-1"
+    },
+    {
+      "incident_assigned_position": "Planning Section Chief",
+      "name": "Commander Richard Croft",
+      "methods_of_contact": "Cell: 555-0350 / Sector Ext: 305"
+    }
+  ],
+  "4_prepared_by": {
+    "name": "J. Myers",
+    "position_title": "Communications Unit Leader",
+    "signature": "J. Myers",
+    "date_time": "10/14/2026 06:15"
+  },
+  "iap_page_number": "6"
 }

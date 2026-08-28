@@ -1,76 +1,74 @@
 {
-  "ics_205_ground_truth": {
-    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
-    "2_date_time_prepared": {
-      "date": "05/18/2026",
-      "time": "16:00"
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_date_time_prepared": {
+    "date": "05/18/2026",
+    "time": "16:00"
+  },
+  "3_operational_period": {
+    "date_from": "05/18/2026",
+    "date_to": "05/19/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "4_basic_radio_channel_use": [
+    {
+      "zone_grp": "Zone Lake",
+      "channel_number": "1",
+      "function": "Command",
+      "channel_name_trunked_radio_system_talkgroup": "FIRE-CMD",
+      "assignment": "Unified Command / Station 30",
+      "rx_frequency_n_or_w": "154.1500 N",
+      "rx_tone_nac": "146.2",
+      "tx_frequency_n_or_w": "158.8500 N",
+      "tx_tone_nac": "146.2",
+      "mode_a_d_or_m": "A",
+      "remarks": "County Station 30 Repeater"
     },
-    "3_operational_period": {
-      "date_from": "05/18/2026",
-      "date_to": "05/19/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+    {
+      "zone_grp": "Zone Lake",
+      "channel_number": "3",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "MARINE-11",
+      "assignment": "Reservoir Skimmer Fleet",
+      "rx_frequency_n_or_w": "156.5500 W",
+      "rx_tone_nac": "None",
+      "tx_frequency_n_or_w": "156.5500 W",
+      "tx_tone_nac": "None",
+      "mode_a_d_or_m": "A",
+      "remarks": "VHF Channel 11 Marine Simplex"
     },
-    "4_basic_radio_channel_use": [
-      {
-        "zone_grp": "Zone Lake",
-        "channel_number": "1",
-        "function": "Command",
-        "channel_name_trunked_radio_system_talkgroup": "FIRE-CMD",
-        "assignment": "Unified Command / Station 30",
-        "rx_frequency_n_or_w": "154.1500 N",
-        "rx_tone_nac": "146.2",
-        "tx_frequency_n_or_w": "158.8500 N",
-        "tx_tone_nac": "146.2",
-        "mode_a_d_or_m": "A",
-        "remarks": "County Station 30 Repeater"
-      },
-      {
-        "zone_grp": "Zone Lake",
-        "channel_number": "3",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "MARINE-11",
-        "assignment": "Reservoir Skimmer Fleet",
-        "rx_frequency_n_or_w": "156.5500 W",
-        "rx_tone_nac": "None",
-        "tx_frequency_n_or_w": "156.5500 W",
-        "tx_tone_nac": "None",
-        "mode_a_d_or_m": "A",
-        "remarks": "VHF Channel 11 Marine Simplex"
-      },
-      {
-        "zone_grp": "Zone Lake",
-        "channel_number": "4",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "PIPE-TAC",
-        "assignment": "Canyon Pipeline Repair Group",
-        "rx_frequency_n_or_w": "462.5750 N",
-        "rx_tone_nac": "D115",
-        "tx_frequency_n_or_w": "467.5750 N",
-        "tx_tone_nac": "D115",
-        "mode_a_d_or_m": "D",
-        "remarks": "Sawpit Canyon tactical link"
-      },
-      {
-        "zone_grp": "Zone Lake",
-        "channel_number": "5",
-        "function": "Support",
-        "channel_name_trunked_radio_system_talkgroup": "PARK-SUPP",
-        "assignment": "State Parks & Intake Guard",
-        "rx_frequency_n_or_w": "151.4000 N",
-        "rx_tone_nac": "146.2",
-        "tx_frequency_n_or_w": "151.4000 N",
-        "tx_tone_nac": "146.2",
-        "mode_a_d_or_m": "A",
-        "remarks": "Water Agency & Park Rangers"
-      }
-    ],
-    "5_special_instructions": "All marine vessels must maintain continuous watch on VHF Channel 11. Emergency Mayday protocol monitored by Command on Ch 1.",
-    "6_prepared_by": {
-      "name": "Sgt. R. Hall",
-      "signature": "R. Hall",
-      "date_time": "05/18/2026 16:00"
+    {
+      "zone_grp": "Zone Lake",
+      "channel_number": "4",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "PIPE-TAC",
+      "assignment": "Canyon Pipeline Repair Group",
+      "rx_frequency_n_or_w": "462.5750 N",
+      "rx_tone_nac": "D115",
+      "tx_frequency_n_or_w": "467.5750 N",
+      "tx_tone_nac": "D115",
+      "mode_a_d_or_m": "D",
+      "remarks": "Sawpit Canyon tactical link"
     },
-    "iap_page_number": "5"
-  }
+    {
+      "zone_grp": "Zone Lake",
+      "channel_number": "5",
+      "function": "Support",
+      "channel_name_trunked_radio_system_talkgroup": "PARK-SUPP",
+      "assignment": "State Parks & Intake Guard",
+      "rx_frequency_n_or_w": "151.4000 N",
+      "rx_tone_nac": "146.2",
+      "tx_frequency_n_or_w": "151.4000 N",
+      "tx_tone_nac": "146.2",
+      "mode_a_d_or_m": "A",
+      "remarks": "Water Agency & Park Rangers"
+    }
+  ],
+  "5_special_instructions": "All marine vessels must maintain continuous watch on VHF Channel 11. Emergency Mayday protocol monitored by Command on Ch 1.",
+  "6_prepared_by": {
+    "name": "Sgt. R. Hall",
+    "signature": "R. Hall",
+    "date_time": "05/18/2026 16:00"
+  },
+  "iap_page_number": "5"
 }

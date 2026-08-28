@@ -1,125 +1,123 @@
 {
-  "ics_203_ground_truth": {
-    "1_incident_name": "Blackwood Chemical Pipeline Breach",
-    "2_operational_period": {
-      "date_from": "08/13/2026",
-      "date_to": "08/14/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Blackwood Chemical Pipeline Breach",
+  "2_operational_period": {
+    "date_from": "08/13/2026",
+    "date_to": "08/14/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_incident_commander_and_command_staff": {
+    "ic_ucs": [
+      "Chief R. Vance (Blackwood Fire Dept)",
+      "Officer M. Ross (State EPA)",
+      "J. Vance (Blackwood Pipeline Co. RP)"
+    ],
+    "deputy": "Deputy Chief L. Morgan",
+    "safety_officer": "Captain L. Hayes",
+    "public_info_officer": "E. Wright",
+    "liaison_officer": "Deputy K. Miller"
+  },
+  "4_agency_organization_representatives": [
+    {
+      "agency_organization": "US EPA Region 5",
+      "name": "OSC R. Brooks"
     },
-    "3_incident_commander_and_command_staff": {
-      "ic_ucs": [
-        "Chief R. Vance (Blackwood Fire Dept)",
-        "Officer M. Ross (State EPA)",
-        "J. Vance (Blackwood Pipeline Co. RP)"
-      ],
-      "deputy": "Deputy Chief L. Morgan",
-      "safety_officer": "Captain L. Hayes",
-      "public_info_officer": "E. Wright",
-      "liaison_officer": "Deputy K. Miller"
+    {
+      "agency_organization": "Blackwood County Sheriff",
+      "name": "Sheriff T. Higgins"
     },
-    "4_agency_organization_representatives": [
+    {
+      "agency_organization": "Valley Water Authority",
+      "name": "Director P. Simmons"
+    }
+  ],
+  "5_planning_section": {
+    "chief": "Sarah L. Jenkins",
+    "deputy": "T. Bradley",
+    "resources_unit": "A. Patel",
+    "situation_unit": "C. Webb",
+    "documentation_unit": "Dr. H. Thorne",
+    "demobilization_unit": "M. Brody",
+    "technical_specialists": [
       {
-        "agency_organization": "US EPA Region 5",
-        "name": "OSC R. Brooks"
+        "specialty": "Pipeline Integrity Specialist",
+        "name": "E. Vance"
       },
       {
-        "agency_organization": "Blackwood County Sheriff",
-        "name": "Sheriff T. Higgins"
+        "specialty": "Chemical Toxicology Specialist",
+        "name": "Dr. S. Ray"
+      }
+    ]
+  },
+  "6_logistics_section": {
+    "chief": "T. Bradley",
+    "deputy": "W. Miller",
+    "support_branch": {
+      "director": "G. Kross",
+      "supply_unit": "H. Lin",
+      "facilities_unit": "R. Sterling",
+      "ground_support_unit": "D. Miller"
+    },
+    "service_branch": {
+      "director": "S. Norris",
+      "communications_unit": "K. Albright",
+      "medical_unit": "Dr. T. Vance",
+      "food_unit": "A. Cho"
+    }
+  },
+  "7_operations_section": {
+    "chief": "D. Kowalski",
+    "deputy": "Lt. Timothy Vance",
+    "staging_area": "Staging Area Bravo (Westside High School)",
+    "branches": [
+      {
+        "branch_name": "Pipeline Isolation Branch",
+        "branch_director": "Capt. Donald Kross",
+        "deputy": "Lt. C. Webb",
+        "divisions_groups": [
+          {
+            "identifier": "Hot Zone Entry Group",
+            "supervisor": "Lt. R. Mendez"
+          },
+          {
+            "identifier": "Vapor Suppression Group",
+            "supervisor": "Capt. A. Ross"
+          }
+        ]
       },
       {
-        "agency_organization": "Valley Water Authority",
-        "name": "Director P. Simmons"
+        "branch_name": "River Spill Containment Branch",
+        "branch_director": "Commander Thomas Blake",
+        "deputy": "Inspector G. Sims",
+        "divisions_groups": [
+          {
+            "identifier": "Booming Division 1",
+            "supervisor": "Lt. J. Thorne"
+          },
+          {
+            "identifier": "Water Intake Protection Group",
+            "supervisor": "Capt. B. Walsh"
+          }
+        ]
       }
     ],
-    "5_planning_section": {
-      "chief": "Sarah L. Jenkins",
-      "deputy": "T. Bradley",
-      "resources_unit": "A. Patel",
-      "situation_unit": "C. Webb",
-      "documentation_unit": "Dr. H. Thorne",
-      "demobilization_unit": "M. Brody",
-      "technical_specialists": [
-        {
-          "specialty": "Pipeline Integrity Specialist",
-          "name": "E. Vance"
-        },
-        {
-          "specialty": "Chemical Toxicology Specialist",
-          "name": "Dr. S. Ray"
-        }
-      ]
-    },
-    "6_logistics_section": {
-      "chief": "T. Bradley",
-      "deputy": "W. Miller",
-      "support_branch": {
-        "director": "G. Kross",
-        "supply_unit": "H. Lin",
-        "facilities_unit": "R. Sterling",
-        "ground_support_unit": "D. Miller"
-      },
-      "service_branch": {
-        "director": "S. Norris",
-        "communications_unit": "K. Albright",
-        "medical_unit": "Dr. T. Vance",
-        "food_unit": "A. Cho"
-      }
-    },
-    "7_operations_section": {
-      "chief": "D. Kowalski",
-      "deputy": "Lt. Timothy Vance",
-      "staging_area": "Staging Area Bravo (Westside High School)",
-      "branches": [
-        {
-          "branch_name": "Pipeline Isolation Branch",
-          "branch_director": "Capt. Donald Kross",
-          "deputy": "Lt. C. Webb",
-          "divisions_groups": [
-            {
-              "identifier": "Hot Zone Entry Group",
-              "supervisor": "Lt. R. Mendez"
-            },
-            {
-              "identifier": "Vapor Suppression Group",
-              "supervisor": "Capt. A. Ross"
-            }
-          ]
-        },
-        {
-          "branch_name": "River Spill Containment Branch",
-          "branch_director": "Commander Thomas Blake",
-          "deputy": "Inspector G. Sims",
-          "divisions_groups": [
-            {
-              "identifier": "Booming Division 1",
-              "supervisor": "Lt. J. Thorne"
-            },
-            {
-              "identifier": "Water Intake Protection Group",
-              "supervisor": "Capt. B. Walsh"
-            }
-          ]
-        }
-      ],
-      "air_operations_branch": {
-        "air_ops_branch_dir": "Capt. E. Walters"
-      }
-    },
-    "8_finance_administration_section": {
-      "chief": "A. Patel",
-      "deputy": "Robert Sterling",
-      "time_unit": "J. Mercer",
-      "procurement_unit": "Laura Martinez",
-      "comp_claims_unit": "Inspector R. Sterling",
-      "cost_unit": "Sandra Keller"
-    },
-    "9_prepared_by": {
-      "name": "Sarah L. Jenkins",
-      "position_title": "Planning Section Chief",
-      "signature": "Sarah L. Jenkins",
-      "date_time": "08/13/2026 16:30"
-    },
-    "iap_page_number": "1"
-  }
+    "air_operations_branch": {
+      "air_ops_branch_dir": "Capt. E. Walters"
+    }
+  },
+  "8_finance_administration_section": {
+    "chief": "A. Patel",
+    "deputy": "Robert Sterling",
+    "time_unit": "J. Mercer",
+    "procurement_unit": "Laura Martinez",
+    "comp_claims_unit": "Inspector R. Sterling",
+    "cost_unit": "Sandra Keller"
+  },
+  "9_prepared_by": {
+    "name": "Sarah L. Jenkins",
+    "position_title": "Planning Section Chief",
+    "signature": "Sarah L. Jenkins",
+    "date_time": "08/13/2026 16:30"
+  },
+  "iap_page_number": "1"
 }

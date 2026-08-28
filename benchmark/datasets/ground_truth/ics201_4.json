@@ -1,145 +1,145 @@
 {
-    "1_incident_name": "Blackwood River Chemical Spill",
-    "2_incident_number": "USCG-EPA-R4-2026-0813",
-    "3_date_time_initiated": {
-        "date": "08/13/2026",
-        "time": "07:15"
+  "1_incident_name": "Blackwood River Chemical Spill",
+  "2_incident_number": "USCG-EPA-R4-2026-0813",
+  "3_date_time_initiated": {
+    "date": "08/13/2026",
+    "time": "07:15"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "3.5-mile radius encompassing Blackwood Industrial Park, Mile Marker 42 of the Blackwood River, and State Route 104 corridor.",
+    "incident_site_area": "Storage Tank #4 at Apex Chemical Tank Farm (MM 42.1, East Bank), involving a structural fracture leaking concentrated Styrene Monomer.",
+    "impacted_areas": "1,200 meters of Blackwood River surface exhibiting heavy product sheening and a continuous vapor plume extending 800 yards downwind across State Route 104.",
+    "threatened_areas": "Blackwood Municipal Drinking Water Intake (3 miles downstream at MM 39.1) and Blackwood Marsh Ecological Reserve (1.5 miles downstream).",
+    "overflight_results": "USCG Aux Drone Flight #1 confirmed a 200-yard wide slick migrating south-southwest at 1.8 knots with moderate shore oiling along the east riverbank.",
+    "trajectories": "Airborne volatile organic plume tracking East-Northeast at 6 mph; aquatic slick migrating South-Southwest at 1.8 knots downstream.",
+    "impacted_shorelines": "East bank riprap shoreline and adjacent low-lying mudflats from MM 42.1 to MM 41.3.",
+    "graphics_and_symbology": "North oriented vertically, depicting Staging Area A at Westside High School, Boom Site 1 (Deflection), Boom Site 2 (Containment), Command Post at County Fire Station 12, Exclusion Zone boundary (500 ft radius), and water intake protection zones."
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "At 06:45 EDT, a catastrophic seal failure occurred on Tank #4 at Apex Chemical Facility, releasing approximately 8,500 gallons of liquid Styrene Monomer into secondary containment, with overflow entering Blackwood River via storm drain #3 at an estimated 30 gpm. Secondary vapor cloud formed over Route 104, triggering immediate road closures and evacuation of 60 surrounding industrial properties.",
+    "health_and_safety_hazards": "Inhalation of toxic styrene vapors (narcotic, central nervous system depressant, respiratory irritant), flammability risk (flash point 88\u00b0F), dermal contact hazards, slip/trip/fall hazards along wet river banks, and severe heat stress (ambient temp 91\u00b0F).",
+    "necessary_measures": "Establish 500-foot Exclusion Zone; mandate Level B PPE (SCBA with continuous air monitor PID/LEL/O2) within Hot Zone; Level C PPE (full-face APR with organic vapor cartridges) within Warm Zone; continuous air monitoring required at CP and downwind perimeters; establish wet-decontamination corridor at Gate 2."
+  },
+  "6_prepared_by": {
+    "name": "Sarah L. Jenkins",
+    "position_title": "Planning Section Chief",
+    "signature": "Sarah L. Jenkins",
+    "date_time": "08/13/2026 09:30"
+  },
+  "7_current_and_planned_objectives": [
+    "Maintain life safety and enforce 500-foot exclusion perimeter by 08:00 hours.",
+    "Complete containment booming at Boom Site 1 (MM 41.5) by 10:30 hours to protect downstream drinking water intake.",
+    "Secure leak source on Apex Tank #4 and complete product transfer by 12:00 hours.",
+    "Perform continuous air monitoring downwind along Route 104 and publish safety advisories by 11:00 hours.",
+    "Transition to full Unified Command (USCG, EPA, State DEQ, County Hazmat) by 10:00 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "07:15",
+      "actions": "Initial alarm dispatch; County Fire Engine 12 and Hazmat 1 respond. Initial 500-foot perimeter established."
     },
-    "4_map_sketch": {
-        "total_area_of_operations": "3.5-mile radius encompassing Blackwood Industrial Park, Mile Marker 42 of the Blackwood River, and State Route 104 corridor.",
-        "incident_site_area": "Storage Tank #4 at Apex Chemical Tank Farm (MM 42.1, East Bank), involving a structural fracture leaking concentrated Styrene Monomer.",
-        "impacted_areas": "1,200 meters of Blackwood River surface exhibiting heavy product sheening and a continuous vapor plume extending 800 yards downwind across State Route 104.",
-        "threatened_areas": "Blackwood Municipal Drinking Water Intake (3 miles downstream at MM 39.1) and Blackwood Marsh Ecological Reserve (1.5 miles downstream).",
-        "overflight_results": "USCG Aux Drone Flight #1 confirmed a 200-yard wide slick migrating south-southwest at 1.8 knots with moderate shore oiling along the east riverbank.",
-        "trajectories": "Airborne volatile organic plume tracking East-Northeast at 6 mph; aquatic slick migrating South-Southwest at 1.8 knots downstream.",
-        "impacted_shorelines": "East bank riprap shoreline and adjacent low-lying mudflats from MM 42.1 to MM 41.3.",
-        "graphics_and_symbology": "North oriented vertically, depicting Staging Area A at Westside High School, Boom Site 1 (Deflection), Boom Site 2 (Containment), Command Post at County Fire Station 12, Exclusion Zone boundary (500 ft radius), and water intake protection zones."
+    {
+      "time": "07:30",
+      "actions": "Local Command established by Chief Henderson; Apex facility emergency shutdown initiated. Route 104 closed to traffic."
     },
-    "5_situation_summary_health_safety_briefing": {
-        "situation_summary": "At 06:45 EDT, a catastrophic seal failure occurred on Tank #4 at Apex Chemical Facility, releasing approximately 8,500 gallons of liquid Styrene Monomer into secondary containment, with overflow entering Blackwood River via storm drain #3 at an estimated 30 gpm. Secondary vapor cloud formed over Route 104, triggering immediate road closures and evacuation of 60 surrounding industrial properties.",
-        "health_and_safety_hazards": "Inhalation of toxic styrene vapors (narcotic, central nervous system depressant, respiratory irritant), flammability risk (flash point 88°F), dermal contact hazards, slip/trip/fall hazards along wet river banks, and severe heat stress (ambient temp 91°F).",
-        "necessary_measures": "Establish 500-foot Exclusion Zone; mandate Level B PPE (SCBA with continuous air monitor PID/LEL/O2) within Hot Zone; Level C PPE (full-face APR with organic vapor cartridges) within Warm Zone; continuous air monitoring required at CP and downwind perimeters; establish wet-decontamination corridor at Gate 2."
+    {
+      "time": "07:55",
+      "actions": "Regional Hazmat Team 4 arrives; initiates perimeter PID air monitoring and establishes decontamination corridor at Gate 2."
     },
-    "6_prepared_by": {
-        "name": "Sarah L. Jenkins",
-        "position_title": "Planning Section Chief",
-        "signature": "Sarah L. Jenkins",
-        "date_time": "08/13/2026 09:30"
+    {
+      "time": "08:20",
+      "actions": "USCG Sector Strike Team and EPA On-Scene Coordinator arrive on scene; initiate Unified Command setup at Fire Station 12."
     },
-    "7_current_and_planned_objectives": [
-        "Maintain life safety and enforce 500-foot exclusion perimeter by 08:00 hours.",
-        "Complete containment booming at Boom Site 1 (MM 41.5) by 10:30 hours to protect downstream drinking water intake.",
-        "Secure leak source on Apex Tank #4 and complete product transfer by 12:00 hours.",
-        "Perform continuous air monitoring downwind along Route 104 and publish safety advisories by 11:00 hours.",
-        "Transition to full Unified Command (USCG, EPA, State DEQ, County Hazmat) by 10:00 hours."
+    {
+      "time": "08:45",
+      "actions": "Marine Spill Response Vessel River Guardian deploys 1,000 feet of hard containment boom at MM 41.5 (Boom Site 1)."
+    },
+    {
+      "time": "09:15",
+      "actions": "Planned: Entry Team 1 to enter Hot Zone under Level B PPE to secure Tank #4 bottom manifold valve."
+    },
+    {
+      "time": "10:00",
+      "actions": "Planned: Deploy secondary sorbent deflection boom array at Boom Site 2 (MM 40.2) upstream of drinking water intake."
+    },
+    {
+      "time": "11:30",
+      "actions": "Planned: Vacuum truck operations commence skimmer recovery of pooled styrene at storm drain outfall."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Captain M. Ross (USCG Unified Command IC)",
+      "OSC E. Vance (EPA Co-IC)",
+      "Chief R. Henderson (County Fire IC)",
+      "J. Mercer (Apex Facility RP IC)"
     ],
-    "8_current_and_planned_actions_strategies_tactics": [
-        {
-            "time": "07:15",
-            "actions": "Initial alarm dispatch; County Fire Engine 12 and Hazmat 1 respond. Initial 500-foot perimeter established."
-        },
-        {
-            "time": "07:30",
-            "actions": "Local Command established by Chief Henderson; Apex facility emergency shutdown initiated. Route 104 closed to traffic."
-        },
-        {
-            "time": "07:55",
-            "actions": "Regional Hazmat Team 4 arrives; initiates perimeter PID air monitoring and establishes decontamination corridor at Gate 2."
-        },
-        {
-            "time": "08:20",
-            "actions": "USCG Sector Strike Team and EPA On-Scene Coordinator arrive on scene; initiate Unified Command setup at Fire Station 12."
-        },
-        {
-            "time": "08:45",
-            "actions": "Marine Spill Response Vessel River Guardian deploys 1,000 feet of hard containment boom at MM 41.5 (Boom Site 1)."
-        },
-        {
-            "time": "09:15",
-            "actions": "Planned: Entry Team 1 to enter Hot Zone under Level B PPE to secure Tank #4 bottom manifold valve."
-        },
-        {
-            "time": "10:00",
-            "actions": "Planned: Deploy secondary sorbent deflection boom array at Boom Site 2 (MM 40.2) upstream of drinking water intake."
-        },
-        {
-            "time": "11:30",
-            "actions": "Planned: Vacuum truck operations commence skimmer recovery of pooled styrene at storm drain outfall."
-        }
-    ],
-    "9_current_organization": {
-        "incident_commanders": [
-            "Captain M. Ross (USCG Unified Command IC)",
-            "OSC E. Vance (EPA Co-IC)",
-            "Chief R. Henderson (County Fire IC)",
-            "J. Mercer (Apex Facility RP IC)"
-        ],
-        "safety_officer": "Lt. Commander David Miller",
-        "public_information_officer": "Elena Gomez (County OEM)",
-        "liaison_officer": "Captain Arthur Pendelton (State Police)",
-        "operations_section_chief": "Battalion Chief Marcus Brody",
-        "planning_section_chief": "Sarah L. Jenkins",
-        "logistics_section_chief": "Karen Albright",
-        "finance_administration_section_chief": "Robert Sterling",
-        "additional_positions": [
-            {
-                "position": "Hazmat Group Supervisor",
-                "name": "Captain Donald Kross (Hazmat 1)"
-            },
-            {
-                "position": "Waterborne Ops Branch Director",
-                "name": "Lt. Timothy Vance (USCG)"
-            }
-        ]
-    },
-    "10_resource_summary": [
-        {
-            "resource": "Hazmat Unit",
-            "resource_identifier": "HM-01",
-            "date_time_ordered": "08/13/2026 07:20",
-            "eta": "N/A",
-            "arrived": true,
-            "notes": "Conducted initial air monitoring; operating Hot Zone entry."
-        },
-        {
-            "resource": "Fire Engine",
-            "resource_identifier": "ENG-12",
-            "date_time_ordered": "08/13/2026 07:15",
-            "eta": "N/A",
-            "arrived": true,
-            "notes": "Securing perimeter and providing fire standby protection."
-        },
-        {
-            "resource": "USCG Strike Team",
-            "resource_identifier": "USCG-ST-04",
-            "date_time_ordered": "08/13/2026 07:40",
-            "eta": "N/A",
-            "arrived": true,
-            "notes": "Assisting with Unified Command and waterborne ops supervision."
-        },
-        {
-            "resource": "Spill Response Vessel",
-            "resource_identifier": "RV-RG-02",
-            "date_time_ordered": "08/13/2026 08:00",
-            "eta": "N/A",
-            "arrived": true,
-            "notes": "Deployed 1,000 ft containment boom at Boom Site 1."
-        },
-        {
-            "resource": "Vacuum Truck Unit",
-            "resource_identifier": "VAC-99",
-            "date_time_ordered": "08/13/2026 08:30",
-            "eta": "08/13/2026 10:45",
-            "arrived": false,
-            "notes": "En route to perform liquid product recovery at outfall."
-        },
-        {
-            "resource": "Air Monitoring Unit",
-            "resource_identifier": "AMR-03",
-            "date_time_ordered": "08/13/2026 08:15",
-            "eta": "08/13/2026 09:45",
-            "arrived": false,
-            "notes": "Transporting high-sensitivity PID and Jerome mercury/VOC analyzers."
-        }
+    "safety_officer": "Lt. Commander David Miller",
+    "public_information_officer": "Elena Gomez (County OEM)",
+    "liaison_officer": "Captain Arthur Pendelton (State Police)",
+    "operations_section_chief": "Battalion Chief Marcus Brody",
+    "planning_section_chief": "Sarah L. Jenkins",
+    "logistics_section_chief": "Karen Albright",
+    "finance_administration_section_chief": "Robert Sterling",
+    "additional_positions": [
+      {
+        "position": "Hazmat Group Supervisor",
+        "name": "Captain Donald Kross (Hazmat 1)"
+      },
+      {
+        "position": "Waterborne Ops Branch Director",
+        "name": "Lt. Timothy Vance (USCG)"
+      }
     ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "Hazmat Unit",
+      "resource_identifier": "HM-01",
+      "date_time_ordered": "08/13/2026 07:20",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Conducted initial air monitoring; operating Hot Zone entry."
+    },
+    {
+      "resource": "Fire Engine",
+      "resource_identifier": "ENG-12",
+      "date_time_ordered": "08/13/2026 07:15",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Securing perimeter and providing fire standby protection."
+    },
+    {
+      "resource": "USCG Strike Team",
+      "resource_identifier": "USCG-ST-04",
+      "date_time_ordered": "08/13/2026 07:40",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Assisting with Unified Command and waterborne ops supervision."
+    },
+    {
+      "resource": "Spill Response Vessel",
+      "resource_identifier": "RV-RG-02",
+      "date_time_ordered": "08/13/2026 08:00",
+      "eta": "N/A",
+      "arrived": true,
+      "notes": "Deployed 1,000 ft containment boom at Boom Site 1."
+    },
+    {
+      "resource": "Vacuum Truck Unit",
+      "resource_identifier": "VAC-99",
+      "date_time_ordered": "08/13/2026 08:30",
+      "eta": "08/13/2026 10:45",
+      "arrived": false,
+      "notes": "En route to perform liquid product recovery at outfall."
+    },
+    {
+      "resource": "Air Monitoring Unit",
+      "resource_identifier": "AMR-03",
+      "date_time_ordered": "08/13/2026 08:15",
+      "eta": "08/13/2026 09:45",
+      "arrived": false,
+      "notes": "Transporting high-sensitivity PID and Jerome mercury/VOC analyzers."
+    }
+  ]
 }

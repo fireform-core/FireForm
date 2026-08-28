@@ -1,55 +1,53 @@
 {
-  "ics_205a_ground_truth": {
-    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
-    "2_operational_period": {
-      "date_from": "11/02/2026",
-      "date_to": "11/03/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+  "2_operational_period": {
+    "date_from": "11/02/2026",
+    "date_to": "11/03/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_basic_local_communications_information": [
+    {
+      "incident_assigned_position": "WSP Incident Commander",
+      "name": "Captain E. Miller",
+      "methods_of_contact": "Cell: 555-0401 / Radio Ch 1 / Unit: WSP-100"
     },
-    "3_basic_local_communications_information": [
-      {
-        "incident_assigned_position": "WSP Incident Commander",
-        "name": "Captain E. Miller",
-        "methods_of_contact": "Cell: 555-0401 / Radio Ch 1 / Unit: WSP-100"
-      },
-      {
-        "incident_assigned_position": "EPA R10 Co-Commander",
-        "name": "OSC R. Brooks",
-        "methods_of_contact": "Cell: 555-0402 / Radio Ch 1"
-      },
-      {
-        "incident_assigned_position": "Safety Officer",
-        "name": "Captain Marcus Vance",
-        "methods_of_contact": "Cell: 555-0488 / Radio Ch 1"
-      },
-      {
-        "incident_assigned_position": "Operations Section Chief",
-        "name": "Battalion Chief T. Higgins",
-        "methods_of_contact": "Cell: 555-0411 / Radio Ch 1"
-      },
-      {
-        "incident_assigned_position": "Hazmat Capping Branch Director",
-        "name": "Capt. P. Gomez",
-        "methods_of_contact": "Cell: 555-0433 / Radio Ch 2 & 3"
-      },
-      {
-        "incident_assigned_position": "Railcar Entry Supervisor",
-        "name": "Capt. D. Ross",
-        "methods_of_contact": "Cell: 555-0455 / Radio Ch 3 / Vehicle: HZM-33"
-      },
-      {
-        "incident_assigned_position": "Planning Section Chief",
-        "name": "Lt. Colonel Alan Vance",
-        "methods_of_contact": "Cell: 555-0450 / CP Desk: Gym-1"
-      }
-    ],
-    "4_prepared_by": {
-      "name": "B. Foster",
-      "position_title": "Communications Unit Leader",
-      "signature": "B. Foster",
-      "date_time": "11/02/2026 16:30"
+    {
+      "incident_assigned_position": "EPA R10 Co-Commander",
+      "name": "OSC R. Brooks",
+      "methods_of_contact": "Cell: 555-0402 / Radio Ch 1"
     },
-    "iap_page_number": "6"
-  }
+    {
+      "incident_assigned_position": "Safety Officer",
+      "name": "Captain Marcus Vance",
+      "methods_of_contact": "Cell: 555-0488 / Radio Ch 1"
+    },
+    {
+      "incident_assigned_position": "Operations Section Chief",
+      "name": "Battalion Chief T. Higgins",
+      "methods_of_contact": "Cell: 555-0411 / Radio Ch 1"
+    },
+    {
+      "incident_assigned_position": "Hazmat Capping Branch Director",
+      "name": "Capt. P. Gomez",
+      "methods_of_contact": "Cell: 555-0433 / Radio Ch 2 & 3"
+    },
+    {
+      "incident_assigned_position": "Railcar Entry Supervisor",
+      "name": "Capt. D. Ross",
+      "methods_of_contact": "Cell: 555-0455 / Radio Ch 3 / Vehicle: HZM-33"
+    },
+    {
+      "incident_assigned_position": "Planning Section Chief",
+      "name": "Lt. Colonel Alan Vance",
+      "methods_of_contact": "Cell: 555-0450 / CP Desk: Gym-1"
+    }
+  ],
+  "4_prepared_by": {
+    "name": "B. Foster",
+    "position_title": "Communications Unit Leader",
+    "signature": "B. Foster",
+    "date_time": "11/02/2026 16:30"
+  },
+  "iap_page_number": "6"
 }

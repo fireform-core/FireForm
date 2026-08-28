@@ -1,139 +1,139 @@
 {
-    "1_incident_name": "Blackwood Chemical Pipeline Breach",
-    "2_incident_number": "US-EPA-R5-2026-0813",
-    "3_date_time_initiated": {
-        "date": "August 13, 2026",
-        "time": "07:15 hours"
+  "1_incident_name": "Blackwood Chemical Pipeline Breach",
+  "2_incident_number": "US-EPA-R5-2026-0813",
+  "3_date_time_initiated": {
+    "date": "August 13, 2026",
+    "time": "07:15 hours"
+  },
+  "4_map_sketch": {
+    "total_area_of_operations": "3.0-mile radius around the Blackwood Industrial Corridor",
+    "incident_site_area": "Pipeline Valve Station 14-B along Blackwood River Road",
+    "impacted_areas": "150-foot radius surrounding the breached 8-inch pressurized line releasing anhydrous ammonia gas",
+    "threatened_areas": "Oakridge Residential Subdivision 0.75 miles downwind to the East; Valley Water Authority Municipal Intake Facility 1.5 miles downstream",
+    "overflight_results": "Dense, low-hanging vapor cloud hugging the ground and moving steadily downwind, along with a localized surface sheen on the riverbank",
+    "trajectories": "Toxic vapor plume moving East-Northeast at 6 mph; waterborne chemical runoff traveling downstream at approximately 2.0 knots",
+    "impacted_shorelines": "1,000 yards down the adjacent Blackwood River",
+    "graphics_and_symbology": "Standard graphics and GIS symbology, oriented with North at top"
+  },
+  "5_situation_summary_health_safety_briefing": {
+    "situation_summary": "Third-party excavation crew accidentally punctured the main 8-inch transfer pipeline at 06:50 hours, causing an uncontrolled high-pressure release of hazardous anhydrous ammonia gas.",
+    "health_and_safety_hazards": "Severe atmospheric exposure to anhydrous ammonia vapor, cryogenic freeze burns upon direct contact with liquid leakage, respiratory injury, structural eye damage, responder heat stress in 85\u00b0F temperatures, and slip-and-fall risks near steep river embankment slopes.",
+    "necessary_measures": "Immediate establishment of a 500-foot Exclusion Zone, mandatory Level A vapor-tight PPE with SCBA for Hot Zone entry, continuous PID air monitoring at control perimeters, water curtain deployment to knock down vapor clouds, and compulsory full-body chemical decontamination at the Warm-to-Cold zone boundary prior to site exit."
+  },
+  "6_prepared_by": {
+    "name": "Sarah Jenkins",
+    "position_title": "Initial Planning Section Chief",
+    "signature": "Sarah Jenkins",
+    "date_time": "August 13, 2026, at 08:30 hours"
+  },
+  "7_current_and_planned_objectives": [
+    "Achieve complete isolation of the pipeline segment by closing upstream valves by 09:30 hours.",
+    "Finish the sheltering-in-place order and partial evacuation of 120 homes in the downwind Oakridge subdivision by 10:00 hours.",
+    "Deploy absorbent and containment booming across the Blackwood River above the municipal water intake by 10:30 hours.",
+    "Fully establish a Multi-Agency Unified Command at the Regional Emergency Operations Center by 11:00 hours."
+  ],
+  "8_current_and_planned_actions_strategies_tactics": [
+    {
+      "time": "07:00 hours",
+      "actions": "Initial dispatch sent Blackwood Fire Department and Local Sheriff units to establish an outer safety perimeter."
     },
-    "4_map_sketch": {
-        "total_area_of_operations": "3.0-mile radius around the Blackwood Industrial Corridor",
-        "incident_site_area": "Pipeline Valve Station 14-B along Blackwood River Road",
-        "impacted_areas": "150-foot radius surrounding the breached 8-inch pressurized line releasing anhydrous ammonia gas",
-        "threatened_areas": "Oakridge Residential Subdivision 0.75 miles downwind to the East; Valley Water Authority Municipal Intake Facility 1.5 miles downstream",
-        "overflight_results": "Dense, low-hanging vapor cloud hugging the ground and moving steadily downwind, along with a localized surface sheen on the riverbank",
-        "trajectories": "Toxic vapor plume moving East-Northeast at 6 mph; waterborne chemical runoff traveling downstream at approximately 2.0 knots",
-        "impacted_shorelines": "1,000 yards down the adjacent Blackwood River",
-        "graphics_and_symbology": "Standard graphics and GIS symbology, oriented with North at top"
+    {
+      "time": "07:20 hours",
+      "actions": "Fire Chief R. Vance established Incident Command and ordered an immediate downwind shelter-in-place alert."
     },
-    "5_situation_summary_health_safety_briefing": {
-        "situation_summary": "Third-party excavation crew accidentally punctured the main 8-inch transfer pipeline at 06:50 hours, causing an uncontrolled high-pressure release of hazardous anhydrous ammonia gas.",
-        "health_and_safety_hazards": "Severe atmospheric exposure to anhydrous ammonia vapor, cryogenic freeze burns upon direct contact with liquid leakage, respiratory injury, structural eye damage, responder heat stress in 85°F temperatures, and slip-and-fall risks near steep river embankment slopes.",
-        "necessary_measures": "Immediate establishment of a 500-foot Exclusion Zone, mandatory Level A vapor-tight PPE with SCBA for Hot Zone entry, continuous PID air monitoring at control perimeters, water curtain deployment to knock down vapor clouds, and compulsory full-body chemical decontamination at the Warm-to-Cold zone boundary prior to site exit."
+    {
+      "time": "07:45 hours",
+      "actions": "Hazmat Team 5 arrived on scene to conduct initial perimeter air monitoring and assist in establishing control zones."
     },
-    "6_prepared_by": {
-        "name": "Sarah Jenkins",
-        "position_title": "Initial Planning Section Chief",
-        "signature": "Sarah Jenkins",
-        "date_time": "August 13, 2026, at 08:30 hours"
+    {
+      "time": "08:15 hours",
+      "actions": "Pipeline technicians confirmed valve isolation procedures were initiated, while fire crews set up unmanned monitor nozzles to disperse airborne vapors."
     },
-    "7_current_and_planned_objectives": [
-        "Achieve complete isolation of the pipeline segment by closing upstream valves by 09:30 hours.",
-        "Finish the sheltering-in-place order and partial evacuation of 120 homes in the downwind Oakridge subdivision by 10:00 hours.",
-        "Deploy absorbent and containment booming across the Blackwood River above the municipal water intake by 10:30 hours.",
-        "Fully establish a Multi-Agency Unified Command at the Regional Emergency Operations Center by 11:00 hours."
+    {
+      "time": "09:00 hours",
+      "actions": "Deploy the Regional Spill Response Team to launch containment boom at River Boom Site Alpha."
+    },
+    {
+      "time": "09:30 hours",
+      "actions": "Conduct a secondary drone air sampling flight."
+    },
+    {
+      "time": "10:00 hours",
+      "actions": "Finalize the shift to a Unified Command structure at the Regional Emergency Operations Center."
+    }
+  ],
+  "9_current_organization": {
+    "incident_commanders": [
+      "Chief R. Vance (Blackwood Fire Department)",
+      "Officer M. Ross (State Environmental Protection Agency)",
+      "J. Vance (Blackwood Pipeline Co., Responsible Party)"
     ],
-    "8_current_and_planned_actions_strategies_tactics": [
-        {
-            "time": "07:00 hours",
-            "actions": "Initial dispatch sent Blackwood Fire Department and Local Sheriff units to establish an outer safety perimeter."
-        },
-        {
-            "time": "07:20 hours",
-            "actions": "Fire Chief R. Vance established Incident Command and ordered an immediate downwind shelter-in-place alert."
-        },
-        {
-            "time": "07:45 hours",
-            "actions": "Hazmat Team 5 arrived on scene to conduct initial perimeter air monitoring and assist in establishing control zones."
-        },
-        {
-            "time": "08:15 hours",
-            "actions": "Pipeline technicians confirmed valve isolation procedures were initiated, while fire crews set up unmanned monitor nozzles to disperse airborne vapors."
-        },
-        {
-            "time": "09:00 hours",
-            "actions": "Deploy the Regional Spill Response Team to launch containment boom at River Boom Site Alpha."
-        },
-        {
-            "time": "09:30 hours",
-            "actions": "Conduct a secondary drone air sampling flight."
-        },
-        {
-            "time": "10:00 hours",
-            "actions": "Finalize the shift to a Unified Command structure at the Regional Emergency Operations Center."
-        }
-    ],
-    "9_current_organization": {
-        "incident_commanders": [
-            "Chief R. Vance (Blackwood Fire Department)",
-            "Officer M. Ross (State Environmental Protection Agency)",
-            "J. Vance (Blackwood Pipeline Co., Responsible Party)"
-        ],
-        "safety_officer": "Captain L. Hayes",
-        "public_information_officer": "E. Wright",
-        "liaison_officer": "Deputy K. Miller",
-        "operations_section_chief": "D. Kowalski",
-        "planning_section_chief": "Sarah Jenkins",
-        "logistics_section_chief": "T. Bradley",
-        "finance_administration_section_chief": "A. Patel",
-        "additional_positions": [
-            {
-                "position": "Hazmat Group Supervisor",
-                "name": "Lieutenant C. Webb"
-            },
-            {
-                "position": "Air Monitoring Specialist",
-                "name": "Dr. H. Thorne"
-            }
-        ]
-    },
-    "10_resource_summary": [
-        {
-            "resource": "Hazmat Team 5",
-            "resource_identifier": "HZM-05",
-            "date_time_ordered": "August 13, 2026, 07:00 hours",
-            "eta": "Arrived",
-            "arrived": true,
-            "notes": "Executing air monitoring and entry ops at the Hot Zone perimeter."
-        },
-        {
-            "resource": "Blackwood Engine 12",
-            "resource_identifier": "ENG-12",
-            "date_time_ordered": "August 13, 2026, 06:55 hours",
-            "eta": "Arrived",
-            "arrived": true,
-            "notes": "Actively operating water curtains for vapor suppression."
-        },
-        {
-            "resource": "County Water Tender 3",
-            "resource_identifier": "WT-03",
-            "date_time_ordered": "August 13, 2026, 07:10 hours",
-            "eta": "Arrived",
-            "arrived": true,
-            "notes": "Supplying continuous water flow to Engine 12."
-        },
-        {
-            "resource": "Sheriff Patrol Unit Group Alpha",
-            "resource_identifier": "SO-ALPHA",
-            "date_time_ordered": "August 13, 2026, 06:55 hours",
-            "eta": "Arrived",
-            "arrived": true,
-            "notes": "Maintaining road closures and executing downwind evacuation notices."
-        },
-        {
-            "resource": "CleanHarbor Spill Response Team",
-            "resource_identifier": "CH-SRT-1",
-            "date_time_ordered": "August 13, 2026, 07:30 hours",
-            "eta": "09:00 hours",
-            "arrived": false,
-            "notes": "En route with 1,500 feet of river containment boom and vacuum recovery equipment."
-        },
-        {
-            "resource": "State EPA Air Monitoring Drone Unit",
-            "resource_identifier": "EPA-DRONE-2",
-            "date_time_ordered": "August 13, 2026, 07:40 hours",
-            "eta": "08:45 hours",
-            "arrived": false,
-            "notes": "En route to provide real-time thermal and chemical plume mapping."
-        }
+    "safety_officer": "Captain L. Hayes",
+    "public_information_officer": "E. Wright",
+    "liaison_officer": "Deputy K. Miller",
+    "operations_section_chief": "D. Kowalski",
+    "planning_section_chief": "Sarah Jenkins",
+    "logistics_section_chief": "T. Bradley",
+    "finance_administration_section_chief": "A. Patel",
+    "additional_positions": [
+      {
+        "position": "Hazmat Group Supervisor",
+        "name": "Lieutenant C. Webb"
+      },
+      {
+        "position": "Air Monitoring Specialist",
+        "name": "Dr. H. Thorne"
+      }
     ]
+  },
+  "10_resource_summary": [
+    {
+      "resource": "Hazmat Team 5",
+      "resource_identifier": "HZM-05",
+      "date_time_ordered": "August 13, 2026, 07:00 hours",
+      "eta": "Arrived",
+      "arrived": true,
+      "notes": "Executing air monitoring and entry ops at the Hot Zone perimeter."
+    },
+    {
+      "resource": "Blackwood Engine 12",
+      "resource_identifier": "ENG-12",
+      "date_time_ordered": "August 13, 2026, 06:55 hours",
+      "eta": "Arrived",
+      "arrived": true,
+      "notes": "Actively operating water curtains for vapor suppression."
+    },
+    {
+      "resource": "County Water Tender 3",
+      "resource_identifier": "WT-03",
+      "date_time_ordered": "August 13, 2026, 07:10 hours",
+      "eta": "Arrived",
+      "arrived": true,
+      "notes": "Supplying continuous water flow to Engine 12."
+    },
+    {
+      "resource": "Sheriff Patrol Unit Group Alpha",
+      "resource_identifier": "SO-ALPHA",
+      "date_time_ordered": "August 13, 2026, 06:55 hours",
+      "eta": "Arrived",
+      "arrived": true,
+      "notes": "Maintaining road closures and executing downwind evacuation notices."
+    },
+    {
+      "resource": "CleanHarbor Spill Response Team",
+      "resource_identifier": "CH-SRT-1",
+      "date_time_ordered": "August 13, 2026, 07:30 hours",
+      "eta": "09:00 hours",
+      "arrived": false,
+      "notes": "En route with 1,500 feet of river containment boom and vacuum recovery equipment."
+    },
+    {
+      "resource": "State EPA Air Monitoring Drone Unit",
+      "resource_identifier": "EPA-DRONE-2",
+      "date_time_ordered": "August 13, 2026, 07:40 hours",
+      "eta": "08:45 hours",
+      "arrived": false,
+      "notes": "En route to provide real-time thermal and chemical plume mapping."
+    }
+  ]
 }

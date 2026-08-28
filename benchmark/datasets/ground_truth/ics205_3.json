@@ -1,76 +1,74 @@
 {
-  "ics_205_ground_truth": {
-    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
-    "2_date_time_prepared": {
-      "date": "10/14/2026",
-      "time": "05:30"
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_date_time_prepared": {
+    "date": "10/14/2026",
+    "time": "05:30"
+  },
+  "3_operational_period": {
+    "date_from": "10/14/2026",
+    "date_to": "10/15/2026",
+    "time_from": "07:00",
+    "time_to": "19:00"
+  },
+  "4_basic_radio_channel_use": [
+    {
+      "zone_grp": "Zone Port",
+      "channel_number": "16",
+      "function": "Command",
+      "channel_name_trunked_radio_system_talkgroup": "VHF 16 / CMD",
+      "assignment": "USCG / Unified Command",
+      "rx_frequency_n_or_w": "156.8000 W",
+      "rx_tone_nac": "None",
+      "tx_frequency_n_or_w": "156.8000 W",
+      "tx_tone_nac": "None",
+      "mode_a_d_or_m": "A",
+      "remarks": "International Maritime Distress & Command"
     },
-    "3_operational_period": {
-      "date_from": "10/14/2026",
-      "date_to": "10/15/2026",
-      "time_from": "07:00",
-      "time_to": "19:00"
+    {
+      "zone_grp": "Zone Port",
+      "channel_number": "11",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "VHF 11 / OPS",
+      "assignment": "Vessel Deck Entry Group",
+      "rx_frequency_n_or_w": "156.5500 W",
+      "rx_tone_nac": "None",
+      "tx_frequency_n_or_w": "156.5500 W",
+      "tx_tone_nac": "None",
+      "mode_a_d_or_m": "A",
+      "remarks": "Ship-to-shore deck entry"
     },
-    "4_basic_radio_channel_use": [
-      {
-        "zone_grp": "Zone Port",
-        "channel_number": "16",
-        "function": "Command",
-        "channel_name_trunked_radio_system_talkgroup": "VHF 16 / CMD",
-        "assignment": "USCG / Unified Command",
-        "rx_frequency_n_or_w": "156.8000 W",
-        "rx_tone_nac": "None",
-        "tx_frequency_n_or_w": "156.8000 W",
-        "tx_tone_nac": "None",
-        "mode_a_d_or_m": "A",
-        "remarks": "International Maritime Distress & Command"
-      },
-      {
-        "zone_grp": "Zone Port",
-        "channel_number": "11",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "VHF 11 / OPS",
-        "assignment": "Vessel Deck Entry Group",
-        "rx_frequency_n_or_w": "156.5500 W",
-        "rx_tone_nac": "None",
-        "tx_frequency_n_or_w": "156.5500 W",
-        "tx_tone_nac": "None",
-        "mode_a_d_or_m": "A",
-        "remarks": "Ship-to-shore deck entry"
-      },
-      {
-        "zone_grp": "Zone Port",
-        "channel_number": "4",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "PORT-HAZ",
-        "assignment": "Chemical Neutralization Team",
-        "rx_frequency_n_or_w": "453.2250 N",
-        "rx_tone_nac": "141.3",
-        "tx_frequency_n_or_w": "458.2250 N",
-        "tx_tone_nac": "141.3",
-        "mode_a_d_or_m": "D",
-        "remarks": "Port Fire Hazmat digital"
-      },
-      {
-        "zone_grp": "Zone Port",
-        "channel_number": "5",
-        "function": "Support",
-        "channel_name_trunked_radio_system_talkgroup": "MED-NET",
-        "assignment": "Medical & Decon Operations",
-        "rx_frequency_n_or_w": "462.6000 N",
-        "rx_tone_nac": "100.0",
-        "tx_frequency_n_or_w": "462.6000 N",
-        "tx_tone_nac": "100.0",
-        "mode_a_d_or_m": "A",
-        "remarks": "Decon trailer baseline"
-      }
-    ],
-    "5_special_instructions": "VHF Channel 16 reserved for Command & emergency traffic only. Deck entry team must maintain dual-watch on VHF 11 and Port-Haz Ch 4.",
-    "6_prepared_by": {
-      "name": "J. Myers",
-      "signature": "J. Myers",
-      "date_time": "10/14/2026 05:30"
+    {
+      "zone_grp": "Zone Port",
+      "channel_number": "4",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "PORT-HAZ",
+      "assignment": "Chemical Neutralization Team",
+      "rx_frequency_n_or_w": "453.2250 N",
+      "rx_tone_nac": "141.3",
+      "tx_frequency_n_or_w": "458.2250 N",
+      "tx_tone_nac": "141.3",
+      "mode_a_d_or_m": "D",
+      "remarks": "Port Fire Hazmat digital"
     },
-    "iap_page_number": "5"
-  }
+    {
+      "zone_grp": "Zone Port",
+      "channel_number": "5",
+      "function": "Support",
+      "channel_name_trunked_radio_system_talkgroup": "MED-NET",
+      "assignment": "Medical & Decon Operations",
+      "rx_frequency_n_or_w": "462.6000 N",
+      "rx_tone_nac": "100.0",
+      "tx_frequency_n_or_w": "462.6000 N",
+      "tx_tone_nac": "100.0",
+      "mode_a_d_or_m": "A",
+      "remarks": "Decon trailer baseline"
+    }
+  ],
+  "5_special_instructions": "VHF Channel 16 reserved for Command & emergency traffic only. Deck entry team must maintain dual-watch on VHF 11 and Port-Haz Ch 4.",
+  "6_prepared_by": {
+    "name": "J. Myers",
+    "signature": "J. Myers",
+    "date_time": "10/14/2026 05:30"
+  },
+  "iap_page_number": "5"
 }

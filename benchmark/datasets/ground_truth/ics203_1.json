@@ -1,125 +1,123 @@
 {
-  "ics_203_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_operational_period": {
-      "date_from": "07/07/2026",
-      "date_to": "07/08/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_operational_period": {
+    "date_from": "07/07/2026",
+    "date_to": "07/08/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_incident_commander_and_command_staff": {
+    "ic_ucs": [
+      "Chief J. Thomas (County Fire)",
+      "S. Albright (State DEQ)",
+      "D. Miller (CSX Railroad RP)"
+    ],
+    "deputy": "Assistant Chief M. Reynolds",
+    "safety_officer": "Captain R. Mendez",
+    "public_info_officer": "A. Cho (County OEM)",
+    "liaison_officer": "Inspector G. Sims (SO)"
+  },
+  "4_agency_organization_representatives": [
+    {
+      "agency_organization": "US EPA Region 4",
+      "name": "OSC K. Lawson"
     },
-    "3_incident_commander_and_command_staff": {
-      "ic_ucs": [
-        "Chief J. Thomas (County Fire)",
-        "S. Albright (State DEQ)",
-        "D. Miller (CSX Railroad RP)"
-      ],
-      "deputy": "Assistant Chief M. Reynolds",
-      "safety_officer": "Captain R. Mendez",
-      "public_info_officer": "A. Cho (County OEM)",
-      "liaison_officer": "Inspector G. Sims (SO)"
+    {
+      "agency_organization": "CSX Railroad",
+      "name": "V. Patel"
     },
-    "4_agency_organization_representatives": [
+    {
+      "agency_organization": "Whispering Pines Police Dept",
+      "name": "Commander B. Davis"
+    }
+  ],
+  "5_planning_section": {
+    "chief": "Marcus Vance",
+    "deputy": "L. Sullivan",
+    "resources_unit": "T. Jenkins",
+    "situation_unit": "E. Brooks",
+    "documentation_unit": "H. Martinez",
+    "demobilization_unit": "R. Sterling",
+    "technical_specialists": [
       {
-        "agency_organization": "US EPA Region 4",
-        "name": "OSC K. Lawson"
+        "specialty": "Rail Tank Car Specialist",
+        "name": "D. Kowalski"
       },
       {
-        "agency_organization": "CSX Railroad",
-        "name": "V. Patel"
+        "specialty": "Air Dispersion Modeler",
+        "name": "Dr. A. Chen"
+      }
+    ]
+  },
+  "6_logistics_section": {
+    "chief": "K. Dunavan",
+    "deputy": "P. Wright",
+    "support_branch": {
+      "director": "J. Myers",
+      "supply_unit": "S. Taylor",
+      "facilities_unit": "C. Adams",
+      "ground_support_unit": "M. Evans"
+    },
+    "service_branch": {
+      "director": "B. Foster",
+      "communications_unit": "R. Lee",
+      "medical_unit": "Dr. N. Howard",
+      "food_unit": "L. King"
+    }
+  },
+  "7_operations_section": {
+    "chief": "B. Reynolds",
+    "deputy": "Lt. Commander D. Miller",
+    "staging_area": "Staging Area Alpha (County Fairgrounds)",
+    "branches": [
+      {
+        "branch_name": "Hazardous Materials Branch",
+        "branch_director": "Lt. T. Kincaid",
+        "deputy": "Sgt. R. Hall",
+        "divisions_groups": [
+          {
+            "identifier": "Hazmat Entry Group",
+            "supervisor": "Capt. P. Gomez"
+          },
+          {
+            "identifier": "Decontamination Group",
+            "supervisor": "Lt. S. Baker"
+          }
+        ]
       },
       {
-        "agency_organization": "Whispering Pines Police Dept",
-        "name": "Commander B. Davis"
+        "branch_name": "Fire Suppression Branch",
+        "branch_director": "Batt. Chief E. Walters",
+        "deputy": "Capt. J. Miller",
+        "divisions_groups": [
+          {
+            "identifier": "Division A (Rail Right-of-Way)",
+            "supervisor": "Capt. D. Ross"
+          },
+          {
+            "identifier": "Water Supply Group",
+            "supervisor": "Lt. M. Turner"
+          }
+        ]
       }
     ],
-    "5_planning_section": {
-      "chief": "Marcus Vance",
-      "deputy": "L. Sullivan",
-      "resources_unit": "T. Jenkins",
-      "situation_unit": "E. Brooks",
-      "documentation_unit": "H. Martinez",
-      "demobilization_unit": "R. Sterling",
-      "technical_specialists": [
-        {
-          "specialty": "Rail Tank Car Specialist",
-          "name": "D. Kowalski"
-        },
-        {
-          "specialty": "Air Dispersion Modeler",
-          "name": "Dr. A. Chen"
-        }
-      ]
-    },
-    "6_logistics_section": {
-      "chief": "K. Dunavan",
-      "deputy": "P. Wright",
-      "support_branch": {
-        "director": "J. Myers",
-        "supply_unit": "S. Taylor",
-        "facilities_unit": "C. Adams",
-        "ground_support_unit": "M. Evans"
-      },
-      "service_branch": {
-        "director": "B. Foster",
-        "communications_unit": "R. Lee",
-        "medical_unit": "Dr. N. Howard",
-        "food_unit": "L. King"
-      }
-    },
-    "7_operations_section": {
-      "chief": "B. Reynolds",
-      "deputy": "Lt. Commander D. Miller",
-      "staging_area": "Staging Area Alpha (County Fairgrounds)",
-      "branches": [
-        {
-          "branch_name": "Hazardous Materials Branch",
-          "branch_director": "Lt. T. Kincaid",
-          "deputy": "Sgt. R. Hall",
-          "divisions_groups": [
-            {
-              "identifier": "Hazmat Entry Group",
-              "supervisor": "Capt. P. Gomez"
-            },
-            {
-              "identifier": "Decontamination Group",
-              "supervisor": "Lt. S. Baker"
-            }
-          ]
-        },
-        {
-          "branch_name": "Fire Suppression Branch",
-          "branch_director": "Batt. Chief E. Walters",
-          "deputy": "Capt. J. Miller",
-          "divisions_groups": [
-            {
-              "identifier": "Division A (Rail Right-of-Way)",
-              "supervisor": "Capt. D. Ross"
-            },
-            {
-              "identifier": "Water Supply Group",
-              "supervisor": "Lt. M. Turner"
-            }
-          ]
-        }
-      ],
-      "air_operations_branch": {
-        "air_ops_branch_dir": "Capt. H. Nelson"
-      }
-    },
-    "8_finance_administration_section": {
-      "chief": "Robert Sterling",
-      "deputy": "A. Patel",
-      "time_unit": "C. White",
-      "procurement_unit": "G. Scott",
-      "comp_claims_unit": "E. Green",
-      "cost_unit": "W. Harris"
-    },
-    "9_prepared_by": {
-      "name": "Marcus Vance",
-      "position_title": "Planning Section Chief",
-      "signature": "Marcus Vance",
-      "date_time": "07/07/2026 16:30"
-    },
-    "iap_page_number": "1"
-  }
+    "air_operations_branch": {
+      "air_ops_branch_dir": "Capt. H. Nelson"
+    }
+  },
+  "8_finance_administration_section": {
+    "chief": "Robert Sterling",
+    "deputy": "A. Patel",
+    "time_unit": "C. White",
+    "procurement_unit": "G. Scott",
+    "comp_claims_unit": "E. Green",
+    "cost_unit": "W. Harris"
+  },
+  "9_prepared_by": {
+    "name": "Marcus Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "Marcus Vance",
+    "date_time": "07/07/2026 16:30"
+  },
+  "iap_page_number": "1"
 }

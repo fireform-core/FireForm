@@ -1,21 +1,19 @@
 {
-  "ics_208_ground_truth": {
-    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
-    "2_operational_period": {
-      "date_from": "05/18/2026",
-      "date_to": "05/19/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
-    },
-    "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Focus tactical priority on preventing any oil migration toward the municipal water intake. Night skimming operations must maintain illuminated safety perimeters and 100% life-vest compliance at all times. High vigilance required for steep, oil-covered riprap banks and wildlife hazards.",
-    "4_site_safety_plan_required": true,
-    "approved_site_safety_plan_located_at": "Incident Command Post at Hesperia Fire Station 30",
-    "5_prepared_by": {
-      "name": "Captain Gregory Hall",
-      "position_title": "Safety Officer",
-      "signature": "Gregory Hall",
-      "date_time": "05/18/2026 16:30"
-    },
-    "iap_page_number": "6"
-  }
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_operational_period": {
+    "date_from": "05/18/2026",
+    "date_to": "05/19/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Focus tactical priority on preventing any oil migration toward the municipal water intake. Night skimming operations must maintain illuminated safety perimeters and 100% life-vest compliance at all times. High vigilance required for steep, oil-covered riprap banks and wildlife hazards.",
+  "4_site_safety_plan_required": true,
+  "approved_site_safety_plan_located_at": "Incident Command Post at Hesperia Fire Station 30",
+  "5_prepared_by": {
+    "name": "Captain Gregory Hall",
+    "position_title": "Safety Officer",
+    "signature": "Gregory Hall",
+    "date_time": "05/18/2026 16:30"
+  },
+  "iap_page_number": "6"
 }

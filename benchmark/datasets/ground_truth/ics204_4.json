@@ -1,81 +1,79 @@
 {
-  "ics_204_ground_truth": {
-    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
-    "2_operational_period": {
-      "date_from": "11/02/2026",
-      "date_to": "11/03/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+  "2_operational_period": {
+    "date_from": "11/02/2026",
+    "date_to": "11/03/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_branch_division_group_staging_area": {
+    "branch": "Hazmat Capping Branch",
+    "division": "Division Ravine",
+    "group": "Railcar Entry Group 1",
+    "staging_area": "Staging Area Charlie (Stevens Pass Yard)"
+  },
+  "4_operations_personnel": {
+    "operations_section_chief": {
+      "name": "Battalion Chief T. Higgins",
+      "contact_number": "555-0411 / Ch 1"
     },
-    "3_branch_division_group_staging_area": {
-      "branch": "Hazmat Capping Branch",
-      "division": "Division Ravine",
-      "group": "Railcar Entry Group 1",
-      "staging_area": "Staging Area Charlie (Stevens Pass Yard)"
+    "branch_director": {
+      "name": "Capt. P. Gomez",
+      "contact_number": "555-0433 / Ch 2"
     },
-    "4_operations_personnel": {
-      "operations_section_chief": {
-        "name": "Battalion Chief T. Higgins",
-        "contact_number": "555-0411 / Ch 1"
-      },
-      "branch_director": {
-        "name": "Capt. P. Gomez",
-        "contact_number": "555-0433 / Ch 2"
-      },
-      "division_group_supervisor": {
-        "name": "Capt. D. Ross",
-        "contact_number": "555-0455 / Ch 3"
-      }
+    "division_group_supervisor": {
+      "name": "Capt. D. Ross",
+      "contact_number": "555-0455 / Ch 3"
+    }
+  },
+  "5_resources_assigned": [
+    {
+      "resource_identifier": "HZM-33",
+      "leader": "Lt. S. Baker",
+      "number_of_persons": "5",
+      "contact": "Radio Ch 3 (462.700 MHz)",
+      "reporting_location_special_equipment_remarks_notes_information": "Report to Ravine Checkpoint by 18:30. Level A encapsulated suits, Emergency B-Kit capping assembly, pneumatic torque wrenches."
     },
-    "5_resources_assigned": [
-      {
-        "resource_identifier": "HZM-33",
-        "leader": "Lt. S. Baker",
-        "number_of_persons": "5",
-        "contact": "Radio Ch 3 (462.700 MHz)",
-        "reporting_location_special_equipment_remarks_notes_information": "Report to Ravine Checkpoint by 18:30. Level A encapsulated suits, Emergency B-Kit capping assembly, pneumatic torque wrenches."
-      },
-      {
-        "resource_identifier": "BNSF-ER-01",
-        "leader": "Spec. G. Peterson",
-        "number_of_persons": "3",
-        "contact": "Radio Ch 3",
-        "reporting_location_special_equipment_remarks_notes_information": "Provide railcar dome technical oversight and heavy rigging hardware."
-      },
-      {
-        "resource_identifier": "DECON-04",
-        "leader": "Tech M. Turner",
-        "number_of_persons": "4",
-        "contact": "Radio Ch 2",
-        "reporting_location_special_equipment_remarks_notes_information": "Operate heated water decontamination trailer at Staging Area Charlie."
-      }
-    ],
-    "6_work_assignments": "Descend ravine to derailed railcar BNSF-77402 under Level A protection. Mount and torque Emergency B-Kit hood over damaged chlorine angle valve dome. Verify seal integrity using ammonia vapor swab test until zero leakage is detected.",
-    "7_special_instructions": "Freezing temperature hazard (28°F) and icy slopes. Suit entry teams limited to 30-minute rotations. Heated decon wash mandatory to prevent suit freeze-up. Continuous electrochemical chlorine monitoring required.",
-    "8_communications": [
-      {
-        "name_function": "Command Channel",
-        "primary_contact": "Radio Ch 1 (154.400 MHz)"
-      },
-      {
-        "name_function": "Capping Tactical",
-        "primary_contact": "Radio Ch 3 (462.700 MHz)"
-      },
-      {
-        "name_function": "Safety Officer Line",
-        "primary_contact": "Cell: 555-0488"
-      },
-      {
-        "name_function": "Evac Control Line",
-        "primary_contact": "Radio Ch 4 (467.550 MHz)"
-      }
-    ],
-    "9_prepared_by": {
-      "name": "Lt. Colonel Alan Vance",
-      "position_title": "Planning Section Chief",
-      "signature": "Alan Vance",
-      "date_time": "11/02/2026 16:30"
+    {
+      "resource_identifier": "BNSF-ER-01",
+      "leader": "Spec. G. Peterson",
+      "number_of_persons": "3",
+      "contact": "Radio Ch 3",
+      "reporting_location_special_equipment_remarks_notes_information": "Provide railcar dome technical oversight and heavy rigging hardware."
     },
-    "iap_page_number": "4"
-  }
+    {
+      "resource_identifier": "DECON-04",
+      "leader": "Tech M. Turner",
+      "number_of_persons": "4",
+      "contact": "Radio Ch 2",
+      "reporting_location_special_equipment_remarks_notes_information": "Operate heated water decontamination trailer at Staging Area Charlie."
+    }
+  ],
+  "6_work_assignments": "Descend ravine to derailed railcar BNSF-77402 under Level A protection. Mount and torque Emergency B-Kit hood over damaged chlorine angle valve dome. Verify seal integrity using ammonia vapor swab test until zero leakage is detected.",
+  "7_special_instructions": "Freezing temperature hazard (28\u00b0F) and icy slopes. Suit entry teams limited to 30-minute rotations. Heated decon wash mandatory to prevent suit freeze-up. Continuous electrochemical chlorine monitoring required.",
+  "8_communications": [
+    {
+      "name_function": "Command Channel",
+      "primary_contact": "Radio Ch 1 (154.400 MHz)"
+    },
+    {
+      "name_function": "Capping Tactical",
+      "primary_contact": "Radio Ch 3 (462.700 MHz)"
+    },
+    {
+      "name_function": "Safety Officer Line",
+      "primary_contact": "Cell: 555-0488"
+    },
+    {
+      "name_function": "Evac Control Line",
+      "primary_contact": "Radio Ch 4 (467.550 MHz)"
+    }
+  ],
+  "9_prepared_by": {
+    "name": "Lt. Colonel Alan Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "Alan Vance",
+    "date_time": "11/02/2026 16:30"
+  },
+  "iap_page_number": "4"
 }

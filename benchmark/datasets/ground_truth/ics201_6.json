@@ -17,7 +17,7 @@
   },
   "5_situation_summary_health_safety_briefing": {
     "situation_summary": "At 04:15 PST on 11/02/2026, a mountain derailment caused 5 freight cars to leave the tracks. Tank car BNSF-77402 sustained severe dome housing damage, resulting in a low-rate pressurized vapor release of toxic chlorine at approximately 15 lbs/min. State Route 2 was closed and mandatory evacuation issued for 250 residents of Skykomish.",
-    "health_and_safety_hazards": "Severe pulmonary edema risk from chlorine gas inhalation, ocular and skin chemical burns, acute respiratory collapse, mountain hypothermia (ambient temp 34°F), and steep terrain slip hazards.",
+    "health_and_safety_hazards": "Severe pulmonary edema risk from chlorine gas inhalation, ocular and skin chemical burns, acute respiratory collapse, mountain hypothermia (ambient temp 34\u00b0F), and steep terrain slip hazards.",
     "necessary_measures": "Enforce 1.5-mile Exclusion Zone; mandatory Level A vapor-tight encapsulated suits with SCBA for Hot Zone entry personnel; Level B suits for Warm Zone support; continuous electrochemical chlorine sensor monitoring at CP baselines; mandatory indoor shelter-in-place for outer perimeters; heated wet-decontamination trailer wash at Staging Area Charlie."
   },
   "6_prepared_by": {

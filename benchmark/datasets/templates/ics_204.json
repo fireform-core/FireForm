@@ -1,53 +1,143 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_branch_division_group_staging_area": {
-    "branch": "string",
-    "division": "string",
-    "group": "string",
-    "staging_area": "string"
-  },
-  "4_operations_personnel": {
-    "operations_section_chief": {
-      "name": "string",
-      "contact_number": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
     },
-    "branch_director": {
-      "name": "string",
-      "contact_number": "string"
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
+        }
+      }
     },
-    "division_group_supervisor": {
-      "name": "string",
-      "contact_number": "string"
+    "3_branch_division_group_staging_area": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "group": {
+          "type": "string"
+        },
+        "staging_area": {
+          "type": "string"
+        }
+      }
+    },
+    "4_operations_personnel": {
+      "type": "object",
+      "properties": {
+        "operations_section_chief": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "contact_number": {
+              "type": "string"
+            }
+          }
+        },
+        "branch_director": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "contact_number": {
+              "type": "string"
+            }
+          }
+        },
+        "division_group_supervisor": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "contact_number": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "5_resources_assigned": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource_identifier": {
+            "type": "string"
+          },
+          "leader": {
+            "type": "string"
+          },
+          "number_of_persons": {
+            "type": "string"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "reporting_location_special_equipment_remarks_notes_information": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "6_work_assignments": {
+      "type": "string"
+    },
+    "7_special_instructions": {
+      "type": "string"
+    },
+    "8_communications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name_function": {
+            "type": "string"
+          },
+          "primary_contact": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "9_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
     }
-  },
-  "5_resources_assigned": [
-    {
-      "resource_identifier": "string",
-      "leader": "string",
-      "number_of_persons": "string",
-      "contact": "string",
-      "reporting_location_special_equipment_remarks_notes_information": "string"
-    }
-  ],
-  "6_work_assignments": "string",
-  "7_special_instructions": "string",
-  "8_communications": [
-    {
-      "name_function": "string",
-      "primary_contact": "string"
-    }
-  ],
-  "9_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  }
 }

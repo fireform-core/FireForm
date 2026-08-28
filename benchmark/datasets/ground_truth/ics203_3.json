@@ -1,126 +1,124 @@
 {
-  "ics_203_ground_truth": {
-    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
-    "2_operational_period": {
-      "date_from": "10/14/2026",
-      "date_to": "10/15/2026",
-      "time_from": "07:00",
-      "time_to": "19:00"
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_operational_period": {
+    "date_from": "10/14/2026",
+    "date_to": "10/15/2026",
+    "time_from": "07:00",
+    "time_to": "19:00"
+  },
+  "3_incident_commander_and_command_staff": {
+    "ic_ucs": [
+      "Captain H. Vance (USCG Unified Command IC)",
+      "OSC M. Reynolds (EPA Co-IC)",
+      "Chief D. Garcia (Port Authority Fire IC)",
+      "K. Lindqvist (Stolt Tankers RP IC)"
+    ],
+    "deputy": "Commander T. Blake",
+    "safety_officer": "Commander Thomas Blake",
+    "public_info_officer": "Laura Martinez (Port Authority)",
+    "liaison_officer": "Inspector R. Sterling (TCEQ)"
+  },
+  "4_agency_organization_representatives": [
+    {
+      "agency_organization": "Texas Commission on Environmental Quality",
+      "name": "Inspector R. Sterling"
     },
-    "3_incident_commander_and_command_staff": {
-      "ic_ucs": [
-        "Captain H. Vance (USCG Unified Command IC)",
-        "OSC M. Reynolds (EPA Co-IC)",
-        "Chief D. Garcia (Port Authority Fire IC)",
-        "K. Lindqvist (Stolt Tankers RP IC)"
-      ],
-      "deputy": "Commander T. Blake",
-      "safety_officer": "Commander Thomas Blake",
-      "public_info_officer": "Laura Martinez (Port Authority)",
-      "liaison_officer": "Inspector R. Sterling (TCEQ)"
+    {
+      "agency_organization": "Stolt Tankers Shipping",
+      "name": "K. Lindqvist"
     },
-    "4_agency_organization_representatives": [
+    {
+      "agency_organization": "Port of Houston Pilots",
+      "name": "Captain M. Brody"
+    }
+  ],
+  "5_planning_section": {
+    "chief": "Commander Richard Croft",
+    "deputy": "Lt. J. Thorne",
+    "resources_unit": "Dr. V. Patel",
+    "situation_unit": "Sandra Keller",
+    "documentation_unit": "Wayne Miller",
+    "demobilization_unit": "Battalion Chief A. Ross",
+    "technical_specialists": [
       {
-        "agency_organization": "Texas Commission on Environmental Quality",
-        "name": "Inspector R. Sterling"
+        "specialty": "Chemical Hazard Specialist",
+        "name": "Dr. V. Patel"
       },
       {
-        "agency_organization": "Stolt Tankers Shipping",
-        "name": "K. Lindqvist"
+        "specialty": "Marine Salvage Engineer",
+        "name": "E. Miller"
+      }
+    ]
+  },
+  "6_logistics_section": {
+    "chief": "Sandra Keller",
+    "deputy": "Wayne Miller",
+    "support_branch": {
+      "director": "Capt. H. Nelson",
+      "supply_unit": "C. White",
+      "facilities_unit": "G. Scott",
+      "ground_support_unit": "E. Green"
+    },
+    "service_branch": {
+      "director": "W. Harris",
+      "communications_unit": "J. Myers",
+      "medical_unit": "Dr. A. Chen",
+      "food_unit": "S. Taylor"
+    }
+  },
+  "7_operations_section": {
+    "chief": "Battalion Chief A. Ross",
+    "deputy": "Lt. J. Thorne",
+    "staging_area": "Staging Area Bravo (Jacintoport Terminal)",
+    "branches": [
+      {
+        "branch_name": "Vessel Salvage & Entry Branch",
+        "branch_director": "Lt. J. Thorne",
+        "deputy": "Capt. P. Gomez",
+        "divisions_groups": [
+          {
+            "identifier": "Deck Neutralization Group",
+            "supervisor": "Lt. S. Baker"
+          },
+          {
+            "identifier": "Manifold Isolation Team",
+            "supervisor": "Capt. D. Ross"
+          }
+        ]
       },
       {
-        "agency_organization": "Port of Houston Pilots",
-        "name": "Captain M. Brody"
+        "branch_name": "Ship Channel Protection Branch",
+        "branch_director": "Capt. Donald Kross",
+        "deputy": "Lt. M. Turner",
+        "divisions_groups": [
+          {
+            "identifier": "Water Quality Sampling Division",
+            "supervisor": "Dr. S. Ray"
+          },
+          {
+            "identifier": "Booming Operations Group",
+            "supervisor": "Capt. B. Walsh"
+          }
+        ]
       }
     ],
-    "5_planning_section": {
-      "chief": "Commander Richard Croft",
-      "deputy": "Lt. J. Thorne",
-      "resources_unit": "Dr. V. Patel",
-      "situation_unit": "Sandra Keller",
-      "documentation_unit": "Wayne Miller",
-      "demobilization_unit": "Battalion Chief A. Ross",
-      "technical_specialists": [
-        {
-          "specialty": "Chemical Hazard Specialist",
-          "name": "Dr. V. Patel"
-        },
-        {
-          "specialty": "Marine Salvage Engineer",
-          "name": "E. Miller"
-        }
-      ]
-    },
-    "6_logistics_section": {
-      "chief": "Sandra Keller",
-      "deputy": "Wayne Miller",
-      "support_branch": {
-        "director": "Capt. H. Nelson",
-        "supply_unit": "C. White",
-        "facilities_unit": "G. Scott",
-        "ground_support_unit": "E. Green"
-      },
-      "service_branch": {
-        "director": "W. Harris",
-        "communications_unit": "J. Myers",
-        "medical_unit": "Dr. A. Chen",
-        "food_unit": "S. Taylor"
-      }
-    },
-    "7_operations_section": {
-      "chief": "Battalion Chief A. Ross",
-      "deputy": "Lt. J. Thorne",
-      "staging_area": "Staging Area Bravo (Jacintoport Terminal)",
-      "branches": [
-        {
-          "branch_name": "Vessel Salvage & Entry Branch",
-          "branch_director": "Lt. J. Thorne",
-          "deputy": "Capt. P. Gomez",
-          "divisions_groups": [
-            {
-              "identifier": "Deck Neutralization Group",
-              "supervisor": "Lt. S. Baker"
-            },
-            {
-              "identifier": "Manifold Isolation Team",
-              "supervisor": "Capt. D. Ross"
-            }
-          ]
-        },
-        {
-          "branch_name": "Ship Channel Protection Branch",
-          "branch_director": "Capt. Donald Kross",
-          "deputy": "Lt. M. Turner",
-          "divisions_groups": [
-            {
-              "identifier": "Water Quality Sampling Division",
-              "supervisor": "Dr. S. Ray"
-            },
-            {
-              "identifier": "Booming Operations Group",
-              "supervisor": "Capt. B. Walsh"
-            }
-          ]
-        }
-      ],
-      "air_operations_branch": {
-        "air_ops_branch_dir": "Commander T. Blake"
-      }
-    },
-    "8_finance_administration_section": {
-      "chief": "Wayne Miller",
-      "deputy": "Sandra Keller",
-      "time_unit": "C. Adams",
-      "procurement_unit": "M. Evans",
-      "comp_claims_unit": "B. Foster",
-      "cost_unit": "R. Lee"
-    },
-    "9_prepared_by": {
-      "name": "Commander Richard Croft",
-      "position_title": "Planning Section Chief",
-      "signature": "Richard Croft",
-      "date_time": "10/14/2026 06:00"
-    },
-    "iap_page_number": "1"
-  }
+    "air_operations_branch": {
+      "air_ops_branch_dir": "Commander T. Blake"
+    }
+  },
+  "8_finance_administration_section": {
+    "chief": "Wayne Miller",
+    "deputy": "Sandra Keller",
+    "time_unit": "C. Adams",
+    "procurement_unit": "M. Evans",
+    "comp_claims_unit": "B. Foster",
+    "cost_unit": "R. Lee"
+  },
+  "9_prepared_by": {
+    "name": "Commander Richard Croft",
+    "position_title": "Planning Section Chief",
+    "signature": "Richard Croft",
+    "date_time": "10/14/2026 06:00"
+  },
+  "iap_page_number": "1"
 }

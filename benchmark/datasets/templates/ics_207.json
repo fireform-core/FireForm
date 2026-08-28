@@ -1,63 +1,177 @@
 {
-  "1_incident_name": "string",
-  "2_operational_period": {
-    "date_from": "string",
-    "date_to": "string",
-    "time_from": "string",
-    "time_to": "string"
-  },
-  "3_organization_chart": {
-    "incident_commanders": ["string"],
-    "command_staff": {
-      "safety_officer": "string",
-      "public_information_officer": "string",
-      "liaison_officer": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
     },
-    "operations_section": {
-      "chief": "string",
-      "staging_area_manager": "string",
-      "branches_divisions_groups": [
-        {
-          "title": "string",
-          "name": "string"
+    "2_operational_period": {
+      "type": "object",
+      "properties": {
+        "date_from": {
+          "type": "string"
+        },
+        "date_to": {
+          "type": "string"
+        },
+        "time_from": {
+          "type": "string"
+        },
+        "time_to": {
+          "type": "string"
         }
-      ]
-    },
-    "planning_section": {
-      "chief": "string",
-      "resources_unit_ldr": "string",
-      "situation_unit_ldr": "string",
-      "documentation_unit_ldr": "string",
-      "demobilization_unit_ldr": "string"
-    },
-    "logistics_section": {
-      "chief": "string",
-      "support_branch": {
-        "director": "string",
-        "supply_unit_ldr": "string",
-        "facilities_unit_ldr": "string",
-        "ground_spt_unit_ldr": "string"
-      },
-      "service_branch": {
-        "director": "string",
-        "comms_unit_ldr": "string",
-        "medical_unit_ldr": "string",
-        "food_unit_ldr": "string"
       }
     },
-    "finance_administration_section": {
-      "chief": "string",
-      "time_unit_ldr": "string",
-      "procurement_unit_ldr": "string",
-      "comp_claims_unit_ldr": "string",
-      "cost_unit_ldr": "string"
+    "3_organization_chart": {
+      "type": "object",
+      "properties": {
+        "incident_commanders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "command_staff": {
+          "type": "object",
+          "properties": {
+            "safety_officer": {
+              "type": "string"
+            },
+            "public_information_officer": {
+              "type": "string"
+            },
+            "liaison_officer": {
+              "type": "string"
+            }
+          }
+        },
+        "operations_section": {
+          "type": "object",
+          "properties": {
+            "chief": {
+              "type": "string"
+            },
+            "staging_area_manager": {
+              "type": "string"
+            },
+            "branches_divisions_groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "planning_section": {
+          "type": "object",
+          "properties": {
+            "chief": {
+              "type": "string"
+            },
+            "resources_unit_ldr": {
+              "type": "string"
+            },
+            "situation_unit_ldr": {
+              "type": "string"
+            },
+            "documentation_unit_ldr": {
+              "type": "string"
+            },
+            "demobilization_unit_ldr": {
+              "type": "string"
+            }
+          }
+        },
+        "logistics_section": {
+          "type": "object",
+          "properties": {
+            "chief": {
+              "type": "string"
+            },
+            "support_branch": {
+              "type": "object",
+              "properties": {
+                "director": {
+                  "type": "string"
+                },
+                "supply_unit_ldr": {
+                  "type": "string"
+                },
+                "facilities_unit_ldr": {
+                  "type": "string"
+                },
+                "ground_spt_unit_ldr": {
+                  "type": "string"
+                }
+              }
+            },
+            "service_branch": {
+              "type": "object",
+              "properties": {
+                "director": {
+                  "type": "string"
+                },
+                "comms_unit_ldr": {
+                  "type": "string"
+                },
+                "medical_unit_ldr": {
+                  "type": "string"
+                },
+                "food_unit_ldr": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "finance_administration_section": {
+          "type": "object",
+          "properties": {
+            "chief": {
+              "type": "string"
+            },
+            "time_unit_ldr": {
+              "type": "string"
+            },
+            "procurement_unit_ldr": {
+              "type": "string"
+            },
+            "comp_claims_unit_ldr": {
+              "type": "string"
+            },
+            "cost_unit_ldr": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "4_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "iap_page_number": {
+      "type": "string"
     }
-  },
-  "4_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "iap_page_number": "string"
+  }
 }

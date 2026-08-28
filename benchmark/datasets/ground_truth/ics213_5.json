@@ -1,29 +1,27 @@
 {
-  "ics_213_ground_truth": {
-    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
-    "2_to": {
-      "name": "Rachel Brooks",
-      "position": "Planning Section Chief"
-    },
-    "3_from": {
-      "name": "Skimmer Operations Leader Frank Gomez",
-      "position": "Operations Group Supervisor"
-    },
-    "4_subject": "Skimmer Vessel Relocation and Sorbent Boom Realignment",
-    "5_date": "05/18/2026",
-    "6_time": "20:00",
-    "7_message": "Due to shifts in surface currents toward Sawpit Canyon inlet, requesting authorization to reposition Skimmer Vessel RV-LC-01 to South Arm and deploy an additional 500 feet of hard containment boom by 22:00 hours.",
-    "8_approved_by": {
-      "name": "Chief M. Thorne",
-      "position_title": "Incident Commander",
-      "signature": "Chief M. Thorne"
-    },
-    "9_reply": "Operations Chief approves relocation of RV-LC-01 and deployment of 500 feet hard boom. Work Boat 3 assigned to assist boom rigging.",
-    "10_replied_by": {
-      "name": "Rachel Brooks",
-      "position_title": "Planning Section Chief",
-      "signature": "Rachel Brooks",
-      "date_time": "05/18/2026 20:30"
-    }
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_to": {
+    "name": "Rachel Brooks",
+    "position": "Planning Section Chief"
+  },
+  "3_from": {
+    "name": "Skimmer Operations Leader Frank Gomez",
+    "position": "Operations Group Supervisor"
+  },
+  "4_subject": "Skimmer Vessel Relocation and Sorbent Boom Realignment",
+  "5_date": "05/18/2026",
+  "6_time": "20:00",
+  "7_message": "Due to shifts in surface currents toward Sawpit Canyon inlet, requesting authorization to reposition Skimmer Vessel RV-LC-01 to South Arm and deploy an additional 500 feet of hard containment boom by 22:00 hours.",
+  "8_approved_by": {
+    "name": "Chief M. Thorne",
+    "position_title": "Incident Commander",
+    "signature": "Chief M. Thorne"
+  },
+  "9_reply": "Operations Chief approves relocation of RV-LC-01 and deployment of 500 feet hard boom. Work Boat 3 assigned to assist boom rigging.",
+  "10_replied_by": {
+    "name": "Rachel Brooks",
+    "position_title": "Planning Section Chief",
+    "signature": "Rachel Brooks",
+    "date_time": "05/18/2026 20:30"
   }
 }

@@ -1,27 +1,76 @@
 {
-  "1_incident_name": "string",
-  "2_to": {
-    "name": "string",
-    "position": "string"
-  },
-  "3_from": {
-    "name": "string",
-    "position": "string"
-  },
-  "4_subject": "string",
-  "5_date": "string",
-  "6_time": "string",
-  "7_message": "string",
-  "8_approved_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string"
-  },
-  "9_reply": "string",
-  "10_replied_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
+    },
+    "2_to": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        }
+      }
+    },
+    "3_from": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        }
+      }
+    },
+    "4_subject": {
+      "type": "string"
+    },
+    "5_date": {
+      "type": "string"
+    },
+    "6_time": {
+      "type": "string"
+    },
+    "7_message": {
+      "type": "string"
+    },
+    "8_approved_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        }
+      }
+    },
+    "9_reply": {
+      "type": "string"
+    },
+    "10_replied_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    }
   }
 }

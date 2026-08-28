@@ -1,21 +1,19 @@
 {
-  "ics_208_ground_truth": {
-    "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
-    "2_operational_period": {
-      "date_from": "11/02/2026",
-      "date_to": "11/03/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
-    },
-    "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Command emphasizes absolute safety of capping entry teams working under nighttime freezing conditions (28°F overnight). Enforce mandatory Level A PPE compliance and buddy system protocols. Heated decontamination water and warm hydration must be maintained continuously to prevent suit icing and hypothermia.",
-    "4_site_safety_plan_required": true,
-    "approved_site_safety_plan_located_at": "Skykomish School Gym Operations Briefing Room",
-    "5_prepared_by": {
-      "name": "Captain Marcus Vance",
-      "position_title": "Safety Officer",
-      "signature": "Marcus Vance",
-      "date_time": "11/02/2026 16:30"
-    },
-    "iap_page_number": "6"
-  }
+  "1_incident_name": "Cascade Pass Chlorine Railcar Derailment",
+  "2_operational_period": {
+    "date_from": "11/02/2026",
+    "date_to": "11/03/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_safety_message_expanded_safety_message_safety_plan_site_safety_plan": "Command emphasizes absolute safety of capping entry teams working under nighttime freezing conditions (28\u00b0F overnight). Enforce mandatory Level A PPE compliance and buddy system protocols. Heated decontamination water and warm hydration must be maintained continuously to prevent suit icing and hypothermia.",
+  "4_site_safety_plan_required": true,
+  "approved_site_safety_plan_located_at": "Skykomish School Gym Operations Briefing Room",
+  "5_prepared_by": {
+    "name": "Captain Marcus Vance",
+    "position_title": "Safety Officer",
+    "signature": "Marcus Vance",
+    "date_time": "11/02/2026 16:30"
+  },
+  "iap_page_number": "6"
 }

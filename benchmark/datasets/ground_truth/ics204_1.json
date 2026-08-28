@@ -1,81 +1,79 @@
 {
-  "ics_204_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_operational_period": {
-      "date_from": "07/07/2026",
-      "date_to": "07/08/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_operational_period": {
+    "date_from": "07/07/2026",
+    "date_to": "07/08/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_branch_division_group_staging_area": {
+    "branch": "Hazardous Materials Branch",
+    "division": "Division A",
+    "group": "Hazmat Entry Group",
+    "staging_area": "Staging Area Alpha (County Fairgrounds)"
+  },
+  "4_operations_personnel": {
+    "operations_section_chief": {
+      "name": "B. Reynolds",
+      "contact_number": "555-0192 / Ch 1"
     },
-    "3_branch_division_group_staging_area": {
-      "branch": "Hazardous Materials Branch",
-      "division": "Division A",
-      "group": "Hazmat Entry Group",
-      "staging_area": "Staging Area Alpha (County Fairgrounds)"
+    "branch_director": {
+      "name": "Lt. T. Kincaid",
+      "contact_number": "555-0144 / Ch 3"
     },
-    "4_operations_personnel": {
-      "operations_section_chief": {
-        "name": "B. Reynolds",
-        "contact_number": "555-0192 / Ch 1"
-      },
-      "branch_director": {
-        "name": "Lt. T. Kincaid",
-        "contact_number": "555-0144 / Ch 3"
-      },
-      "division_group_supervisor": {
-        "name": "Capt. P. Gomez",
-        "contact_number": "555-0188 / Ch 4"
-      }
+    "division_group_supervisor": {
+      "name": "Capt. P. Gomez",
+      "contact_number": "555-0188 / Ch 4"
+    }
+  },
+  "5_resources_assigned": [
+    {
+      "resource_identifier": "HZM-01",
+      "leader": "Lt. T. Kincaid",
+      "number_of_persons": "6",
+      "contact": "Radio Ch 4 (462.550 MHz)",
+      "reporting_location_special_equipment_remarks_notes_information": "Report to Hot Zone Gate 1 by 18:30. Level B SCBA suits, PID air monitors, non-sparking aluminum tools."
     },
-    "5_resources_assigned": [
-      {
-        "resource_identifier": "HZM-01",
-        "leader": "Lt. T. Kincaid",
-        "number_of_persons": "6",
-        "contact": "Radio Ch 4 (462.550 MHz)",
-        "reporting_location_special_equipment_remarks_notes_information": "Report to Hot Zone Gate 1 by 18:30. Level B SCBA suits, PID air monitors, non-sparking aluminum tools."
-      },
-      {
-        "resource_identifier": "DECON-02",
-        "leader": "Lt. S. Baker",
-        "number_of_persons": "4",
-        "contact": "Radio Ch 4",
-        "reporting_location_special_equipment_remarks_notes_information": "Establish wet-decon station at Warm Zone boundary Gate 2 by 18:45. Decon shower trailer with lime wash solution."
-      },
-      {
-        "resource_identifier": "ENG-41",
-        "leader": "Capt. D. Ross",
-        "number_of_persons": "3",
-        "contact": "Radio Ch 2",
-        "reporting_location_special_equipment_remarks_notes_information": "Position at Warm Zone boundary for continuous AFFF foam blanket standby during tank car grounding."
-      }
-    ],
-    "6_work_assignments": "Execute Hot Zone entry into rail right-of-way to secure structural stabilization straps on derailed Car #14. Attach grounding cables to prevent static spark ignition. Perform real-time PID air monitoring around breached Benzene manifold and report VOC concentrations to Branch Director every 15 minutes.",
-    "7_special_instructions": "All entry personnel must wear Level B PPE with SCBA. Continuous air monitoring required; evacuate Hot Zone immediately if PID readings exceed 5 ppm Benzene or 10% LEL. Ensure formal decontamination shower prior to exiting Warm Zone.",
-    "8_communications": [
-      {
-        "name_function": "Command Channel / Ops Chief",
-        "primary_contact": "Radio Ch 1 (154.280 MHz)"
-      },
-      {
-        "name_function": "Hazmat Tactical Channel",
-        "primary_contact": "Radio Ch 4 (462.550 MHz)"
-      },
-      {
-        "name_function": "Safety Officer Direct Line",
-        "primary_contact": "Cell: 555-0177"
-      },
-      {
-        "name_function": "Medical Emergency Call",
-        "primary_contact": "Radio Ch 5 / Cell: 555-0199"
-      }
-    ],
-    "9_prepared_by": {
-      "name": "Marcus Vance",
-      "position_title": "Planning Section Chief",
-      "signature": "Marcus Vance",
-      "date_time": "07/07/2026 16:30"
+    {
+      "resource_identifier": "DECON-02",
+      "leader": "Lt. S. Baker",
+      "number_of_persons": "4",
+      "contact": "Radio Ch 4",
+      "reporting_location_special_equipment_remarks_notes_information": "Establish wet-decon station at Warm Zone boundary Gate 2 by 18:45. Decon shower trailer with lime wash solution."
     },
-    "iap_page_number": "4"
-  }
+    {
+      "resource_identifier": "ENG-41",
+      "leader": "Capt. D. Ross",
+      "number_of_persons": "3",
+      "contact": "Radio Ch 2",
+      "reporting_location_special_equipment_remarks_notes_information": "Position at Warm Zone boundary for continuous AFFF foam blanket standby during tank car grounding."
+    }
+  ],
+  "6_work_assignments": "Execute Hot Zone entry into rail right-of-way to secure structural stabilization straps on derailed Car #14. Attach grounding cables to prevent static spark ignition. Perform real-time PID air monitoring around breached Benzene manifold and report VOC concentrations to Branch Director every 15 minutes.",
+  "7_special_instructions": "All entry personnel must wear Level B PPE with SCBA. Continuous air monitoring required; evacuate Hot Zone immediately if PID readings exceed 5 ppm Benzene or 10% LEL. Ensure formal decontamination shower prior to exiting Warm Zone.",
+  "8_communications": [
+    {
+      "name_function": "Command Channel / Ops Chief",
+      "primary_contact": "Radio Ch 1 (154.280 MHz)"
+    },
+    {
+      "name_function": "Hazmat Tactical Channel",
+      "primary_contact": "Radio Ch 4 (462.550 MHz)"
+    },
+    {
+      "name_function": "Safety Officer Direct Line",
+      "primary_contact": "Cell: 555-0177"
+    },
+    {
+      "name_function": "Medical Emergency Call",
+      "primary_contact": "Radio Ch 5 / Cell: 555-0199"
+    }
+  ],
+  "9_prepared_by": {
+    "name": "Marcus Vance",
+    "position_title": "Planning Section Chief",
+    "signature": "Marcus Vance",
+    "date_time": "07/07/2026 16:30"
+  },
+  "iap_page_number": "4"
 }

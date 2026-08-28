@@ -1,126 +1,124 @@
 {
-  "ics_203_ground_truth": {
-    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
-    "2_operational_period": {
-      "date_from": "05/18/2026",
-      "date_to": "05/19/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_operational_period": {
+    "date_from": "05/18/2026",
+    "date_to": "05/19/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_incident_commander_and_command_staff": {
+    "ic_ucs": [
+      "OSC C. Martinez (EPA R9 Co-IC)",
+      "Chief M. Thorne (SBCo Fire IC)",
+      "Chief Inspector A. Kim (Cal OES)",
+      "W. Vance (Pipeline RP IC)"
+    ],
+    "deputy": "Commander F. Miller",
+    "safety_officer": "Captain Gregory Hall",
+    "public_info_officer": "Samantha Norris (Cal OES)",
+    "liaison_officer": "Ranger D. Stevens (State Parks)"
+  },
+  "4_agency_organization_representatives": [
+    {
+      "agency_organization": "US Forest Service",
+      "name": "Dr. L. Arispe"
     },
-    "3_incident_commander_and_command_staff": {
-      "ic_ucs": [
-        "OSC C. Martinez (EPA R9 Co-IC)",
-        "Chief M. Thorne (SBCo Fire IC)",
-        "Chief Inspector A. Kim (Cal OES)",
-        "W. Vance (Pipeline RP IC)"
-      ],
-      "deputy": "Commander F. Miller",
-      "safety_officer": "Captain Gregory Hall",
-      "public_info_officer": "Samantha Norris (Cal OES)",
-      "liaison_officer": "Ranger D. Stevens (State Parks)"
+    {
+      "agency_organization": "Mojave Water Agency",
+      "name": "Engineer K. Ross"
     },
-    "4_agency_organization_representatives": [
+    {
+      "agency_organization": "Clean Harbors Environmental",
+      "name": "Captain B. Walsh"
+    }
+  ],
+  "5_planning_section": {
+    "chief": "Captain Rachel Brooks",
+    "deputy": "Megan Taylor",
+    "resources_unit": "Jason Wu",
+    "situation_unit": "Battalion Chief Kevin Ross",
+    "documentation_unit": "Dr. L. Arispe",
+    "demobilization_unit": "Captain B. Walsh",
+    "technical_specialists": [
       {
-        "agency_organization": "US Forest Service",
+        "specialty": "Environmental Unit Leader",
         "name": "Dr. L. Arispe"
       },
       {
-        "agency_organization": "Mojave Water Agency",
-        "name": "Engineer K. Ross"
+        "specialty": "Hydrological Flow Specialist",
+        "name": "Dr. S. Ray"
+      }
+    ]
+  },
+  "6_logistics_section": {
+    "chief": "Megan Taylor",
+    "deputy": "Jason Wu",
+    "support_branch": {
+      "director": "Capt. P. Gomez",
+      "supply_unit": "Lt. S. Baker",
+      "facilities_unit": "Capt. D. Ross",
+      "ground_support_unit": "Lt. M. Turner"
+    },
+    "service_branch": {
+      "director": "Capt. H. Nelson",
+      "communications_unit": "Sgt. R. Hall",
+      "medical_unit": "Dr. N. Howard",
+      "food_unit": "L. King"
+    }
+  },
+  "7_operations_section": {
+    "chief": "Battalion Chief Kevin Ross",
+    "deputy": "Captain B. Walsh",
+    "staging_area": "Staging Area Delta (Silverwood Lake Marina)",
+    "branches": [
+      {
+        "branch_name": "Canyon Pipeline Repair Branch",
+        "branch_director": "Capt. Gregory Hall",
+        "deputy": "Lt. R. Mendez",
+        "divisions_groups": [
+          {
+            "identifier": "Clamp Repair Group",
+            "supervisor": "Capt. A. Ross"
+          },
+          {
+            "identifier": "Sawpit Containment Group",
+            "supervisor": "Lt. C. Webb"
+          }
+        ]
       },
       {
-        "agency_organization": "Clean Harbors Environmental",
-        "name": "Captain B. Walsh"
+        "branch_name": "Reservoir Skimming & Booming Branch",
+        "branch_director": "Captain B. Walsh",
+        "deputy": "Lt. J. Thorne",
+        "divisions_groups": [
+          {
+            "identifier": "South Arm Skimmer Division",
+            "supervisor": "Capt. B. Walsh"
+          },
+          {
+            "identifier": "Water Intake Protection Group",
+            "supervisor": "Dr. L. Arispe"
+          }
+        ]
       }
     ],
-    "5_planning_section": {
-      "chief": "Captain Rachel Brooks",
-      "deputy": "Megan Taylor",
-      "resources_unit": "Jason Wu",
-      "situation_unit": "Battalion Chief Kevin Ross",
-      "documentation_unit": "Dr. L. Arispe",
-      "demobilization_unit": "Captain B. Walsh",
-      "technical_specialists": [
-        {
-          "specialty": "Environmental Unit Leader",
-          "name": "Dr. L. Arispe"
-        },
-        {
-          "specialty": "Hydrological Flow Specialist",
-          "name": "Dr. S. Ray"
-        }
-      ]
-    },
-    "6_logistics_section": {
-      "chief": "Megan Taylor",
-      "deputy": "Jason Wu",
-      "support_branch": {
-        "director": "Capt. P. Gomez",
-        "supply_unit": "Lt. S. Baker",
-        "facilities_unit": "Capt. D. Ross",
-        "ground_support_unit": "Lt. M. Turner"
-      },
-      "service_branch": {
-        "director": "Capt. H. Nelson",
-        "communications_unit": "Sgt. R. Hall",
-        "medical_unit": "Dr. N. Howard",
-        "food_unit": "L. King"
-      }
-    },
-    "7_operations_section": {
-      "chief": "Battalion Chief Kevin Ross",
-      "deputy": "Captain B. Walsh",
-      "staging_area": "Staging Area Delta (Silverwood Lake Marina)",
-      "branches": [
-        {
-          "branch_name": "Canyon Pipeline Repair Branch",
-          "branch_director": "Capt. Gregory Hall",
-          "deputy": "Lt. R. Mendez",
-          "divisions_groups": [
-            {
-              "identifier": "Clamp Repair Group",
-              "supervisor": "Capt. A. Ross"
-            },
-            {
-              "identifier": "Sawpit Containment Group",
-              "supervisor": "Lt. C. Webb"
-            }
-          ]
-        },
-        {
-          "branch_name": "Reservoir Skimming & Booming Branch",
-          "branch_director": "Captain B. Walsh",
-          "deputy": "Lt. J. Thorne",
-          "divisions_groups": [
-            {
-              "identifier": "South Arm Skimmer Division",
-              "supervisor": "Capt. B. Walsh"
-            },
-            {
-              "identifier": "Water Intake Protection Group",
-              "supervisor": "Dr. L. Arispe"
-            }
-          ]
-        }
-      ],
-      "air_operations_branch": {
-        "air_ops_branch_dir": "Capt. E. Walters"
-      }
-    },
-    "8_finance_administration_section": {
-      "chief": "Jason Wu",
-      "deputy": "Megan Taylor",
-      "time_unit": "J. Myers",
-      "procurement_unit": "S. Taylor",
-      "comp_claims_unit": "C. Adams",
-      "cost_unit": "M. Evans"
-    },
-    "9_prepared_by": {
-      "name": "Captain Rachel Brooks",
-      "position_title": "Planning Section Chief",
-      "signature": "Rachel Brooks",
-      "date_time": "05/18/2026 16:30"
-    },
-    "iap_page_number": "1"
-  }
+    "air_operations_branch": {
+      "air_ops_branch_dir": "Capt. E. Walters"
+    }
+  },
+  "8_finance_administration_section": {
+    "chief": "Jason Wu",
+    "deputy": "Megan Taylor",
+    "time_unit": "J. Myers",
+    "procurement_unit": "S. Taylor",
+    "comp_claims_unit": "C. Adams",
+    "cost_unit": "M. Evans"
+  },
+  "9_prepared_by": {
+    "name": "Captain Rachel Brooks",
+    "position_title": "Planning Section Chief",
+    "signature": "Rachel Brooks",
+    "date_time": "05/18/2026 16:30"
+  },
+  "iap_page_number": "1"
 }

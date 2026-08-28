@@ -1,80 +1,78 @@
 {
-  "ics_206_ground_truth": {
-    "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
-    "2_operational_period": {
-      "date_from": "05/18/2026",
-      "date_to": "05/19/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Silverwood Reservoir Crude Oil Pipeline Rupture",
+  "2_operational_period": {
+    "date_from": "05/18/2026",
+    "date_to": "05/19/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_medical_aid_stations": [
+    {
+      "name": "ICP Main Medical Station",
+      "location": "Hesperia Fire Station 30",
+      "contact_number_frequency": "460.1250 MHz / Ch 1",
+      "paramedic_service": true
     },
-    "3_medical_aid_stations": [
+    {
+      "name": "Sawpit Canyon Water Rescue & Medical Aid Station",
+      "location": "Sawpit Canyon Boat Launch",
+      "contact_number_frequency": "465.1250 MHz / Ch 2",
+      "paramedic_service": true
+    }
+  ],
+  "4_transportation_services": {
+    "ambulance_services": [
       {
-        "name": "ICP Main Medical Station",
+        "name": "San Bernardino County Fire Medic 30",
         "location": "Hesperia Fire Station 30",
-        "contact_number_frequency": "460.1250 MHz / Ch 1",
+        "contact_number_frequency": "(555) 678-9012 / Ch 1",
         "paramedic_service": true
       },
       {
-        "name": "Sawpit Canyon Water Rescue & Medical Aid Station",
-        "location": "Sawpit Canyon Boat Launch",
-        "contact_number_frequency": "465.1250 MHz / Ch 2",
+        "name": "Desert Ambulance Unit 14",
+        "location": "Silverwood Lake Main Entrance",
+        "contact_number_frequency": "(555) 678-9013 / Ch 1",
+        "paramedic_service": false
+      }
+    ],
+    "air_ambulance_services": [
+      {
+        "name": "Mercy Air Helicopter 2",
+        "location": "Victorville Regional Airport Helipad",
+        "contact_number_frequency": "(555) 444-8765 / VHF 155.340 MHz",
         "paramedic_service": true
       }
-    ],
-    "4_transportation_services": {
-      "ambulance_services": [
-        {
-          "name": "San Bernardino County Fire Medic 30",
-          "location": "Hesperia Fire Station 30",
-          "contact_number_frequency": "(555) 678-9012 / Ch 1",
-          "paramedic_service": true
-        },
-        {
-          "name": "Desert Ambulance Unit 14",
-          "location": "Silverwood Lake Main Entrance",
-          "contact_number_frequency": "(555) 678-9013 / Ch 1",
-          "paramedic_service": false
-        }
-      ],
-      "air_ambulance_services": [
-        {
-          "name": "Mercy Air Helicopter 2",
-          "location": "Victorville Regional Airport Helipad",
-          "contact_number_frequency": "(555) 444-8765 / VHF 155.340 MHz",
-          "paramedic_service": true
-        }
-      ]
+    ]
+  },
+  "5_hospitals": [
+    {
+      "hospital_name": "Desert Valley Hospital",
+      "address_latitude_longitude": "16850 Bear Valley Rd, Victorville, 34.4712 N, 117.2954 W",
+      "contact_number_frequency": "(555) 012-4400 / County Med Net 2",
+      "air_ambulance_helipad": true,
+      "burn_center": false,
+      "trauma_center": true
     },
-    "5_hospitals": [
-      {
-        "hospital_name": "Desert Valley Hospital",
-        "address_latitude_longitude": "16850 Bear Valley Rd, Victorville, 34.4712 N, 117.2954 W",
-        "contact_number_frequency": "(555) 012-4400 / County Med Net 2",
-        "air_ambulance_helipad": true,
-        "burn_center": false,
-        "trauma_center": true
-      },
-      {
-        "hospital_name": "Loma Linda University Medical Center",
-        "address_latitude_longitude": "11234 Anderson St, Loma Linda, 34.0489 N, 117.2641 W",
-        "contact_number_frequency": "(555) 012-9900 / County Med Net 9",
-        "air_ambulance_helipad": true,
-        "burn_center": true,
-        "trauma_center": true
-      }
-    ],
-    "6_special_medical_emergency_procedures": "Night operations on water present dual risks of hydrocarbon skin absorption/ingestion and water submersion. All personnel operating on skimmer vessels or boom lines must wear USCG-approved PFDs and safety tether lines. In case of accidental water entry or oil ingestion, immediately transport the patient to Sawpit Canyon Water Rescue Medical Aid Station for emergency decon and airway management. Mercy Air Helicopter 2 is on standby at Hesperia Fire Station 30 Helipad.",
-    "7_prepared_by": {
-      "name": "Dr. Lisa Martinez",
-      "position_title": "Medical Unit Leader",
-      "signature": "Lisa Martinez",
-      "date_time": "05/18/2026 16:30"
-    },
-    "8_approved_by_safety_officer": {
-      "name": "Safety Officer Frank Owens",
-      "signature": "Frank Owens",
-      "date_time": "05/18/2026 17:00"
-    },
-    "iap_page_number": "5"
-  }
+    {
+      "hospital_name": "Loma Linda University Medical Center",
+      "address_latitude_longitude": "11234 Anderson St, Loma Linda, 34.0489 N, 117.2641 W",
+      "contact_number_frequency": "(555) 012-9900 / County Med Net 9",
+      "air_ambulance_helipad": true,
+      "burn_center": true,
+      "trauma_center": true
+    }
+  ],
+  "6_special_medical_emergency_procedures": "Night operations on water present dual risks of hydrocarbon skin absorption/ingestion and water submersion. All personnel operating on skimmer vessels or boom lines must wear USCG-approved PFDs and safety tether lines. In case of accidental water entry or oil ingestion, immediately transport the patient to Sawpit Canyon Water Rescue Medical Aid Station for emergency decon and airway management. Mercy Air Helicopter 2 is on standby at Hesperia Fire Station 30 Helipad.",
+  "7_prepared_by": {
+    "name": "Dr. Lisa Martinez",
+    "position_title": "Medical Unit Leader",
+    "signature": "Lisa Martinez",
+    "date_time": "05/18/2026 16:30"
+  },
+  "8_approved_by_safety_officer": {
+    "name": "Safety Officer Frank Owens",
+    "signature": "Frank Owens",
+    "date_time": "05/18/2026 17:00"
+  },
+  "iap_page_number": "5"
 }

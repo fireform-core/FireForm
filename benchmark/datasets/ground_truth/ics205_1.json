@@ -1,76 +1,74 @@
 {
-  "ics_205_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_date_time_prepared": {
-      "date": "07/07/2026",
-      "time": "16:00"
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_date_time_prepared": {
+    "date": "07/07/2026",
+    "time": "16:00"
+  },
+  "3_operational_period": {
+    "date_from": "07/07/2026",
+    "date_to": "07/08/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "4_basic_radio_channel_use": [
+    {
+      "zone_grp": "Zone 1",
+      "channel_number": "1",
+      "function": "Command",
+      "channel_name_trunked_radio_system_talkgroup": "TAC-1",
+      "assignment": "Unified Command / Section Chiefs",
+      "rx_frequency_n_or_w": "154.2800 N",
+      "rx_tone_nac": "156.7",
+      "tx_frequency_n_or_w": "159.4800 N",
+      "tx_tone_nac": "156.7",
+      "mode_a_d_or_m": "A",
+      "remarks": "Repeater 1 on Ridge Top"
     },
-    "3_operational_period": {
-      "date_from": "07/07/2026",
-      "date_to": "07/08/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+    {
+      "zone_grp": "Zone 1",
+      "channel_number": "2",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "TAC-2",
+      "assignment": "Hazmat Entry Group",
+      "rx_frequency_n_or_w": "462.5500 N",
+      "rx_tone_nac": "114.8",
+      "tx_frequency_n_or_w": "467.5500 N",
+      "tx_tone_nac": "114.8",
+      "mode_a_d_or_m": "D",
+      "remarks": "Encrypted digital talkgroup"
     },
-    "4_basic_radio_channel_use": [
-      {
-        "zone_grp": "Zone 1",
-        "channel_number": "1",
-        "function": "Command",
-        "channel_name_trunked_radio_system_talkgroup": "TAC-1",
-        "assignment": "Unified Command / Section Chiefs",
-        "rx_frequency_n_or_w": "154.2800 N",
-        "rx_tone_nac": "156.7",
-        "tx_frequency_n_or_w": "159.4800 N",
-        "tx_tone_nac": "156.7",
-        "mode_a_d_or_m": "A",
-        "remarks": "Repeater 1 on Ridge Top"
-      },
-      {
-        "zone_grp": "Zone 1",
-        "channel_number": "2",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "TAC-2",
-        "assignment": "Hazmat Entry Group",
-        "rx_frequency_n_or_w": "462.5500 N",
-        "rx_tone_nac": "114.8",
-        "tx_frequency_n_or_w": "467.5500 N",
-        "tx_tone_nac": "114.8",
-        "mode_a_d_or_m": "D",
-        "remarks": "Encrypted digital talkgroup"
-      },
-      {
-        "zone_grp": "Zone 1",
-        "channel_number": "3",
-        "function": "Tactical",
-        "channel_name_trunked_radio_system_talkgroup": "TAC-3",
-        "assignment": "Fire Suppression Branch",
-        "rx_frequency_n_or_w": "153.8300 N",
-        "rx_tone_nac": "156.7",
-        "tx_frequency_n_or_w": "153.8300 N",
-        "tx_tone_nac": "156.7",
-        "mode_a_d_or_m": "A",
-        "remarks": "Direct tactical simplex"
-      },
-      {
-        "zone_grp": "Zone 1",
-        "channel_number": "4",
-        "function": "Support",
-        "channel_name_trunked_radio_system_talkgroup": "SUPP-1",
-        "assignment": "Logistics & Decon",
-        "rx_frequency_n_or_w": "462.6250 N",
-        "rx_tone_nac": "123.0",
-        "tx_frequency_n_or_w": "462.6250 N",
-        "tx_tone_nac": "123.0",
-        "mode_a_d_or_m": "A",
-        "remarks": "Staging & decon trailer"
-      }
-    ],
-    "5_special_instructions": "All emergency traffic must use 'MAYDAY' call sign on Channel 1. Channel 2 encryption key loaded at Staging Area Alpha.",
-    "6_prepared_by": {
-      "name": "R. Lee",
-      "signature": "R. Lee",
-      "date_time": "07/07/2026 16:00"
+    {
+      "zone_grp": "Zone 1",
+      "channel_number": "3",
+      "function": "Tactical",
+      "channel_name_trunked_radio_system_talkgroup": "TAC-3",
+      "assignment": "Fire Suppression Branch",
+      "rx_frequency_n_or_w": "153.8300 N",
+      "rx_tone_nac": "156.7",
+      "tx_frequency_n_or_w": "153.8300 N",
+      "tx_tone_nac": "156.7",
+      "mode_a_d_or_m": "A",
+      "remarks": "Direct tactical simplex"
     },
-    "iap_page_number": "5"
-  }
+    {
+      "zone_grp": "Zone 1",
+      "channel_number": "4",
+      "function": "Support",
+      "channel_name_trunked_radio_system_talkgroup": "SUPP-1",
+      "assignment": "Logistics & Decon",
+      "rx_frequency_n_or_w": "462.6250 N",
+      "rx_tone_nac": "123.0",
+      "tx_frequency_n_or_w": "462.6250 N",
+      "tx_tone_nac": "123.0",
+      "mode_a_d_or_m": "A",
+      "remarks": "Staging & decon trailer"
+    }
+  ],
+  "5_special_instructions": "All emergency traffic must use 'MAYDAY' call sign on Channel 1. Channel 2 encryption key loaded at Staging Area Alpha.",
+  "6_prepared_by": {
+    "name": "R. Lee",
+    "signature": "R. Lee",
+    "date_time": "07/07/2026 16:00"
+  },
+  "iap_page_number": "5"
 }

@@ -1,80 +1,78 @@
 {
-  "ics_206_ground_truth": {
-    "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
-    "2_operational_period": {
-      "date_from": "10/14/2026",
-      "date_to": "10/15/2026",
-      "time_from": "07:00",
-      "time_to": "19:00"
+  "1_incident_name": "Port of Houston Sulfuric Acid Tanker Leak",
+  "2_operational_period": {
+    "date_from": "10/14/2026",
+    "date_to": "10/15/2026",
+    "time_from": "07:00",
+    "time_to": "19:00"
+  },
+  "3_medical_aid_stations": [
+    {
+      "name": "Berth 42 Decon & Medical Station",
+      "location": "Berth 42 Dockside Command Post",
+      "contact_number_frequency": "156.800 MHz / Ch 16",
+      "paramedic_service": true
     },
-    "3_medical_aid_stations": [
+    {
+      "name": "M/T Stolt Synergy Deck Medical Post",
+      "location": "Vessel Starboard Main Deck",
+      "contact_number_frequency": "467.525 MHz / Ch 3",
+      "paramedic_service": true
+    }
+  ],
+  "4_transportation_services": {
+    "ambulance_services": [
       {
-        "name": "Berth 42 Decon & Medical Station",
-        "location": "Berth 42 Dockside Command Post",
-        "contact_number_frequency": "156.800 MHz / Ch 16",
+        "name": "Houston Fire Department Medic 42",
+        "location": "Port Gate 5 Security Staging",
+        "contact_number_frequency": "(555) 456-7890 / Ch 1",
         "paramedic_service": true
       },
       {
-        "name": "M/T Stolt Synergy Deck Medical Post",
-        "location": "Vessel Starboard Main Deck",
-        "contact_number_frequency": "467.525 MHz / Ch 3",
+        "name": "Harris County Emergency Corps Unit 18",
+        "location": "Channelview Staging Area",
+        "contact_number_frequency": "(555) 456-7891 / Ch 1",
         "paramedic_service": true
       }
     ],
-    "4_transportation_services": {
-      "ambulance_services": [
-        {
-          "name": "Houston Fire Department Medic 42",
-          "location": "Port Gate 5 Security Staging",
-          "contact_number_frequency": "(555) 456-7890 / Ch 1",
-          "paramedic_service": true
-        },
-        {
-          "name": "Harris County Emergency Corps Unit 18",
-          "location": "Channelview Staging Area",
-          "contact_number_frequency": "(555) 456-7891 / Ch 1",
-          "paramedic_service": true
-        }
-      ],
-      "air_ambulance_services": [
-        {
-          "name": "Memorial Hermann Life Flight",
-          "location": "Houston Medical Center Helipad",
-          "contact_number_frequency": "(555) 777-9111 / VHF 155.280 MHz",
-          "paramedic_service": true
-        }
-      ]
-    },
-    "5_hospitals": [
+    "air_ambulance_services": [
       {
-        "hospital_name": "Houston Methodist Hospital Baytown",
-        "address_latitude_longitude": "4401 Garth Road, Baytown, 29.7355 N, 94.9774 W",
-        "contact_number_frequency": "(555) 890-2200 / Marine Channel 22",
-        "air_ambulance_helipad": true,
-        "burn_center": false,
-        "trauma_center": true
-      },
-      {
-        "hospital_name": "Memorial Hermann Texas Medical Center",
-        "address_latitude_longitude": "6411 Fannin St, Houston, 29.7108 N, 95.3986 W",
-        "contact_number_frequency": "(555) 890-9900 / Marine Channel 24",
-        "air_ambulance_helipad": true,
-        "burn_center": true,
-        "trauma_center": true
+        "name": "Memorial Hermann Life Flight",
+        "location": "Houston Medical Center Helipad",
+        "contact_number_frequency": "(555) 777-9111 / VHF 155.280 MHz",
+        "paramedic_service": true
       }
-    ],
-    "6_special_medical_emergency_procedures": "Given high ambient heat and humidity during Level A chemical suit entry, responder entry times are strictly capped at 20 minutes followed by 40 minutes active cooling and hydration. In the event of chemical acid splashes or suit breaches, perform instant water deluge at the Berth 42 Decon Station for a minimum of 15 minutes. Memorial Hermann Life Flight is designated for critical chemical burn transport from Berth 42 Pier Helipad.",
-    "7_prepared_by": {
-      "name": "LT Commander James Miller",
-      "position_title": "Medical Unit Leader",
-      "signature": "James Miller",
-      "date_time": "10/14/2026 06:00"
+    ]
+  },
+  "5_hospitals": [
+    {
+      "hospital_name": "Houston Methodist Hospital Baytown",
+      "address_latitude_longitude": "4401 Garth Road, Baytown, 29.7355 N, 94.9774 W",
+      "contact_number_frequency": "(555) 890-2200 / Marine Channel 22",
+      "air_ambulance_helipad": true,
+      "burn_center": false,
+      "trauma_center": true
     },
-    "8_approved_by_safety_officer": {
-      "name": "Safety Officer Sarah Jenkins",
-      "signature": "Sarah Jenkins",
-      "date_time": "10/14/2026 06:30"
-    },
-    "iap_page_number": "5"
-  }
+    {
+      "hospital_name": "Memorial Hermann Texas Medical Center",
+      "address_latitude_longitude": "6411 Fannin St, Houston, 29.7108 N, 95.3986 W",
+      "contact_number_frequency": "(555) 890-9900 / Marine Channel 24",
+      "air_ambulance_helipad": true,
+      "burn_center": true,
+      "trauma_center": true
+    }
+  ],
+  "6_special_medical_emergency_procedures": "Given high ambient heat and humidity during Level A chemical suit entry, responder entry times are strictly capped at 20 minutes followed by 40 minutes active cooling and hydration. In the event of chemical acid splashes or suit breaches, perform instant water deluge at the Berth 42 Decon Station for a minimum of 15 minutes. Memorial Hermann Life Flight is designated for critical chemical burn transport from Berth 42 Pier Helipad.",
+  "7_prepared_by": {
+    "name": "LT Commander James Miller",
+    "position_title": "Medical Unit Leader",
+    "signature": "James Miller",
+    "date_time": "10/14/2026 06:00"
+  },
+  "8_approved_by_safety_officer": {
+    "name": "Safety Officer Sarah Jenkins",
+    "signature": "Sarah Jenkins",
+    "date_time": "10/14/2026 06:30"
+  },
+  "iap_page_number": "5"
 }

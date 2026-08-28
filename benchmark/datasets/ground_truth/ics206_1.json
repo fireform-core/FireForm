@@ -1,80 +1,78 @@
 {
-  "ics_206_ground_truth": {
-    "1_incident_name": "Whispering Pines Derailment",
-    "2_operational_period": {
-      "date_from": "07/07/2026",
-      "date_to": "07/08/2026",
-      "time_from": "18:00",
-      "time_to": "06:00"
+  "1_incident_name": "Whispering Pines Derailment",
+  "2_operational_period": {
+    "date_from": "07/07/2026",
+    "date_to": "07/08/2026",
+    "time_from": "18:00",
+    "time_to": "06:00"
+  },
+  "3_medical_aid_stations": [
+    {
+      "name": "Staging Area Alpha First Aid Station",
+      "location": "Whispering Pines Creek Staging Area",
+      "contact_number_frequency": "462.5500 MHz / Ch 1",
+      "paramedic_service": true
     },
-    "3_medical_aid_stations": [
+    {
+      "name": "Forward Decon Medical Post",
+      "location": "Derailment Site Perimeter West",
+      "contact_number_frequency": "467.7750 MHz / Ch 2",
+      "paramedic_service": true
+    }
+  ],
+  "4_transportation_services": {
+    "ambulance_services": [
       {
-        "name": "Staging Area Alpha First Aid Station",
-        "location": "Whispering Pines Creek Staging Area",
-        "contact_number_frequency": "462.5500 MHz / Ch 1",
+        "name": "County Emergency Medical Services Unit 41",
+        "location": "Whispering Pines Staging Area",
+        "contact_number_frequency": "(555) 234-8901 / Ch 1",
         "paramedic_service": true
       },
       {
-        "name": "Forward Decon Medical Post",
-        "location": "Derailment Site Perimeter West",
-        "contact_number_frequency": "467.7750 MHz / Ch 2",
+        "name": "Pine Valley Volunteer Fire & Rescue Ambulance 12",
+        "location": "Station 12 Base",
+        "contact_number_frequency": "(555) 234-8902 / Ch 1",
+        "paramedic_service": false
+      }
+    ],
+    "air_ambulance_services": [
+      {
+        "name": "LifeFlight Air Medical Helicopter",
+        "location": "Regional Trauma Center Helipad",
+        "contact_number_frequency": "(555) 999-4321 / VHF 155.340 MHz",
         "paramedic_service": true
       }
-    ],
-    "4_transportation_services": {
-      "ambulance_services": [
-        {
-          "name": "County Emergency Medical Services Unit 41",
-          "location": "Whispering Pines Staging Area",
-          "contact_number_frequency": "(555) 234-8901 / Ch 1",
-          "paramedic_service": true
-        },
-        {
-          "name": "Pine Valley Volunteer Fire & Rescue Ambulance 12",
-          "location": "Station 12 Base",
-          "contact_number_frequency": "(555) 234-8902 / Ch 1",
-          "paramedic_service": false
-        }
-      ],
-      "air_ambulance_services": [
-        {
-          "name": "LifeFlight Air Medical Helicopter",
-          "location": "Regional Trauma Center Helipad",
-          "contact_number_frequency": "(555) 999-4321 / VHF 155.340 MHz",
-          "paramedic_service": true
-        }
-      ]
+    ]
+  },
+  "5_hospitals": [
+    {
+      "hospital_name": "Whispering Pines Regional Medical Center",
+      "address_latitude_longitude": "100 Medical Center Drive, Whispering Pines, 42.1234 N, 73.5678 W",
+      "contact_number_frequency": "(555) 789-0100 / Med Channel 3",
+      "air_ambulance_helipad": true,
+      "burn_center": false,
+      "trauma_center": true
     },
-    "5_hospitals": [
-      {
-        "hospital_name": "Whispering Pines Regional Medical Center",
-        "address_latitude_longitude": "100 Medical Center Drive, Whispering Pines, 42.1234 N, 73.5678 W",
-        "contact_number_frequency": "(555) 789-0100 / Med Channel 3",
-        "air_ambulance_helipad": true,
-        "burn_center": false,
-        "trauma_center": true
-      },
-      {
-        "hospital_name": "State University Burn & Trauma Center",
-        "address_latitude_longitude": "500 University Ave, Capital City, 42.3500 N, 73.8000 W",
-        "contact_number_frequency": "(555) 789-0900 / Med Channel 5",
-        "air_ambulance_helipad": true,
-        "burn_center": true,
-        "trauma_center": true
-      }
-    ],
-    "6_special_medical_emergency_procedures": "In the event of a medical emergency or chemical exposure during night operations, responders must immediately notify the Incident Commander and Medical Unit Leader over Command Channel 1. All entry personnel exposed to Benzene must undergo full gross and technical decontamination at the Forward Decon Medical Post before transport. For critical life safety, LifeFlight Air Medical is on standby for immediate evacuation from Landing Zone Alpha located adjacent to Staging Area Alpha.",
-    "7_prepared_by": {
-      "name": "Dr. Evelyn Reed",
-      "position_title": "Medical Unit Leader",
-      "signature": "Evelyn Reed",
-      "date_time": "07/07/2026 16:30"
-    },
-    "8_approved_by_safety_officer": {
-      "name": "Captain Thomas Wright",
-      "signature": "Thomas Wright",
-      "date_time": "07/07/2026 17:00"
-    },
-    "iap_page_number": "5"
-  }
+    {
+      "hospital_name": "State University Burn & Trauma Center",
+      "address_latitude_longitude": "500 University Ave, Capital City, 42.3500 N, 73.8000 W",
+      "contact_number_frequency": "(555) 789-0900 / Med Channel 5",
+      "air_ambulance_helipad": true,
+      "burn_center": true,
+      "trauma_center": true
+    }
+  ],
+  "6_special_medical_emergency_procedures": "In the event of a medical emergency or chemical exposure during night operations, responders must immediately notify the Incident Commander and Medical Unit Leader over Command Channel 1. All entry personnel exposed to Benzene must undergo full gross and technical decontamination at the Forward Decon Medical Post before transport. For critical life safety, LifeFlight Air Medical is on standby for immediate evacuation from Landing Zone Alpha located adjacent to Staging Area Alpha.",
+  "7_prepared_by": {
+    "name": "Dr. Evelyn Reed",
+    "position_title": "Medical Unit Leader",
+    "signature": "Evelyn Reed",
+    "date_time": "07/07/2026 16:30"
+  },
+  "8_approved_by_safety_officer": {
+    "name": "Captain Thomas Wright",
+    "signature": "Thomas Wright",
+    "date_time": "07/07/2026 17:00"
+  },
+  "iap_page_number": "5"
 }

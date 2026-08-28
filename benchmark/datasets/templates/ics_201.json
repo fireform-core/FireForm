@@ -1,62 +1,174 @@
 {
-  "1_incident_name": "string",
-  "2_incident_number": "string",
-  "3_date_time_initiated": {
-    "date": "string",
-    "time": "string"
-  },
-  "4_map_sketch": {
-    "total_area_of_operations": "string",
-    "incident_site_area": "string",
-    "impacted_areas": "string",
-    "threatened_areas": "string",
-    "overflight_results": "string",
-    "trajectories": "string",
-    "impacted_shorelines": "string",
-    "graphics_and_symbology": "string"
-  },
-  "5_situation_summary_health_safety_briefing": {
-    "situation_summary": "string",
-    "health_and_safety_hazards": "string",
-    "necessary_measures": "string"
-  },
-  "6_prepared_by": {
-    "name": "string",
-    "position_title": "string",
-    "signature": "string",
-    "date_time": "string"
-  },
-  "7_current_and_planned_objectives": ["string"],
-  "8_current_and_planned_actions_strategies_tactics": [
-    {
-      "time": "string",
-      "actions": "string"
-    }
-  ],
-  "9_current_organization": {
-    "incident_commanders": ["string"],
-    "safety_officer": "string",
-    "public_information_officer": "string",
-    "liaison_officer": "string",
-    "operations_section_chief": "string",
-    "planning_section_chief": "string",
-    "logistics_section_chief": "string",
-    "finance_administration_section_chief": "string",
-    "additional_positions": [
-      {
-        "position": "string",
-        "name": "string"
+  "type": "object",
+  "properties": {
+    "1_incident_name": {
+      "type": "string"
+    },
+    "2_incident_number": {
+      "type": "string"
+    },
+    "3_date_time_initiated": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        }
       }
-    ]
-  },
-  "10_resource_summary": [
-    {
-      "resource": "string",
-      "resource_identifier": "string",
-      "date_time_ordered": "string",
-      "eta": "string",
-      "arrived": "boolean",
-      "notes": "string"
+    },
+    "4_map_sketch": {
+      "type": "object",
+      "properties": {
+        "total_area_of_operations": {
+          "type": "string"
+        },
+        "incident_site_area": {
+          "type": "string"
+        },
+        "impacted_areas": {
+          "type": "string"
+        },
+        "threatened_areas": {
+          "type": "string"
+        },
+        "overflight_results": {
+          "type": "string"
+        },
+        "trajectories": {
+          "type": "string"
+        },
+        "impacted_shorelines": {
+          "type": "string"
+        },
+        "graphics_and_symbology": {
+          "type": "string"
+        }
+      }
+    },
+    "5_situation_summary_health_safety_briefing": {
+      "type": "object",
+      "properties": {
+        "situation_summary": {
+          "type": "string"
+        },
+        "health_and_safety_hazards": {
+          "type": "string"
+        },
+        "necessary_measures": {
+          "type": "string"
+        }
+      }
+    },
+    "6_prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "position_title": {
+          "type": "string"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "date_time": {
+          "type": "string"
+        }
+      }
+    },
+    "7_current_and_planned_objectives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "8_current_and_planned_actions_strategies_tactics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string"
+          },
+          "actions": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "9_current_organization": {
+      "type": "object",
+      "properties": {
+        "incident_commanders": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "safety_officer": {
+          "type": "string"
+        },
+        "public_information_officer": {
+          "type": "string"
+        },
+        "liaison_officer": {
+          "type": "string"
+        },
+        "operations_section_chief": {
+          "type": "string"
+        },
+        "planning_section_chief": {
+          "type": "string"
+        },
+        "logistics_section_chief": {
+          "type": "string"
+        },
+        "finance_administration_section_chief": {
+          "type": "string"
+        },
+        "additional_positions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "position": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "10_resource_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "type": "string"
+          },
+          "resource_identifier": {
+            "type": "string"
+          },
+          "date_time_ordered": {
+            "type": "string"
+          },
+          "eta": {
+            "type": "string"
+          },
+          "arrived": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
     }
-  ]
+  }
 }
