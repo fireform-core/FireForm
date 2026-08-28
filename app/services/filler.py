@@ -1,7 +1,8 @@
+from datetime import datetime
+
 from pdfrw import PdfReader, PdfWriter
 from app.core.pdf_utils import _pdf_text
 from app.services.llm import LLM
-from datetime import datetime
 
 
 class Filler:

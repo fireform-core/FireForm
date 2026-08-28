@@ -1,0 +1,49 @@
+{
+  "ics_202_ground_truth": {
+    "1_incident_name": "Oakridge Industrial Park Anhydrous Ammonia Release",
+    "2_operational_period": {
+      "date_from": "09/05/2026",
+      "date_to": "09/06/2026",
+      "time_from": "07:00",
+      "time_to": "19:00"
+    },
+    "3_objectives": [
+      "Enforce strict Level A/B PPE protocols and 1,000-foot Exclusion Zone control throughout daytime mechanical ventilation operations.",
+      "Complete charcoal scrubber building ventilation of Building 7 interior to reduce interior ammonia concentrations below 15 ppm by 13:00 hours.",
+      "Conduct full structural and piping stress inspection of Roof Mechanical Room 3 by 15:00 hours.",
+      "Perform interior clearance air sampling across all 4 building quadrants by 17:00 hours.",
+      "Submit final environmental decontamination report to NJ DEP and lift perimeter road closures by 18:30 hours."
+    ],
+    "4_operational_period_command_emphasis": "Focus operational efforts on safe indoor ventilation and structural validation. Ensure air monitoring teams continuously verify downwind residential air quality before discharging building exhaust.",
+    "general_situational_awareness": "Mostly sunny with daytime high of 82°F. Winds from West-Southwest at 7 mph. Thermal updrafts on Building 7 roof deck require secure tie-offs for all entry personnel.",
+    "5_site_safety_plan_required": true,
+    "approved_site_safety_plans_located_at": "Edison Fire Station 4 Command Post Conference Room",
+    "6_incident_action_plan_attachments": {
+      "ics_203": true,
+      "ics_204": true,
+      "ics_205": true,
+      "ics_205a": true,
+      "ics_206": true,
+      "ics_207": false,
+      "ics_208": true,
+      "map_chart": true,
+      "weather_forecast_tides_currents": true,
+      "other_attachments": [
+        "Building 7 Ventilation Engineering Plan",
+        "NJ DEP Air Quality Standard Sheet"
+      ]
+    },
+    "7_prepared_by": {
+      "name": "Captain Michael Vance",
+      "position_title": "Planning Section Chief",
+      "signature": "Michael Vance",
+      "date_time": "09/05/2026 06:00"
+    },
+    "8_approved_by_incident_commander": {
+      "name": "Chief E. Sullivan",
+      "signature": "Chief E. Sullivan",
+      "date_time": "09/05/2026 06:30"
+    },
+    "iap_page_number": "1"
+  }
+}

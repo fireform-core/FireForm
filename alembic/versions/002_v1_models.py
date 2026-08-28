@@ -16,9 +16,10 @@ will be added when that model is resolved.
 
 from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 import sqlmodel
+
+from alembic import op
 
 revision: str = "002"
 down_revision: str | None = "001"

@@ -1,3 +1,3 @@
-from . import templates, forms
+from . import forms, templates
 
-__all__ = ["templates", "forms"]
+__all__ = ["forms", "templates"]

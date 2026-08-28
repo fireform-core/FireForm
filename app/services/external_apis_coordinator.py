@@ -1,5 +1,6 @@
-from app.services.external_apis.zipcode_api import ZipCodeAPI
 from app.services.external_apis.weather_api import WeatherAPI
+from app.services.external_apis.zipcode_api import ZipCodeAPI
+
 
 class ExternalAPIsCoordinator:
     def __init__(self):

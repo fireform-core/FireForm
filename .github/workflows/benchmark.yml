@@ -1,0 +1,57 @@
+name: Run Pipeline Benchmark
+
+on:
+  pull_request:
+    branches: [ main, development ]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11434:11434
+
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run PR Branch Benchmark
+        run: |
+          pytest benchmark/test_benchmark.py -v
+          mv benchmark/benchmark_report.json branch_report.json
+
+      - name: Checkout Target Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.base_ref }}
+          clean: false
+
+      - name: Run Target Branch Benchmark
+        run: |
+          pytest benchmark/test_benchmark.py -v
+          mv benchmark/benchmark_report.json target_report.json
+
+      - name: Compare Benchmarks
+        id: compare
+        run: |
+          python benchmark/compare_benchmarks.py branch_report.json target_report.json > comparison.md
+          cat comparison.md
+
+      - name: Comment PR with results
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          filePath: comparison.md

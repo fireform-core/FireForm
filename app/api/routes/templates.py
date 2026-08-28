@@ -2,15 +2,15 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.templates import (
+    MakeFillableRequest,
+    MakeFillableResponse,
     TemplateCreate,
     TemplateResponse,
     TemplateUploadResponse,
-    MakeFillableRequest,
-    MakeFillableResponse,
 )
 from app.core.config import DEFAULT_TEMPLATE_DIR
 from app.db.repositories import get_template

@@ -1,7 +1,8 @@
 import os
+
+from app.core.logging import get_logger
 from app.services.filler import Filler
 from app.services.llm import LLM
-from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 

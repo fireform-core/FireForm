@@ -1,7 +1,8 @@
 import json
 import os
+
 import requests
-from requests.exceptions import Timeout, RequestException
+from requests.exceptions import RequestException, Timeout
 
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
 from app.core.logging import get_logger
@@ -92,7 +93,6 @@ class LLM:
         else:
             self._json[field] = parsed_value
 
-        return
 
 
     def get_data(self):
