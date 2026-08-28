@@ -15,15 +15,16 @@ class Runner:
         narratives_dir = os.path.join(datasets_dir, "narratives")
         ground_truth_dir = os.path.join(datasets_dir, "ground_truth")
         templates_dir = os.path.join(datasets_dir, "templates")
-        pdfs_dir = os.path.join(templates_dir, "pdfs")
+        pdfs_dir = os.path.join(datasets_dir, "pdfs")
 
         results = []
         total_latency = 0.0
 
         # Scan narratives directory to find matching ground_truth and template files
-        narrative_files = [f for f in os.listdir(narratives_dir) if f.endswith(".txt")]
+        narrative_files = sorted([f for f in os.listdir(narratives_dir) if f.endswith(".txt")])
+        total_cases = len(narrative_files)
 
-        for narrative_file in sorted(narrative_files):
+        for idx, narrative_file in enumerate(narrative_files, start=1):
             case_name = os.path.splitext(narrative_file)[0]
             # Match ics201_1.txt -> ics201_1.json or ics201.json
             # Find matching ground truth file
@@ -49,6 +50,7 @@ class Runner:
             pdf_path = os.path.join(pdfs_dir, template_file.replace(".json", ".pdf"))
 
             if not os.path.exists(gt_path) or not os.path.exists(template_path) or not os.path.exists(pdf_path):
+                print(f"[{idx}/{total_cases}] Skipping {case_name}: missing gt/template/pdf")
                 continue
 
             with open(narrative_path, "r") as f:
@@ -56,19 +58,29 @@ class Runner:
 
             with open(gt_path, "r") as f:
                 gt_data = json.load(f)
-                # Unwrap the outer wrapper key if present
-                gt_key = list(gt_data.keys())[0]
-                gt_content = gt_data[gt_key]
+                # Unwrap the outer wrapper key if present (e.g., "ics_202_ground_truth")
+                if len(gt_data) == 1 and isinstance(list(gt_data.values())[0], dict) and ("ground_truth" in list(gt_data.keys())[0] or "ics" in list(gt_data.keys())[0].lower()):
+                    gt_content = list(gt_data.values())[0]
+                else:
+                    gt_content = gt_data
 
             with open(template_path, "r") as f:
-                template_schema = json.load(f)
+                template_schema = f.read()
 
+            # Format case_name e.g., ics201_1 -> ics_201_1
+            formatted_case_name = case_name
+            if "ics" in case_name and not case_name.startswith("ics_"):
+                formatted_case_name = "ics_" + case_name[3:]
+            output_pdf_path = os.path.join(pdfs_dir, f"{formatted_case_name}_filled.pdf")
+
+            print(f"[{idx}/{total_cases}] Starting evaluation for '{case_name}' ({base_form_name})...")
             start_time = time.time()
-            output = self.pipeline.run(narrative_text, template_schema, pdf_path)
+            output = self.pipeline.run(narrative_text, template_schema, pdf_path, output_pdf_path)
             latency = time.time() - start_time
             total_latency += latency
 
             accuracy = calculate_accuracy(output.extracted_fields, gt_content)
+            print(f"[{idx}/{total_cases}] Finished '{case_name}' | Latency: {latency:.2f}s | Accuracy: {accuracy * 100:.2f}%\n" + "-" * 60)
 
             results.append({
                 "case_id": case_name,

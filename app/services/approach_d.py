@@ -9,7 +9,7 @@ class ApproachD:
         pass
 
     @staticmethod
-    def fill_form(narrative: str, target_json: str):
+    def fill_form(narrative: str, target_json: str, pdf_path: str, output_pdf_path: str):
         prompt = """
         You are a precise data extraction engine. Extract information from the provided incident narrative and format it as a valid JSON object strictly adhering to the specified JSON Schema structure and field types. Do not include introductory text, explanations, or Markdown boilerplate—return ONLY the raw JSON object.
         User Prompt:
@@ -238,7 +238,7 @@ class ApproachD:
         json_data = response.json() 
 
         response_str = json_data.get("response", "{}")
-        print("LLM Response:\n", response_str)
+        # print("LLM Response:\n", response_str)
 
         if "```json" in response_str:
             response_str = response_str.split("```json")[1].split("```")[0].strip()
@@ -262,7 +262,7 @@ class ApproachD:
 
 
         answers_list = flatten_json_values(extracted_json)
-        print(answers_list)
+        #print(answers_list)
 
 
         def set_field_value(annot, value):
@@ -295,8 +295,8 @@ class ApproachD:
                     annot.AP = None
 
 
-        pdf_path = Path(__file__).resolve().parents[2] / "benchmark" / "datasets" / "pdfs" / "ics_209.pdf"
-        pdf = PdfReader(str(pdf_path))
+        pdf_file = Path(pdf_path)
+        pdf = PdfReader(str(pdf_file))
 
         i = 0
         for page in pdf.pages:
@@ -313,6 +313,5 @@ class ApproachD:
                         else:
                             break
 
-        output_pdf = str(pdf_path.parent / "ics_209_filled.pdf")
-        PdfWriter().write(output_pdf, pdf)
-        print(f"Filled {i} fields and saved to {output_pdf}")
+        PdfWriter().write(str(output_pdf_path), pdf)
+        return extracted_json
