@@ -1,10 +1,17 @@
-.PHONY: help init fireform build up down logs logs-app logs-ollama shell pull-model test clean super-clean status ready-banner sync docs
+.PHONY: help init fireform build up down logs logs-app logs-ollama shell pull-model test benchmark clean super-clean status ready-banner sync docs
 
 COMPOSE     = docker compose -f docker/dev/compose.yml --env-file docker/.env.dev
 ENV_DEV     = docker/.env.dev
 
-# Read OLLAMA_MODEL from .env.dev at runtime; fall back to default if file absent.
-OLLAMA_MODEL = $(shell grep -E '^OLLAMA_MODEL=' $(ENV_DEV) 2>/dev/null | cut -d= -f2 | tr -d '[:space:]' || echo qwen2.5:1.5b)
+# Docker mode owns the Ollama container and model. External mode only points
+# FireForm at an Ollama server managed by the user.
+OLLAMA_MODEL = $(or $(shell grep -E '^OLLAMA_MODEL=' $(ENV_DEV) 2>/dev/null | cut -d= -f2 | tr -d '[:space:]'),qwen2.5:1.5b)
+OLLAMA_MODE  = $(or $(shell grep -E '^OLLAMA_MODE=' $(ENV_DEV) 2>/dev/null | cut -d= -f2 | tr -d '[:space:]'),docker)
+OLLAMA_HOST  = $(or $(shell grep -E '^OLLAMA_HOST=' $(ENV_DEV) 2>/dev/null | cut -d= -f2 | tr -d '[:space:]'),http://ollama:11434)
+COMPOSE_LOCAL_LLM = $(COMPOSE) --profile local-llm
+BENCHMARK_CASES ?= ics201_1
+BENCHMARK_CONCURRENCY ?= 1
+BENCHMARK_TIMEOUT_SECONDS ?= 7200
 
 help:
 	@printf '%s\n' \
@@ -18,7 +25,7 @@ help:
 	@echo "FireForm Development Commands"
 	@echo "=============================="
 	@echo "make init         - First-time setup: check deps, create .env.dev, pick model"
-	@echo "make fireform     - Build images, start containers, pull Ollama model"
+	@echo "make fireform     - Build and start FireForm (Ollama follows OLLAMA_MODE)"
 	@echo "make build        - Build Docker images"
 	@echo "make up           - Start all containers (detached)"
 	@echo "make down         - Stop all containers"
@@ -31,9 +38,11 @@ help:
 	@echo "make shell        - Open shell in running app container"
 	@echo "make pull-model   - Pull Ollama model from .env.dev ($(OLLAMA_MODEL))"
 	@echo "make test         - Run test suite"
+	@echo "make benchmark    - Run live extraction benchmark (default: ics201_1)"
 	@echo "make docs         - Serve interactive API docs from the OpenAPI contract"
 	@echo "make migrate      - Run pending Alembic migrations"
 	@echo "make migration    - Generate new migration (msg='description')"
+	@echo "make generate-contract-models - Regenerate Pydantic models from the incident contract"
 	@echo "make clean        - Stop containers (preserves volumes)"
 	@echo "make super-clean  - [CAUTION] Stop containers, delete volumes, prune Docker"
 
@@ -42,7 +51,7 @@ init:
 	@sh scripts/check-deps.sh
 	@sh scripts/init-env.sh
 	@sh scripts/select-model.sh
-	@printf "Build containers and pull model now? [y/N] "; \
+	@printf "Build and start FireForm now? [y/N] "; \
 	read answer; \
 	case "$$answer" in \
 		[yY]*) $(MAKE) fireform ;; \
@@ -50,12 +59,19 @@ init:
 	esac
 
 fireform:
-	@$(COMPOSE) up -d --build
-	@if $(COMPOSE) exec -T ollama ollama list 2>/dev/null | grep -q "^$(OLLAMA_MODEL)"; then \
-		echo "  Model $(OLLAMA_MODEL) already pulled."; \
+	@set -e; \
+	if [ "$(OLLAMA_MODE)" = "docker" ]; then \
+		$(COMPOSE_LOCAL_LLM) up -d --build; \
+		if $(COMPOSE_LOCAL_LLM) exec -T ollama ollama list 2>/dev/null | grep -q "^$(OLLAMA_MODEL)"; then \
+			echo "  Model $(OLLAMA_MODEL) already pulled."; \
+		else \
+			echo "  Pulling $(OLLAMA_MODEL)..."; \
+			$(COMPOSE_LOCAL_LLM) exec -T ollama ollama pull $(OLLAMA_MODEL); \
+		fi; \
 	else \
-		echo "  Pulling $(OLLAMA_MODEL)..."; \
-		$(COMPOSE) exec -T ollama ollama pull $(OLLAMA_MODEL); \
+		$(COMPOSE_LOCAL_LLM) stop ollama >/dev/null 2>&1 || true; \
+		$(COMPOSE) up -d --build; \
+		echo "  Using external Ollama at $(OLLAMA_HOST); skipping model pull."; \
 	fi
 	@$(MAKE) --no-print-directory ready-banner
 
@@ -63,7 +79,13 @@ build:
 	@$(COMPOSE) build
 
 up:
-	@$(COMPOSE) up -d
+	@if [ "$(OLLAMA_MODE)" = "docker" ]; then \
+		$(COMPOSE_LOCAL_LLM) up -d; \
+	else \
+		$(COMPOSE_LOCAL_LLM) stop ollama >/dev/null 2>&1 || true; \
+		$(COMPOSE) up -d; \
+		echo "  Using external Ollama at $(OLLAMA_HOST)."; \
+	fi
 	@$(MAKE) --no-print-directory ready-banner
 
 # Fast path for "I added a package": install the delta into the running container
@@ -83,7 +105,7 @@ ready-banner:
 	@echo "Run 'make logs' to view live logs, 'make down' to stop."
 
 down:
-	@$(COMPOSE) down --remove-orphans
+	@$(COMPOSE_LOCAL_LLM) down --remove-orphans
 
 logs:
 	@$(COMPOSE) logs -f
@@ -101,10 +123,18 @@ shell:
 	@$(COMPOSE) exec app /bin/sh
 
 pull-model:
-	@$(COMPOSE) exec -T ollama ollama pull $(OLLAMA_MODEL)
+	@if [ "$(OLLAMA_MODE)" = "docker" ]; then \
+		$(COMPOSE_LOCAL_LLM) up -d ollama; \
+		$(COMPOSE_LOCAL_LLM) exec -T ollama ollama pull $(OLLAMA_MODEL); \
+	else \
+		echo "OLLAMA_MODE=external; manage model $(OLLAMA_MODEL) on $(OLLAMA_HOST)."; \
+	fi
 
 test:
-	@$(COMPOSE) exec -T app python3 -m pytest tests/ -v
+	@$(COMPOSE) exec -T app python3 -m pytest tests/ benchmark/ -m "not live_benchmark" -v
+
+benchmark:
+	@BENCHMARK_CASES="$(BENCHMARK_CASES)" RUN_LIVE_BENCHMARK=1 python3 -m pytest benchmark/test_benchmark.py -v
 
 docs:
 	@echo "Serving Swagger UI from contracts/openapi.yaml at http://localhost:8088"
@@ -114,7 +144,11 @@ migrate:
 	@$(COMPOSE) exec -T app alembic upgrade head
 
 migration:
-	@$(COMPOSE) exec -T app alembic revision --autogenerate -m "$(msg)"
+	@test -n "$(rev)" || { echo "rev is required, e.g. make migration rev=003 msg=\"...\""; exit 1; }
+	@$(COMPOSE) exec -T app alembic revision --autogenerate --rev-id "$(rev)" -m "$(msg)"
+
+generate-contract-models:
+	@$(COMPOSE) exec -T app sh -c "uv pip install --system -r requirements-dev.txt && python3 scripts/generate_contract_models.py"
 
 clean:
 	@$(COMPOSE) down

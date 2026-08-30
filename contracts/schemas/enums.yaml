@@ -47,44 +47,58 @@ JobStatus:
 
 FormType:
   type: string
-  enum:
-    - neris
-    - nemsis_epcr
-    - nibrs
-    - nfirs_basic
-    - nfirs_fire
-    - nfirs_structure
-    - nfirs_wildland
-    - nfirs_ems
-    - nfirs_hazmat
-    - nfirs_apparatus
-    - nfirs_personnel
-    - nfirs_arson
-    - nfirs_casualty_civilian
-    - nfirs_casualty_responder
-    - cal_fire_ics209
-    - osha_301
-    - un_ssirs
-    - state_georgia
-    - state_california
-    - state_new_york
   description: |
-    Stable string identifier for a form type. Includes the new NERIS standard
-    (replacing NFIRS as of Feb 2026), legacy NFIRS modules, NEMSIS, NIBRS,
-    OSHA, state-specific, and international (UN SSIRS) forms.
+    Stable string identifier for a form type. An open string, not a closed
+    enum, because users register their own templates (any jurisdiction, any
+    agency) and each carries its own form_type label. Generation and
+    validation are keyed by template_id; form_type is a human-friendly label
+    and grouping key.
+
+    Well-known built-in values: neris, nemsis_epcr, nibrs, nfirs_basic,
+    nfirs_fire, nfirs_structure, nfirs_wildland, nfirs_ems, nfirs_hazmat,
+    nfirs_apparatus, nfirs_personnel, nfirs_arson, nfirs_casualty_civilian,
+    nfirs_casualty_responder, cal_fire_ics209, osha_301, un_ssirs,
+    state_georgia, state_california, state_new_york.
+  example: "neris"
+
+FieldSource:
+  type: string
+  enum:
+    - schema
+    - static
+    - manual
+    - open
+  description: |
+    Where a template field's value comes from at generation time.
+    - schema: looked up from the incident contract via incident_mapping.
+      No LLM at fill time.
+    - static: constant text saved in the template (static_text), stamped
+      on every generated form. Station name, footer, checkbox marks.
+    - manual: intentionally per-incident. Left blank until the user types
+      the value on the review screen; stored in the contract's
+      custom_fields. Counts as missing in the readiness matrix until
+      filled.
+    - open: not covered by the incident contract. The LLM extracts it
+      during the extraction layer using the field's description as the
+      instruction (one extra grouped call per template with open fields).
+      The value lands in the contract's custom_fields, passes the same
+      human review as schema fields, and is filled by lookup afterwards.
 
 IncidentCategory:
   type: string
   enum:
     - fire
+    - overpressure_explosion
     - ems
     - rescue
     - hazardous_conditions
     - service_call
     - good_intent
     - false_alarm
+    - natural_disaster
     - law_enforcement
-  description: High-level incident category
+    - special_incident
+  description: High-level incident category (aligned with NFIRS series 100-900 and UK IRS generic types)
 
 CauseCertainty:
   type: string
@@ -101,8 +115,10 @@ InjurySeverity:
     - minor
     - moderate
     - severe
+    - life_threatening
     - fatal
-  description: Severity classification for injuries
+    - undetermined
+  description: Severity classification for injuries (NFIRS 5-level scale plus undetermined)
 
 RateOfSpread:
   type: string

@@ -15,6 +15,7 @@ from app.api.schemas.enums import (
     ExtractionStatus,
     FormStatus,
     FormType,
+    IncidentCategory,
     InputStatus,
     InputType,
     JobStatus,
@@ -22,7 +23,7 @@ from app.api.schemas.enums import (
     PeriodType,
     ReportStatus,
 )
-from app.models import Extraction, Form, Incident, Input, Report
+from app.models import Extraction, Form, FormTemplate, Incident, Input, Report
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -39,6 +40,26 @@ def _input(db: Session, **kwargs) -> Input:
 
 def _extraction(db: Session, input_id: UUID, **kwargs) -> "Extraction":
     row = Extraction(input_id=input_id, **kwargs)
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def _incident(db: Session, **kwargs) -> Incident:
+    inp = _input(db)
+    ext = _extraction(db, inp.input_id)
+    defaults = dict(extract_id=ext.extract_id)
+    row = Incident(**{**defaults, **kwargs})
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+def _form_template(db: Session, **kwargs) -> FormTemplate:
+    defaults = dict(form_type=f"test_form_{uuid4().hex[:8]}", display_name="Test Form", fields=[])
+    row = FormTemplate(**{**defaults, **kwargs})
     db.add(row)
     db.commit()
     db.refresh(row)
@@ -122,21 +143,21 @@ class TestExtractionModel:
         assert isinstance(ext.extract_id, UUID)
         assert ext.input_id == inp.input_id
         assert ext.status == ExtractionStatus.processing
-        assert ext.incident_contract is None
+        assert ext.partial_result is None
         assert ext.corrections is None
         assert ext.started_at is None
 
-    def test_incident_contract_json_roundtrip(self, db):
+    def test_partial_result_json_roundtrip(self, db):
         inp = _input(db)
-        contract = {
+        partial = {
             "schema_version": "1.1.0",
             "incident": {"name": "Structure Fire Main St", "types": []},
             "location": {"address": "123 Main St", "state": "CA"},
         }
-        ext = _extraction(db, inp.input_id, incident_contract=contract)
+        ext = _extraction(db, inp.input_id, partial_result=partial)
         fetched = db.get(Extraction, ext.extract_id)
-        assert fetched.incident_contract["schema_version"] == "1.1.0"
-        assert fetched.incident_contract["location"]["state"] == "CA"
+        assert fetched.partial_result["schema_version"] == "1.1.0"
+        assert fetched.partial_result["location"]["state"] == "CA"
 
     def test_corrections_json_roundtrip(self, db):
         inp = _input(db)
@@ -223,18 +244,59 @@ class TestIncidentModel:
         fetched = db.get(Incident, row.incident_id)
         assert fetched.deleted_at is not None
 
-    def test_incident_date_field(self, db):
-        row = self._make(db, incident_date=date(2026, 5, 15))
-        fetched = db.get(Incident, row.incident_id)
-        assert fetched.incident_date == date(2026, 5, 15)
-
     def test_all_nullable_fields_default_none(self, db):
         row = self._make(db)
         assert row.incident_number is None
         assert row.incident_name is None
         assert row.incident_type is None
-        assert row.incident_date is None
         assert row.notes is None
+
+    def test_incident_contract_json_roundtrip(self, db):
+        contract = {
+            "schema_version": "1.1.0",
+            "incident": {"name": "Structure Fire Main St", "types": []},
+            "location": {"address": "123 Main St", "state": "CA"},
+        }
+        row = self._make(db, incident_contract=contract)
+        fetched = db.get(Incident, row.incident_id)
+        assert fetched.incident_contract["schema_version"] == "1.1.0"
+        assert fetched.incident_contract["location"]["state"] == "CA"
+
+    def test_promoted_columns_default_none(self, db):
+        row = self._make(db)
+        assert row.incident_contract is None
+        assert row.incident_category is None
+        assert row.incident_datetime is None
+        assert row.city is None
+        assert row.civilian_injuries is None
+        assert row.area_burned_ha is None
+        assert row.total_loss_amount is None
+        assert row.call_to_arrival_seconds is None
+
+    def test_promoted_columns_roundtrip(self, db):
+        row = self._make(
+            db,
+            incident_category=IncidentCategory.fire,
+            incident_datetime=datetime(2026, 5, 15, 14, 30, tzinfo=timezone.utc),
+            city="Oakland",
+            state="CA",
+            country="US",
+            civilian_injuries=2,
+            responder_fatalities=0,
+            people_evacuated=40,
+            structures_destroyed=3,
+            area_burned_ha=12.5,
+            total_loss_amount=250000.0,
+            total_loss_currency="USD",
+            call_to_arrival_seconds=312,
+        )
+        fetched = db.get(Incident, row.incident_id)
+        assert fetched.incident_category == IncidentCategory.fire
+        assert fetched.city == "Oakland"
+        assert fetched.civilian_injuries == 2
+        assert fetched.area_burned_ha == pytest.approx(12.5)
+        assert fetched.total_loss_currency == "USD"
+        assert fetched.call_to_arrival_seconds == 312
 
 
 # ---------------------------------------------------------------------------
@@ -244,10 +306,11 @@ class TestIncidentModel:
 class TestFormModel:
 
     def _make(self, db, **kwargs):
-        inp = _input(db)
-        ext = _extraction(db, inp.input_id)
+        template = _form_template(db)
+        incident = _incident(db)
         defaults = dict(
-            extract_id=ext.extract_id,
+            template_id=template.template_id,
+            incident_id=incident.incident_id,
             form_type=FormType.nfirs_basic,
         )
         row = Form(**{**defaults, **kwargs})
@@ -262,7 +325,9 @@ class TestFormModel:
         assert row.status == FormStatus.queued
         assert row.pdf_ready is False
         assert row.json_ready is False
-        assert row.incident_id is None
+        assert isinstance(row.template_id, UUID)
+        assert isinstance(row.incident_id, UUID)
+        assert row.batch_id is None
         assert row.job_id is None
         assert row.completed_at is None
 
@@ -286,15 +351,11 @@ class TestFormModel:
         assert fetched.json_data["FDID"] == "CA99901"
 
     def test_incident_fk_links_correctly(self, db):
-        inp = _input(db)
-        ext = _extraction(db, inp.input_id)
-        incident = Incident(extract_id=ext.extract_id)
-        db.add(incident)
-        db.commit()
-        db.refresh(incident)
+        template = _form_template(db)
+        incident = _incident(db)
 
         form = Form(
-            extract_id=ext.extract_id,
+            template_id=template.template_id,
             form_type=FormType.neris,
             incident_id=incident.incident_id,
         )
@@ -302,6 +363,27 @@ class TestFormModel:
         db.commit()
         db.refresh(form)
         assert form.incident_id == incident.incident_id
+
+    def test_template_fk_links_correctly(self, db):
+        template = _form_template(db)
+        incident = _incident(db)
+
+        form = Form(
+            template_id=template.template_id,
+            form_type=FormType.neris,
+            incident_id=incident.incident_id,
+        )
+        db.add(form)
+        db.commit()
+        db.refresh(form)
+        assert form.template_id == template.template_id
+
+    def test_batch_id_roundtrip(self, db):
+        """batch_id is a plain UUID grouping key — no Batch table, no FK."""
+        batch_id = uuid4()
+        row = self._make(db, batch_id=batch_id)
+        fetched = db.get(Form, row.form_id)
+        assert fetched.batch_id == batch_id
 
     def test_job_id_stored_without_fk(self, db):
         """job_id is a plain UUID — can store any UUID without a FK constraint."""
@@ -311,10 +393,14 @@ class TestFormModel:
         assert fetched.job_id == arbitrary_uuid
 
     def test_all_form_types_accepted(self, db):
-        inp = _input(db)
-        ext = _extraction(db, inp.input_id)
+        template = _form_template(db)
+        incident = _incident(db)
         for ft in FormType:
-            form = Form(extract_id=ext.extract_id, form_type=ft)
+            form = Form(
+                template_id=template.template_id,
+                incident_id=incident.incident_id,
+                form_type=ft,
+            )
             db.add(form)
         db.commit()
         results = db.exec(select(Form)).all()

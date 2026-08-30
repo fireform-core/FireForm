@@ -2,13 +2,14 @@
 # GET /api/v1/health
 # GET /api/v1/schema/incident
 # GET /api/v1/schema/incident/versions
+# GET /api/v1/schema/fields
 
 health:
   get:
     operationId: getHealth
     summary: System health check
     description: |
-      Returns the health status of all FireForm components — database, Ollama LLM
+      Returns the health status of all FireForm components - database, Ollama LLM
       (including loaded models, GPU status, and current load), Whisper transcription,
       and file storage. Returns 200 even when degraded (so load balancers don't kill
       it), 503 only if the system is truly unhealthy and cannot serve any requests.
@@ -32,23 +33,16 @@ health:
                     database:
                       status: "healthy"
                       response_time_ms: 2
-                    ollama:
+                    llm:
                       status: "healthy"
                       response_time_ms: 15
-                      model_loaded: "llama3:8b"
-                      ollama_version: "0.3.0"
+                      provider: "ollama"
+                      model: "llama3:8b"
+                      external: false
+                      probed: true
                       models_available:
-                        - name: "llama3:8b"
-                          size_gb: 4.7
-                          quantization: "Q4_K_M"
-                          loaded: true
-                        - name: "mistral:7b"
-                          size_gb: 4.1
-                          quantization: "Q4_0"
-                          loaded: false
-                      current_load:
-                        active_requests: 1
-                        queued_requests: 0
+                        - "llama3:8b"
+                        - "mistral:7b"
                     whisper:
                       status: "healthy"
                       response_time_ms: 10
@@ -65,13 +59,14 @@ health:
                     database:
                       status: "healthy"
                       response_time_ms: 2
-                    ollama:
+                    llm:
                       status: "degraded"
                       response_time_ms: 5000
-                      detail: "High latency model may be loading"
-                      current_load:
-                        active_requests: 3
-                        queued_requests: 2
+                      provider: "ollama"
+                      model: "llama3:8b"
+                      external: false
+                      probed: true
+                      detail: "High latency, the model may still be loading"
                     whisper:
                       status: "unhealthy"
                       detail: "Whisper model not loaded"
@@ -92,16 +87,20 @@ health:
                 database:
                   status: "unhealthy"
                   detail: "Connection refused"
-                ollama:
+                llm:
                   status: "unhealthy"
+                  provider: "ollama"
+                  model: "llama3:8b"
+                  external: false
+                  probed: true
                   detail: "Connection refused"
 
 schema_incident:
   get:
     operationId: getIncidentSchema
-    summary: Get the canonical FireForm JSON Schema
+    summary: Get the incident contract as a JSON Schema
     description: |
-      Returns the full canonical FireForm incident JSON Schema (JSON Schema
+      Returns the full incident contract as a JSON Schema document (JSON Schema
       draft-07). Clients can use this to validate incident data locally before
       submitting. This is a schema-as-API pattern for interoperability.
     tags:
@@ -113,21 +112,99 @@ schema_incident:
           application/json:
             schema:
               type: object
-              description: JSON Schema draft-07 document for the canonical incident model
+              description: JSON Schema draft-07 document for the incident contract
             example:
               $schema: "http://json-schema.org/draft-07/schema#"
-              title: "FireForm Canonical Incident"
+              title: "FireForm Incident Contract"
               type: "object"
               properties:
                 schema_version:
                   type: "string"
+
+schema_fields:
+  get:
+    operationId: searchSchemaFields
+    summary: Search or list the incident-contract field catalog
+    description: |
+      Returns the flattened, searchable catalog of every leaf field in the
+      incident contract: dotted path, type, section, description, enum values,
+      aliases and PII flag. The catalog is generated from the contract itself,
+      so it always matches the running schema version.
+
+      The catalog (paths, types, descriptions, aliases, PII flags) is built
+      by flattening incident-contract.yaml at startup; aliases come from each
+      field's x-aliases entry in that file. The contract is the single source
+      of truth, nothing is duplicated in code, and a schema upgrade updates
+      search and suggestions automatically.
+
+      Without `q` the full catalog is returned; the editor can cache it for
+      the whole session since it only changes with a schema upgrade and
+      filter locally as the user types. With `q` the server ranks matches
+      with plain fuzzy scoring. No LLM is involved, results are deterministic
+      and instant. Ranking order, best first: exact field-name match, exact
+      alias match, field-name prefix, alias prefix, token-based fuzzy match
+      on name and aliases, word match in the description. Ties break toward
+      the shorter path. Short queries stay usable because name and alias hits
+      always outrank description-only hits.
+
+      This powers two things: the type-ahead mapping picker in the template
+      editor, and the automatic mapping suggestions produced after commonforms
+      field detection (same index, same scorer).
+    tags:
+      - system
+    parameters:
+      - name: q
+        in: query
+        required: false
+        description: Search text. Matches field names, aliases and descriptions.
+        schema:
+          type: string
+      - name: section
+        in: query
+        required: false
+        description: Restrict results to one top-level contract section
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          default: 20
+          maximum: 100
+    responses:
+      "200":
+        description: Ranked matches, or the full catalog when q is omitted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/template-record.yaml#/SchemaFieldSearchResponse"
+            example:
+              query: "zip"
+              total: 2
+              schema_version: "1.1.0"
+              fields:
+                - path: "location.postal_code"
+                  label: "Postal code"
+                  field_type: "string"
+                  section: "location"
+                  aliases: ["zip", "zipcode", "pincode"]
+                  pii: false
+                  score: 0.97
+                - path: "persons_involved[].address"
+                  label: "Person address"
+                  field_type: "string"
+                  section: "persons_involved"
+                  description: "Owner, occupant or other party's address"
+                  pii: true
+                  score: 0.41
 
 schema_versions:
   get:
     operationId: getSchemaVersions
     summary: Get schema version history
     description: |
-      Returns the version history of the canonical FireForm incident schema,
+      Returns the version history of the incident contract,
       including changelogs and whether each version introduced breaking changes.
       Useful for clients tracking schema evolution across FireForm updates.
     tags:
@@ -148,5 +225,5 @@ schema_versions:
                 breaking_changes: true
               - version: "1.0.0"
                 released_at: "2024-01-01T00:00:00Z"
-                changelog: "Initial canonical schema with NFIRS support."
+                changelog: "Initial incident contract with NFIRS support."
                 breaking_changes: false

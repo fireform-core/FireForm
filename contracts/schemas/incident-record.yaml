@@ -1,7 +1,22 @@
 # Incident management schemas
+#
+# IncidentRecord is the Postgres row that OWNS the JSONB incident contract,
+# the single store of incident data. A draft incident row is created
+# automatically when extraction completes; review corrections (PATCH
+# /extract) write into this row's document, and form generation reads from
+# it by incident_id. Nothing else (extractions included) keeps a copy.
+# The analytics block holds stats promoted out of the JSONB so long-period
+# queries (monthly/annual counts, response-time trends, loss totals) run on
+# indexed columns without digging into the document. Every analytics field is
+# nullable and recomputed server-side from the contract whenever the document
+# changes; clients never write them directly.
 
 CreateIncidentRequest:
   type: object
+  description: Finalizes the draft incident that was auto-created when the
+    extraction completed, assigning the department's incident number and tags.
+    It does not create a second row; the extract_id resolves to the existing
+    draft.
   required:
     - extract_id
   properties:
@@ -54,10 +69,22 @@ IncidentRecord:
     incident_type:
       type: string
       nullable: true
-    incident_date:
-      type: string
-      format: date
+      description: Primary incident subcategory as free text
+    incident_category:
+      allOf:
+        - $ref: "../schemas/enums.yaml#/IncidentCategory"
       nullable: true
+      description: Primary incident category, promoted for grouping
+    incident_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: When the incident happened, promoted for date-range queries
+        and sorting. Derived from the contract on every document change, using
+        incident.alarm_datetime, falling back to incident.start_datetime,
+        then dispatch.call_received_datetime.
+    analytics:
+      $ref: "#/IncidentAnalytics"
     forms_generated:
       type: array
       items:
@@ -87,6 +114,70 @@ IncidentRecord:
       type: string
       format: date-time
       nullable: true
+
+IncidentAnalytics:
+  type: object
+  description: |
+    Read-only stats promoted from the incident contract into queryable
+    columns. Recomputed server-side on every contract change.
+  properties:
+    city:
+      type: string
+      nullable: true
+    state:
+      type: string
+      nullable: true
+      description: State, province or region
+    country:
+      type: string
+      nullable: true
+      description: ISO 3166-1 alpha-2
+    civilian_injuries:
+      type: integer
+      nullable: true
+    civilian_fatalities:
+      type: integer
+      nullable: true
+    responder_injuries:
+      type: integer
+      nullable: true
+    responder_fatalities:
+      type: integer
+      nullable: true
+    people_rescued:
+      type: integer
+      nullable: true
+    people_evacuated:
+      type: integer
+      nullable: true
+    structures_destroyed:
+      type: integer
+      nullable: true
+    area_burned_ha:
+      type: number
+      nullable: true
+    total_loss_amount:
+      type: number
+      nullable: true
+      description: property_loss + contents_loss from the contract
+    total_loss_currency:
+      type: string
+      nullable: true
+      description: ISO 4217
+    call_to_arrival_seconds:
+      type: integer
+      nullable: true
+      description: Call received (or alarm) to first arrival
+    turnout_seconds_first_unit:
+      type: integer
+      nullable: true
+    travel_seconds_first_unit:
+      type: integer
+      nullable: true
+    on_scene_duration_seconds:
+      type: integer
+      nullable: true
+      description: First arrival to last unit cleared
 
 IncidentRecordFull:
   description: Full incident record with linked extraction and forms
@@ -137,9 +228,19 @@ IncidentListResponse:
           incident_type:
             type: string
             nullable: true
-          incident_date:
+          incident_category:
+            allOf:
+              - $ref: "../schemas/enums.yaml#/IncidentCategory"
+            nullable: true
+          incident_datetime:
             type: string
-            format: date
+            format: date-time
+            nullable: true
+          city:
+            type: string
+            nullable: true
+          country:
+            type: string
             nullable: true
           forms_count:
             type: integer

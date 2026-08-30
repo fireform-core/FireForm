@@ -23,6 +23,10 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: fireform-ollama
+    environment:
+      # The server side of the extraction worker's parallelism. Both read the
+      # same variable so they cannot drift apart.
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-4}
     ports:
       - "127.0.0.1:11434:11434"
     volumes:
@@ -96,14 +100,21 @@ services:
       - fireform_uploads:/data/uploads
     ports:
       - "${APP_PORT:-8000}:8000"
+    # Everything in the env file reaches the container, so a new setting works
+    # without being listed twice. The block below still wins where a container
+    # needs a different value than the host (service names, data dirs).
+    env_file:
+      - ../.env.dev
     environment:
       - PYTHONUNBUFFERED=1
       - CUDA_VISIBLE_DEVICES=
       - PYTHONPATH=/app
       - DATABASE_URL=postgresql://fireform:fireform@postgres:5432/fireform
       - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
-      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-300}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-600}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:1.5b}
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-4}
+      - OLLAMA_MAX_TOKENS=${OLLAMA_MAX_TOKENS:-1200}
       - WHISPER_HOST=${WHISPER_HOST:-http://whisper:9000}
       - FIREFORM_DATA_DIR=/data/uploads
       - FIREFORM_TEMPLATE_DIR=/data/uploads
@@ -130,13 +141,17 @@ services:
     volumes:
       - ../..:/app
       - fireform_uploads:/data/uploads
+    env_file:
+      - ../.env.dev
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
       - DATABASE_URL=postgresql://fireform:fireform@postgres:5432/fireform
       - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
-      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-300}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-600}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:1.5b}
+      - OLLAMA_NUM_PARALLEL=${OLLAMA_NUM_PARALLEL:-4}
+      - OLLAMA_MAX_TOKENS=${OLLAMA_MAX_TOKENS:-1200}
       - FIREFORM_DATA_DIR=/data/uploads
       - FIREFORM_TEMPLATE_DIR=/data/uploads
       - CELERY_BROKER_URL=redis://redis:6379/0

@@ -6,7 +6,7 @@ job_by_id:
     operationId: getJobStatus
     summary: Get async job status
     description: |
-      Universal job status endpoint for any asynchronous operation in FireForm —
+      Universal job status endpoint for any asynchronous operation in FireForm
       transcription, LLM extraction, form generation, and report generation.
       Returns the current status, progress percentage, and a result URL when
       the job completes. Poll this endpoint for long-running operations.

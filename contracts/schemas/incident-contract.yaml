@@ -1,67 +1,520 @@
-# Canonical FireForm Incident Schema
-# This is the master superset schema single source of truth for all downstream forms
+# FireForm Incident Contract
+#
+# Master superset schema, single source of truth for all downstream forms.
+# Built from a survey of NERIS, NFIRS 5.0, ICS-209, NEMSIS, OSHA 301, UK IRS,
+# Australia AIRS, Canada NFID / Ontario SIR, CTIF, UN SSIRS, and Indian state
+# fire service proformas (see incident_contract_research.md).
+#
+# Conventions:
+# - One contract field per concept. Form mappers rename per target form.
+# - Physical quantities are stored in SI units, unit in the field name
+#   (_c, _kph, _m, _m2, _ha, _l, _km). Mappers convert for the target form.
+# - Money is always {amount, currency} (ISO 4217).
+# - Standard-specific codes attach through CodeRef arrays {scheme, code},
+#   never as per-standard fields.
+# - Absent field = unknown / not extracted. Enums carry explicit `none` and
+#   `undetermined` members where source standards distinguish them.
+# - Fields holding personal data are marked x-pii: true.
+# - Fields carry x-aliases: alternate names a user might type when searching
+#   for the field (synonyms, abbreviations, regional terms - "zip" and
+#   "pincode" for postal_code). The schema-field catalog behind
+#   GET /api/v1/schema/fields and the mapping suggester load them from this
+#   file at startup; the contract is the only place aliases are defined,
+#   nothing re-declares them in code. Seeded on the high-traffic fields;
+#   grows over time (including non-English terms) without schema changes.
+# - All date-times are RFC 3339 with UTC offset; incident.timezone holds the
+#   IANA zone for local wall-clock rendering.
+# - Each top-level chunk carries x-extraction, telling the extraction worker
+#   how to treat it: core runs on every incident, gated runs only when the
+#   narrative shows evidence for it, background runs after the rest, manual is
+#   never sent to the model (signatures, record ids, authored reflections).
+#   Gated chunks list the evidence words in x-triggers, and x-extraction-priority
+#   orders chunks inside a tier. The worker reads all three from this file at
+#   startup, so retuning the router means editing the contract, not the code.
 
 IncidentContract:
   type: object
   description: |
-    The canonical FireForm incident data model. This is the superset schema containing
-    every field any downstream form could need. Form-specific mappers select only the
-    relevant fields for each agency template.
+    The FireForm incident contract. This is the superset schema
+    containing every field any downstream form could need. Form-specific
+    mappers select only the relevant fields for each agency template.
+    Stored as a single JSONB document; queryable stats are promoted to
+    IncidentRecord columns server-side.
   properties:
     schema_version:
+      x-extraction: manual
       type: string
       description: Schema version identifier
       example: "1.1.0"
     schema_name:
+      x-extraction: manual
       type: string
       description: Schema name identifier
       enum:
         - fireform_incident_contract
 
     extraction_metadata:
+      x-extraction: manual
       $ref: "#/ExtractionMetadata"
     report_metadata:
+      x-extraction: manual
       $ref: "#/ReportMetadata"
     incident:
+      x-extraction: core
+      x-extraction-priority: 1
       $ref: "#/Incident"
+    dispatch:
+      x-extraction: core
+      x-extraction-priority: 2
+      $ref: "#/Dispatch"
     location:
+      x-extraction: core
+      x-extraction-priority: 3
       $ref: "#/Location"
+    actions_taken:
+      x-extraction: core
+      x-extraction-priority: 5
+      $ref: "#/ActionsTaken"
+    responding_agencies:
+      x-extraction: core
+      x-extraction-priority: 6
+      $ref: "#/RespondingAgencies"
+    units:
+      x-extraction: core
+      x-extraction-priority: 4
+      type: array
+      description: Per-unit (apparatus/resource) response records with timestamps
+      items:
+        $ref: "#/UnitResponse"
+    resources_summary:
+      x-extraction: background
+      $ref: "#/ResourcesSummary"
     fire:
+      x-extraction: gated
+      x-triggers:
+        - fire
+        - fires
+        - flame
+        - flames
+        - smoke
+        - burn
+        - burning
+        - burned
+        - blaze
+        - arson
+        - ignition
+        - ignited
+        - ember
+        - embers
+        - smoldering
       $ref: "#/Fire"
-    wildland:
-      $ref: "#/Wildland"
+    explosion:
+      x-extraction: gated
+      x-triggers:
+        - explosion
+        - explosive
+        - exploded
+        - blast
+        - detonation
+        - detonated
+        - bleve
+        - ruptured
+        - backdraft
+      $ref: "#/Explosion"
+    risk_reduction:
+      x-extraction: background
+      $ref: "#/RiskReduction"
     structure:
+      x-extraction: gated
+      x-triggers:
+        - structure
+        - building
+        - house
+        - home
+        - apartment
+        - residence
+        - roof
+        - floor
+        - basement
+        - attic
+        - warehouse
+        - garage
+        - unit
+        - storey
+        - story
+        - wall
+        - ceiling
       $ref: "#/Structure"
+    wildland:
+      x-extraction: gated
+      x-triggers:
+        - wildland
+        - wildfire
+        - brush
+        - grass
+        - grassland
+        - forest
+        - woods
+        - vegetation
+        - acre
+        - acres
+        - hectare
+        - hectares
+        - timber
+        - canopy
+        - crown
+        - fireline
+        - containment
+      $ref: "#/Wildland"
+    exposures:
+      x-extraction: gated
+      x-triggers:
+        - exposure
+        - exposures
+        - spread
+        - spreading
+        - adjacent
+        - neighboring
+        - neighbouring
+        - next door
+        - nearby structure
+      type: array
+      description: Properties beyond the origin affected by spread of the incident
+      items:
+        $ref: "#/Exposure"
     casualties:
+      x-extraction: gated
+      x-triggers:
+        - injured
+        - injury
+        - injuries
+        - victim
+        - victims
+        - fatality
+        - fatalities
+        - deceased
+        - died
+        - killed
+        - dead
+        - transported
+        - burns
+        - inhalation
+        - casualty
+        - casualties
+        - hurt
+        - unconscious
       $ref: "#/Casualties"
+    rescues:
+      x-extraction: gated
+      x-triggers:
+        - rescue
+        - rescued
+        - trapped
+        - extricate
+        - extrication
+        - extricated
+        - pulled out
+        - carried out
+        - ladder rescue
+        - confined space
+      type: array
+      description: Rescues and assisted evacuations, with or without injury
+      items:
+        $ref: "#/Rescue"
+    evacuation_displacement:
+      x-extraction: gated
+      x-triggers:
+        - evacuate
+        - evacuated
+        - evacuation
+        - displaced
+        - displacement
+        - shelter
+        - sheltered
+        - relocated
+        - red cross
+        - self-evacuated
+      $ref: "#/EvacuationDisplacement"
     ems:
+      x-extraction: gated
+      x-triggers:
+        - ems
+        - ambulance
+        - medic
+        - medics
+        - paramedic
+        - patient
+        - patients
+        - cpr
+        - triage
+        - hospital
+        - vitals
+        - oxygen
+        - defibrillator
+        - als
+        - bls
+        - treated
       $ref: "#/EMS"
     hazmat:
+      x-extraction: gated
+      x-triggers:
+        - hazmat
+        - chemical
+        - chemicals
+        - spill
+        - spilled
+        - leak
+        - leaking
+        - fumes
+        - placard
+        - decon
+        - decontamination
+        - vapor
+        - vapour
+        - propane
+        - cylinder
+        - tanker
+        - corrosive
+        - toxic
       $ref: "#/Hazmat"
-    arson:
-      $ref: "#/Arson"
-    responding_agencies:
-      $ref: "#/RespondingAgencies"
-    resources_deployed:
-      $ref: "#/ResourcesDeployed"
+    emerging_hazards:
+      x-extraction: gated
+      x-triggers:
+        - battery
+        - batteries
+        - lithium
+        - ev
+        - electric vehicle
+        - solar
+        - solar panel
+        - energy storage
+        - charger
+        - charging
+        - thermal runaway
+      type: array
+      description: Battery, EV, solar and other stored-energy hazards (NERIS)
+      items:
+        $ref: "#/EmergingHazard"
+    investigation:
+      x-extraction: gated
+      x-triggers:
+        - investigation
+        - investigator
+        - investigated
+        - cause
+        - origin
+        - arson
+        - fire marshal
+        - evidence
+        - police
+        - suspicious
+        - incendiary
+      $ref: "#/Investigation"
+    persons_involved:
+      x-extraction: gated
+      x-triggers:
+        - owner
+        - occupant
+        - occupants
+        - resident
+        - residents
+        - tenant
+        - witness
+        - witnesses
+        - driver
+        - landlord
+        - homeowner
+      type: array
+      description: Owners, occupants and other parties connected to the incident
+      items:
+        $ref: "#/PersonInvolved"
+    mobile_property:
+      x-extraction: gated
+      x-triggers:
+        - vehicle
+        - vehicles
+        - car
+        - cars
+        - truck
+        - van
+        - suv
+        - motorcycle
+        - boat
+        - vessel
+        - trailer
+        - bus
+        - license plate
+        - tractor
+      type: array
+      description: Vehicles, vessels and other mobile property involved
+      items:
+        $ref: "#/MobileProperty"
+    losses:
+      x-extraction: gated
+      x-triggers:
+        - loss
+        - losses
+        - damage
+        - damages
+        - destroyed
+        - cost
+        - estimated
+        - insured
+        - insurance
+        - value
+        - worth
+        - dollars
+        - total loss
+      $ref: "#/Losses"
     weather:
+      x-extraction: gated
+      x-triggers:
+        - weather
+        - wind
+        - windy
+        - gust
+        - rain
+        - raining
+        - snow
+        - storm
+        - temperature
+        - humidity
+        - dry
+        - fog
+        - heat
+        - freezing
       $ref: "#/Weather"
     environmental_impact:
+      x-extraction: gated
+      x-triggers:
+        - runoff
+        - contamination
+        - contaminated
+        - waterway
+        - river
+        - creek
+        - stream
+        - soil
+        - pollution
+        - wildlife
+        - groundwater
+        - drain
       $ref: "#/EnvironmentalImpact"
     infrastructure_impact:
+      x-extraction: gated
+      x-triggers:
+        - power
+        - powerline
+        - electric
+        - utility
+        - utilities
+        - outage
+        - road closed
+        - road closure
+        - water main
+        - gas line
+        - bridge
+        - rail
+        - traffic
+        - telecom
       $ref: "#/InfrastructureImpact"
     near_miss_and_safety:
+      x-extraction: gated
+      x-triggers:
+        - near miss
+        - mayday
+        - close call
+        - ppe
+        - scba
+        - rit
+        - collapse
+        - safety officer
+        - firefighter injured
+        - accountability
       $ref: "#/NearMissAndSafety"
+    situation_status:
+      x-extraction: core
+      x-extraction-priority: 7
+      $ref: "#/SituationStatus"
     lessons_learned:
+      x-extraction: manual
       $ref: "#/LessonsLearned"
     follow_up:
+      x-extraction: manual
       $ref: "#/FollowUp"
     periodic_reporting:
+      x-extraction: background
       $ref: "#/PeriodicReporting"
     attachments:
+      x-extraction: manual
       $ref: "#/Attachments"
+    custom_fields:
+      x-extraction: manual
+      type: object
+      description: |
+        Agency-local fields with no contract home (NFIRS special studies,
+        IRS local options and similar). Keys are agency-defined strings,
+        values are scalars. Passed through to mappers untouched.
+      additionalProperties: true
 
-# --- Sub-schemas ---
+# --- Shared value types ---
+
+Money:
+  type: object
+  description: Monetary amount with ISO 4217 currency code
+  properties:
+    amount:
+      type: number
+    currency:
+      type: string
+      description: ISO 4217 code
+      example: "USD"
+
+CodeRef:
+  type: object
+  description: A code from a named external coding scheme
+  properties:
+    scheme:
+      type: string
+      description: Coding scheme identifier
+      enum: [neris, nfirs, uk_irs, airs, ontario_sir, nemsis, nibrs, un_ssirs, local, other]
+    code:
+      type: string
+    label:
+      type: string
+      nullable: true
+
+Quantity:
+  type: object
+  description: Value with explicit reported unit, used where the unit itself is data (hazmat)
+  properties:
+    value:
+      type: number
+    unit:
+      type: string
+      description: Unit as reported (e.g. l, kg, gal, lb, m3)
+
+PresenceStatus:
+  type: string
+  enum: [present, absent, undetermined]
+
+OperationStatus:
+  type: string
+  description: Whether a protection system operated when exposed to the incident
+  enum: [operated, failed_to_operate, fire_too_small_to_activate, not_reached_by_fire, undetermined]
+
+Coordinates:
+  type: object
+  properties:
+    latitude:
+      type: number
+    longitude:
+      type: number
+    accuracy_meters:
+      type: number
+      nullable: true
+
+# --- Extraction metadata ---
 
 ExtractionMetadata:
   type: object
@@ -85,19 +538,17 @@ ExtractionMetadata:
       type: number
       minimum: 0
       maximum: 1
-      description: Overall confidence score from the LLM extraction (0.0–1.0)
+      description: Overall confidence score from the LLM extraction (0.0-1.0)
     completeness:
       $ref: "#/Completeness"
-    applicable_forms:
-      type: array
-      items:
-        $ref: "../schemas/enums.yaml#/FormType"
 
 Completeness:
   type: object
   description: |
-    Tells the system which forms can be fully auto-generated vs which need
-    manual review. Recalculated server-side after every PATCH /extract.
+    Extraction-quality summary, recalculated server-side after every
+    PATCH /extract. Per-template readiness is not stored here; it is
+    computed live by GET /extract/{extract_id}/readiness against the
+    registered templates.
   properties:
     overall_percent:
       type: integer
@@ -118,18 +569,8 @@ Completeness:
       items:
         type: string
       description: JSON paths of fields that were inferred (not explicitly stated)
-    forms_fully_generatable:
-      type: array
-      items:
-        $ref: "../schemas/enums.yaml#/FormType"
-    forms_needing_review:
-      type: array
-      items:
-        $ref: "../schemas/enums.yaml#/FormType"
-    forms_missing_data:
-      type: array
-      items:
-        $ref: "../schemas/enums.yaml#/FormType"
+
+# --- Report metadata ---
 
 ReportMetadata:
   type: object
@@ -139,21 +580,39 @@ ReportMetadata:
       example: "FF-2024-CA-0157"
     incident_number:
       type: string
+      description: Department's own incident number
       example: "CA-SQF-2024-0421"
+      x-aliases: [incident no, report number, call number, event number, cad number]
+    external_ids:
+      type: array
+      description: Identifiers for this incident in external systems (CAD event, IRWIN, state registry, partner agency)
+      items:
+        type: object
+        properties:
+          scheme:
+            type: string
+            example: "irwin"
+          value:
+            type: string
     report_date:
       type: string
       format: date
+      x-aliases: [date of report, form date, prepared date]
     report_time:
       type: string
       format: time
+      x-aliases: [time of report]
     report_status:
       $ref: "../schemas/enums.yaml#/ReportStatus"
     reporting_unit:
       $ref: "#/ReportingUnit"
     prepared_by:
       type: array
+      description: Member(s) making the report
       items:
         $ref: "#/Personnel"
+    officer_in_charge:
+      $ref: "#/Personnel"
     reviewed_by:
       type: array
       items:
@@ -176,6 +635,7 @@ ReportingUnit:
   properties:
     station_name:
       type: string
+      x-aliases: [fire station, station]
     station_id:
       type: string
     agency_name:
@@ -191,14 +651,21 @@ Personnel:
   properties:
     name:
       type: string
+      x-pii: true
     badge_number:
       type: string
+      x-pii: true
     rank:
       type: string
     role:
       type: string
+    assignment:
+      type: string
+      nullable: true
     contact_number:
       type: string
+      nullable: true
+      x-pii: true
     signature_captured:
       type: boolean
 
@@ -207,8 +674,10 @@ Reviewer:
   properties:
     name:
       type: string
+      x-pii: true
     badge_number:
       type: string
+      x-pii: true
     rank:
       type: string
     role:
@@ -219,25 +688,106 @@ Reviewer:
     approved:
       type: boolean
 
+# --- Incident core ---
+
 Incident:
   type: object
   properties:
     name:
       type: string
       description: Human-readable incident name
+      x-aliases: [incident name, fire name, incident title]
     types:
       type: array
       items:
         $ref: "#/IncidentType"
+    special_modifiers:
+      type: array
+      description: Magnitude or class tags qualifying the incident (NERIS special modifiers)
+      items:
+        type: string
+      example: ["mass_casualty", "major_incident"]
+    false_alarm:
+      type: object
+      description: Populated when the final type is a false alarm
+      properties:
+        reason:
+          type: string
+          enum: [malicious, good_intent, automatic_system_fault, automatic_system_accidental, human_error, undetermined, other]
+          nullable: true
+        reason_description:
+          type: string
+          nullable: true
+    special_service_type:
+      type: string
+      nullable: true
+      description: Non-fire service call subtype (lift release, lock-in, flooding, animal assist, co-response)
+    chimney_fire:
+      type: boolean
+      nullable: true
+      description: Flame confined to a chimney (UK IRS 3.9)
+    timezone:
+      type: string
+      nullable: true
+      description: IANA timezone of the incident, for local wall-clock rendering
+      example: "America/Los_Angeles"
+    # Discovery (UK IRS 5.2-5.4, arson relevance)
+    discovered_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    how_discovered:
+      type: string
+      nullable: true
+      description: How the fire or emergency was first discovered
+    delay_ignition_to_discovery:
+      type: string
+      enum: [immediate, under_5_min, 5_to_30_min, over_30_min, undetermined]
+      nullable: true
+    delay_discovery_to_call:
+      type: string
+      enum: [immediate, under_5_min, 5_to_30_min, over_30_min, undetermined]
+      nullable: true
+    # Incident-level timeline (per-unit times live in units[])
     start_datetime:
       type: string
       format: date-time
+      description: Estimated ignition or emergency start
+      x-aliases: [ignition time, time of fire, start time, date of incident, incident date, incident time]
     alarm_datetime:
       type: string
       format: date-time
+      description: Department alerted / alarm time
+      x-aliases: [alarm time, time of call, call time, reported time, notification time]
     first_arrival_datetime:
       type: string
       format: date-time
+      description: First unit on scene
+      x-aliases: [arrival time, on scene time, time of arrival, attendance time]
+    command_established_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    sizeup_complete_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    water_on_fire_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    primary_search_begin_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    primary_search_complete_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    knocked_down_datetime:
+      type: string
+      format: date-time
+      nullable: true
     containment_datetime:
       type: string
       format: date-time
@@ -246,16 +796,75 @@ Incident:
       type: string
       format: date-time
       nullable: true
+      x-aliases: [under control, control time]
+    extrication_complete_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    suppression_complete_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    loss_stopped_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    stop_message_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: Stop / situation-under-control message to control room (UK IRS 2.5)
     cleared_datetime:
       type: string
       format: date-time
       nullable: true
+      description: Last unit cleared the scene
+      x-aliases: [last unit cleared, departure time, left scene, return time]
+    closed_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: Incident administratively closed
     total_duration_hours:
       type: number
       nullable: true
+      x-aliases: [duration, time on scene, total time]
+    # Response context
+    alarm_level:
+      type: integer
+      nullable: true
+      description: Number of alarms / escalation level
+      x-aliases: [number of alarms, alarms]
+    shift_or_platoon:
+      type: string
+      nullable: true
+    district:
+      type: string
+      nullable: true
+      description: Response district or box area
+    people_present:
+      type: boolean
+      nullable: true
+      description: Whether people were present at the location at the time
+    animals_rescued:
+      type: integer
+      nullable: true
+    animals_deceased:
+      type: integer
+      nullable: true
+    # Narratives
     narrative:
       type: string
       description: Free text summary of the incident
+      x-aliases: [remarks, comments, description of incident, summary, details]
+    narrative_impediment:
+      type: string
+      nullable: true
+      description: Obstacles that impacted the response (NERIS)
+    narrative_outcome:
+      type: string
+      nullable: true
+      description: Final disposition of the incident (NERIS)
     raw_transcript:
       type: string
       description: Original voice or text input verbatim
@@ -265,51 +874,163 @@ IncidentType:
   properties:
     primary:
       type: boolean
+      description: Only one entry may be primary
     category:
       $ref: "../schemas/enums.yaml#/IncidentCategory"
     subcategory:
       type: string
-    neris_code:
+      description: Free-form specific type within the category
+      x-aliases: [incident type, call type, nature of call, type of incident]
+    codes:
+      type: array
+      description: This type expressed in external coding schemes
+      items:
+        $ref: "#/CodeRef"
+
+# --- Dispatch / call handling ---
+
+Dispatch:
+  type: object
+  description: Call handling data, usually pre-populated from CAD/PSAP when available
+  properties:
+    psap_id:
       type: string
-      description: NERIS incident type code (replaces NFIRS as of Feb 2026)
-    nfirs_code:
+      nullable: true
+      description: Dispatch center / PSAP identifier
+    dispatch_center:
       type: string
-      description: Legacy NFIRS incident type code
+      nullable: true
+      description: Dispatch center name
+    cad_event_id:
+      type: string
+      nullable: true
+    call_received_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: Call arrived at PSAP or department dispatch center
+      x-aliases: [call received, time of call, call time]
+    call_answered_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    call_created_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: CAD event created
+    first_unit_dispatched_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    call_origin:
+      type: string
+      enum: [person_landline, person_mobile, person_in_person, automatic_alarm_originator, automatic_alarm_monitoring_center, other_agency, police, ambulance, coastguard, other_fire_service, other, undetermined]
+      nullable: true
+    automatic_alarm:
+      type: boolean
+      nullable: true
+      description: Call originated from an automatic alarm system
+    incident_type_at_dispatch:
+      type: string
+      nullable: true
+      description: Incident type as received by the control room; may differ from final type
+    determinate_code:
+      type: string
+      nullable: true
+      description: Output code from the dispatch protocol (e.g. EMD/ProQA)
+    priority_at_call:
+      type: integer
+      nullable: true
+      minimum: 1
+      maximum: 5
+    dispatcher_comments:
+      type: array
+      items:
+        type: object
+        properties:
+          comment:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+            nullable: true
+
+# --- Location ---
 
 Location:
   type: object
   properties:
+    location_type:
+      type: string
+      enum: [street_address, intersection, milepost_or_highway, coordinates_only, unaddressable_area, water_body, other]
+      nullable: true
     address:
       type: string
       nullable: true
+      description: Full street address as one line
+      x-aliases: [street address, location, address of incident, premises]
+    cross_streets:
+      type: array
+      description: Nearest cross street(s)
+      x-aliases: [cross street, intersection, nearest junction]
+      items:
+        type: string
     nearest_landmark:
       type: string
       nullable: true
-    nearest_town:
+    city:
       type: string
       nullable: true
+      description: City, town or nearest settlement
+      x-aliases: [town, municipality, village]
+    district_or_zone:
+      type: string
+      nullable: true
+      description: Administrative district, borough or fire zone
+      x-aliases: [ward, zone, fire zone]
     county:
       type: string
       nullable: true
+      x-aliases: [borough, parish]
     state:
       type: string
       nullable: true
+      description: State, province or region
+      x-aliases: [province, region]
     country:
       type: string
       nullable: true
+      description: ISO 3166-1 alpha-2 code preferred
+      example: "US"
     postal_code:
       type: string
       nullable: true
+      x-aliases: [zip, zip code, zipcode, pincode, pin code, postcode]
+    census_area:
+      type: string
+      nullable: true
+      description: Census tract or national statistical area code
     coordinates:
       $ref: "#/Coordinates"
     ignition_point_coordinates:
-      $ref: "#/CoordinatesBasic"
-    elevation_range_ft:
-      type: string
+      $ref: "#/Coordinates"
+    grid_reference:
+      type: object
+      description: National grid reference where used instead of lat/long
+      properties:
+        scheme:
+          type: string
+          enum: [usng, mgrs, utm, osgb, other]
+        value:
+          type: string
+    elevation_m:
+      type: number
       nullable: true
     legal_description:
       type: string
       nullable: true
+      description: Township / section / range or equivalent cadastral reference
     jurisdiction:
       type: object
       properties:
@@ -321,50 +1042,386 @@ Location:
           type: boolean
         tribal:
           type: boolean
+    ownership_at_origin:
+      type: string
+      enum: [private, city_or_local, county, state_or_province, federal, tribal, military, foreign, other, undetermined]
+      nullable: true
+      description: Ownership of the property at the point of origin
+    population_density:
+      type: string
+      enum: [urban, suburban, rural, wilderness]
+      nullable: true
     property_type:
       type: string
       nullable: true
+      x-aliases: [type of property, premises type]
     property_use:
       type: string
       nullable: true
-    dispatch_center:
+      description: Use of the property at the time (residential, commercial, school...)
+      x-aliases: [occupancy, occupancy type, use of property]
+    property_use_codes:
+      type: array
+      description: Property use in external coding schemes (NFIRS 3-digit, NERIS location use)
+      items:
+        $ref: "#/CodeRef"
+    mixed_use:
       type: string
       nullable: true
+      description: Mixed-use classification when the property has multiple uses
+    over_border:
+      type: object
+      description: Incident on another service's ground (UK IRS 1.5-1.7)
+      properties:
+        is_over_border:
+          type: boolean
+        other_service_name:
+          type: string
+          nullable: true
+        other_service_incident_number:
+          type: string
+          nullable: true
 
-Coordinates:
+# --- Actions taken ---
+
+ActionsTaken:
+  type: object
+  description: What responders did on scene. Every reporting standard requires this.
+  properties:
+    actions:
+      type: array
+      items:
+        type: object
+        properties:
+          category:
+            type: string
+            enum: [fire_suppression, search, rescue, ems_care, extrication, hazmat_mitigation, ventilation, forcible_entry, salvage_overhaul, water_supply, exposure_protection, evacuation, command_control, investigation, public_assist, standby, information_referral, systems_restoration, other]
+          description:
+            type: string
+            nullable: true
+          codes:
+            type: array
+            items:
+              $ref: "#/CodeRef"
+    no_action_reason:
+      type: string
+      nullable: true
+      description: Why no action was taken (canceled enroute, no hazard found...)
+
+# --- Response: agencies, units, resource totals ---
+
+RespondingAgencies:
   type: object
   properties:
-    latitude:
-      type: number
-    longitude:
-      type: number
-    accuracy_meters:
-      type: number
+    primary_agency:
+      type: string
+    all_agencies:
+      type: array
+      items:
+        $ref: "#/RespondingAgency"
+    mutual_aid_activated:
+      type: boolean
+      x-aliases: [mutual aid, aid given or received]
+    aid_direction:
+      type: string
+      enum: [given, received, both, none]
+      nullable: true
+    aid_type:
+      type: string
+      enum: [automatic, mutual, other, none]
+      nullable: true
+    non_fd_entities:
+      type: array
+      description: Non fire department entities that assisted (utility, red cross, public works)
+      items:
+        type: string
+    unified_command:
+      type: boolean
+    incident_commander:
+      type: object
+      properties:
+        name:
+          type: string
+          x-pii: true
+          x-aliases: [ic, incident commander, officer in charge, oic]
+        agency:
+          type: string
+        position:
+          type: string
+          nullable: true
 
-CoordinatesBasic:
+RespondingAgency:
   type: object
   properties:
-    latitude:
-      type: number
-    longitude:
-      type: number
+    agency_name:
+      type: string
+    agency_type:
+      type: string
+      description: fire, ems, police, forestry, military, utility, ngo, other
+    role:
+      type: string
+    personnel_count:
+      type: integer
+      nullable: true
+    incident_number_at_agency:
+      type: string
+      nullable: true
+      description: That agency's own incident number for cross-referencing
+
+UnitResponse:
+  type: object
+  description: One responding unit (apparatus or resource) and its timeline
+  properties:
+    unit_id:
+      type: string
+      description: Callsign or unit identifier
+      x-aliases: [callsign, apparatus id, unit number, appliance]
+    unit_name:
+      type: string
+      nullable: true
+    agency_name:
+      type: string
+      nullable: true
+    apparatus_type:
+      type: string
+      enum: [engine_pumper, ladder_aerial, quint, tanker_tender, brush_wildland, arff, dozer_plow, heavy_equipment, aircraft_fixed_wing, helicopter, boat, rescue_unit, usar_unit, hazmat_unit, ambulance_bls, ambulance_als, command_vehicle, support_unit, hand_crew, privately_owned, other]
+      nullable: true
+    use:
+      type: string
+      enum: [suppression, ems, rescue, hazmat, command, support, other]
+      nullable: true
+    personnel_count:
+      type: integer
+      nullable: true
+    personnel:
+      type: array
+      items:
+        type: object
+        properties:
+          personnel_id:
+            type: string
+            x-pii: true
+          name:
+            type: string
+            x-pii: true
+          rank:
+            type: string
+            nullable: true
+          role:
+            type: string
+            nullable: true
+    response_mode:
+      type: string
+      enum: [emergency_lights_siren, non_emergency, undetermined]
+      nullable: true
+    canceled_enroute:
+      type: boolean
+      nullable: true
+    dispatched_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    enroute_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    arrived_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    staged_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    at_patient_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    enroute_hospital_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    arrived_hospital_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    transfer_of_care_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    cleared_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    in_service_datetime:
+      type: string
+      format: date-time
+      nullable: true
+      description: Back available for calls
+    turnout_seconds:
+      type: integer
+      nullable: true
+      description: Computed, dispatched to enroute
+    travel_seconds:
+      type: integer
+      nullable: true
+      description: Computed, enroute to arrived
+    transport_mode:
+      type: string
+      enum: [emergency_lights_siren, non_emergency, undetermined]
+      nullable: true
+    hospital_destination:
+      type: string
+      nullable: true
+    actions_taken:
+      type: array
+      description: Actions by this unit, same categories as incident actions
+      items:
+        type: string
+
+ResourcesSummary:
+  type: object
+  description: Aggregate counts; per-unit detail lives in units[]
+  properties:
+    total_personnel:
+      type: integer
+      x-aliases: [personnel, manpower, firefighters on scene, staff count]
+    personnel_breakdown:
+      type: object
+      properties:
+        firefighters:
+          type: integer
+        officers:
+          type: integer
+        engineers_operators:
+          type: integer
+        ems_personnel:
+          type: integer
+        incident_command:
+          type: integer
+        support_staff:
+          type: integer
+    apparatus_counts:
+      type: object
+      description: Unit counts by primary use (NFIRS Basic G1)
+      properties:
+        suppression:
+          type: integer
+        ems:
+          type: integer
+        other:
+          type: integer
+    crew_types:
+      type: array
+      description: Wildland crew types deployed (hand crew type 1/2, engine crew...)
+      items:
+        type: string
+    counts_include_aid_received:
+      type: boolean
+      nullable: true
+
+# --- Fire ---
 
 Fire:
   type: object
   properties:
+    # Cause
     cause_category:
       type: string
+      enum: [intentional, unintentional, equipment_failure, act_of_nature, cause_under_investigation, undetermined, other]
       nullable: true
+      x-aliases: [cause, cause of fire, how the fire started, fire cause]
     cause_specific:
       type: string
       nullable: true
+    cause_codes:
+      type: array
+      items:
+        $ref: "#/CodeRef"
     cause_certainty:
       $ref: "../schemas/enums.yaml#/CauseCertainty"
     arson_suspected:
       type: boolean
+      x-aliases: [suspicious fire, deliberate, malicious]
+    # Ignition detail
+    area_of_origin:
+      type: string
+      nullable: true
+      description: Room or area where the fire began
+      x-aliases: [point of origin, seat of fire, where the fire started, origin]
+    heat_source:
+      type: string
+      nullable: true
+      description: What provided the heat that started the fire
+      x-aliases: [source of ignition, ignition source, source of heat]
+    ignition_power_source:
+      type: string
+      nullable: true
+      description: What powered the ignition source (mains, battery, gas, open flame)
+    item_first_ignited:
+      type: string
+      nullable: true
+      x-aliases: [first item ignited, what caught fire first]
     material_first_ignited:
       type: string
       nullable: true
+      x-aliases: [material ignited, first material]
+    multiple_seats_of_fire:
+      type: boolean
+      nullable: true
+      description: More than one independent point of origin (arson indicator)
+    human_factors:
+      type: array
+      description: Human factors contributing to ignition
+      items:
+        type: string
+        enum: [asleep, impaired_by_alcohol_or_drugs, unattended_person, mentally_disabled, physically_disabled, multiple_persons_involved, age_was_factor, other]
+    person_involved_age:
+      type: integer
+      nullable: true
+      description: Estimated age of person whose age was a factor
+    person_involved_sex:
+      type: string
+      nullable: true
+    contributing_factors:
+      type: array
+      description: Non-human factors contributing to ignition
+      items:
+        type: string
+    equipment_involved:
+      type: object
+      description: Equipment involved in ignition, if any
+      properties:
+        involved:
+          type: boolean
+        equipment_type:
+          type: string
+          nullable: true
+        brand:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        serial_number:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+        power_source:
+          type: string
+          nullable: true
+        portability:
+          type: string
+          enum: [portable, stationary]
+          nullable: true
+    on_site_materials:
+      type: array
+      description: Significant commercial/industrial/agricultural materials on the property
+      items:
+        type: string
+    # Fuel and behavior
     fuel_types:
       type: array
       items:
@@ -375,82 +1432,216 @@ Fire:
         type: string
     rate_of_spread:
       $ref: "../schemas/enums.yaml#/RateOfSpread"
-    flame_lengths_ft:
-      type: string
+    rate_of_spread_m_per_min:
+      type: number
       nullable: true
-    spotting_distance_miles:
+    flame_length_m:
+      type: number
+      nullable: true
+    spotting_distance_km:
       type: number
       nullable: true
     unusual_behaviors:
       type: array
       items:
         type: string
-    detector_present:
-      type: boolean
+    rapid_growth_cause:
+      type: string
       nullable: true
-    detector_operated:
-      type: boolean
-      nullable: true
-    suppression_system_present:
-      type: boolean
-      nullable: true
-    suppression_system_operated:
-      type: boolean
-      nullable: true
-    estimated_damage_usd:
-      type: number
-      nullable: true
-    contents_loss_usd:
-      type: number
-      nullable: true
+      description: Cause of any rapid fire growth (UK IRS 8.8)
+    fire_suppression_factors:
+      type: array
+      description: Factors that helped or hindered suppression
+      items:
+        type: string
+    # Suppression operations
+    suppression_operations:
+      $ref: "#/SuppressionOperations"
+    # Investigation need lives in investigation section
 
-Wildland:
+SuppressionOperations:
   type: object
   properties:
-    is_wildland_incident:
-      type: boolean
-    total_acres_burned:
+    water_supply_type:
+      type: string
+      enum: [pressurized_hydrant, rural_water_supply, tanker_shuttle, drafting_static_source, onboard_water_only, none_needed, other, undetermined]
+      nullable: true
+    water_used_l:
       type: number
       nullable: true
-    land_ownership_breakdown:
-      type: object
-      properties:
-        federal_acres:
-          type: number
-        state_acres:
-          type: number
-        private_acres:
-          type: number
-        tribal_acres:
-          type: number
-    percent_contained:
-      type: integer
-      minimum: 0
-      maximum: 100
-    fire_lines:
-      type: object
-      properties:
-        primary_line_miles:
-          type: number
-        secondary_line_miles:
-          type: number
-        dozer_line_miles:
-          type: number
-        hand_line_miles:
-          type: number
-    aerial_operations:
-      type: object
-      properties:
-        water_drops_gallons:
-          type: integer
-        retardant_drops_gallons:
-          type: integer
-        total_flight_hours:
-          type: number
-    containment_strategies:
+      x-aliases: [water used, gallons used, litres used]
+    extinguishing_agents:
       type: array
       items:
         type: string
+        enum: [water, foam, co2, dry_chemical, wet_chemical, halon_clean_agent, sand_earth, blanket_smothering, other]
+    suppression_appliances:
+      type: array
+      description: Appliances used for suppression (jets, hose reels, monitors, extinguishers)
+      items:
+        type: string
+    equipment_used:
+      type: array
+      description: Equipment used at the incident with counts (UK IRS 6.16-6.17)
+      items:
+        type: object
+        properties:
+          equipment_type:
+            type: string
+          count:
+            type: integer
+    ba_wearers_count:
+      type: integer
+      nullable: true
+      description: Breathing apparatus wearers
+      x-aliases: [breathing apparatus, ba count, scba]
+    firefighting_delay:
+      type: object
+      properties:
+        occurred:
+          type: boolean
+        reason:
+          type: string
+          nullable: true
+    public_action_before_arrival:
+      type: string
+      nullable: true
+      description: Main action taken by the public before responders arrived
+
+# --- Explosion ---
+
+Explosion:
+  type: object
+  description: Explosion or overpressure event, with or without fire (UK IRS 8.10-8.13)
+  properties:
+    occurred:
+      type: boolean
+    cause:
+      type: string
+      nullable: true
+    stage:
+      type: string
+      enum: [before_fire, during_fire, after_fire, no_fire]
+      nullable: true
+    containers_involved:
+      type: array
+      items:
+        type: string
+
+# --- Risk reduction / protection systems ---
+
+RiskReduction:
+  type: object
+  description: Alarms, detectors and suppression systems and how they performed
+  properties:
+    smoke_alarm:
+      type: object
+      properties:
+        presence:
+          $ref: "#/PresenceStatus"
+        alarm_type:
+          type: string
+          enum: [smoke, heat, combination, sprinkler_waterflow, multiple_types, other, undetermined]
+          nullable: true
+        power_supply:
+          type: string
+          enum: [battery_only, hardwire_only, hardwire_with_battery, plug_in, plug_in_with_battery, mechanical, multiple, other, undetermined]
+          nullable: true
+        working:
+          type: boolean
+          nullable: true
+        operation:
+          $ref: "#/OperationStatus"
+        effectiveness:
+          type: string
+          enum: [alerted_occupants_responded, alerted_occupants_no_response, no_occupants, failed_to_alert, undetermined]
+          nullable: true
+        failure_reason:
+          type: string
+          enum: [power_failure_or_disconnect, improper_installation, defective, lack_of_maintenance, battery_missing, battery_dead, other, undetermined]
+          nullable: true
+        occupant_response:
+          type: string
+          nullable: true
+    fire_alarm:
+      type: object
+      description: Building fire alarm system
+      properties:
+        presence:
+          $ref: "#/PresenceStatus"
+        alarm_type:
+          type: string
+          nullable: true
+        monitored:
+          type: boolean
+          nullable: true
+        operation:
+          $ref: "#/OperationStatus"
+        failure_reason:
+          type: string
+          nullable: true
+    other_alarm:
+      type: object
+      description: CO, gas, security or other alarm
+      properties:
+        presence:
+          $ref: "#/PresenceStatus"
+        alarm_type:
+          type: string
+          nullable: true
+    suppression_system:
+      type: object
+      description: Automatic extinguishing system
+      properties:
+        presence:
+          $ref: "#/PresenceStatus"
+        system_type:
+          type: string
+          enum: [wet_pipe_sprinkler, dry_pipe_sprinkler, other_sprinkler, dry_chemical, foam, halon_clean_agent, co2, water_mist, other_special_hazard, other, undetermined]
+          nullable: true
+        coverage:
+          type: string
+          enum: [full, partial, undetermined]
+          nullable: true
+        operation:
+          $ref: "#/OperationStatus"
+        sprinkler_heads_activated:
+          type: integer
+          nullable: true
+        effective:
+          type: boolean
+          nullable: true
+        failure_reason:
+          type: string
+          enum: [system_shut_off, not_enough_agent, agent_did_not_reach_fire, wrong_system_type, fire_outside_protected_area, components_damaged, lack_of_maintenance, manual_intervention, other, undetermined]
+          nullable: true
+    cooking_suppression:
+      type: object
+      properties:
+        presence:
+          $ref: "#/PresenceStatus"
+        system_type:
+          type: string
+          nullable: true
+    fixed_firefighting_facilities:
+      type: array
+      description: Built-in firefighting facilities (risers, hose reels, smoke control, fire lift)
+      items:
+        type: object
+        properties:
+          facility_type:
+            type: string
+          used:
+            type: boolean
+            nullable: true
+          worked:
+            type: boolean
+            nullable: true
+          failure_reason:
+            type: string
+            nullable: true
+
+# --- Structure ---
 
 Structure:
   type: object
@@ -469,21 +1660,277 @@ Structure:
     structures_protected:
       type: integer
       nullable: true
+    buildings_involved:
+      type: integer
+      nullable: true
+      description: Number of buildings involved at the origin property
+    building_status:
+      type: string
+      enum: [occupied_in_use, vacant_secured, vacant_unsecured, under_construction, under_renovation, under_demolition, derelict, undetermined]
+      nullable: true
     construction_type:
       type: string
       nullable: true
-    stories:
+      x-aliases: [building construction, construction class]
+    construction_codes:
+      type: array
+      items:
+        $ref: "#/CodeRef"
+    special_construction_method:
+      type: string
+      nullable: true
+      description: Notable construction method involved (timber frame, sandwich panel, cladding system)
+    stories_above_grade:
       type: integer
       nullable: true
-    area_sqft:
+      x-aliases: [floors, storeys, number of stories, building height]
+    stories_below_grade:
+      type: integer
+      nullable: true
+      x-aliases: [basement levels, floors below ground]
+    total_floor_area_m2:
       type: number
       nullable: true
+      x-aliases: [floor area, square footage, building area]
+    main_floor_area_m2:
+      type: number
+      nullable: true
+    residential_units:
+      type: integer
+      nullable: true
+      description: Residential living units in the building of origin
     occupancy_at_time:
       type: integer
       nullable: true
+      description: Estimated number of people in the building at the time
+    fire_safety_regulations_apply:
+      type: boolean
+      nullable: true
+    means_of_escape_condition:
+      type: string
+      nullable: true
+    compartmentation_effective:
+      type: boolean
+      nullable: true
+    # Origin and spread within the structure
+    story_of_origin:
+      type: integer
+      nullable: true
+      description: Negative below grade, 1 is ground floor
+    room_of_origin:
+      type: string
+      nullable: true
+    room_of_origin_area_m2:
+      type: number
+      nullable: true
+    floor_of_origin_area_m2:
+      type: number
+      nullable: true
+    fire_spread_extent:
+      type: string
+      enum: [confined_to_object, confined_to_room, confined_to_floor, confined_to_building, beyond_building, no_flame_damage, undetermined]
+      nullable: true
+      x-aliases: [extent of damage, spread of fire, fire spread]
+    item_contributing_most_to_spread:
+      type: string
+      nullable: true
+    material_contributing_most_to_spread:
+      type: string
+      nullable: true
+    arrival_conditions:
+      type: string
+      enum: [no_visible_smoke_or_fire, smoke_showing, fire_showing, fully_involved, collapsed, undetermined]
+      nullable: true
+    progressed_beyond_arrival:
+      type: boolean
+      nullable: true
+      description: Fire extended beyond the conditions found on arrival
+    smoke_damage_only:
+      type: boolean
+      nullable: true
+      description: Heat/smoke damage with no flame damage (UK IRS 8.19)
+    stories_damaged:
+      type: object
+      description: Count of stories by flame damage band (NFIRS-3 J3)
+      properties:
+        minor:
+          type: integer
+          description: 1-24% flame damage
+        significant:
+          type: integer
+          description: 25-49% flame damage
+        heavy:
+          type: integer
+          description: 50-74% flame damage
+        extreme:
+          type: integer
+          description: 75-100% flame damage
+    damage_area_on_arrival_m2:
+      type: number
+      nullable: true
+    damage_area_at_stop_m2:
+      type: number
+      nullable: true
+      description: Horizontal area damaged by flame/heat when fire was stopped
+
+# --- Wildland ---
+
+Wildland:
+  type: object
+  properties:
+    is_wildland_incident:
+      type: boolean
+    discovery_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    area_type:
+      type: string
+      enum: [urban, suburban, rural, wildland_urban_interface, remote_wilderness]
+      nullable: true
+    area_burned_ha:
+      type: number
+      nullable: true
+      description: Total area burned in hectares
+      x-aliases: [acres burned, area burnt, burn area, fire size, hectares burned]
+    land_ownership_breakdown:
+      type: object
+      properties:
+        federal_ha:
+          type: number
+        state_ha:
+          type: number
+        private_ha:
+          type: number
+        tribal_ha:
+          type: number
+        other_ha:
+          type: number
+    percent_contained:
+      type: integer
+      minimum: 0
+      maximum: 100
+      x-aliases: [containment, contained percent]
+    fire_danger_rating:
+      type: string
+      enum: [low, moderate, high, very_high, severe, extreme, catastrophic]
+      nullable: true
+      description: Fire danger rating in effect at the time
+    fuel_model:
+      type: string
+      nullable: true
+      description: NFDRS or local fuel model at origin
+    fuel_moisture_percent:
+      type: number
+      nullable: true
+    complexity_level:
+      type: string
+      enum: [type_5, type_4, type_3, type_2, type_1]
+      nullable: true
+      description: Incident complexity (type 5 lowest, type 1 highest)
+    slope_position:
+      type: string
+      nullable: true
+      description: Relative position on slope at origin
+    aspect:
+      type: string
+      nullable: true
+    person_responsible:
+      type: object
+      description: Person who caused the wildland fire, if any (NFIRS-8 L)
+      properties:
+        status:
+          type: string
+          enum: [identified, unidentified, fire_not_caused_by_person]
+        age:
+          type: integer
+          nullable: true
+          x-pii: true
+        sex:
+          type: string
+          nullable: true
+          x-pii: true
+        activity:
+          type: string
+          nullable: true
+    right_of_way:
+      type: object
+      description: Nearby road/rail/power right-of-way (NFIRS-8 M)
+      properties:
+        row_type:
+          type: string
+          nullable: true
+        distance_m:
+          type: number
+          nullable: true
+    crops_burned:
+      type: array
+      items:
+        type: string
+    fire_lines:
+      type: object
+      properties:
+        primary_line_km:
+          type: number
+        secondary_line_km:
+          type: number
+        dozer_line_km:
+          type: number
+        hand_line_km:
+          type: number
+    aerial_operations:
+      type: object
+      properties:
+        water_dropped_l:
+          type: number
+        retardant_dropped_l:
+          type: number
+        total_flight_hours:
+          type: number
+    containment_strategies:
+      type: array
+      items:
+        type: string
+
+# --- Exposures ---
+
+Exposure:
+  type: object
+  description: A property beyond the origin damaged or threatened by spread
+  properties:
+    exposure_number:
+      type: integer
+      description: 0 is the origin; exposures count up from 1 (NFIRS convention)
+    exposure_type:
+      type: string
+      nullable: true
+    item_damaged:
+      type: string
+      nullable: true
+    address:
+      type: string
+      nullable: true
+    coordinates:
+      $ref: "#/Coordinates"
+    property_use:
+      type: string
+      nullable: true
+    people_present:
+      type: boolean
+      nullable: true
+    damage_rating:
+      type: string
+      enum: [none, minor, significant, heavy, destroyed, undetermined]
+      nullable: true
+    people_displaced:
+      type: integer
+      nullable: true
+
+# --- Casualties ---
 
 Casualties:
   type: object
+  description: Injuries and deaths. Uninjured rescues live in rescues[].
   properties:
     civilian:
       type: array
@@ -495,36 +1942,107 @@ Casualties:
         $ref: "#/ResponderCasualty"
     total_civilian_injuries:
       type: integer
+      x-aliases: [injuries, injured, number injured, victims injured, casualties]
     total_civilian_fatalities:
       type: integer
+      x-aliases: [deaths, fatalities, killed, number dead, lives lost, victims died]
     total_responder_injuries:
       type: integer
+      x-aliases: [firefighter injuries, personnel injured, service casualties]
     total_responder_fatalities:
       type: integer
+      x-aliases: [firefighter deaths, line of duty deaths, lodd]
 
 CivilianCasualty:
   type: object
   properties:
+    name:
+      type: string
+      nullable: true
+      x-pii: true
     age:
       type: integer
       nullable: true
+      x-pii: true
+    date_of_birth:
+      type: string
+      format: date
+      nullable: true
+      x-pii: true
     sex:
       type: string
       nullable: true
+      x-pii: true
+    race_ethnicity:
+      type: string
+      nullable: true
+      x-pii: true
+      description: Only where the target jurisdiction collects it (US, UK)
+    affiliation:
+      type: string
+      enum: [civilian, ems_non_fd, police, other_responder, undetermined]
+      nullable: true
+    injury_datetime:
+      type: string
+      format: date-time
+      nullable: true
     injury_type:
       type: string
+      description: Nature of the injury (burns, smoke inhalation, trauma)
+    primary_symptom:
+      type: string
+      nullable: true
+    primary_body_part:
+      type: string
+      nullable: true
     severity:
       $ref: "../schemas/enums.yaml#/InjurySeverity"
     cause:
       type: string
       nullable: true
-    location_at_time:
+    human_factors:
+      type: array
+      items:
+        type: string
+        enum: [asleep, unconscious, impaired_by_alcohol, impaired_by_drugs, mentally_disabled, physically_disabled, physically_restrained, unattended_person, other]
+    contributing_factors:
+      type: array
+      items:
+        type: string
+    activity_when_injured:
+      type: string
+      enum: [escaping, rescue_attempt, fire_control, returning_before_control, returning_after_control, sleeping, unable_to_act, irrational_act, other, undetermined]
+      nullable: true
+    location_at_ignition:
+      type: string
+      enum: [in_area_of_origin, in_building_not_in_area, outside_building, not_on_property, undetermined]
+      nullable: true
+    story_at_start:
+      type: integer
+      nullable: true
+    story_where_injured:
+      type: integer
+      nullable: true
+    location_where_found:
+      type: string
+      nullable: true
+    cause_of_failure_to_escape:
+      type: string
+      nullable: true
+      description: Why the person could not escape (Canada NFID casualty file)
+    disposition:
       type: string
       nullable: true
     transported:
       type: boolean
     hospital:
       type: string
+      nullable: true
+    fatal_circumstances:
+      type: string
+      nullable: true
+    death_certificate_reconciled:
+      type: boolean
       nullable: true
 
 ResponderCasualty:
@@ -532,21 +2050,105 @@ ResponderCasualty:
   properties:
     personnel_id:
       type: string
+      x-pii: true
+    name:
+      type: string
+      nullable: true
+      x-pii: true
+    age:
+      type: integer
+      nullable: true
+      x-pii: true
+    sex:
+      type: string
+      nullable: true
+      x-pii: true
     agency:
       type: string
     role:
       type: string
+    rank:
+      type: string
+      nullable: true
+    career_or_volunteer:
+      type: string
+      enum: [career, volunteer, undetermined]
+      nullable: true
+    years_of_service:
+      type: number
+      nullable: true
+    usual_assignment:
+      type: string
+      nullable: true
+    physical_condition_prior:
+      type: string
+      enum: [rested, fatigued, ill_or_injured, other, undetermined]
+      nullable: true
+    prior_responses_24h:
+      type: integer
+      nullable: true
+    injury_datetime:
+      type: string
+      format: date-time
+      nullable: true
     injury_type:
       type: string
+    primary_symptom:
+      type: string
+      nullable: true
+    primary_body_part:
+      type: string
+      nullable: true
     severity:
       $ref: "../schemas/enums.yaml#/InjurySeverity"
+    cause:
+      type: string
+      nullable: true
+    contributing_factor:
+      type: string
+      nullable: true
+    object_involved:
+      type: string
+      nullable: true
+    activity_at_injury:
+      type: string
+      nullable: true
+    where_occurred:
+      type: string
+      enum: [enroute_to_scene, at_scene_inside, at_scene_outside, enroute_to_facility, at_facility, returning, at_station, other, undetermined]
+      nullable: true
+    story_where_injured:
+      type: integer
+      nullable: true
+    protective_equipment_failure:
+      type: object
+      properties:
+        failed:
+          type: boolean
+        item:
+          type: string
+          nullable: true
+        problem:
+          type: string
+          nullable: true
+    duty_status:
+      type: string
+      enum: [on_duty, off_duty_responding, off_duty, undetermined]
+      nullable: true
     treatment:
       type: string
+      nullable: true
+    taken_to:
+      type: string
+      enum: [hospital, doctors_office, morgue, residence, station, not_transported, other]
       nullable: true
     transported:
       type: boolean
     hospital:
       type: string
+      nullable: true
+    hospitalized_overnight:
+      type: boolean
       nullable: true
     return_to_duty_date:
       type: string
@@ -554,8 +2156,140 @@ ResponderCasualty:
       nullable: true
     osha_recordable:
       type: boolean
-    nfirs_5_required:
+    exposure_only:
       type: boolean
+      nullable: true
+      description: Chemical/biological exposure without immediate symptoms
+
+# --- Rescues ---
+
+Rescue:
+  type: object
+  description: One person rescued, assisted or self-evacuated (NERIS rescue modules)
+  properties:
+    person_type:
+      type: string
+      enum: [civilian, firefighter, other_responder]
+    rescue_type:
+      type: string
+      enum: [rescue, assist, self_evacuation, body_recovery, no_rescue_needed]
+      nullable: true
+    presence_known_beforehand:
+      type: boolean
+      nullable: true
+    age:
+      type: integer
+      nullable: true
+      x-pii: true
+    sex:
+      type: string
+      nullable: true
+      x-pii: true
+    primary_mode:
+      type: string
+      nullable: true
+      description: Primary rescue mode (interior search, ladder, water, rope, extrication)
+    actions:
+      type: array
+      items:
+        type: string
+    impediments:
+      type: array
+      items:
+        type: string
+    room_type:
+      type: string
+      nullable: true
+    elevation:
+      type: string
+      nullable: true
+      description: Elevation at which the person was found (below grade, ground, upper story, roof)
+    removal_path:
+      type: string
+      nullable: true
+      description: Route used to remove the person (internal stairs, window, aerial)
+    relative_time_to_suppression:
+      type: string
+      enum: [before_suppression, during_suppression, after_suppression, undetermined]
+      nullable: true
+    gas_isolation:
+      type: boolean
+      nullable: true
+      description: Space was isolated from heat/toxic gas flow
+    mayday:
+      type: object
+      description: Firefighter emergencies only
+      properties:
+        called:
+          type: boolean
+        relative_time:
+          type: string
+          nullable: true
+        rit_activated:
+          type: boolean
+          nullable: true
+    resulting_casualty:
+      type: boolean
+      nullable: true
+      description: True if this person also appears in casualties
+
+# --- Evacuation and displacement ---
+
+EvacuationDisplacement:
+  type: object
+  properties:
+    evacuation_occurred:
+      type: boolean
+      nullable: true
+    evacuation_status:
+      type: string
+      enum: [none, planned, in_progress, completed, repopulation_in_progress, shelter_in_place]
+      nullable: true
+    people_evacuated_without_assistance:
+      type: integer
+      nullable: true
+    people_evacuated_with_assistance:
+      type: integer
+      nullable: true
+    people_assisted_by_fd:
+      type: integer
+      nullable: true
+    total_people_evacuated:
+      type: integer
+      nullable: true
+      x-aliases: [evacuees, people evacuated, number evacuated]
+    buildings_evacuated:
+      type: integer
+      nullable: true
+    evacuation_delay_reason:
+      type: string
+      nullable: true
+    evacuation_completion_minutes:
+      type: integer
+      nullable: true
+    people_sheltering_in_place:
+      type: integer
+      nullable: true
+    people_in_temporary_shelters:
+      type: integer
+      nullable: true
+    people_trapped:
+      type: integer
+      nullable: true
+    people_missing:
+      type: integer
+      nullable: true
+    people_displaced:
+      type: integer
+      nullable: true
+      description: People who cannot return to the property
+      x-aliases: [displaced, made homeless, rendered homeless]
+    displacement_causes:
+      type: array
+      items:
+        type: string
+
+# --- EMS ---
 
 EMS:
   type: object
@@ -568,6 +2302,7 @@ EMS:
         $ref: "#/EMSPatient"
     total_patients:
       type: integer
+      x-aliases: [patients, number of patients, casualties treated]
     ems_agency_responded:
       type: string
       nullable: true
@@ -575,34 +2310,107 @@ EMS:
       type: boolean
     nemsis_report_ids:
       type: array
+      description: Linked ePCR ids (NEMSIS eRecord.01); the full ePCR stays in the EMS system
       items:
         type: string
 
 EMSPatient:
   type: object
+  description: Summary-level patient record; the ePCR is the clinical record
   properties:
     patient_ref_id:
       type: string
+    nemsis_report_id:
+      type: string
+      nullable: true
     age_approx:
       type: integer
       nullable: true
-    sex:
-      type: string
-      nullable: true
-    chief_complaint:
-      type: string
-      nullable: true
-    disposition:
-      type: string
-      nullable: true
-    transported:
-      type: boolean
+      x-pii: true
     date_of_birth:
       type: string
       format: date
       nullable: true
-    nemsis_data_captured:
+      x-pii: true
+    sex:
+      type: string
+      nullable: true
+      x-pii: true
+    chief_complaint:
+      type: string
+      nullable: true
+    provider_impression:
+      type: string
+      nullable: true
+      description: Provider's primary impression/assessment
+    injury_intent:
+      type: string
+      enum: [accidental, self_inflicted, inflicted_by_other, undetermined]
+      nullable: true
+    body_sites:
+      type: array
+      description: Injured body sites with injury type per site
+      items:
+        type: object
+        properties:
+          site:
+            type: string
+          injury_type:
+            type: string
+    procedures:
+      type: array
+      description: Procedures performed on scene (CPR, oxygen, splinting, defibrillation)
+      items:
+        type: string
+    cardiac_arrest:
+      type: object
+      properties:
+        occurred:
+          type: boolean
+        pre_arrival:
+          type: boolean
+          nullable: true
+        witnessed:
+          type: boolean
+          nullable: true
+        bystander_cpr:
+          type: boolean
+          nullable: true
+        initial_rhythm:
+          type: string
+          nullable: true
+    safety_equipment_used:
+      type: array
+      description: Safety equipment used by the patient (seat belt, airbag, helmet)
+      items:
+        type: string
+    highest_care_level_on_scene:
+      type: string
+      enum: [first_responder, emt_basic, emt_intermediate, paramedic, physician, other]
+      nullable: true
+    patient_status:
+      type: string
+      enum: [improved, unchanged, worsened]
+      nullable: true
+    at_patient_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    transfer_of_care_datetime:
+      type: string
+      format: date-time
+      nullable: true
+    disposition:
+      type: string
+      enum: [treated_and_transported_by_fd, transported_by_other_agency, treated_no_transport, refused_care, dead_at_scene, transferred_care, other]
+      nullable: true
+    transported:
       type: boolean
+    hospital_destination:
+      type: string
+      nullable: true
+
+# --- Hazmat ---
 
 Hazmat:
   type: object
@@ -612,20 +2420,175 @@ Hazmat:
     materials:
       type: array
       items:
-        type: object
-        properties:
-          name:
-            type: string
-          un_number:
-            type: string
-            nullable: true
-          quantity:
-            type: string
-            nullable: true
+        $ref: "#/HazmatMaterial"
+    ignition_or_release_first:
+      type: string
+      enum: [ignition_first, release_first, no_fire, undetermined]
+      nullable: true
+    release_cause:
+      type: string
+      enum: [intentional, unintentional, container_failure, act_of_nature, cause_under_investigation, undetermined]
+      nullable: true
+    release_factors:
+      type: array
+      items:
+        type: string
+    mitigation_factors:
+      type: array
+      description: Factors or impediments that affected mitigation
+      items:
+        type: string
+    actions_taken:
+      type: array
+      description: Hazmat-specific actions (identification, containment, decontamination, neutralization)
+      items:
+        type: string
+    equipment_involved_in_release:
+      type: object
+      properties:
+        involved:
+          type: boolean
+        equipment_type:
+          type: string
+          nullable: true
+        brand:
+          type: string
+          nullable: true
+        model:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+    area_affected:
+      $ref: "#/Quantity"
+    area_evacuated:
+      $ref: "#/Quantity"
     epa_reportable_quantity_exceeded:
       type: boolean
-    spill_size_gallons:
-      type: number
+    disposition:
+      type: string
+      enum: [completed_by_fire_service, completed_with_fire_service_present, released_to_local_agency, released_to_state_agency, released_to_federal_agency, released_to_private_contractor, released_to_owner, undetermined]
+      nullable: true
+      description: Who the cleanup/scene was released to. Evacuee counts live in evacuation_displacement.
+
+HazmatMaterial:
+  type: object
+  properties:
+    name:
+      type: string
+      x-aliases: [chemical, substance, hazardous material, chemical name]
+    un_number:
+      type: string
+      nullable: true
+      x-aliases: [un number, un id]
+    dot_hazard_class:
+      type: string
+      nullable: true
+      description: DOT/UN hazard class and division, e.g. "3" or "2.1"
+    cas_number:
+      type: string
+      nullable: true
+    physical_state:
+      type: string
+      enum: [solid, liquid, gas, undetermined]
+      nullable: true
+    container_type:
+      type: string
+      nullable: true
+    container_capacity:
+      $ref: "#/Quantity"
+    released:
+      type: boolean
+      nullable: true
+    amount_released:
+      $ref: "#/Quantity"
+    released_into:
+      type: string
+      enum: [air, water, soil, contained_on_site, sewer_drain, other, undetermined]
+      nullable: true
+    released_from_story:
+      type: integer
+      nullable: true
+    released_inside_structure:
+      type: boolean
+      nullable: true
+
+# --- Emerging hazards ---
+
+EmergingHazard:
+  type: object
+  description: Stored-energy and similar emerging hazards (NERIS emerging_hazard module)
+  properties:
+    category:
+      type: string
+      enum: [battery_energy_storage, electric_vehicle, micromobility_device, consumer_electronics, photovoltaic_system, power_generation, csst_gas_tubing, other]
+    subtype:
+      type: string
+      nullable: true
+    source_or_target:
+      type: string
+      enum: [ignition_source, target_only, both, undetermined]
+      nullable: true
+    suppression_approach:
+      type: string
+      nullable: true
+    reignition_occurred:
+      type: boolean
+      nullable: true
+    ev_crash_involved:
+      type: boolean
+      nullable: true
+      description: Electric vehicle was involved in a crash
+    lightning_suspected:
+      type: boolean
+      nullable: true
+      description: CSST cases, lightning as suspected cause
+    notes:
+      type: string
+      nullable: true
+
+# --- Investigation (includes arson) ---
+
+Investigation:
+  type: object
+  properties:
+    investigation_needed:
+      type: boolean
+      description: Incident commander's assessment that formal investigation is required
+    investigation_types:
+      type: array
+      description: Types of investigation completed (origin_and_cause, arson, insurance, forensic)
+      items:
+        type: string
+    investigation_ongoing:
+      type: boolean
+      nullable: true
+    case_status:
+      type: string
+      enum: [open, closed_with_arrest, closed_exceptional, closed, inactive]
+      nullable: true
+    agency_referred_to:
+      type: object
+      properties:
+        name:
+          type: string
+        case_number:
+          type: string
+          nullable: true
+    law_enforcement_notified:
+      type: boolean
+    evidence_collected:
+      type: boolean
+    laboratory_used:
+      type: string
+      nullable: true
+    nibrs_report_required:
+      type: boolean
+    arson:
+      $ref: "#/Arson"
+    notes:
+      type: string
       nullable: true
 
 Arson:
@@ -635,85 +2598,226 @@ Arson:
       type: boolean
     confirmed:
       type: boolean
-    law_enforcement_notified:
-      type: boolean
-    investigation_required:
-      type: boolean
-    investigation_agency:
-      type: string
-      nullable: true
-    evidence_collected:
-      type: boolean
-    nibrs_report_required:
-      type: boolean
-    notes:
-      type: string
-      nullable: true
-
-RespondingAgencies:
-  type: object
-  properties:
-    primary_agency:
-      type: string
-    all_agencies:
+    motivation_factors:
       type: array
-      items:
-        $ref: "#/RespondingAgency"
-    mutual_aid_activated:
-      type: boolean
-    mutual_aid_agencies:
-      type: array
+      description: Suspected motivations (fraud, intimidation, concealment, thrill, protest)
       items:
         type: string
-    unified_command:
-      type: boolean
-
-RespondingAgency:
-  type: object
-  properties:
-    agency_name:
+    group_involvement:
       type: string
-    agency_type:
+      nullable: true
+    entry_method:
       type: string
-    role:
+      nullable: true
+    extent_of_involvement_on_arrival:
       type: string
-    personnel_count:
-      type: integer
-
-ResourcesDeployed:
-  type: object
-  properties:
-    total_personnel:
-      type: integer
-    personnel_breakdown:
+      nullable: true
+    incendiary_device:
       type: object
       properties:
-        firefighters:
-          type: integer
-        crew_supervisors:
-          type: integer
-        engineers:
-          type: integer
-        incident_command:
-          type: integer
-        support_staff:
-          type: integer
-    apparatus:
+        container:
+          type: string
+          nullable: true
+        ignition_delay_mechanism:
+          type: string
+          nullable: true
+        fuel:
+          type: string
+          nullable: true
+    material_availability:
+      type: string
+      enum: [transported_to_scene, available_at_scene, undetermined]
+      nullable: true
+    initial_observations:
       type: array
-      items:
-        $ref: "#/Apparatus"
-    crew_types:
-      type: array
+      description: Scene observations (forced entry, doors locked, security system state)
       items:
         type: string
+    other_indicators:
+      type: array
+      description: Contextual indicators (vacancy, for sale, insurance change, financial problems)
+      items:
+        type: string
+    juvenile_firesetter:
+      type: object
+      properties:
+        involved:
+          type: boolean
+        subjects:
+          type: array
+          items:
+            type: object
+            properties:
+              age:
+                type: integer
+                nullable: true
+                x-pii: true
+              sex:
+                type: string
+                nullable: true
+                x-pii: true
+              family_type:
+                type: string
+                nullable: true
+                x-pii: true
+              risk_factors:
+                type: array
+                items:
+                  type: string
+              disposition:
+                type: string
+                nullable: true
 
-Apparatus:
+# --- Persons involved ---
+
+PersonInvolved:
+  type: object
+  description: Owner, occupant or other party connected to the incident (not casualties)
+  properties:
+    role:
+      type: string
+      enum: [owner, occupant, tenant, reporting_party, responsible_party, witness, business_representative, insurance_holder, other]
+    name:
+      type: string
+      nullable: true
+      x-pii: true
+      x-aliases: [owner name, occupant name, person name]
+    business_name:
+      type: string
+      nullable: true
+    address:
+      type: string
+      nullable: true
+      x-pii: true
+    same_address_as_incident:
+      type: boolean
+      nullable: true
+    phone:
+      type: string
+      nullable: true
+      x-pii: true
+    email:
+      type: string
+      nullable: true
+      x-pii: true
+    insurance:
+      type: object
+      properties:
+        insured:
+          type: boolean
+          nullable: true
+        company:
+          type: string
+          nullable: true
+          x-aliases: [insurance company, insurer]
+        policy_number:
+          type: string
+          nullable: true
+          x-pii: true
+
+# --- Mobile property / vehicles ---
+
+MobileProperty:
   type: object
   properties:
-    type:
+    involvement:
       type: string
-    count:
+      enum: [ignition_source_and_burned, ignition_source_not_burned, burned_not_ignition_source, collision, hazmat_release, rescued_from, threatened_only, other]
+      nullable: true
+    property_type:
+      type: string
+      enum: [passenger_car, motorcycle, bus, heavy_goods_vehicle, agricultural_vehicle, construction_vehicle, recreational_vehicle, train_rail, boat_vessel, aircraft, trailer, mobile_home, other]
+      nullable: true
+    make:
+      type: string
+      nullable: true
+      x-aliases: [vehicle make, manufacturer]
+    model:
+      type: string
+      nullable: true
+      x-aliases: [vehicle model]
+    year:
       type: integer
+      nullable: true
+    fuel_type:
+      type: string
+      enum: [petrol_gasoline, diesel, electric, hybrid, hydrogen, cng_lpg, other, undetermined]
+      nullable: true
+    license_plate:
+      type: string
+      nullable: true
+      x-pii: true
+      x-aliases: [registration, number plate, reg number, plate number]
+    license_region:
+      type: string
+      nullable: true
+      description: Registering state/province/country
+    vin:
+      type: string
+      nullable: true
+      x-pii: true
+      x-aliases: [chassis number, vehicle identification number]
+    dot_icc_number:
+      type: string
+      nullable: true
+    reported_stolen:
+      type: boolean
+      nullable: true
+    appeared_abandoned:
+      type: boolean
+      nullable: true
+    occupants:
+      type: integer
+      nullable: true
+    extrication:
+      type: object
+      description: Extrication from this vehicle (UK IRS RTC block)
+      properties:
+        performed:
+          type: boolean
+        method:
+          type: string
+          nullable: true
+        vehicle_position:
+          type: string
+          nullable: true
+        time_taken_minutes:
+          type: integer
+          nullable: true
+
+# --- Losses ---
+
+Losses:
+  type: object
+  description: Monetary values. Currency follows the reporting agency.
+  properties:
+    no_loss:
+      type: boolean
+      nullable: true
+    property_loss:
+      allOf:
+        - $ref: "#/Money"
+      x-aliases: [property damage, damage estimate, estimated loss, money lost, loss value, damage cost]
+    contents_loss:
+      allOf:
+        - $ref: "#/Money"
+      x-aliases: [contents damage, contents value lost]
+    pre_incident_property_value:
+      $ref: "#/Money"
+    pre_incident_contents_value:
+      $ref: "#/Money"
+    property_saved:
+      allOf:
+        - $ref: "#/Money"
+      x-aliases: [value saved, save value]
+    other_costs:
+      $ref: "#/Money"
+    estimate_method:
+      type: string
+      enum: [rough_estimate, owner_estimate, insurance_assessment, investigator_assessment, official_valuation, other]
+      nullable: true
+
+# --- Weather ---
 
 Weather:
   type: object
@@ -721,7 +2825,11 @@ Weather:
     on_arrival:
       $ref: "#/WeatherReading"
     worst_conditions:
-      $ref: "#/WeatherReadingExtended"
+      $ref: "#/WeatherReading"
+    weather_type:
+      type: string
+      enum: [clear, cloudy, rain, snow_ice, fog, high_winds, thunderstorm_lightning, extreme_heat, extreme_cold, other]
+      nullable: true
     factors_influencing_fire:
       type: array
       items:
@@ -733,38 +2841,30 @@ WeatherReading:
     datetime:
       type: string
       format: date-time
-    temperature_f:
+    temperature_c:
       type: number
+      x-aliases: [temperature, temp]
     relative_humidity_percent:
       type: number
-    wind_speed_mph:
+      x-aliases: [humidity, rh]
+    wind_speed_kph:
       type: number
+      x-aliases: [wind, wind speed]
+    wind_gusts_kph:
+      type: number
+      nullable: true
     wind_direction:
       type: string
     haines_index:
       type: integer
       nullable: true
 
-WeatherReadingExtended:
-  type: object
-  properties:
-    datetime:
-      type: string
-      format: date-time
-    temperature_f:
-      type: number
-    relative_humidity_percent:
-      type: number
-    wind_speed_mph:
-      type: number
-    wind_gusts_mph:
-      type: number
-      nullable: true
+# --- Environmental impact ---
 
 EnvironmentalImpact:
   type: object
   properties:
-    wildlife_habitat_affected_acres:
+    habitat_affected_ha:
       type: number
       nullable: true
     watershed_impact:
@@ -784,6 +2884,8 @@ EnvironmentalImpact:
       type: boolean
       nullable: true
 
+# --- Infrastructure impact ---
+
 InfrastructureImpact:
   type: object
   properties:
@@ -795,7 +2897,7 @@ InfrastructureImpact:
 InfrastructureItem:
   type: object
   properties:
-    type:
+    infrastructure_type:
       type: string
     unit:
       type: string
@@ -803,6 +2905,8 @@ InfrastructureItem:
       type: number
     severity:
       type: string
+
+# --- Near miss and safety ---
 
 NearMissAndSafety:
   type: object
@@ -829,10 +2933,124 @@ NearMissAndSafety:
             nullable: true
     safety_breaches:
       type: integer
+    maydays_count:
+      type: integer
+      nullable: true
+    attacks_on_personnel:
+      type: object
+      description: Attacks on responders travelling to, at, or from the incident (UK IRS 3.10-3.13)
+      properties:
+        occurred:
+          type: boolean
+        attack_type:
+          type: string
+          enum: [verbal_abuse, physical_no_weapon, weapon, objects_thrown, vehicle_used, other]
+          nullable: true
+        serious_injuries:
+          type: integer
+          nullable: true
+        slight_injuries:
+          type: integer
+          nullable: true
     weather_related_risks:
       type: array
       items:
         type: string
+
+# --- Situation status (ICS-209 layer) ---
+
+SituationStatus:
+  type: object
+  description: |
+    Evolving large-incident status for sitreps (ICS-209 shape). Person counts
+    live in casualties and evacuation_displacement; structure counts live in
+    structure. Mappers compose the ICS-209 matrices from those sections.
+  properties:
+    report_version:
+      type: string
+      enum: [initial, update, final]
+      nullable: true
+    report_number:
+      type: integer
+      nullable: true
+    period_from:
+      type: string
+      format: date-time
+      nullable: true
+    period_to:
+      type: string
+      format: date-time
+      nullable: true
+    complexity_level:
+      type: string
+      enum: [type_5, type_4, type_3, type_2, type_1]
+      nullable: true
+    imt_type:
+      type: string
+      nullable: true
+      description: Incident management organization (single resource, type 3 IMT, unified command)
+    significant_events:
+      type: string
+      nullable: true
+    primary_hazards:
+      type: string
+      nullable: true
+      description: Primary materials or hazards involved
+    threat_management:
+      type: array
+      description: Active protective actions
+      items:
+        type: string
+        enum: [no_likely_threat, potential_future_threat, mass_notifications_in_progress, mass_notifications_completed, no_evacuations_imminent, planning_for_evacuation, planning_for_shelter_in_place, evacuations_in_progress, shelter_in_place_in_progress, repopulation_in_progress, area_restriction_in_effect, other]
+    projected_activity:
+      type: object
+      description: Projected incident activity by timeframe
+      properties:
+        next_12_hours:
+          type: string
+          nullable: true
+        next_24_hours:
+          type: string
+          nullable: true
+        next_48_hours:
+          type: string
+          nullable: true
+        next_72_hours:
+          type: string
+          nullable: true
+        beyond_72_hours:
+          type: string
+          nullable: true
+    strategic_objectives:
+      type: string
+      nullable: true
+    threat_summary:
+      type: string
+      nullable: true
+    critical_resource_needs:
+      type: array
+      items:
+        type: string
+    planned_actions:
+      type: string
+      nullable: true
+    projected_final_size_ha:
+      type: number
+      nullable: true
+    anticipated_completion_date:
+      type: string
+      format: date
+      nullable: true
+    demobilization_start_date:
+      type: string
+      format: date
+      nullable: true
+    costs_to_date:
+      $ref: "#/Money"
+    projected_final_cost:
+      $ref: "#/Money"
+
+# --- Lessons learned ---
 
 LessonsLearned:
   type: object
@@ -850,6 +3068,8 @@ LessonsLearned:
       items:
         type: string
 
+# --- Follow up ---
+
 FollowUp:
   type: object
   properties:
@@ -866,9 +3086,9 @@ FollowUp:
     rehabilitation:
       type: object
       properties:
-        erosion_control_acres:
+        erosion_control_ha:
           type: number
-        reseeding_acres:
+        reseeding_ha:
           type: number
         hazard_tree_removal_required:
           type: boolean
@@ -876,8 +3096,8 @@ FollowUp:
       type: string
       format: date
       nullable: true
-    investigation_ongoing:
-      type: boolean
+
+# --- Periodic reporting ---
 
 PeriodicReporting:
   type: object
@@ -900,6 +3120,8 @@ PeriodicReporting:
       type: string
       format: date-time
       nullable: true
+
+# --- Attachments ---
 
 Attachments:
   type: object

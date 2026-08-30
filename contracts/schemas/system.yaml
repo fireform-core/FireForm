@@ -22,7 +22,7 @@ HealthStatus:
       properties:
         database:
           $ref: "#/ComponentHealth"
-        ollama:
+        llm:
           $ref: "#/ComponentHealth"
         whisper:
           $ref: "#/ComponentHealth"
@@ -46,43 +46,43 @@ ComponentHealth:
     detail:
       type: string
       nullable: true
-    model_loaded:
-      type: string
-      nullable: true
-      description: Currently loaded model (ollama component)
     disk_free_gb:
       type: number
       nullable: true
       description: Free disk space (storage component)
-    ollama_version:
+    provider:
       type: string
       nullable: true
-      description: Ollama server version (ollama component)
+      description: Configured LLM provider (llm component)
+      enum:
+        - ollama
+        - openai
+        - gemini
+        - anthropic
+        - custom
+    model:
+      type: string
+      nullable: true
+      description: Model this deployment sends prompts to (llm component)
+    external:
+      type: boolean
+      nullable: true
+      description: >
+        True when prompts leave this machine, which is the case for every
+        hosted provider (llm component)
+    probed:
+      type: boolean
+      nullable: true
+      description: >
+        Whether the status came from a live call. Hosted providers are not
+        probed, because a call on every health check spends quota to answer a
+        question the configuration already answers (llm component)
     models_available:
       type: array
       nullable: true
-      description: All models pulled and available on the Ollama server (ollama component)
+      description: Models the provider will serve (llm component)
       items:
-        type: object
-        properties:
-          name:
-            type: string
-          size_gb:
-            type: number
-          quantization:
-            type: string
-            nullable: true
-          loaded:
-            type: boolean
-    current_load:
-      type: object
-      nullable: true
-      description: Current processing load (ollama component)
-      properties:
-        active_requests:
-          type: integer
-        queued_requests:
-          type: integer
+        type: string
 
 SchemaVersion:
   type: object

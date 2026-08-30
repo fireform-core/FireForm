@@ -1,0 +1,429 @@
+# Template & Configuration schemas
+
+TemplateSummary:
+  type: object
+  properties:
+    template_id:
+      type: string
+      format: uuid
+    form_type:
+      type: string
+      description: Unique form type identifier (built-in or custom jurisdiction)
+    display_name:
+      type: string
+    jurisdiction:
+      type: string
+      nullable: true
+      description: Jurisdiction code (e.g. "US-Federal", "US-CA", "US-GA")
+    agency_type:
+      type: string
+      nullable: true
+    version:
+      type: string
+    last_updated:
+      type: string
+      format: date
+    field_count:
+      type: integer
+    status:
+      type: string
+      enum:
+        - active
+        - legacy
+        - draft
+
+CreateTemplateRequest:
+  type: object
+  required:
+    - form_type
+    - display_name
+    - fields
+  properties:
+    form_type:
+      type: string
+      description: Unique form type identifier
+    display_name:
+      type: string
+    jurisdiction:
+      type: string
+      nullable: true
+      description: Jurisdiction code. Optional - the visual editor may register a
+        template before jurisdiction is assigned.
+    agency_type:
+      type: string
+      nullable: true
+    fields:
+      type: array
+      items:
+        $ref: "#/TemplateField"
+    source_standard:
+      type: string
+      nullable: true
+      description: Reference to the source standard (e.g. "NERIS v2.0", "NFIRS 5.0")
+    pdf_template_ref:
+      type: string
+      nullable: true
+      description: Reference to the PDF template file the layout coordinates apply to
+
+Template:
+  allOf:
+    - type: object
+      properties:
+        template_id:
+          type: string
+          format: uuid
+        version:
+          type: string
+        last_updated:
+          type: string
+          format: date
+        field_count:
+          type: integer
+        status:
+          type: string
+          enum: [active, legacy, draft]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    - $ref: "#/CreateTemplateRequest"
+
+TemplateField:
+  type: object
+  description: |
+    One box on the form. The `source` decides how it gets its value:
+    - source=schema: `incident_mapping` is required, value is a contract lookup.
+    - source=static: `static_text` is required, stamped as-is on every form.
+    - source=manual: no mapping. User types the value on the review screen;
+      it is stored under custom_fields."{form_type}.{field_name}" in the
+      contract and filled from there.
+    - source=open: no mapping. `description` is required and is the
+      instruction the LLM uses to extract the value during the extraction
+      layer. The value is stored under custom_fields."{form_type}.{field_name}"
+      and reviewed like any other extracted value.
+  required:
+    - field_name
+    - field_type
+    - source
+    - required
+  properties:
+    field_name:
+      type: string
+      description: Field identifier within this template
+    field_type:
+      type: string
+      enum:
+        - string
+        - integer
+        - number
+        - boolean
+        - date
+        - datetime
+        - time
+        - enum
+        - text
+        - array
+      description: Data type of the field
+    source:
+      $ref: "../schemas/enums.yaml#/FieldSource"
+    required:
+      type: boolean
+    description:
+      type: string
+      nullable: true
+      description: |
+        Help text for the field. For source=open this is required and doubles
+        as the extraction instruction sent to the LLM, so write it as a plain
+        statement of what to pull from the narrative (e.g. "Name of the
+        insurance company covering the property").
+    max_length:
+      type: integer
+      nullable: true
+    min_value:
+      type: number
+      nullable: true
+    max_value:
+      type: number
+      nullable: true
+    allowed_values:
+      type: array
+      items:
+        type: string
+      nullable: true
+      description: Valid values for enum fields
+    incident_mapping:
+      type: string
+      nullable: true
+      description: |
+        JSON path in the FireForm incident contract this field pulls its value
+        from (e.g. "fire.cause_category"). Required when source=schema, null
+        for every other source.
+    static_text:
+      type: string
+      nullable: true
+      description: |
+        Fixed text drawn into the field. Required when source=static, null for
+        every other source.
+    default_value:
+      nullable: true
+      description: Default value if the mapped incident field is null
+    unit:
+      type: string
+      nullable: true
+      description: |
+        Target unit for the stamped value when the form wants something other
+        than the incident contract's SI unit (e.g. "acres" for a field mapped
+        to wildland.area_burned_ha, "fahrenheit" for temperature_c). The
+        mapper converts during generation. Null means stamp the value as
+        stored.
+    layout:
+      nullable: true
+      description: Visual placement of the field on the PDF. Null for fields with
+        no fixed position.
+      allOf:
+        - $ref: "#/TemplateFieldLayout"
+
+TemplateFieldLayout:
+  type: object
+  description: |
+    Visual placement of a field on the PDF page. Coordinates are in PDF points
+    with the origin at the bottom-left of the page, so the field box runs from
+    start = (x, y) to end = (x + width, y + height). The editor is responsible
+    for converting rendered-canvas pixels to PDF points before saving.
+  required:
+    - page
+    - x
+    - y
+    - width
+    - height
+  properties:
+    page:
+      type: integer
+      description: Zero-based page index
+    x:
+      type: number
+      description: Lower-left X of the box, in PDF points
+    y:
+      type: number
+      description: Lower-left Y of the box, in PDF points (origin bottom-left)
+    width:
+      type: number
+    height:
+      type: number
+    font:
+      type: string
+      default: Helvetica
+    font_size:
+      type: number
+      default: 10
+    color:
+      type: string
+      default: "#000000"
+      description: Hex color, e.g. "#000000"
+    align:
+      type: string
+      enum:
+        - left
+        - center
+        - right
+      default: left
+
+TemplateDraft:
+  type: object
+  description: |
+    Result of uploading a PDF for template authoring. Carries everything the
+    visual editor needs: the stored PDF reference, page geometry, and the
+    fields auto-detected by commonforms with mapping suggestions. Each
+    detected field is already a full TemplateField draft, so the editor can
+    let the user adjust boxes, change sources, accept or override suggested
+    mappings, add or delete fields, and then send the exact same array in
+    POST /api/v1/templates. Fields the detector could not interpret still
+    come back with a layout box and empty mapping; coordinates alone are a
+    valid starting point.
+  required:
+    - upload_id
+    - status
+    - pdf_template_ref
+    - page_count
+    - pages
+  properties:
+    upload_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum:
+        - processing
+        - completed
+        - failed
+      description: Field detection status. The PDF itself is stored as soon
+        as the upload returns; only detection is asynchronous.
+    pdf_template_ref:
+      type: string
+      description: Opaque reference to the stored PDF, passed back in the
+        template body as pdf_template_ref
+    original_filename:
+      type: string
+    page_count:
+      type: integer
+    pages:
+      type: array
+      description: Per-page geometry in PDF points, index 0 = first page
+      items:
+        type: object
+        required:
+          - page
+          - width
+          - height
+        properties:
+          page:
+            type: integer
+          width:
+            type: number
+          height:
+            type: number
+    detected_fields:
+      type: array
+      description: Present when status is completed. Empty when the detector
+        found nothing; the user then draws boxes from scratch.
+      items:
+        $ref: "#/DraftField"
+    detection_error:
+      type: string
+      nullable: true
+      description: Present when status is failed. The upload is still usable;
+        the editor falls back to manual box drawing.
+    retry_after_seconds:
+      type: integer
+      description: Polling hint, present while status is processing
+
+DraftField:
+  type: object
+  description: |
+    One auto-detected field plus ranked mapping suggestions.
+
+    Detected labels are messy ("Incident No.:", stray colons, no text at
+    all), so the suggester normalizes the label before scoring: lowercase,
+    strip punctuation, collapse whitespace, expand common form abbreviations
+    ("no" → "number", "dt" → "date", "addr" → "address", "tel" → "phone",
+    "dob" → "date of birth"). Scoring then runs against the schema catalog
+    (names, x-aliases and descriptions, same index and scorer as
+    GET /api/v1/schema/fields).
+
+    Two thresholds apply. Below the confidence floor, `suggestions` is empty:
+    an empty list with a good search box beats a wrong guess, because users
+    trust pre-filled values too much. Above the higher auto-apply threshold,
+    the top suggestion is pre-applied as the field's incident_mapping and
+    source is set to schema; in between, suggestions are listed but nothing
+    is pre-applied.
+  required:
+    - field
+  properties:
+    field:
+      $ref: "#/TemplateField"
+    detected_label:
+      type: string
+      nullable: true
+      description: Raw label text found near the box on the PDF, kept verbatim
+        (not normalized) so the editor can show what the suggestion was based on
+    suggestions:
+      type: array
+      description: Ranked incident-contract mapping suggestions for this box,
+        best first. Empty when nothing scored above the confidence floor.
+      items:
+        $ref: "#/MappingSuggestion"
+
+MappingSuggestion:
+  type: object
+  required:
+    - path
+    - score
+  properties:
+    path:
+      type: string
+      description: Incident-contract JSON path (e.g. "location.postal_code")
+    label:
+      type: string
+      description: Human-friendly name of the schema field
+    field_type:
+      type: string
+      description: Data type of the schema field
+    section:
+      type: string
+      description: Top-level contract section the path belongs to
+    description:
+      type: string
+      description: The schema field's own description from the contract
+    score:
+      type: number
+      description: Match confidence 0-1 from the fuzzy matcher (no LLM)
+
+SchemaFieldEntry:
+  type: object
+  description: One searchable entry in the incident-contract field catalog.
+  required:
+    - path
+    - field_type
+    - section
+  properties:
+    path:
+      type: string
+      description: Dotted JSON path into the incident contract
+    label:
+      type: string
+      description: Human-friendly name derived from the field name
+    field_type:
+      type: string
+    section:
+      type: string
+      description: Top-level contract section (fire, location, casualties, ...)
+    description:
+      type: string
+      nullable: true
+    enum_values:
+      type: array
+      items:
+        type: string
+      nullable: true
+    pii:
+      type: boolean
+      description: True when the contract marks this field x-pii
+    aliases:
+      type: array
+      items:
+        type: string
+      description: Alternate names the search index also matches (zip for
+        postal_code, victim for casualty, and similar). Sourced from the
+        field's x-aliases entry in incident-contract.yaml - the contract is
+        the single place aliases are defined; the catalog builder reads them
+        from the schema file at startup, nothing re-declares them in code.
+
+SchemaFieldSearchResponse:
+  type: object
+  required:
+    - total
+    - fields
+  properties:
+    query:
+      type: string
+      nullable: true
+      description: Echo of the q parameter, null when listing the full catalog
+    total:
+      type: integer
+    schema_version:
+      type: string
+      description: Incident-contract version the catalog was built from
+    fields:
+      type: array
+      description: Ranked matches when q is given, full catalog otherwise
+      items:
+        allOf:
+          - $ref: "#/SchemaFieldEntry"
+          - type: object
+            properties:
+              score:
+                type: number
+                nullable: true
+                description: Present only for search results

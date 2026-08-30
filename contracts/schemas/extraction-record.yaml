@@ -15,17 +15,41 @@ ExtractionRequest:
           description: Hint about the incident type (e.g. "wildland_fire", "structure_fire")
         state:
           type: string
-          description: US state code to apply state-specific extraction rules
+          description: State or region code to apply region-specific extraction rules
         agency_type:
           type: string
           description: Agency type hint for form selection
       additionalProperties: true
+    defaults:
+      type: object
+      description: |
+        Deployment context the extractor uses when the narrative does not say
+        otherwise: resolving relative dates ("yesterday evening") against the
+        local timezone, defaulting country, and picking the currency for
+        Money amounts. Server config supplies these when omitted.
+      properties:
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2
+        timezone:
+          type: string
+          description: IANA timezone name (e.g. "Asia/Kolkata")
+        currency:
+          type: string
+          description: ISO 4217 currency for extracted Money amounts
 
 ExtractionCompleted:
   type: object
+  description: |
+    A completed extraction. The contract document itself is stored once, on
+    the incident row this extraction links to (a draft incident is created
+    automatically the moment extraction completes). The extraction row keeps
+    only job metadata and the corrections audit trail; this response embeds
+    the contract read from the incident so the review screen needs one call.
   required:
     - extract_id
     - input_id
+    - incident_id
     - status
     - incident_contract
   properties:
@@ -35,6 +59,11 @@ ExtractionCompleted:
     input_id:
       type: string
       format: uuid
+    incident_id:
+      type: string
+      format: uuid
+      description: The draft incident row created when extraction completed.
+        It holds the contract document and is what form generation targets.
     status:
       type: string
       enum:
@@ -48,7 +77,10 @@ ExtractionCompleted:
     processing_time_seconds:
       type: number
     incident_contract:
-      $ref: "incident-contract.yaml#/IncidentContract"
+      description: The contract document, read from the linked incident row
+        (the single store; extractions hold no copy of it)
+      allOf:
+        - $ref: "incident-contract.yaml#/IncidentContract"
     corrections:
       type: array
       description: Audit trail of manual corrections applied via PATCH
@@ -103,12 +135,15 @@ ValidationResult:
   type: object
   required:
     - valid
-    - form_type
+    - template_id
     - extract_id
   properties:
     valid:
       type: boolean
-      description: Whether all required fields for this form type are present
+      description: Whether all required fields for this template are present
+    template_id:
+      type: string
+      format: uuid
     form_type:
       $ref: "enums.yaml#/FormType"
     extract_id:
@@ -117,13 +152,12 @@ ValidationResult:
     missing_required:
       type: array
       items:
-        type: string
-      description: JSON paths of required fields that are missing
+        $ref: "#/FieldGap"
     missing_recommended:
       type: array
       items:
-        type: string
-      description: JSON paths of recommended fields that are missing
+        $ref: "#/FieldGap"
+      description: Optional template fields that have no value yet
     warnings:
       type: array
       items:
@@ -132,3 +166,82 @@ ValidationResult:
     field_coverage_percent:
       type: number
       description: Percentage of form fields that have values
+
+FieldGap:
+  type: object
+  description: One template field that has no value yet, with enough context
+    for the UI to explain it and offer the right fix (type it in for manual
+    fields, correct the contract for schema fields).
+  required:
+    - field_name
+    - source
+  properties:
+    field_name:
+      type: string
+      description: The template's own field name
+    source:
+      $ref: "enums.yaml#/FieldSource"
+    incident_mapping:
+      type: string
+      nullable: true
+      description: Contract path the value would come from (source=schema),
+        or the custom_fields key (source=manual/open)
+    description:
+      type: string
+      nullable: true
+
+ReadinessMatrix:
+  type: object
+  description: |
+    Per-template fill readiness for one extraction, computed by comparing the
+    contract (including custom_fields) against every registered template's
+    field list. Pure lookup, no LLM. Drives the form-selection screen: ready
+    templates show green and selectable, the rest grey with their gaps
+    listed. Filling a gap (typing a manual value, correcting the contract)
+    and refetching flips the template to ready.
+  required:
+    - extract_id
+    - templates
+  properties:
+    extract_id:
+      type: string
+      format: uuid
+    computed_at:
+      type: string
+      format: date-time
+    templates:
+      type: array
+      items:
+        $ref: "#/TemplateReadiness"
+
+TemplateReadiness:
+  type: object
+  required:
+    - template_id
+    - form_type
+    - display_name
+    - ready
+  properties:
+    template_id:
+      type: string
+      format: uuid
+    form_type:
+      $ref: "enums.yaml#/FormType"
+    display_name:
+      type: string
+    ready:
+      type: boolean
+      description: True when every required field resolves to a value
+    missing_required:
+      type: array
+      items:
+        $ref: "#/FieldGap"
+      description: Required fields with no value. Empty when ready.
+    missing_recommended:
+      type: array
+      items:
+        $ref: "#/FieldGap"
+      description: Optional fields with no value; the form can still generate
+        with these left blank
+    field_coverage_percent:
+      type: number

@@ -8,11 +8,14 @@
 incidents:
   post:
     operationId: createIncident
-    summary: Create a full incident record
+    summary: Finalize the incident record for an extraction
     description: |
-      Creates a permanent incident record that links input, extraction, and
-      generated forms into a single coherent unit. Assigns a permanent incident_id
-      and stores the complete incident for future retrieval and reporting.
+      A draft incident row is created automatically the moment extraction
+      completes; it owns the contract document (the single store of incident
+      data) and its incident_id is returned by the extraction endpoints.
+      This endpoint finalizes that draft: assigns the department's incident
+      number and tags, and promotes the record for retrieval and reporting.
+      It never creates a second row for the same extraction.
     tags:
       - incidents
     requestBody:
@@ -40,6 +43,7 @@ incidents:
               extract_id: "550e8400-e29b-41d4-a716-446655440020"
               incident_number: "CA-SQF-2024-0421"
               status: "draft"
+              incident_datetime: "2024-07-10T13:52:00-07:00"
               forms_generated:
                 - form_id: "550e8400-e29b-41d4-a716-446655440040"
                   form_type: "neris"
@@ -79,19 +83,21 @@ incidents:
     parameters:
       - name: date_from
         in: query
-        description: Start date filter (inclusive, ISO 8601)
+        description: Start date filter (inclusive, ISO 8601), applied to
+          incident_datetime
         schema:
           type: string
           format: date
       - name: date_to
         in: query
-        description: End date filter (inclusive, ISO 8601)
+        description: End date filter (inclusive, ISO 8601), applied to
+          incident_datetime
         schema:
           type: string
           format: date
-      - name: incident_type
+      - name: incident_category
         in: query
-        description: Filter by incident category
+        description: Filter by the incident's primary category
         schema:
           $ref: "../schemas/enums.yaml#/IncidentCategory"
       - name: status
@@ -136,8 +142,9 @@ incidents:
                   incident_number: "CA-SQF-2024-0421"
                   status: "draft"
                   incident_name: "Bear Creek Wildfire"
-                  incident_type: "fire"
-                  incident_date: "2024-07-10"
+                  incident_type: "wildland_fire"
+                  incident_category: "fire"
+                  incident_datetime: "2024-07-10T13:52:00-07:00"
                   forms_count: 3
                   created_at: "2024-07-15T14:35:00Z"
               pagination:
@@ -166,7 +173,7 @@ incident_by_id:
     operationId: getIncident
     summary: Get full incident record
     description: |
-      Returns the complete incident record including the linked canonical
+      Returns the complete incident record including the linked incident
       extraction, all generated forms and their statuses, submission log,
       and audit trail.
     tags:

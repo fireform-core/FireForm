@@ -4,16 +4,19 @@ from app.models.models import (
     Extraction,
     Form,
     FormSubmission,
+    FormTemplate,
     Incident,
     Input,
     Job,
     Report,
     Template,
+    TemplateUpload,
 )
 
 __all__ = [
-    "Extraction",
-    "Form",
+    "Template",
+    "FormTemplate",
+    "TemplateUpload",
     "FormSubmission",
     "Incident",
     "Input",

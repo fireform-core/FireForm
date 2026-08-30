@@ -9,7 +9,7 @@ on:
       - 'alembic.ini'
       - '.github/workflows/tests.yml'
   pull_request:
-    branches: [main,development]
+    branches: [main, development, 'development-*']
     paths:
       - '**.py'
       - 'requirements.txt'

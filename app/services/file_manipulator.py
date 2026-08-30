@@ -2,7 +2,7 @@ import os
 
 from app.core.logging import get_logger
 from app.services.filler import Filler
-from app.services.llm import LLM
+from app.services.form_fill import extract_field_values
 
 logger = get_logger(__name__)
 
@@ -10,7 +10,6 @@ logger = get_logger(__name__)
 class FileManipulator:
     def __init__(self):
         self.filler = Filler()
-        self.llm = LLM()
 
     def prepare_fillable(self, pdf_path: str):
         """
@@ -18,7 +17,6 @@ class FileManipulator:
         fillable PDF. Returns the new path (alongside the original).
         """
         # Disable CUDA to force CPU usage, preventing errors on Mac Silicon / Docker
-        import os
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
         # Monkey patch rfdetr to force CPU usage on Mac Silicon / Docker
@@ -51,10 +49,8 @@ class FileManipulator:
 
         logger.info("[3] Starting extraction and PDF filling process...")
         try:
-            self.llm._target_fields = fields
-            self.llm._transcript_text = user_input
-            self.llm._model = model
-            output_name = self.filler.fill_form(pdf_form=pdf_form_path, llm=self.llm)
+            values = extract_field_values(user_input, fields, model=model)
+            output_name = self.filler.fill_form(pdf_form_path, values)
 
             logger.info("Process complete. Output saved to: %s", output_name)
 

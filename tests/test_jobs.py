@@ -7,21 +7,13 @@ from app.core.config import API_PREFIX
 
 class TestJobEndpoints:
 
-    def _seed_template(self, client):
-        resp = client.post(f"{API_PREFIX}/templates/create", json={
-            "name": "Test Template",
-            "pdf_path": "test.pdf",
-            "fields": {"name": "string"},
-        })
-        return resp.json()["id"]
-
     @patch("app.api.routes.jobs.fill_form_task")
-    def test_submit_async_single(self, mock_task, client):
+    def test_submit_async_single(self, mock_task, client, seed_template):
         mock_result = MagicMock()
         mock_result.id = "celery-task-id-1"
         mock_task.delay.return_value = mock_result
 
-        tpl_id = self._seed_template(client)
+        tpl_id = seed_template()
         resp = client.post(f"{API_PREFIX}/forms/jobs", json={
             "template_ids": [tpl_id],
             "input_text": "John Doe firefighter",
@@ -35,14 +27,14 @@ class TestJobEndpoints:
         mock_task.delay.assert_called_once_with(tpl_id, "John Doe firefighter", None)
 
     @patch("app.api.routes.jobs.fill_form_task")
-    def test_submit_async_batch(self, mock_task, client):
+    def test_submit_async_batch(self, mock_task, client, seed_template):
         mock_task.delay.side_effect = [
             MagicMock(id="task-1"),
             MagicMock(id="task-2"),
         ]
 
-        t1 = self._seed_template(client)
-        t2 = self._seed_template(client)
+        t1 = seed_template()
+        t2 = seed_template()
         resp = client.post(f"{API_PREFIX}/forms/jobs", json={
             "template_ids": [t1, t2],
             "input_text": "batch input",
@@ -63,10 +55,10 @@ class TestJobEndpoints:
         mock_task.delay.assert_not_called()
 
     @patch("app.api.routes.jobs.fill_form_task")
-    def test_get_job_status(self, mock_task, client):
+    def test_get_job_status(self, mock_task, client, seed_template):
         mock_task.delay.return_value = MagicMock(id="celery-abc")
 
-        tpl_id = self._seed_template(client)
+        tpl_id = seed_template()
         submit_resp = client.post(f"{API_PREFIX}/forms/jobs", json={
             "template_ids": [tpl_id],
             "input_text": "test input",
@@ -86,10 +78,10 @@ class TestJobEndpoints:
         assert resp.status_code == 404
 
     @patch("app.api.routes.jobs.fill_form_task")
-    def test_submit_with_model_override(self, mock_task, client):
+    def test_submit_with_model_override(self, mock_task, client, seed_template):
         mock_task.delay.return_value = MagicMock(id="celery-xyz")
 
-        tpl_id = self._seed_template(client)
+        tpl_id = seed_template()
         resp = client.post(f"{API_PREFIX}/forms/jobs", json={
             "template_ids": [tpl_id],
             "input_text": "test",

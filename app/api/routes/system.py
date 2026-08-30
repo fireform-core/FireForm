@@ -7,7 +7,7 @@ import shutil
 import time
 
 import requests
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
@@ -15,9 +15,11 @@ from app.api.schemas.system import (
     ComponentHealth,
     HealthComponents,
     HealthStatus,
-    ModelInfo,
+    SchemaFieldEntry,
+    SchemaFieldSearchResponse,
 )
-from app.core.config import APP_VERSION, DATA_DIR, OLLAMA_HOST, WHISPER_HOST
+from app.services import field_catalog, llm
+from app.core.config import APP_VERSION, DATA_DIR, WHISPER_HOST
 from app.db.database import engine
 
 router = APIRouter(tags=["system"])
@@ -41,59 +43,32 @@ def _check_database() -> ComponentHealth:
         return ComponentHealth(status="unhealthy", detail=str(exc))
 
 
-def _check_ollama() -> ComponentHealth:
-    t0 = time.monotonic()
-    try:
-        tags_resp = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=_PROBE_TIMEOUT)
-        tags_resp.raise_for_status()
-        elapsed = int((time.monotonic() - t0) * 1000)
+def _check_llm() -> ComponentHealth:
+    """Health for whichever provider this deployment is configured for.
 
-        tags_data = tags_resp.json()
+    A local provider is probed. A hosted one is not, so the model list is left
+    out there too: both cost quota to answer a question the configuration
+    already answers.
+    """
+    report = llm.health()
+    status = report.status
+    if status == "healthy" and report.response_time_ms and report.response_time_ms > _SLOW_MS:
+        status = "degraded"
 
-        ollama_version: str | None = None
-        try:
-            ver_resp = requests.get(f"{OLLAMA_HOST}/api/version", timeout=_PROBE_TIMEOUT)
-            ver_resp.raise_for_status()
-            ollama_version = ver_resp.json().get("version")
-        except Exception:
-            pass
+    models: list[str] | None = None
+    if report.probed and status != "unhealthy":
+        models = [model.name for model in llm.list_models()]
 
-        running_names: set[str] = set()
-        model_loaded: str | None = None
-        try:
-            ps_resp = requests.get(f"{OLLAMA_HOST}/api/ps", timeout=_PROBE_TIMEOUT)
-            ps_resp.raise_for_status()
-            running = ps_resp.json().get("models", [])
-            running_names = {m.get("name", "") for m in running}
-            if running:
-                model_loaded = running[0].get("name")
-        except Exception:
-            pass
-
-        raw_models = tags_data.get("models", [])
-        models_available: list[ModelInfo] = []
-        for m in raw_models:
-            name = m.get("name", "")
-            size_gb = round(m.get("size", 0) / (1024 ** 3), 2)
-            quantization = m.get("details", {}).get("quantization_level")
-            models_available.append(
-                ModelInfo(name=name, size_gb=size_gb, quantization=quantization, loaded=name in running_names)
-            )
-
-        status = "degraded" if elapsed > _SLOW_MS else "healthy"
-
-        return ComponentHealth(
-            status=status,
-            response_time_ms=elapsed,
-            model_loaded=model_loaded,
-            ollama_version=ollama_version,
-            models_available=models_available if models_available else None,
-            # current_load is always None — Ollama exposes no queue-depth API;
-            # populating it would require fabricating data.
-            current_load=None,
-        )
-    except requests.exceptions.RequestException as exc:
-        return ComponentHealth(status="unhealthy", detail=str(exc))
+    return ComponentHealth(
+        status=status,
+        response_time_ms=report.response_time_ms,
+        detail=report.detail,
+        provider=report.provider,
+        model=report.model,
+        external=report.external,
+        probed=report.probed,
+        models_available=models,
+    )
 
 
 def _check_whisper() -> ComponentHealth:
@@ -128,15 +103,15 @@ def _check_storage() -> ComponentHealth:
 )
 def get_health():
     database = _check_database()
-    ollama = _check_ollama()
+    provider = _check_llm()
     whisper = _check_whisper()
     storage = _check_storage()
 
     components = HealthComponents(
-        database=database, ollama=ollama, whisper=whisper, storage=storage
+        database=database, llm=provider, whisper=whisper, storage=storage
     )
 
-    statuses = {database.status, ollama.status, whisper.status, storage.status}
+    statuses = {database.status, provider.status, whisper.status, storage.status}
 
     if database.status == "unhealthy":
         overall = "unhealthy"
@@ -178,4 +153,36 @@ def get_schema_versions():
             "error_code": "NOT_IMPLEMENTED",
             "message": "Schema version history not yet available — see issue #555",
         },
+    )
+
+
+@router.get(
+    "/schema/fields",
+    response_model=SchemaFieldSearchResponse,
+    summary="Search or list the incident-contract field catalog",
+)
+def search_schema_fields(
+    q: str | None = Query(None, description="Search text, matched against names, aliases and descriptions"),
+    section: str | None = Query(None, description="Restrict to one top-level contract section"),
+    limit: int = Query(20, ge=1, le=100, description="Caps search results, ignored when q is omitted"),
+):
+    hits = field_catalog.search(q, section, limit)
+    return SchemaFieldSearchResponse(
+        query=q,
+        total=len(hits),
+        schema_version=field_catalog.schema_version(),
+        fields=[
+            SchemaFieldEntry(
+                path=entry.path,
+                label=entry.label,
+                field_type=entry.field_type,
+                section=entry.section,
+                description=entry.description,
+                enum_values=list(entry.enum_values) if entry.enum_values else None,
+                pii=entry.pii,
+                aliases=list(entry.aliases),
+                score=score,
+            )
+            for entry, score in hits
+        ],
     )

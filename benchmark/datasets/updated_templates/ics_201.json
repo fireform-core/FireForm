@@ -1,0 +1,639 @@
+{
+  "form_type": "ics_201",
+  "display_name": "ICS 201 - Incident Briefing",
+  "jurisdiction": null,
+  "agency_type": "incident_management",
+  "source_standard": "FEMA ICS 201",
+  "pdf_template_ref": null,
+  "fields": [
+    {
+      "field_name": "4 MapSketch include sketch showing the total area of operations the incident sitearea impacted and threatened areas overflight results trajectories impacted shorelines or other graphics depicting situational status and resource assignment",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "Complete ICS 201 map and sketch narrative: describe the area of operations, incident site, impacted and threatened areas, overflight results, trajectories, shorelines, and relevant map features."
+    },
+    {
+      "field_name": "5 Situation Summary and Health and Safety Briefing for briefings or transfer of command Recognize potential incident Health and Safety Hazards and develop necessary measures remove hazard provide personal protective equipment warn people of the hazard to protect responders from those hazards",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "Complete ICS 201 situation and safety briefing: summarize the incident, identify responder health and safety hazards, and state the required protective or hazard-control measures."
+    },
+    {
+      "field_name": "6 Prepared by Name",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 prepared by: extract the assigned person name from the incident narrative."
+    },
+    {
+      "field_name": "7 Current and Planned Objectives",
+      "field_type": "string",
+      "source": "schema",
+      "required": false,
+      "description": "List all current and planned incident objectives for ICS 201, including stated deadlines or completion targets.",
+      "incident_mapping": "situation_status.strategic_objectives"
+    },
+    {
+      "field_name": "9 Current Organization fill in additional organization as appropriate Incident Commanders Operations Section Chief Planning Section Chief Logistics Section Chief FinanceAdministration Section Chief Safety Officer Public Information Officer Liaison Officer",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "List additional ICS 201 organization positions and assigned people not already captured in the named command and general staff fields."
+    },
+    {
+      "field_name": "ActionsRow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 1: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 2: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 3: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 4: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 5: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 6: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 7: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 8: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "ActionsRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 9: extract the action, strategy, or tactic performed or planned at this row time from the incident narrative."
+    },
+    {
+      "field_name": "Check Box1",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 1 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Check Box2",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 2 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Check Box3",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 3 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Check Box4",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 4 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Check Box5",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 5 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Check Box8",
+      "field_type": "boolean",
+      "source": "open",
+      "required": false,
+      "description": "Whether the resource in ICS 201 resource-summary row 8 has arrived on scene. Return yes or no."
+    },
+    {
+      "field_name": "Date",
+      "field_type": "string",
+      "source": "schema",
+      "required": false,
+      "description": "ICS 201 date time initiated: extract the calendar date from the incident narrative. Return MM/DD/YYYY.",
+      "incident_mapping": "report_metadata.report_date"
+    },
+    {
+      "field_name": "DateTime",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 prepared by: extract the date and time from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 1: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 2: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 3: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 4: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 5: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 6: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 7: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 8: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "DateTime OrderedRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 9: extract the date and time the resource was ordered from the incident narrative. Return MM/DD/YYYY HH:MM."
+    },
+    {
+      "field_name": "ETARow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 1: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 2: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 3: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 4: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 5: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 6: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 7: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 8: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "ETARow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 9: extract the resource arrival or estimated arrival time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "FinanceAdministration Section Chief",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the finance administration section chief from the incident narrative."
+    },
+    {
+      "field_name": "Incident Commanders",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "Names and represented agencies of every Incident Commander or Unified Command member."
+    },
+    {
+      "field_name": "Incident Name",
+      "field_type": "string",
+      "source": "schema",
+      "required": false,
+      "description": "ICS 201: extract the official incident name from the incident narrative.",
+      "incident_mapping": "incident.name"
+    },
+    {
+      "field_name": "Incident Number",
+      "field_type": "string",
+      "source": "schema",
+      "required": false,
+      "description": "ICS 201: extract the official incident identifier or incident number from the incident narrative.",
+      "incident_mapping": "report_metadata.incident_number"
+    },
+    {
+      "field_name": "Liaison Officer",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the liaison officer from the incident narrative."
+    },
+    {
+      "field_name": "Logistics Section Chief",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the logistics section chief from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 1: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatusRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 8: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatusRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 9: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 2: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 3: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 4: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 5: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 6: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Notes locationassignmentstatus_7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 7: extract the resource location, assignment, status, and relevant notes from the incident narrative."
+    },
+    {
+      "field_name": "Operations Section Chief_2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the operations section chief from the incident narrative."
+    },
+    {
+      "field_name": "Planning Section Chief_2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the planning section chief from the incident narrative."
+    },
+    {
+      "field_name": "PositionTitle",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 prepared by: extract the assigned person position or title from the incident narrative."
+    },
+    {
+      "field_name": "Public Information Officer",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the public information officer from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 1: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 2: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 3: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 4: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 5: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 6: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 7: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 8: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "Resource IdentifierRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 9: extract the resource identifier, unit name, or call sign from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 1: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 2: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 3: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 4: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 5: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 6: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 7: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 8: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "ResourceRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 resource summary entry 9: extract the resource type or category from the incident narrative."
+    },
+    {
+      "field_name": "Safety Officer",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current organization: extract the safety officer from the incident narrative."
+    },
+    {
+      "field_name": "Signature",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 prepared by: extract the name represented by the signature from the incident narrative."
+    },
+    {
+      "field_name": "Time",
+      "field_type": "string",
+      "source": "schema",
+      "required": false,
+      "description": "ICS 201 date time initiated: extract the time from the incident narrative. Return HH:MM.",
+      "incident_mapping": "report_metadata.report_time"
+    },
+    {
+      "field_name": "TimeRow1",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 1: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow2",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 2: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow3",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 3: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow4",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 4: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow5",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 5: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow6",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 6: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow7",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 7: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow8",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 8: extract the time from the incident narrative. Return HH:MM."
+    },
+    {
+      "field_name": "TimeRow9",
+      "field_type": "string",
+      "source": "open",
+      "required": false,
+      "description": "ICS 201 current and planned actions strategies tactics entry 9: extract the time from the incident narrative. Return HH:MM."
+    }
+  ]
+}
+

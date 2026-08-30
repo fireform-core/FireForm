@@ -2,6 +2,7 @@
 # POST /api/v1/extract/{input_id}
 # GET /api/v1/extract/{extract_id}
 # PATCH /api/v1/extract/{extract_id}
+# GET /api/v1/extract/{extract_id}/readiness
 # POST /api/v1/extract/{extract_id}/validate
 
 extract_by_input:
@@ -9,10 +10,36 @@ extract_by_input:
     operationId: createExtraction
     summary: Start AI extraction from input narrative
     description: |
-      Sends the narrative (from a previously submitted input) to the local Ollama
-      LLM with a structured prompt to extract all incident fields into the canonical
-      FireForm JSON schema. This is an asynchronous operation the LLM may take
-      30–120 seconds. Returns an extract_id and job_id for polling.
+      Extracts the narrative (from a previously submitted input) into the
+      incident contract. The contract is far too large for one LLM
+      call, so the extractor splits it into small field groups and runs them
+      as parallel calls against the configured provider (bounded by
+      LLM_MAX_PARALLEL and available RAM), validates each group against
+      the schema with per-group retry, and stitches the validated pieces
+      into one document.
+
+      A provider that rate limits the run is retried, and if the limit does not
+      lift the extraction is recorded as failed with error_type
+      LLM_RATE_LIMITED. Everything the earlier waves already produced is kept
+      in partial_result rather than thrown away.
+
+      Open fields from registered templates (source=open) are extracted in
+      the same run as extra groups, so their values reach the review screen
+      together with everything else; they are stored under the contract's
+      custom_fields keyed "{form_type}.{field_name}".
+
+      Deterministic context is applied without the LLM where possible:
+      relative dates resolve against the configured timezone, and country
+      and currency defaults come from the request or server config.
+
+      The moment extraction completes, the server creates a draft incident
+      row holding the stitched contract document. That row is the single
+      store of incident data: review corrections write into it, and form
+      generation reads from it by incident_id. The extraction row itself
+      keeps only job metadata and the corrections audit trail.
+
+      This is an asynchronous operation and may take 30-120 seconds.
+      Returns an extract_id and job_id for polling.
     tags:
       - extraction
     parameters:
@@ -34,6 +61,10 @@ extract_by_input:
             extraction_hints:
               incident_type: "wildland_fire"
               state: "CA"
+            defaults:
+              country: "US"
+              timezone: "America/Los_Angeles"
+              currency: "USD"
     responses:
       "202":
         description: Extraction job queued successfully
@@ -81,26 +112,27 @@ extract_by_input:
                   detail:
                     existing_extract_id: "550e8400-e29b-41d4-a716-446655440020"
       "503":
-        description: Ollama LLM service unavailable
+        description: The configured LLM provider is unavailable
         content:
           application/json:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
             example:
               error_code: "LLM_UNAVAILABLE"
-              message: "Ollama LLM service is not available"
+              message: "The Ollama LLM service is not available"
               retry_after_seconds: 30
               detail:
-                ollama_status: "connection_refused"
+                provider: "ollama"
+                reason: "connection refused"
 
 extract_by_id:
   get:
     operationId: getExtraction
     summary: Get extraction result by ID
     description: |
-      Returns the full canonical FireForm JSON when extraction is complete, or
+      Returns the full incident contract when extraction is complete, or
       the current job status while still processing. When status is "completed",
-      the response body contains the entire canonical incident schema. When still
+      the response body contains the entire incident contract. When still
       processing, includes a retry_after_seconds hint for polling.
     tags:
       - extraction
@@ -123,10 +155,11 @@ extract_by_id:
                 - $ref: "../schemas/extraction-record.yaml#/ExtractionProcessing"
             examples:
               completed:
-                summary: Extraction completed with canonical JSON
+                summary: Extraction completed with the incident contract
                 value:
                   extract_id: "550e8400-e29b-41d4-a716-446655440020"
                   input_id: "550e8400-e29b-41d4-a716-446655440001"
+                  incident_id: "550e8400-e29b-41d4-a716-446655440050"
                   status: "completed"
                   completed_at: "2024-07-15T14:31:05Z"
                   incident_contract:
@@ -159,10 +192,20 @@ extract_by_id:
     operationId: updateExtraction
     summary: Manually correct extracted fields
     description: |
-      Allows a responder to correct any field in the canonical JSON after LLM
-      extraction. Uses JSON Merge Patch (RFC 7396) only send the fields that
-      changed. The server records an audit trail of all changes vs the original
-      LLM output and recalculates completeness scores and applicable_forms.
+      The review-screen write path. Lets a responder correct any field in the
+      contract after extraction: fix a wrong value, add a missing one, or
+      remove a hallucinated one (RFC 7396: sending null deletes the field).
+      Manual template fields are entered the same way, and open-field values
+      corrected the same way, both under custom_fields keyed
+      "{form_type}.{field_name}". Only send the fields that changed.
+
+      Corrections are applied to the contract document on the linked
+      incident row (the single store of incident data), so form generation
+      and analytics always see the reviewed values with no copy to sync.
+      The server records an audit trail of all changes vs the original LLM
+      output on the extraction and recalculates completeness, analytics
+      columns and readiness, so a corrected field immediately flips
+      dependent templates to ready in the readiness matrix.
     tags:
       - extraction
     parameters:
@@ -181,13 +224,15 @@ extract_by_id:
           schema:
             $ref: "../schemas/incident-contract.yaml#/IncidentContract"
           example:
-            fire:
-              estimated_damage_usd: 250000
+            losses:
+              property_loss:
+                amount: 250000
+                currency: "USD"
             casualties:
               total_responder_injuries: 2
     responses:
       "200":
-        description: Extraction updated returns full updated canonical JSON
+        description: Extraction updated returns the full updated incident contract
         content:
           application/json:
             schema:
@@ -199,17 +244,27 @@ extract_by_id:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
       "409":
-        description: Extraction is locked (already submitted)
+        description: Conflict extraction locked or not yet completed
         content:
           application/json:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
-            example:
-              error_code: "EXTRACT_LOCKED"
-              message: "Cannot modify extraction incident report has been submitted"
-              detail:
-                report_status: "submitted"
-                submitted_at: "2024-07-15T18:00:00Z"
+            examples:
+              locked:
+                summary: Report already submitted
+                value:
+                  error_code: "EXTRACT_LOCKED"
+                  message: "Cannot modify extraction incident report has been submitted"
+                  detail:
+                    report_status: "submitted"
+                    submitted_at: "2024-07-15T18:00:00Z"
+              not_completed:
+                summary: Extraction still running, no document to correct yet
+                value:
+                  error_code: "EXTRACT_NOT_COMPLETED"
+                  message: "Extraction is in 'processing' state. Wait until status is 'completed'."
+                  detail:
+                    current_status: "processing"
       "422":
         description: Invalid field path or value
         content:
@@ -224,15 +279,90 @@ extract_by_id:
                   issue: "Must be one of: confirmed, probable, suspected, undetermined"
                   value: "maybe"
 
+readiness:
+  get:
+    operationId: getExtractionReadiness
+    summary: Fill readiness of every registered template for this extraction
+    description: |
+      The form-selection matrix. Compares the extracted contract against the 
+      field list of every active template and reports, per template, whether 
+      it can be generated right now and which fields block it. Pure lookup 
+      over stored data, no LLM, so it is cheap to refetch after every correction.
+
+      The frontend renders ready templates green and selectable, the rest
+      greyed out; hovering or clicking a grey one lists its gaps from
+      missing_required. Typing a manual value or correcting the contract via
+      PATCH and refetching flips templates to ready.
+    tags:
+      - extraction
+    parameters:
+      - name: extract_id
+        in: path
+        required: true
+        description: Unique identifier of the extraction
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Readiness of every active template
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/extraction-record.yaml#/ReadinessMatrix"
+            example:
+              extract_id: "550e8400-e29b-41d4-a716-446655440020"
+              computed_at: "2026-07-15T14:35:00Z"
+              templates:
+                - template_id: "550e8400-e29b-41d4-a716-446655440070"
+                  form_type: "neris"
+                  display_name: "NERIS Incident Report"
+                  ready: true
+                  missing_required: []
+                  missing_recommended:
+                    - field_name: "smoke_alarm_presence"
+                      source: "schema"
+                      incident_mapping: "risk_reduction.smoke_alarm.presence"
+                  field_coverage_percent: 94
+                - template_id: "550e8400-e29b-41d4-a716-446655440073"
+                  form_type: "state_texas"
+                  display_name: "Texas State Fire Marshal Incident Report"
+                  ready: false
+                  missing_required:
+                    - field_name: "marshal_signature_name"
+                      source: "manual"
+                      incident_mapping: "custom_fields.state_texas.marshal_signature_name"
+                      description: "Reviewing marshal's printed name, entered per incident"
+                    - field_name: "fire_cause"
+                      source: "schema"
+                      incident_mapping: "fire.cause_category"
+                  missing_recommended: []
+                  field_coverage_percent: 78
+      "404":
+        description: Extraction not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "409":
+        description: Extraction not yet completed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "EXTRACT_NOT_COMPLETED"
+              message: "Extraction is still processing. Wait until status is 'completed'."
+
 validate:
   post:
     operationId: validateExtraction
-    summary: Validate extraction against a form's requirements
+    summary: Validate extraction against one template's requirements
     description: |
-      Validates the canonical JSON against a specific form type's field requirements.
-      Returns whether the extraction has all required fields, which recommended
-      fields are missing, and any warnings. Useful for checking "can I generate
-      a NERIS report with what I have?" before triggering form generation.
+      Single-template version of the readiness matrix: checks the contract
+      against one registered template and returns the gaps in detail. Useful
+      for re-checking just the template the user is looking at instead of
+      recomputing the whole matrix.
     tags:
       - extraction
     parameters:
@@ -250,12 +380,13 @@ validate:
           schema:
             type: object
             required:
-              - form_type
+              - template_id
             properties:
-              form_type:
-                $ref: "../schemas/enums.yaml#/FormType"
+              template_id:
+                type: string
+                format: uuid
           example:
-            form_type: "neris"
+            template_id: "550e8400-e29b-41d4-a716-446655440070"
     responses:
       "200":
         description: Validation result
@@ -265,49 +396,35 @@ validate:
               $ref: "../schemas/extraction-record.yaml#/ValidationResult"
             example:
               valid: true
+              template_id: "550e8400-e29b-41d4-a716-446655440070"
               form_type: "neris"
               extract_id: "550e8400-e29b-41d4-a716-446655440020"
               missing_required: []
               missing_recommended:
-                - "fire.detector_present"
-                - "fire.detector_operated"
+                - field_name: "smoke_alarm_presence"
+                  source: "schema"
+                  incident_mapping: "risk_reduction.smoke_alarm.presence"
+                - field_name: "smoke_alarm_operation"
+                  source: "schema"
+                  incident_mapping: "risk_reduction.smoke_alarm.operation"
               warnings:
-                - "fire.estimated_damage_usd is null NERIS recommends providing damage estimates"
+                - "losses.property_loss is null. NERIS recommends providing damage estimates"
               field_coverage_percent: 94
       "404":
-        description: Extraction not found
-        content:
-          application/json:
-            schema:
-              $ref: "../schemas/common.yaml#/ErrorResponse"
-      "422":
-        description: Unknown form type
+        description: Extraction or template not found
         content:
           application/json:
             schema:
               $ref: "../schemas/common.yaml#/ErrorResponse"
             example:
-              error_code: "UNKNOWN_FORM_TYPE"
-              message: "Form type 'xyz' is not recognized"
-              detail:
-                valid_form_types:
-                  - neris
-                  - nemsis_epcr
-                  - nibrs
-                  - nfirs_basic
-                  - nfirs_fire
-                  - nfirs_structure
-                  - nfirs_wildland
-                  - nfirs_ems
-                  - nfirs_hazmat
-                  - nfirs_apparatus
-                  - nfirs_personnel
-                  - nfirs_arson
-                  - nfirs_casualty_civilian
-                  - nfirs_casualty_responder
-                  - cal_fire_ics209
-                  - osha_301
-                  - un_ssirs
-                  - state_georgia
-                  - state_california
-                  - state_new_york
+              error_code: "TEMPLATE_NOT_FOUND"
+              message: "Template with ID 550e8400-e29b-41d4-a716-446655440099 not found"
+      "409":
+        description: Extraction not yet completed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "EXTRACT_NOT_COMPLETED"
+              message: "Extraction is still processing. Wait until status is 'completed'."

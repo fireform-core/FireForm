@@ -31,6 +31,9 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY app/ ./app/
+# The extraction worker reads the incident contract at startup for its chunk
+# tiers and triggers, so the schemas ship with the image.
+COPY contracts/schemas/ ./contracts/schemas/
 COPY requirements.txt .
 COPY docker/entrypoint.sh /entrypoint.sh
 

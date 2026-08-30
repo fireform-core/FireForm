@@ -42,6 +42,7 @@ def test_upgrade_head(alembic_cfg, alembic_engine):
     assert "incidents" in tables
     assert "forms" in tables
     assert "reports" in tables
+    assert "form_templates" in tables
     assert "alembic_version" in tables
 
 
@@ -174,7 +175,7 @@ def test_extractions_columns(alembic_cfg, alembic_engine):
         "completed_at",
         "model_used",
         "processing_time_seconds",
-        "incident_contract",
+        "partial_result",
         "corrections",
         "error_type",
         "error_detail",
@@ -205,9 +206,28 @@ def test_incidents_columns(alembic_cfg, alembic_engine):
         "status",
         "incident_name",
         "incident_type",
-        "incident_date",
         "tags",
         "notes",
+        "incident_contract",
+        "incident_category",
+        "incident_datetime",
+        "city",
+        "state",
+        "country",
+        "civilian_injuries",
+        "civilian_fatalities",
+        "responder_injuries",
+        "responder_fatalities",
+        "people_rescued",
+        "people_evacuated",
+        "structures_destroyed",
+        "area_burned_ha",
+        "total_loss_amount",
+        "total_loss_currency",
+        "call_to_arrival_seconds",
+        "turnout_seconds_first_unit",
+        "travel_seconds_first_unit",
+        "on_scene_duration_seconds",
         "created_at",
         "updated_at",
         "deleted_at",
@@ -233,8 +253,9 @@ def test_forms_columns(alembic_cfg, alembic_engine):
         "form_id",
         "form_type",
         "status",
-        "extract_id",
+        "template_id",
         "incident_id",
+        "batch_id",
         "job_id",
         "completed_at",
         "pdf_ready",
@@ -252,9 +273,10 @@ def test_forms_fk(alembic_cfg, alembic_engine):
 
     inspector = inspect(alembic_engine)
     fks = {fk["referred_table"]: fk for fk in inspector.get_foreign_keys("forms")}
-    # extract_id → extractions and incident_id → incidents; job_id has NO FK constraint
-    assert "extractions" in fks
-    assert fks["extractions"]["referred_columns"] == ["extract_id"]
+    # template_id → form_templates and incident_id → incidents; job_id and
+    # batch_id have NO FK constraint (batch_id is a grouping key, no Batch table)
+    assert "form_templates" in fks
+    assert fks["form_templates"]["referred_columns"] == ["template_id"]
     assert "incidents" in fks
     assert fks["incidents"]["referred_columns"] == ["incident_id"]
     assert len(fks) == 2
@@ -294,9 +316,9 @@ def test_reports_no_fk(alembic_cfg, alembic_engine):
 
 
 def test_downgrade_002(alembic_cfg, alembic_engine):
-    """Downgrade by one step removes only the 002 tables, leaving 001 tables intact."""
+    """Downgrade to 001 removes the 002, 003 and 004 tables, leaving 001 intact."""
     command.upgrade(alembic_cfg, "head")
-    command.downgrade(alembic_cfg, "-1")
+    command.downgrade(alembic_cfg, "001")
 
     inspector = inspect(alembic_engine)
     tables = inspector.get_table_names()
@@ -305,6 +327,209 @@ def test_downgrade_002(alembic_cfg, alembic_engine):
     assert "incidents" not in tables
     assert "forms" not in tables
     assert "reports" not in tables
+    assert "form_templates" not in tables
+    assert "template_uploads" not in tables
     assert "template" in tables
     assert "formsubmission" in tables
     assert "job" in tables
+
+
+# ---------------------------------------------------------------------------
+# 004 — form_templates registry and template_uploads drafts
+# ---------------------------------------------------------------------------
+
+def test_form_templates_columns(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"] for c in inspector.get_columns("form_templates")}
+    assert columns == {
+        "template_id",
+        "form_type",
+        "display_name",
+        "jurisdiction",
+        "agency_type",
+        "fields",
+        "source_standard",
+        "pdf_template_ref",
+        "version",
+        "status",
+        "created_at",
+        "updated_at",
+    }
+
+
+def test_form_templates_unique_form_type(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    indexes = {ix["name"]: ix for ix in inspector.get_indexes("form_templates")}
+    assert indexes["ix_form_templates_form_type"]["unique"]
+
+
+def test_form_templates_no_fk(alembic_cfg, alembic_engine):
+    """form_templates is a standalone registry — no FK to legacy template/incidents."""
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    assert inspector.get_foreign_keys("form_templates") == []
+
+
+def test_template_uploads_columns(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"] for c in inspector.get_columns("template_uploads")}
+    assert columns == {
+        "upload_id",
+        "status",
+        "pdf_path",
+        "pdf_template_ref",
+        "original_filename",
+        "page_count",
+        "pages",
+        "detected_fields",
+        "detection_error",
+        "job_id",
+        "created_at",
+        "updated_at",
+    }
+
+
+def test_template_uploads_no_fk(alembic_cfg, alembic_engine):
+    """Uploads are drafts, not templates, so nothing points at them yet."""
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    assert inspector.get_foreign_keys("template_uploads") == []
+
+
+def test_downgrade_004(alembic_cfg, alembic_engine):
+    """Downgrade to 003 removes both 004 tables, leaving 003 intact.
+
+    Targets the "003" revision explicitly rather than "-1": 005 now sits on
+    top of head, so a relative one-step downgrade only undoes 005, not 004.
+    """
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "003")
+
+    inspector = inspect(alembic_engine)
+    tables = inspector.get_table_names()
+    assert "form_templates" not in tables
+    assert "template_uploads" not in tables
+    assert "inputs" in tables
+    assert "forms" in tables
+    assert "reports" in tables
+
+
+# ---------------------------------------------------------------------------
+# 005 — forms: template_id/incident_id/batch_id, drop extract_id
+# ---------------------------------------------------------------------------
+
+def test_forms_template_id_not_nullable(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"]: c for c in inspector.get_columns("forms")}
+    assert not columns["template_id"]["nullable"]
+
+
+def test_forms_incident_id_not_nullable(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"]: c for c in inspector.get_columns("forms")}
+    assert not columns["incident_id"]["nullable"]
+
+
+def test_forms_batch_id_nullable_no_fk(alembic_cfg, alembic_engine):
+    """batch_id is a plain grouping key — nullable, no FK (no Batch table)."""
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"]: c for c in inspector.get_columns("forms")}
+    assert columns["batch_id"]["nullable"]
+    referred_tables = {fk["referred_table"] for fk in inspector.get_foreign_keys("forms")}
+    assert "batches" not in referred_tables
+
+
+def test_forms_extract_id_removed(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"] for c in inspector.get_columns("forms")}
+    assert "extract_id" not in columns
+
+
+def test_downgrade_005(alembic_cfg, alembic_engine):
+    """Downgrade to 004 restores 004's forms shape.
+
+    Targets "004" explicitly rather than "-1": 006 now sits on top of head, so
+    a relative one-step downgrade only undoes 006, not 005.
+    """
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "004")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"]: c for c in inspector.get_columns("forms")}
+    assert "extract_id" in columns
+    assert "template_id" not in columns
+    assert "batch_id" not in columns
+    assert columns["incident_id"]["nullable"]
+
+    fks = {fk["referred_table"] for fk in inspector.get_foreign_keys("forms")}
+    assert "extractions" in fks
+    assert "form_templates" not in fks
+
+    # form_templates itself is untouched — only introduced by 004, not by 005
+    assert "form_templates" in inspector.get_table_names()
+
+
+def test_round_trip_005(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "004")
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    columns = {c["name"] for c in inspector.get_columns("forms")}
+    assert "template_id" in columns
+    assert "batch_id" in columns
+    assert "extract_id" not in columns
+
+
+def test_incidents_indexes(alembic_cfg, alembic_engine):
+    """006 adds the two indexes GET /incidents and the number check rely on."""
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    indexes = {ix["name"]: ix for ix in inspector.get_indexes("incidents")}
+
+    assert indexes["ix_incidents_live_datetime"]["column_names"] == [
+        "deleted_at",
+        "incident_datetime",
+    ]
+    assert indexes["ix_incidents_number_live"]["unique"]
+
+
+def test_downgrade_006(alembic_cfg, alembic_engine):
+    """Downgrade to 005 drops the indexes and puts incident_date back."""
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "005")
+
+    inspector = inspect(alembic_engine)
+    assert "incident_date" in {c["name"] for c in inspector.get_columns("incidents")}
+    assert "ix_incidents_live_datetime" not in {
+        ix["name"] for ix in inspector.get_indexes("incidents")
+    }
+
+
+def test_round_trip_006(alembic_cfg, alembic_engine):
+    command.upgrade(alembic_cfg, "head")
+    command.downgrade(alembic_cfg, "005")
+    command.upgrade(alembic_cfg, "head")
+
+    inspector = inspect(alembic_engine)
+    assert "incident_date" not in {c["name"] for c in inspector.get_columns("incidents")}
+    assert "ix_incidents_number_live" in {
+        ix["name"] for ix in inspector.get_indexes("incidents")
+    }

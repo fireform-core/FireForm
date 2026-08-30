@@ -1,8 +1,8 @@
 """Tests for GET /api/v1/health, /schema/incident, /schema/incident/versions.
 
-External dependencies (Ollama, Whisper, disk, DB) are mocked at the route-module
-boundary. The health check uses engine.connect() directly (not the get_db
-dependency) so we mock system_mod.engine explicitly in every test.
+External dependencies (the LLM provider, Whisper, disk, DB) are mocked at the
+route-module boundary. The health check uses engine.connect() directly (not the
+get_db dependency) so we mock system_mod.engine explicitly in every test.
 """
 
 from unittest.mock import MagicMock
@@ -11,6 +11,7 @@ import pytest
 import requests as requests_lib
 
 import app.api.routes.system as system_mod
+from app.services.llm.models import ModelInfo, ProviderHealth
 
 # ---------------------------------------------------------------------------
 # Low-level helpers
@@ -50,6 +51,37 @@ def _mock_shutil(free_bytes: int = 120 * 1024 ** 3, raise_oserror: bool = False)
         usage.free = free_bytes
         mock.disk_usage.return_value = usage
     return mock
+
+
+def _fake_llm(
+    monkeypatch,
+    status="healthy",
+    provider="ollama",
+    model="llama3:8b",
+    external=False,
+    probed=True,
+    response_time_ms=15,
+    detail=None,
+    models=("llama3:8b", "mistral:7b"),
+):
+    """Stand in for the LLM module the health route asks."""
+    report = ProviderHealth(
+        provider=provider,
+        label=provider.title(),
+        model=model,
+        external=external,
+        status=status,
+        probed=probed,
+        detail=detail,
+        response_time_ms=response_time_ms,
+    )
+    monkeypatch.setattr(system_mod.llm, "health", lambda: report)
+    monkeypatch.setattr(
+        system_mod.llm,
+        "list_models",
+        lambda: [ModelInfo(name=name, default=name == model) for name in models],
+    )
+    return report
 
 
 def _make_mock_response(json_data=None, status_code=200):
@@ -116,6 +148,11 @@ def _fake_get_whisper_down(url, timeout=None):
 
 class TestHealthEndpoint:
 
+    @pytest.fixture(autouse=True)
+    def _healthy_llm(self, monkeypatch):
+        """A working local provider, unless a test says otherwise."""
+        _fake_llm(monkeypatch)
+
     def test_all_healthy(self, client, monkeypatch):
         monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
         monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
@@ -131,21 +168,33 @@ class TestHealthEndpoint:
 
         comps = body["components"]
         assert comps["database"]["status"] == "healthy"
-        assert comps["ollama"]["status"] == "healthy"
+        assert comps["llm"]["status"] == "healthy"
         assert comps["whisper"]["status"] == "healthy"
         assert comps["storage"]["status"] == "healthy"
 
-    def test_ollama_down_returns_200_degraded(self, client, monkeypatch):
+    def test_llm_component_names_the_provider_and_model(self, client, monkeypatch):
+        monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
+        monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
+        monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_all_healthy)
+
+        component = client.get("/api/v1/health").json()["components"]["llm"]
+        assert component["provider"] == "ollama"
+        assert component["model"] == "llama3:8b"
+        assert component["external"] is False
+        assert component["probed"] is True
+
+    def test_llm_down_returns_200_degraded(self, client, monkeypatch):
         monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
         monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
         monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_ollama_down)
+        _fake_llm(monkeypatch, status="unhealthy", detail="connection refused")
 
         resp = client.get("/api/v1/health")
 
         assert resp.status_code == 200
         body = resp.json()
         assert body["status"] == "degraded"
-        assert body["components"]["ollama"]["status"] == "unhealthy"
+        assert body["components"]["llm"]["status"] == "unhealthy"
         assert body["components"]["database"]["status"] == "healthy"
         assert body["components"]["whisper"]["status"] == "healthy"
 
@@ -160,7 +209,7 @@ class TestHealthEndpoint:
         body = resp.json()
         assert body["status"] == "degraded"
         assert body["components"]["whisper"]["status"] == "unhealthy"
-        assert body["components"]["ollama"]["status"] == "healthy"
+        assert body["components"]["llm"]["status"] == "healthy"
 
     def test_db_down_returns_503_unhealthy(self, client, monkeypatch):
         monkeypatch.setattr(system_mod, "engine", _mock_engine_down())
@@ -191,18 +240,7 @@ class TestHealthEndpoint:
         assert body["components"]["database"]["status"] == "unhealthy"
         assert "query failed" in body["components"]["database"]["detail"]
 
-    def test_current_load_not_fabricated(self, client, monkeypatch):
-        """current_load must be absent or null — never a made-up value."""
-        monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
-        monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
-        monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_all_healthy)
-
-        resp = client.get("/api/v1/health")
-        assert resp.status_code == 200
-        ollama_comp = resp.json()["components"]["ollama"]
-        assert ollama_comp.get("current_load") is None
-
-    def test_ollama_slow_returns_degraded(self, client, monkeypatch):
+    def test_slow_llm_returns_degraded(self, client, monkeypatch):
         """Patch _SLOW_MS to -1 so any measured elapsed time triggers degraded,
         without depending on wall-clock timing in CI.
         """
@@ -215,44 +253,39 @@ class TestHealthEndpoint:
         assert resp.status_code == 200
         body = resp.json()
         assert body["status"] == "degraded"
-        assert body["components"]["ollama"]["status"] == "degraded"
+        assert body["components"]["llm"]["status"] == "degraded"
 
-    def test_models_available_and_loaded_flag(self, client, monkeypatch):
-        """models_available is built from /api/tags; loaded=True only for models in /api/ps."""
+    def test_models_available_lists_what_the_provider_serves(self, client, monkeypatch):
         monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
         monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
         monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_all_healthy)
 
         resp = client.get("/api/v1/health")
         assert resp.status_code == 200
-        models = resp.json()["components"]["ollama"]["models_available"]
-        assert len(models) == 2
-        llama = next(m for m in models if m["name"] == "llama3:8b")
-        mistral = next(m for m in models if m["name"] == "mistral:7b")
-        assert llama["loaded"] is True
-        assert mistral["loaded"] is False
-        assert llama["quantization"] == "Q4_K_M"
-        assert llama["size_gb"] == pytest.approx(4.66, abs=0.1)
+        assert resp.json()["components"]["llm"]["models_available"] == [
+            "llama3:8b",
+            "mistral:7b",
+        ]
 
-    def test_model_loaded_reflects_running_model(self, client, monkeypatch):
+    def test_a_hosted_provider_is_flagged_and_not_listed(self, client, monkeypatch):
+        """A hosted provider costs quota to ask, so health does not ask it."""
         monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
         monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
         monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_all_healthy)
+        _fake_llm(
+            monkeypatch,
+            provider="gemini",
+            model="gemini-2.0-flash",
+            external=True,
+            probed=False,
+            response_time_ms=None,
+            detail="hosted provider, not probed to avoid spending quota",
+        )
 
-        resp = client.get("/api/v1/health")
-        assert resp.status_code == 200
-        ollama = resp.json()["components"]["ollama"]
-        assert ollama["model_loaded"] == "llama3:8b"
-
-    def test_ollama_version_present(self, client, monkeypatch):
-        monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())
-        monkeypatch.setattr(system_mod, "shutil", _mock_shutil())
-        monkeypatch.setattr("app.api.routes.system.requests.get", _fake_get_all_healthy)
-
-        resp = client.get("/api/v1/health")
-        assert resp.status_code == 200
-        ollama = resp.json()["components"]["ollama"]
-        assert ollama["ollama_version"] == "0.3.0"
+        component = client.get("/api/v1/health").json()["components"]["llm"]
+        assert component["external"] is True
+        assert component["probed"] is False
+        assert component.get("models_available") is None
 
     def test_storage_disk_free_present(self, client, monkeypatch):
         monkeypatch.setattr(system_mod, "engine", _mock_engine_healthy())

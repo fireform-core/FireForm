@@ -18,7 +18,7 @@ tags:
   - name: input
     description: Submit voice or text incident narratives
   - name: extraction
-    description: AI-powered data extraction from narratives into canonical JSON
+    description: AI-powered data extraction from narratives into the incident contract
   - name: forms
     description: Generate agency-specific PDF forms from extracted data
   - name: incidents
@@ -50,14 +50,14 @@ paths:
     $ref: "path/extraction.yaml#/extract_by_input"
   /api/v1/extract/{extract_id}:
     $ref: "path/extraction.yaml#/extract_by_id"
+  /api/v1/extract/{extract_id}/readiness:
+    $ref: "path/extraction.yaml#/readiness"
   /api/v1/extract/{extract_id}/validate:
     $ref: "path/extraction.yaml#/validate"
 
   # ── Layer 3: Form Generation ───────────────────────────────────
-  /api/v1/forms/generate/all:
-    $ref: "path/forms.yaml#/generate_all"
-  /api/v1/forms/generate/{form_type}:
-    $ref: "path/forms.yaml#/generate_single"
+  /api/v1/forms/generate:
+    $ref: "path/forms.yaml#/generate"
   /api/v1/forms/{form_id}:
     $ref: "path/forms.yaml#/form_by_id"
   /api/v1/forms/{form_id}/pdf:
@@ -66,6 +66,8 @@ paths:
     $ref: "path/forms.yaml#/form_json"
   /api/v1/forms/batch/{batch_id}:
     $ref: "path/forms.yaml#/batch_by_id"
+  /api/v1/forms/batch/{batch_id}/download:
+    $ref: "path/forms.yaml#/batch_download"
 
   # ── Layer 4: Incident Management ───────────────────────────────
   /api/v1/incidents:
@@ -88,8 +90,12 @@ paths:
     $ref: "path/templates.yaml#/template_by_id"
   /api/v1/templates/{template_id}/fields:
     $ref: "path/templates.yaml#/template_fields"
+  /api/v1/templates/{template_id}/pdf:
+    $ref: "path/templates.yaml#/template_source_pdf"
   /api/v1/templates/pdf:
     $ref: "path/templates.yaml#/templates_pdf"
+  /api/v1/templates/pdf/{upload_id}:
+    $ref: "path/templates.yaml#/template_pdf_draft"
 
   # ── Layer 7: System ────────────────────────────────────────────
   /api/v1/health:
@@ -98,6 +104,8 @@ paths:
     $ref: "path/system.yaml#/schema_incident"
   /api/v1/schema/incident/versions:
     $ref: "path/system.yaml#/schema_versions"
+  /api/v1/schema/fields:
+    $ref: "path/system.yaml#/schema_fields"
 
   # ── Layer 8: Async Jobs ────────────────────────────────────────
   /api/v1/jobs/{job_id}:

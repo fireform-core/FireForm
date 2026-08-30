@@ -82,6 +82,7 @@ AsyncJobResponse:
         - form_generation
         - batch_form_generation
         - report_generation
+        - template_field_detection
     status:
       $ref: "enums.yaml#/JobStatus"
     estimated_seconds:
@@ -109,6 +110,7 @@ Job:
         - form_generation
         - batch_form_generation
         - report_generation
+        - template_field_detection
     status:
       $ref: "enums.yaml#/JobStatus"
     progress_percent:
