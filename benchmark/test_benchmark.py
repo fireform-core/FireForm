@@ -1,28 +1,39 @@
+"""Live benchmark test.
+
+Calls a running FireForm API — skipped unless RUN_LIVE_BENCHMARK=1.
+"""
+from __future__ import annotations
+
 import json
 import os
-from datetime import datetime
+from pathlib import Path
+
+import pytest
 
 from benchmark.pipelines.pipeline import Pipeline
 from benchmark.runners.runner import Runner
 
 
+pytestmark = [
+    pytest.mark.live_benchmark,
+    pytest.mark.skipif(
+        os.getenv("RUN_LIVE_BENCHMARK") != "1",
+        reason="set RUN_LIVE_BENCHMARK=1 to run the live API benchmark",
+    ),
+]
+
+
 def test_pipeline_execution():
-    """
-    Standard test executor that finds the available Pipeline class,
-    runs the benchmark dataset, writes execution results to a file, and asserts accuracy.
-    """
-    # Pipeline name contains current date and hour, minute and second (e.g. Pipeline_2026-07-08_12h_12m_12s)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%Hh_%Mm_%Ss")
-    pipeline_name = f"Pipeline_{timestamp}"
+    cases = os.getenv("BENCHMARK_CASES", "ics201_1")
+    report = Runner(Pipeline, "test-run").run_benchmark(cases)
 
-    runner = Runner(Pipeline, pipeline_name)
-    report = runner.run_benchmark()
+    out = Path(__file__).parent / "reports"
+    out.mkdir(exist_ok=True)
+    (out / "latest.json").write_text(json.dumps(report, indent=2) + "\n")
 
-    # Save results to a report file to be compared in CI/CD pipeline
-    report_path = os.path.join(os.path.dirname(__file__), "benchmark_report.json")
-    with open(report_path, "w") as f:
-        json.dump(report, f, indent=2)
+    metrics = report["metrics"]
+    assert metrics["completed_cases"] > 0
+    assert metrics["failed_cases"] == 0
 
-    # Assert basic quality sanity check
-    assert report["metrics"]["average_accuracy"] >= 0.0
-    print(f"\n{pipeline_name} evaluation complete. Average Accuracy: {report['metrics']['average_accuracy']:.2f}")
+    if minimum := os.getenv("BENCHMARK_MIN_ACCURACY"):
+        assert metrics["average_accuracy"] >= float(minimum)
