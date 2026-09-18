@@ -2,7 +2,7 @@ from datetime import date, datetime, timezone
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import InputStatus, InputType
+from app.api.schemas.enums import InputStatus, InputType, JobStatus, JobType
 from app.core.config import AUDIO_DIR
 from app.db.repositories import create_input, create_job, update_job
 from app.models import Input, Job
@@ -54,7 +54,7 @@ class InputService:
         # Create Job, dispatch, and backfill celery_task_id.
         # On any failure after the file write, remove the orphaned audio file.
         try:
-            job = Job(celery_task_id="", job_type="transcription", status="queued")
+            job = Job(celery_task_id="", job_type=JobType.transcription, status=JobStatus.queued)
             job = create_job(session, job)
             result = transcribe_audio_task.delay(str(record.input_id), str(audio_path), job.job_id)
             job.celery_task_id = result.id

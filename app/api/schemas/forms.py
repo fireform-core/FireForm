@@ -1,5 +1,7 @@
 from pydantic import BaseModel, field_validator
 
+from app.api.schemas.enums import JobStatus, JobType
+
 
 class FormFill(BaseModel):
     template_id: int
@@ -52,8 +54,8 @@ class AsyncFormFill(BaseModel):
 
 class JobResponse(BaseModel):
     job_id: str
-    job_type: str
-    status: str
+    job_type: JobType
+    status: JobStatus
     progress_percent: int = 0
     result_url: str | None = None
     error: dict | None = None
@@ -66,7 +68,7 @@ class JobResponse(BaseModel):
 
 class AsyncJobSubmitResponse(BaseModel):
     job_id: str
-    status: str
+    status: JobStatus
     poll_url: str
 
     class Config:

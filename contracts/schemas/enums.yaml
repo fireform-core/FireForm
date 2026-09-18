@@ -128,3 +128,11 @@ OutputFormat:
     - json
     - both
   description: Output format for generated forms
+
+HealthState:
+  type: string
+  enum:
+    - healthy
+    - degraded
+    - unhealthy
+  description: Health status of a system component or the overall system

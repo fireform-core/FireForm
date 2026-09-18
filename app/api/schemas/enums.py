@@ -114,3 +114,9 @@ class OutputFormat(str, Enum):
     pdf = "pdf"
     json = "json"
     both = "both"
+
+
+class HealthState(str, Enum):
+    healthy = "healthy"
+    degraded = "degraded"
+    unhealthy = "unhealthy"
