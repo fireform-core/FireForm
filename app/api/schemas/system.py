@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from app.api.schemas.enums import HealthState
+
 
 class ModelInfo(BaseModel):
     name: str
@@ -14,7 +16,7 @@ class CurrentLoad(BaseModel):
 
 
 class ComponentHealth(BaseModel):
-    status: str
+    status: HealthState
     response_time_ms: int | None = None
     detail: str | None = None
     model_loaded: str | None = None
@@ -32,7 +34,7 @@ class HealthComponents(BaseModel):
 
 
 class HealthStatus(BaseModel):
-    status: str
+    status: HealthState
     version: str
     uptime_seconds: int | None = None
     components: HealthComponents | None = None

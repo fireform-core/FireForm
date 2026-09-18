@@ -176,8 +176,7 @@ BatchStatus:
       type: string
       format: uuid
     status:
-      type: string
-      enum: [processing, completed, failed]
+      $ref: "../schemas/enums.yaml#/JobStatus"
     total:
       type: integer
     completed:
