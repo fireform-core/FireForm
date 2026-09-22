@@ -1,4 +1,4 @@
-from app.services.approach_d_new import ApproachD
+from app.services.approach_d import ApproachD
 from benchmark.pipelines.base import BasePipeline, PipelineExtractionOutput
 import time
 
