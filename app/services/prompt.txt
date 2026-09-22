@@ -5,7 +5,7 @@ only a single string containing the identified value for the JSON field.
 If you don't identify the value in the provided text, return "-1".
 ---
 DATA:
-Target JSON field to find in text: {field}
-Expected value type: {type}
+Target JSON field to find in text: $field
+Expected value type: $type
 
-TEXT: {text}
+TEXT: $text

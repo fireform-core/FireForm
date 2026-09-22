@@ -1,5 +1,6 @@
 import json
 import os
+from string import Template
 
 import requests
 from requests.exceptions import RequestException, Timeout
@@ -28,7 +29,10 @@ class LLM:
         with open(prompt_path, "r") as f:
             template = f.read()
 
-        return template.format(field=current_field, type=current_type, text=self._transcript_text)
+        # Dollar placeholders leave literal braces in JSON examples untouched.
+        return Template(template).safe_substitute(
+            field=current_field, type=current_type, text=self._transcript_text
+        )
 
     def main_loop(self):
         timeout = 45
