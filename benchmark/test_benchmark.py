@@ -1,9 +1,31 @@
+import io
 import json
 import os
+import sys
 from datetime import datetime
 
 from benchmark.pipelines.pipeline import Pipeline
 from benchmark.runners.runner import Runner
+
+
+class _TeeStream(io.TextIOBase):
+    """Writes to both the original stream and a file simultaneously."""
+
+    def __init__(self, original, file_handle):
+        super().__init__()
+        self._original = original
+        self._file = file_handle
+
+    def write(self, s):
+        self._original.write(s)
+        self._original.flush()
+        self._file.write(s)
+        self._file.flush()
+        return len(s)
+
+    def flush(self):
+        self._original.flush()
+        self._file.flush()
 
 
 def test_pipeline_execution():
@@ -15,13 +37,25 @@ def test_pipeline_execution():
     timestamp = datetime.now().strftime("%Y-%m-%d_%Hh_%Mm_%Ss")
     pipeline_name = f"Pipeline_{timestamp}"
 
-    runner = Runner(Pipeline, pipeline_name)
-    report = runner.run_benchmark()
+    benchmark_dir = os.path.dirname(__file__)
+    txt_report_path = os.path.join(benchmark_dir, "benchmark_report.txt")
+
+    with open(txt_report_path, "w", encoding="utf-8") as txt_file:
+        tee = _TeeStream(sys.stdout, txt_file)
+        original_stdout = sys.stdout
+        sys.stdout = tee
+        try:
+            runner = Runner(Pipeline, pipeline_name)
+            report = runner.run_benchmark()
+        finally:
+            sys.stdout = original_stdout
 
     # Save results to a report file to be compared in CI/CD pipeline
-    report_path = os.path.join(os.path.dirname(__file__), "benchmark_report.json")
+    report_path = os.path.join(benchmark_dir, "benchmark_report.json")
     with open(report_path, "w") as f:
         json.dump(report, f, indent=2)
+
+    print(f"📄 Terminal output saved to: {txt_report_path}")
 
     # Assert basic quality sanity check
     assert report["metrics"]["average_accuracy"] >= 0.0
