@@ -8,7 +8,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from benchmark.evaluators.multivalidator import JSONShapeValidator
+from benchmark.evaluators.JSONValidator import JSONValidator
+from benchmark.evaluators.accuracy_calculator import AccuracyCalculator
 
 # Persistent session for connection reuse
 session = requests.Session()
@@ -70,5 +71,14 @@ if __name__ == "__main__":
     print(json.dumps(result, indent=2))
 
     # Validator area
-    print("Is same structure?:", JSONShapeValidator.check_if_same_structure(result, ground_truth_dict))
+    is_same_structure = JSONValidator.json_shape_validator_with_log(result, ground_truth_dict)
+    print("Is same structure?:", is_same_structure)
+
+    if is_same_structure:
+        print("\n--- Value Accuracy Evaluation ---")
+        accuracy_score = AccuracyCalculator.calculate_accuracy(result, ground_truth_dict, verbose=True)
+        print(f"\nOverall Value Accuracy Score: {accuracy_score:.2%}")
+    else:
+        print("\nSkipping accuracy calculation because JSON structure does not match.")
+
 

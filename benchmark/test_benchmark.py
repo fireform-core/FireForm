@@ -25,4 +25,8 @@ def test_pipeline_execution():
 
     # Assert basic quality sanity check
     assert report["metrics"]["average_accuracy"] >= 0.0
-    print(f"\n{pipeline_name} evaluation complete. Average Accuracy: {report['metrics']['average_accuracy']:.2f}")
+    print(f"\n{pipeline_name} evaluation complete. Average Accuracy: {report['metrics']['average_accuracy']:.2%}")
+
+
+if __name__ == "__main__":
+    test_pipeline_execution()
