@@ -1,0 +1,42 @@
+### Field Operations Memo — Redwood Bluff Fire Suppression Effort
+### (Compiled from overnight radio logs and field supervisor reports — NOT in standard ICS order)
+
+**RESOURCE STATUS UPDATE (transmitted at 07:00 by Logistics)**
+
+The following assets are currently committed or en route. Note: some resource requests were placed verbally during initial attack and paperwork is still being reconciled.
+
+Dozer D-7 (Redwood County) — cutting a 40-foot fuel break on the north perimeter; the operator is fatigued and a relief unit, D-9, is en route with an estimated arrival of 13:00. D-7 was mobilized sometime after the Water Tender to control costs. The Water Tender WT-4 was ordered at 21:50 on the 14th and arrived at 00:15 on the 15th; it is managing the portable tank at the Ridgeline Road safety zone. Engine 9 and Engine 12 from Redwood County were both dispatched at initial alarm and have been on scene since well before 01:00 — Engine 9 is handling structure protection on Pinecrest Drive; Engine 12 is supporting the dozer line at Division Alpha. The CAL FIRE Logistics Support Unit LSU-3 established the spike camp at Summit Trailhead; propane supplies are critically low and a resupply has been scheduled for 14:30 — LSU-3 was ordered at 22:00 on March 14. Two resources are still en route as of this writing: an Interagency Hotshot Crew, Salmon River IHC, ordered this morning (March 15) at 06:15 with a noon arrival expected, assigned to direct attack on the northern flank once accessible; and a National Interagency Fire Center Fire Behavior Analyst unit ordered at 06:00 this morning with a 10:30 arrival expected, tasked with real-time fire behavior modeling. Air Tanker 85 completed its first retardant drop at 06:12 this morning after arriving just after sunrise. The USFS crew Klamath-7 (20 personnel) is currently holding the eastern containment line but is on mandatory rest rotation and will resume at 14:00 — they arrived on scene at 05:50. The CalOES Law Enforcement Liaison arrived at 00:45 on the 15th and is coordinating evacuation shelter operations.
+
+Note: Ordering times for Engine 9, Engine 12, Dozer D-7, and Air Tanker 85 are not confirmed in the logistics ledger at this time and should be verified with the Finance Section before the next operational period.
+
+**TACTICAL CHRONOLOGY (prepared by Operations Section)**
+
+Division Chief Navarro opened an incident, declared Unified Command, and ordered overnight resource mobilization at 22:00. The mandatory evacuation order covering all 87 parcels north of mile marker 4.2 on Pinecrest Drive was issued at 23:15. The Type 3 declaration and ICS structure activation, including the Air Tanker 85 order for dawn deployment, occurred at 00:30. Dozer D-7 began its fuel break cut at 01:10. At 04:15 the helicopter recon mission produced overflight data confirming the crown fire status on the northeast ridge. Safety Officer Okafor delivered the morning tailgate safety briefing at 05:30. The Planning Section convened the Operational Period briefing at 06:00. AT-85 completed its first retardant drop and Klamath-7 engaged the eastern line at 06:12. The Planning Section Chief finalized and signed this ICS 201 document at 06:45. The ICP morning briefing was distributed to all division supervisors at 07:00. Voss confirmed Engine 9's structure wrap commitment at 07:15. Planned actions: FBAN arrival at 08:30; aerial recon with Operations and Air Attack at 10:00; IHC Salmon River assignment briefing at 12:00; mandatory wind-shift reassessment with all division supervisors at ICP at 14:00.
+
+Note: The original 21:45 dispatch entry is missing from the radio log transcript — the initial engine dispatch and sheriff pre-notification times are unconfirmed.
+
+**ORGANIZATION (as of morning briefing)**
+
+Unified Command is co-led by Division Chief Patricia Navarro (CAL FIRE Shasta-Trinity Unit) and District Ranger Boyd Kimura (Klamath National Forest). Safety Officer: Captain Elaine Okafor. Liaison Officer: Tomás Espinoza. The Operations Section is led by Battalion Chief Marcus Webb. Planning is led by Sandra Lim. Logistics is led by Devin Okello. Finance/Administration is led by Francesca Di Luca. Additional staff: Hawk Suárez holds the Deputy Operations Chief (Air Operations) role; Lara Voss is the Structure Protection Coordinator; Dominic Huang is the Evacuation Group Supervisor.
+
+Note: A Public Information Officer was verbally identified at the morning briefing but their name was not recorded in the field log. This field is currently blank pending confirmation from the PIO coordinator at county OES.
+
+**SITUATION, HEALTH, AND SAFETY (reversed order per Safety Officer's briefing format)**
+
+Primary safety hazards for this operational period: extreme fire behavior risk from the forecast afternoon wind shift (all personnel must brief escape routes with supervisors before 13:00); snag and falling tree hazard throughout the burn scar (hard hats mandatory, chainsaw crews maintain 2-tree-length spacing); aviation conflict near drop corridors (500-foot ground exclusion zone, coordinate with Air Attack Supervisor); heat stress as temperatures rise toward 91°F (mandatory 30-minute hydration check-ins); smoke inhalation for personnel at extended exposures.
+
+Necessary protective measures: full accountability board sign-in at each division; Tactical Channel 3 (simplex) radio mandatory; LCES briefed every morning; N95 minimum outside containment lines; SCBA inside active burn areas; dozer operators require foot crew escort within 200 feet of the fire edge.
+
+Situation summary: Electrical arcing at the Redwood Bluff substation under red flag conditions ignited this fire on the evening of March 14, 2027 — relative humidity at 9%, offshore winds at 18 mph gusting to 34 mph, fine dead fuel moisture at 4%. Spotting across Ridgeline Road within the first 90 minutes exceeded initial attack capacity, and the incident transitioned to extended attack at 00:30 March 15. As of the morning briefing, 340 acres have burned, 12 structures are confirmed destroyed, 87 parcels remain under mandatory evacuation, and the southern and western flanks are 15% contained. The critical planning driver for this operational period is the forecast southwesterly wind shift at 14:00 that could redirect the head fire from its current northeast vector toward the Klamath River recreation corridor.
+
+**OPERATIONAL OBJECTIVES (embedded in the action notes, not listed separately)**
+
+From the overnight supervisor radio log: "Our primary goal is protecting the lives of all field personnel and the approximately 210 evacuated Pinecrest Drive residents. We need Unified Command confirmed with both CAL FIRE and the Forest Service by 06:00. Get 100% evacuation confirmation on Pinecrest Drive done before the 08:00 morning report. The northern containment line on Ridgeline Road has to hold by noon to protect the volunteer fire station. Every division briefing must confirm LCES before 07:00 field assignments. And by 18:00 tonight we need 40% containment on the south and west flanks to protect the watershed."
+
+**MAP AND OPERATIONAL AREA (brief summary only — full sketch on file at ICP)**
+
+The fire is burning within an approximately 8-by-4-mile operational footprint — roughly 32 square miles — bounded by Ridgeline Road to the north, the Klamath River corridor to the east, Pinecrest Drive to the south, and the substation access road to the west. Ignition point is Tower 14-B at the Redwood Bluff substation; initial footprint was 0.4 acres, now expanding northeast. Impacted: chaparral fuel bed on Ridgeline's southwest slope, 12 Pinecrest Drive structures destroyed, 2.1 miles of Ridgeline Road impassable. Threatened: 87-parcel Pinecrest Drive neighborhood, Redwood Bluff Volunteer Fire Station on Skyline Avenue, Klamath River watershed 1.4 miles northeast. Overflight at 04:15 confirmed crown fire on the northeast ridge with 0.6-mile ember cast; slow ground fire in the south meadow pocket. Primary spread ENE at 2.5 mph; wind shift at 14:00 may redirect toward Klamath River campground cluster. Approximately 0.8 miles of Klamath River riparian buffer have received ember deposition; no water quality impacts confirmed. Map oriented north-up using NWCG symbology; geo-referenced and loaded to ICS 204 tablets.
+
+**DOCUMENT PREPARATION**
+
+This briefing document was finalized by Sandra Lim, Planning Section Chief, at 06:45 on March 15, 2027.
