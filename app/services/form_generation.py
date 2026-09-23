@@ -20,7 +20,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import FormStatus, TemplateStatus
+from app.api.schemas.enums import FormStatus, JobStatus, JobType, TemplateStatus
 from app.api.schemas.form_generation import GenerateFormsOptions, GenerateFormsRequest
 from app.core.config import DATA_DIR
 from app.core.errors.base import AppError
@@ -103,7 +103,7 @@ def form_version(session: Session, form: Form) -> str | None:
     return template.version if template else None
 
 
-def batch_state(forms: list[Form]) -> str:
+def batch_state(forms: list[Form]) -> JobStatus:
     """processing, completed or failed, derived from the batch's Form rows.
 
     There is no Batch table, so both the status endpoint and the zip download
@@ -116,8 +116,8 @@ def batch_state(forms: list[Form]) -> str:
     completed = sum(1 for f in forms if f.status == FormStatus.completed)
     failed = sum(1 for f in forms if f.status == FormStatus.failed)
     if completed + failed < total:
-        return "processing"
-    return "failed" if failed == total else "completed"
+        return JobStatus.processing
+    return JobStatus.failed if failed == total else JobStatus.completed
 
 
 def resolve_form_pdf(form: Form) -> Path | None:
@@ -247,7 +247,7 @@ class FormGenerationService:
                 detail={"skipped": [s.reason for s in result.skipped]},
             )
 
-        job = Job(celery_task_id="", job_type="batch_form_generation", status="queued")
+        job = Job(celery_task_id="", job_type=JobType.batch_form_generation, status=JobStatus.queued)
         try:
             job = create_job(session, job)
             task_result = generate_forms_batch_task.delay(str(batch_id), job.job_id)

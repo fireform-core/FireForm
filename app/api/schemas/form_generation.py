@@ -15,7 +15,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from app.api.schemas.enums import FormStatus, OutputFormat
+from app.api.schemas.enums import FormStatus, JobStatus, OutputFormat
 
 
 # ---------------------------------------------------------------------------
@@ -60,7 +60,7 @@ class BatchGenerateResponse(BaseModel):
     """202 body for POST /forms/generate."""
 
     batch_id: UUID
-    status: Literal["processing"] = "processing"
+    status: Literal[JobStatus.processing] = JobStatus.processing
     incident_id: UUID
     forms_queued: list[QueuedForm] = Field(default_factory=list)
     forms_skipped: list[SkippedForm] = Field(default_factory=list)
@@ -118,7 +118,7 @@ class BatchStatus(BaseModel):
     batch's Form rows — there is no Batch table."""
 
     batch_id: UUID
-    status: Literal["processing", "completed", "failed"]
+    status: Literal[JobStatus.processing, JobStatus.completed, JobStatus.failed]
     total: int
     completed: int
     failed: int

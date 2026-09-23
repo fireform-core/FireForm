@@ -20,7 +20,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from sqlmodel import Session
 
 from app.api.deps import get_db
-from app.api.schemas.enums import FormStatus
+from app.api.schemas.enums import FormStatus, JobStatus
 from app.api.schemas.form_generation import (
     BatchFormEntry,
     BatchGenerateResponse,
@@ -97,7 +97,7 @@ def get_batch_status(batch_id: UUID, db: Session = Depends(get_db)):
         # Only offered once there is something to bundle: a batch where every
         # form failed has no PDFs behind the link.
         download_url=(
-            f"/api/v1/forms/batch/{batch_id}/download" if status == "completed" else None
+            f"/api/v1/forms/batch/{batch_id}/download" if status == JobStatus.completed else None
         ),
     )
 
@@ -109,7 +109,7 @@ def download_batch_zip(batch_id: UUID, db: Session = Depends(get_db)):
         raise AppError(f"Batch {batch_id} not found", status_code=404, error_code="BATCH_NOT_FOUND")
 
     status = batch_state(forms)
-    if status == "processing":
+    if status == JobStatus.processing:
         return JSONResponse(
             status_code=202,
             content={
@@ -119,7 +119,7 @@ def download_batch_zip(batch_id: UUID, db: Session = Depends(get_db)):
             },
         )
 
-    if status == "failed":
+    if status == JobStatus.failed:
         raise AppError(
             f"Every form in batch {batch_id} failed to generate",
             status_code=500,

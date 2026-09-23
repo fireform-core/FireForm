@@ -21,7 +21,7 @@ from uuid import UUID
 from pypdf import PdfReader, PdfWriter
 from sqlmodel import Session
 
-from app.api.schemas.enums import DetectionStatus, FieldSource, TemplateFieldType
+from app.api.schemas.enums import DetectionStatus, FieldSource, JobStatus, TemplateFieldType
 from app.api.schemas.templates import (
     DraftField,
     MappingSuggestion,
@@ -331,14 +331,16 @@ def detect_fields(pdf_path: str | Path) -> list[DraftField]:
 # ---------------------------------------------------------------------------
 # The background run
 # ---------------------------------------------------------------------------
-def _finish_job(session: Session, job_id: str | None, status: str, error: dict | None = None) -> None:
+def _finish_job(
+    session: Session, job_id: str | None, status: JobStatus, error: dict | None = None
+) -> None:
     if not job_id:
         return
     job = get_job_by_uuid(session, job_id)
     if not job:
         return
     job.status = status
-    if status == "completed":
+    if status == JobStatus.completed:
         job.progress_percent = 100
     job.error = error
     job.updated_at = datetime.now(timezone.utc)
@@ -358,14 +360,14 @@ def run_detection(session: Session, upload_id: UUID, job_id: str | None = None) 
         _finish_job(
             session,
             job_id,
-            "failed",
+            JobStatus.failed,
             {"error_code": "UPLOAD_NOT_FOUND", "message": "Upload no longer exists"},
         )
-        return {"upload_id": str(upload_id), "status": "failed"}
+        return {"upload_id": str(upload_id), "status": DetectionStatus.failed}
 
     job = get_job_by_uuid(session, job_id) if job_id else None
     if job:
-        job.status = "processing"
+        job.status = JobStatus.processing
         job.updated_at = datetime.now(timezone.utc)
         update_job(session, job)
 
@@ -379,9 +381,9 @@ def run_detection(session: Session, upload_id: UUID, job_id: str | None = None) 
         upload.updated_at = now
         update_template_upload(session, upload)
         _finish_job(
-            session, job_id, "failed", {"error_code": "DETECTION_FAILED", "message": str(exc)}
+            session, job_id, JobStatus.failed, {"error_code": "DETECTION_FAILED", "message": str(exc)}
         )
-        return {"upload_id": str(upload_id), "status": "failed"}
+        return {"upload_id": str(upload_id), "status": DetectionStatus.failed}
 
     upload.detected_fields = [draft.model_dump(mode="json") for draft in drafts]
     upload.status = DetectionStatus.completed
@@ -392,10 +394,10 @@ def run_detection(session: Session, upload_id: UUID, job_id: str | None = None) 
     if job:
         job.result_url = f"/api/v1/templates/pdf/{upload_id}"
         update_job(session, job)
-    _finish_job(session, job_id, "completed")
+    _finish_job(session, job_id, JobStatus.completed)
 
     return {
         "upload_id": str(upload_id),
-        "status": "completed",
+        "status": DetectionStatus.completed,
         "detected_fields": len(drafts),
     }

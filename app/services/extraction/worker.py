@@ -22,7 +22,7 @@ from uuid import UUID
 from pydantic import ValidationError
 from sqlmodel import Session
 
-from app.api.schemas.enums import ExtractionStatus
+from app.api.schemas.enums import ExtractionStatus, JobStatus
 from app.api.schemas.incident_contract import IncidentContract
 from app.core.logging import get_logger
 from app.db.repositories import (
@@ -98,7 +98,7 @@ def _fail(session: Session, extraction, job, error_type: str, detail: str) -> No
     extraction.updated_at = now
     update_extraction(session, extraction)
     if job:
-        job.status = "failed"
+        job.status = JobStatus.failed
         job.error = {"error_code": error_type, "message": detail}
         job.updated_at = now
         update_job(session, job)
@@ -139,14 +139,14 @@ def run_extraction(
     extraction.updated_at = now
     update_extraction(session, extraction)
     if job:
-        job.status = "processing"
+        job.status = JobStatus.processing
         job.updated_at = now
         update_job(session, job)
 
     text = (input_record.transcript if input_record else "") or ""
     if not text.strip():
         _fail(session, extraction, job, "EMPTY_INPUT", "The input has no transcript to extract from.")
-        return {"extract_id": str(extract_id), "status": "failed"}
+        return {"extract_id": str(extract_id), "status": ExtractionStatus.failed}
 
     model_used = extraction.model_used or llm.get_settings().model
     context = resolve_context(defaults)
@@ -174,7 +174,7 @@ def run_extraction(
         _fail(session, extraction, job, "LLM_RATE_LIMITED", str(exc))
         return {
             "extract_id": str(extract_id),
-            "status": "failed",
+            "status": ExtractionStatus.failed,
             "retry_after_seconds": exc.retry_after_seconds,
         }
     except (llm.LLMUnavailableError, llm.LLMAuthError) as exc:
@@ -189,7 +189,7 @@ def run_extraction(
             "EXTRACTION_FAILED",
             "Every chunk was rejected by validation. Nothing could be extracted.",
         )
-        return {"extract_id": str(extract_id), "status": "failed"}
+        return {"extract_id": str(extract_id), "status": ExtractionStatus.failed}
 
     contract = apply_context(_stitch(results), context)
     contract["extraction_metadata"] = _metadata(extraction, input_record, model_used, results)
@@ -215,7 +215,7 @@ def run_extraction(
     update_extraction(session, extraction)
 
     if job:
-        job.status = "completed"
+        job.status = JobStatus.completed
         job.progress_percent = 100
         job.result_url = f"/api/v1/extract/{extract_id}"
         job.updated_at = now
@@ -235,6 +235,6 @@ def run_extraction(
         "extract_id": str(extract_id),
         "job_id": job_id,
         "incident_id": str(incident.incident_id),
-        "status": "completed",
+        "status": ExtractionStatus.completed,
         "failed_chunks": failed,
     }

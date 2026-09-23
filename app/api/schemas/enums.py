@@ -161,3 +161,14 @@ class FieldSource(str, Enum):
     static = "static"
     manual = "manual"
     open = "open"
+
+
+class HealthState(str, Enum):
+    healthy = "healthy"
+    degraded = "degraded"
+    unhealthy = "unhealthy"
+
+
+class IncidentSort(str, Enum):
+    date_asc = "date_asc"
+    date_desc = "date_desc"

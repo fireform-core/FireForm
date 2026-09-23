@@ -124,10 +124,8 @@ incidents:
         in: query
         description: Sort order
         schema:
-          type: string
-          enum:
-            - date_asc
-            - date_desc
+          allOf:
+            - $ref: "../schemas/enums.yaml#/IncidentSort"
           default: date_desc
     responses:
       "200":

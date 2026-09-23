@@ -31,7 +31,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from sqlmodel import Session
 
-from app.api.schemas.enums import FormStatus, TextAlign
+from app.api.schemas.enums import FormStatus, JobStatus, TextAlign
 from app.api.schemas.templates import TemplateField
 from app.core.config import DATA_DIR, FORMS_OUTPUT_DIR
 from app.core.logging import get_logger
@@ -196,7 +196,7 @@ def run_batch_fill(session: Session, batch_id: UUID, job_id: str) -> dict:
     job = get_job_by_uuid(session, job_id)
 
     if job:
-        job.status = "processing"
+        job.status = JobStatus.processing
         job.updated_at = _now()
         update_job(session, job)
 
@@ -219,7 +219,7 @@ def run_batch_fill(session: Session, batch_id: UUID, job_id: str) -> dict:
             update_job(session, job)
 
     if job:
-        job.status = "completed"
+        job.status = JobStatus.completed
         job.progress_percent = 100
         job.result_url = f"/api/v1/forms/batch/{batch_id}"
         job.updated_at = _now()

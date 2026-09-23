@@ -12,7 +12,7 @@ from uuid import UUID, uuid4
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import DetectionStatus, JobType
+from app.api.schemas.enums import DetectionStatus, JobStatus, JobType
 from app.api.schemas.templates import (
     CreateTemplateRequest,
     DraftField,
@@ -256,7 +256,7 @@ def store_upload(
     try:
         job = create_job(
             db,
-            Job(celery_task_id="", job_type=JobType.template_field_detection, status="queued"),
+            Job(celery_task_id="", job_type=JobType.template_field_detection, status=JobStatus.queued),
         )
         upload.job_id = job.job_id
         upload = create_template_upload(db, upload)
