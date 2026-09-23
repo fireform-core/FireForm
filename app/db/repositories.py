@@ -15,7 +15,7 @@ from app.models import (
     Incident,
     TemplateUpload,
 )
-from app.api.schemas.enums import IncidentCategory, ReportStatus
+from app.api.schemas.enums import IncidentCategory, IncidentSort, ReportStatus
 
 # Templates (legacy fill pipeline - read-only lookup, consumed by forms/jobs/tasks)
 def get_template(session: Session, template_id: int) -> Template | None:
@@ -251,7 +251,7 @@ def list_incidents(
     status: ReportStatus | None = None,
     page: int = 1,
     per_page: int = 20,
-    sort: str = "date_desc",
+    sort: IncidentSort = IncidentSort.date_desc,
 ) -> tuple[list[Incident], int]:
     """One page of live incidents plus the total matching the filters.
 
@@ -274,7 +274,7 @@ def list_incidents(
         select(func.count()).select_from(Incident).where(*conditions)
     ).one()
 
-    ascending = sort == "date_asc"
+    ascending = sort == IncidentSort.date_asc
     ordering = (
         nullslast(Incident.incident_datetime.asc()) if ascending
         else nullslast(Incident.incident_datetime.desc())

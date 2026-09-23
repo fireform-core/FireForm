@@ -12,7 +12,7 @@ from uuid import UUID
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import IncidentCategory, ReportStatus
+from app.api.schemas.enums import IncidentCategory, IncidentSort, ReportStatus
 from app.api.schemas.incidents import CreateIncidentRequest, UpdateIncidentRequest
 from app.core.errors.base import AppError
 from app.db.repositories import (
@@ -95,7 +95,7 @@ class IncidentService:
         status: ReportStatus | None = None,
         page: int = 1,
         per_page: int = 20,
-        sort: str = "date_desc",
+        sort: IncidentSort = IncidentSort.date_desc,
     ) -> tuple[list[Incident], dict[UUID, int], int]:
         """One page of live incidents, their form counts, and the total."""
         if date_from is not None and date_to is not None and date_from > date_to:

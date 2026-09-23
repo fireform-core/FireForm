@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
-from app.api.schemas.enums import FieldSource
+from app.api.schemas.enums import ExtractionStatus, FieldSource, JobType
 from app.api.schemas.incident_contract import IncidentContract
 
 
@@ -54,7 +54,7 @@ class ExtractionJobResponse(BaseModel):
     extract_id: UUID
     input_id: UUID
     job_id: str
-    job_type: str = "extraction"
+    job_type: JobType = JobType.extraction
     status: str
     queued_at: datetime | None = None
     estimated_seconds: int | None = None
@@ -79,7 +79,7 @@ class ExtractionCompleted(BaseModel):
     extract_id: UUID
     input_id: UUID
     incident_id: UUID
-    status: Literal["completed"]
+    status: Literal[ExtractionStatus.completed]
     incident_contract: IncidentContract
     completed_at: datetime | None = None
     model_used: str | None = None
@@ -90,7 +90,7 @@ class ExtractionCompleted(BaseModel):
 class ExtractionProcessing(BaseModel):
     extract_id: UUID
     input_id: UUID
-    status: Literal["processing", "failed"]
+    status: Literal[ExtractionStatus.processing, ExtractionStatus.failed]
     started_at: datetime | None = None
     retry_after_seconds: int | None = None
     error_type: str | None = None

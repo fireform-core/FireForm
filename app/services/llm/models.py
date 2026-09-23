@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from app.api.schemas.enums import HealthState
+
 
 @dataclass(frozen=True)
 class Provider:
@@ -69,7 +71,7 @@ class ProviderHealth:
     label: str
     model: str
     external: bool
-    status: str
+    status: HealthState
     probed: bool
     detail: str | None = None
     response_time_ms: int | None = None

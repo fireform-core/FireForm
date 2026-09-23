@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import ExtractionStatus
+from app.api.schemas.enums import ExtractionStatus, JobStatus, JobType
 from app.api.schemas.extraction import ExtractionDefaults, ExtractionHints
 from app.db.repositories import create_extraction, create_job, update_job
 from app.models import Extraction, Job
@@ -52,7 +52,12 @@ class ExtractionService:
         )
         extraction = create_extraction(session, extraction)
 
-        job = Job(celery_task_id="", job_type="extraction", status="queued", model=model_override)
+        job = Job(
+            celery_task_id="",
+            job_type=JobType.extraction,
+            status=JobStatus.queued,
+            model=model_override,
+        )
         job = create_job(session, job)
 
         result = extract_task.delay(

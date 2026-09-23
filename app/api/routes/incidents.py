@@ -15,7 +15,7 @@ from sqlmodel import Session
 
 from app.api.deps import get_db
 from app.api.schemas.common import Pagination
-from app.api.schemas.enums import IncidentCategory, ReportStatus
+from app.api.schemas.enums import IncidentCategory, IncidentSort, ReportStatus
 from app.api.schemas.form_generation import FormRecord
 from app.api.schemas.incidents import (
     CreateIncidentRequest,
@@ -88,7 +88,7 @@ def list_incidents(
     status: ReportStatus | None = Query(default=None),
     page: int = Query(default=1, ge=1),
     per_page: int = Query(default=20, ge=1, le=100),
-    sort: str = Query(default="date_desc", pattern="^(date_asc|date_desc)$"),
+    sort: IncidentSort = Query(default=IncidentSort.date_desc),
 ):
     rows, counts, total = IncidentService().list_page(
         db,

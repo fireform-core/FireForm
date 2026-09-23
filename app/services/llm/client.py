@@ -20,6 +20,7 @@ from typing import Any, Callable, TypeVar
 import openai
 from openai import OpenAI
 
+from app.api.schemas.enums import HealthState
 from app.core.logging import get_logger
 from app.services.llm.errors import (
     LLMAuthError,
@@ -318,7 +319,7 @@ def health() -> ProviderHealth:
             label="unknown",
             model="",
             external=False,
-            status="unhealthy",
+            status=HealthState.unhealthy,
             probed=False,
             detail=str(exc),
         )
@@ -333,7 +334,7 @@ def health() -> ProviderHealth:
     if settings.external:
         return ProviderHealth(
             **base,
-            status="healthy",
+            status=HealthState.healthy,
             probed=False,
             detail="hosted provider, not probed to avoid spending quota",
         )
@@ -342,10 +343,10 @@ def health() -> ProviderHealth:
     try:
         get_client().models.list()
     except Exception as exc:
-        return ProviderHealth(**base, status="unhealthy", probed=True, detail=str(exc))
+        return ProviderHealth(**base, status=HealthState.unhealthy, probed=True, detail=str(exc))
     return ProviderHealth(
         **base,
-        status="healthy",
+        status=HealthState.healthy,
         probed=True,
         response_time_ms=int((time.monotonic() - started) * 1000),
     )

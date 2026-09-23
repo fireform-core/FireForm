@@ -74,15 +74,7 @@ AsyncJobResponse:
       format: uuid
       description: Unique job identifier for polling
     job_type:
-      type: string
-      description: Type of async operation
-      enum:
-        - transcription
-        - extraction
-        - form_generation
-        - batch_form_generation
-        - report_generation
-        - template_field_detection
+      $ref: "enums.yaml#/JobType"
     status:
       $ref: "enums.yaml#/JobStatus"
     estimated_seconds:
@@ -103,14 +95,7 @@ Job:
       type: string
       format: uuid
     job_type:
-      type: string
-      enum:
-        - transcription
-        - extraction
-        - form_generation
-        - batch_form_generation
-        - report_generation
-        - template_field_detection
+      $ref: "enums.yaml#/JobType"
     status:
       $ref: "enums.yaml#/JobStatus"
     progress_percent:

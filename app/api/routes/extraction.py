@@ -4,7 +4,7 @@ from fastapi import APIRouter, Body, Depends
 from sqlmodel import Session
 
 from app.api.deps import get_db
-from app.api.schemas.enums import ExtractionStatus, InputStatus
+from app.api.schemas.enums import ExtractionStatus, HealthState, InputStatus
 from app.api.schemas.extraction import (
     ExtractionCompleted,
     ExtractionJobResponse,
@@ -49,7 +49,7 @@ def _completed_response(extraction: Extraction, incident: Incident | None) -> Ex
         extract_id=extraction.extract_id,
         input_id=extraction.input_id,
         incident_id=incident.incident_id if incident else None,
-        status="completed",
+        status=ExtractionStatus.completed,
         incident_contract=contract,
         completed_at=extraction.completed_at,
         model_used=extraction.model_used,
@@ -101,7 +101,7 @@ def create_extraction(
         )
 
     provider = llm.health()
-    if provider.status == "unhealthy":
+    if provider.status == HealthState.unhealthy:
         raise AppError(
             f"The {provider.label} LLM service is not available",
             status_code=503,

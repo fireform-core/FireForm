@@ -45,6 +45,17 @@ JobStatus:
     - failed
   description: Status of any async job
 
+JobType:
+  type: string
+  enum:
+    - transcription
+    - extraction
+    - form_generation
+    - batch_form_generation
+    - report_generation
+    - template_field_detection
+  description: Type of async operation
+
 FormType:
   type: string
   description: |
@@ -144,3 +155,18 @@ OutputFormat:
     - json
     - both
   description: Output format for generated forms
+
+HealthState:
+  type: string
+  enum:
+    - healthy
+    - degraded
+    - unhealthy
+  description: Health of the whole system or of one of its components
+
+IncidentSort:
+  type: string
+  enum:
+    - date_asc
+    - date_desc
+  description: Sort order for the incident list
