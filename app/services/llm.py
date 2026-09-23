@@ -28,7 +28,12 @@ class LLM:
         with open(prompt_path, "r") as f:
             template = f.read()
 
-        return template.format(field=current_field, type=current_type, text=self._transcript_text)
+        return (
+            template
+            .replace("{field}", current_field)
+            .replace("{type}", current_type)
+            .replace("{text}", self._transcript_text)
+        )
 
     def main_loop(self):
         timeout = 45
