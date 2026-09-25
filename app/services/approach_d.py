@@ -57,7 +57,7 @@ class ApproachD:
         max_retries = 3
         for attempt in range(1, max_retries + 1):
             try:
-                response = session.post("http://localhost:11434/api/generate", json=payload, timeout=180)
+                response = session.post("http://localhost:11434/api/generate", json=payload, timeout=35)
                 response.raise_for_status()
                 response_str = response.json().get("response", "{}")
                 break
@@ -68,7 +68,7 @@ class ApproachD:
                     print("Final fallback: retrying with format='json' (no grammar constraint).")
                     try:
                         fallback_payload = dict(payload, format="json")
-                        response = session.post("http://localhost:11434/api/generate", json=fallback_payload, timeout=180)
+                        response = session.post("http://localhost:11434/api/generate", json=fallback_payload, timeout=35)
                         response.raise_for_status()
                         response_str = response.json().get("response", "{}")
                     except Exception as fe:
