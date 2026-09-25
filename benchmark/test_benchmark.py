@@ -28,7 +28,7 @@ class _TeeStream(io.TextIOBase):
         self._file.flush()
 
 
-def test_pipeline_execution():
+def test_pipeline_execution(pytestconfig=None):
     """
     Standard test executor that finds the available Pipeline class,
     runs the benchmark dataset, writes execution results to a file, and asserts accuracy.
@@ -36,6 +36,17 @@ def test_pipeline_execution():
     # Pipeline name contains current date and hour, minute and second (e.g. Pipeline_2026-07-08_12h_12m_12s)
     timestamp = datetime.now().strftime("%Y-%m-%d_%Hh_%Mm_%Ss")
     pipeline_name = f"Pipeline_{timestamp}"
+
+    # Determine verbosity: pytest CLI flag or environment variable (default: False/hidden)
+    verbose = False
+    if pytestconfig is not None:
+        try:
+            verbose = pytestconfig.getoption("--verbose-eval", default=False)
+        except Exception:
+            pass
+    if not verbose:
+        env_val = os.getenv("BENCHMARK_VERBOSE", os.getenv("VERBOSE", "0"))
+        verbose = env_val.lower() in ("1", "true", "yes")
 
     benchmark_dir = os.path.dirname(__file__)
     txt_report_path = os.path.join(benchmark_dir, "benchmark_report.txt")
@@ -45,7 +56,7 @@ def test_pipeline_execution():
         original_stdout = sys.stdout
         sys.stdout = tee
         try:
-            runner = Runner(Pipeline, pipeline_name)
+            runner = Runner(Pipeline, pipeline_name, verbose=verbose)
             report = runner.run_benchmark()
         finally:
             sys.stdout = original_stdout

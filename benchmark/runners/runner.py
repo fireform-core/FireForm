@@ -7,9 +7,13 @@ from benchmark.evaluators.accuracy_calculator import AccuracyCalculator
 
 
 class Runner:
-    def __init__(self, pipeline_class, pipeline_name: str):
+    def __init__(self, pipeline_class, pipeline_name: str, verbose: bool | None = None):
         self.pipeline = pipeline_class()
         self.pipeline_name = pipeline_name
+        if verbose is not None:
+            self.verbose = verbose
+        else:
+            self.verbose = os.getenv("BENCHMARK_VERBOSE", "0").lower() in ("1", "true", "yes")
 
     def run_benchmark(self) -> dict[str, any]:
         datasets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "datasets")
@@ -80,22 +84,24 @@ class Runner:
 
             # 1. Structure Validation
             is_same_structure = JSONValidator.json_shape_validator_with_log(
-                output.extracted_fields, gt_content, verbose=True
+                output.extracted_fields, gt_content, verbose=self.verbose
             )
             print(f"Is same structure?: {is_same_structure}")
 
             # 2. Value Accuracy Evaluation (triggered only on structural match)
             if is_same_structure:
-                print("\n--- Value Accuracy Evaluation ---")
+                if self.verbose:
+                    print("\n--- Value Accuracy Evaluation ---")
                 accuracy = AccuracyCalculator.calculate_accuracy(
                     output.extracted_fields,
                     gt_content,
-                    verbose=True,
+                    verbose=self.verbose,
                     use_llm_judge=True,
                     judge_model="qwen2.5:1.5b",
                 )
             else:
-                print(f"\n❌ Skipping value accuracy calculation for '{case_name}' due to structural mismatch.")
+                if self.verbose:
+                    print(f"\n❌ Skipping value accuracy calculation for '{case_name}' due to structural mismatch.")
                 accuracy = 0.0
 
             print(f"[{idx}/{total_cases}] Finished '{case_name}' | Latency: {latency:.2f}s | Structure Valid: {is_same_structure} | Accuracy: {accuracy * 100:.2f}%\n" + "-" * 70)
