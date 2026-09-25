@@ -11,6 +11,7 @@ from app.db.repositories import (
 )
 from app.models import FormSubmission
 from app.services.controller import Controller
+from app.api.schemas.enums import JobStatus
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ def fill_form_task(self, template_id: int, input_text: str, model: str | None = 
         if not job:
             raise RuntimeError(f"No job row for celery task {self.request.id}")
 
-        job.status = "processing"
+        job.status = JobStatus.processing
         job.progress_percent = 10
         job.updated_at = datetime.now(timezone.utc)
         update_job(session, job)
@@ -47,7 +48,7 @@ def fill_form_task(self, template_id: int, input_text: str, model: str | None = 
         )
         create_form(session, submission)
 
-        job.status = "completed"
+        job.status = JobStatus.completed
         job.progress_percent = 100
         job.result_url = f"/api/v1/forms/{submission.id}/download"
         job.updated_at = datetime.now(timezone.utc)
@@ -59,7 +60,7 @@ def fill_form_task(self, template_id: int, input_text: str, model: str | None = 
         logger.exception("fill_form_task failed")
         job = get_job_by_celery_id(session, self.request.id)
         if job:
-            job.status = "failed"
+            job.status = JobStatus.failed
             job.error = {"error_code": "TASK_FAILED", "message": str(e)}
             job.updated_at = datetime.now(timezone.utc)
             update_job(session, job)

@@ -13,6 +13,7 @@ from app.api.schemas.enums import (
     InputStatus,
     InputType,
     JobStatus,
+    JobType,
     OutputFormat,
     PeriodType,
     ReportStatus,
@@ -39,10 +40,16 @@ class Job(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     job_id: str = Field(default_factory=lambda: str(uuid_mod.uuid4()), index=True, unique=True)
     celery_task_id: str = Field(index=True)
-    job_type: str = Field(default="form_generation")
+    job_type: JobType = Field(
+    default=JobType.form_generation,
+    sa_column=Column(AutoString, nullable=False),
+    )
     template_id: int | None = Field(default=None, foreign_key="template.id")
     input_text: str | None = None
-    status: str = Field(default="queued")
+    status: JobStatus = Field(
+    default=JobStatus.queued,
+    sa_column=Column(AutoString, nullable=False),
+    )
     progress_percent: int = Field(default=0)
     result_url: str | None = None
     error: dict | None = Field(default=None, sa_column=Column(JSON))
