@@ -12,6 +12,7 @@ from app.core.errors.base import AppError
 from app.db.repositories import create_job, get_job_by_uuid, get_template
 from app.models import Job
 from app.tasks.fill import fill_form_task
+from app.api.schemas.enums import JobStatus, JobType
 
 router = APIRouter(tags=["jobs"])
 
@@ -44,10 +45,10 @@ def submit_async_form_fill(form: AsyncFormFill, db: Session = Depends(get_db)):
         result = fill_form_task.delay(tid, form.input_text, form.model)
         job = Job(
             celery_task_id=result.id,
-            job_type="form_generation",
+            job_type=JobType.form_generation,
             template_id=tid,
             input_text=form.input_text,
-            status="queued",
+            status=JobStatus.queued,
             model=form.model,
         )
         job = create_job(db, job)

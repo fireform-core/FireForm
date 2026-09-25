@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 from sqlmodel import Session
 
-from app.api.schemas.enums import InputStatus, InputType
+from app.api.schemas.enums import InputStatus, InputType, JobStatus, JobType
 from app.db.repositories import get_input, get_job_by_uuid
 from app.models import Input, Job
 from app.tasks.transcribe import transcribe_audio_task
@@ -73,8 +73,8 @@ class TestSubmitVoiceInput:
         job_id = resp.json()["job_id"]
         job = get_job_by_uuid(db, job_id)
         assert job is not None
-        assert job.job_type == "transcription"
-        assert job.status == "queued"
+        assert job.job_type == JobType.transcription
+        assert job.status == JobStatus.queued
         assert job.celery_task_id == "celery-task-uuid-001"
 
     def test_201_dispatch_called_with_input_id_and_job_id(self, client, db):
@@ -150,7 +150,7 @@ def _seed_input_and_job(session: Session):
         updated_at=now,
     )
     session.add(inp)
-    job = Job(celery_task_id="celery-test-id", job_type="transcription", status="queued")
+    job = Job(celery_task_id="celery-test-id", job_type=JobType.transcription, status=JobStatus.queued)
     session.add(job)
     session.commit()
     session.refresh(inp)
@@ -199,7 +199,7 @@ class TestTranscribeAudioTask:
         self._run_task(inp, job, test_engine, whisper_return="Incident at Main St.")
 
         db.refresh(job)
-        assert job.status == "completed"
+        assert job.status == JobStatus.completed
         assert job.result_url == f"/api/v1/input/{inp.input_id}"
 
     def test_connection_error_input_failed_error_detail(self, db, test_engine):
@@ -217,7 +217,7 @@ class TestTranscribeAudioTask:
         self._run_task(inp, job, test_engine, whisper_side_effect=ConnectionError("Cannot reach Whisper"))
 
         db.refresh(job)
-        assert job.status == "failed"
+        assert job.status == JobStatus.failed
         assert job.error["error_code"] == "STT_UNAVAILABLE"
         assert "Cannot reach Whisper" in job.error["message"]
 
@@ -236,7 +236,7 @@ class TestTranscribeAudioTask:
         self._run_task(inp, job, test_engine, whisper_side_effect=RuntimeError("HTTP 500 from Whisper"))
 
         db.refresh(job)
-        assert job.status == "failed"
+        assert job.status == JobStatus.failed
         assert job.error["error_code"] == "TRANSCRIPTION_FAILED"
         assert "HTTP 500 from Whisper" in job.error["message"]
 
