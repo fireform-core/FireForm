@@ -8,5 +8,5 @@ try:
         {'role': 'user', 'content': 'Say hello in Spanish'}
     ])
     print("Success! Response:", response['message']['content'])
-except Exception as e:
+except Exception as e:  # noqa: BLE001
     print("Error:", e)
