@@ -19,6 +19,19 @@ from app.api.schemas.enums import (
 )
 
 
+class Profile(SQLModel, table=True):
+    __tablename__ = "profiles"
+
+    profile_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    name: str
+    profession: str
+    role: str
+    description: str | None = None
+    custom_fields: dict | None = Field(default=None, sa_column=Column(JSON))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Template(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
@@ -59,6 +72,7 @@ class Input(SQLModel, table=True):
     __tablename__ = "inputs"
 
     input_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    profile_id: UUID | None = Field(default=None, foreign_key="profiles.profile_id")
     # sa_column required on all str-Enum fields: without it SQLModel emits
     # sa.Enum(native_enum=True) which creates a Postgres ENUM type — hard to
     # migrate and inconsistent with the VARCHAR approach used in migration 001.
