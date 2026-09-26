@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from uuid import UUID
-
+from typing import Optional
 from pydantic import BaseModel, Field
 
 from app.api.schemas.enums import InputStatus, InputType
@@ -23,6 +23,7 @@ class TextInputRequest(BaseModel):
     station_id: str | None = None
     responder_badge: str | None = None
     incident_date_hint: date | None = None
+    profile_id: UUID | None = Field(None, description="ID of the user profile filling the form")
 
 
 class TextInputResponse(BaseModel):
@@ -36,6 +37,7 @@ class TextInputResponse(BaseModel):
 
 class InputRecordResponse(BaseModel):
     input_id: UUID
+    profile_id: UUID | None = None
     input_type: InputType
     status: InputStatus
     transcript: str | None = None

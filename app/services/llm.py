@@ -6,29 +6,53 @@ from requests.exceptions import RequestException, Timeout
 
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
 from app.core.logging import get_logger
+from app.models.models import Profile
 
 logger = get_logger(__name__)
 
 
+def append_profile_context(base_prompt: str, profile: Profile = None) -> str:
+    if not profile:
+        return base_prompt
+        
+    desc = profile.description if profile.description else "N/A"
+        
+    profile_context = (
+        "=== USER PROFILE CONTEXT ===\n"
+        "The form is being filled out by a user with the following profile:\n"
+        f"- Name: {profile.name}\n"
+        f"- Profession: {profile.profession}\n"
+        f"- Role: {profile.role}\n"
+        f"- Description: {desc}\n"
+    )
+    
+    if profile.custom_fields:
+        for key, value in profile.custom_fields.items():
+            profile_context += f"- {key.capitalize()}: {value}\n"
+            
+    profile_context += "\nPlease use this context to provide more relevant and tailored field suggestions and validations.\n\n"
+    return profile_context + base_prompt
+
+
 class LLM:
-    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None, model: str=None):
+    def __init__(self, transcript_text: str=None, target_fields: list=None, json_dict: dict=None, model: str=None, profile: Profile=None):
         self._transcript_text = transcript_text
         self._target_fields = target_fields
         self._json = json_dict if json_dict is not None else {}
-        # Optional per-request model override; falls back to OLLAMA_MODEL env.
         self._model = model
-
+        self._profile = profile
+    
     def build_prompt(self, current_field: str, current_type: str = "string"):
-        """
-        This method is in charge of the prompt engineering. It creates a specific prompt for each target field.
-        @params: current_field -> represents the current element of the json that is being prompted.
-        @params: current_type  -> hint to the LLM about the expected value shape (date, number, etc.).
-        """
         prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
-        with open(prompt_path, "r") as f:
-            template = f.read()
+        # In case prompt.txt isn't in Colab, we'll use a fallback for testing
+        try:
+            with open(prompt_path, "r") as f:
+                template = f.read()
+        except FileNotFoundError:
+            template = "Extract the {field} ({type}) from the following text:\n{text}"
 
-        return template.format(field=current_field, type=current_type, text=self._transcript_text)
+        base_prompt = template.format(field=current_field, type=current_type, text=self._transcript_text)
+        return append_profile_context(base_prompt, self._profile)
 
     def main_loop(self):
         timeout = 45
@@ -78,10 +102,6 @@ class LLM:
         return self
 
     def add_response_to_json(self, field: str, value: str):
-        """
-        this method adds the following value under the specified field,
-        or under a new field if the field doesn't exist, to the json dict
-        """
         value = value.strip().replace('"', "")
         parsed_value = None
 
@@ -92,8 +112,6 @@ class LLM:
             self._json[field].append(parsed_value)
         else:
             self._json[field] = parsed_value
-
-
 
     def get_data(self):
         return self._json
