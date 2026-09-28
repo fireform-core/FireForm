@@ -88,8 +88,12 @@ class LLM:
         if value != "-1":
             parsed_value = value
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            existing = self._json[field]
+            if isinstance(existing, list):
+                existing.append(parsed_value)
+            else:
+                self._json[field] = [existing, parsed_value]
         else:
             self._json[field] = parsed_value
 
