@@ -107,7 +107,7 @@ services:
       - WHISPER_HOST=${WHISPER_HOST:-http://whisper:9000}
       - FIREFORM_DATA_DIR=/data/uploads
       - FIREFORM_TEMPLATE_DIR=/data/uploads
-      - FIREFORM_DB_ECHO=${FIREFORM_DB_ECHO:-true}
+      - FIREFORM_DB_ECHO=${FIREFORM_DB_ECHO:-false}
       - FRONTEND_ORIGINS=${FRONTEND_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
