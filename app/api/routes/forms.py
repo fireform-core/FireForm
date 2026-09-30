@@ -59,6 +59,8 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
             fields=fetched_template.fields,
             pdf_form_path=fetched_template.pdf_path,
             model=form.model,
+            sign=form.sign,
+            
         )
 
         # `model` is a runtime override, not a column — keep it out of the DB row.

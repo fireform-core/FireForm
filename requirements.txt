@@ -20,3 +20,4 @@ retry-requests
 pandas
 geopy
 alembic
+pyhanko

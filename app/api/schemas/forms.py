@@ -5,6 +5,7 @@ class FormFill(BaseModel):
     template_id: int
     input_text: str
     model: str | None = None
+    sign: bool = False  # Ajouté pour l'issue #231
 
     @field_validator("input_text")
     def validate_input_text(cls, value):
@@ -36,6 +37,7 @@ class AsyncFormFill(BaseModel):
     template_ids: list[int]
     input_text: str
     model: str | None = None
+    sign: bool = False  # Ajouté pour l'issue #231
 
     @field_validator("input_text")
     def validate_input_text(cls, value):
