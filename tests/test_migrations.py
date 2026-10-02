@@ -72,7 +72,14 @@ def test_template_columns(alembic_cfg, alembic_engine):
 
     inspector = inspect(alembic_engine)
     columns = {c["name"] for c in inspector.get_columns("template")}
-    assert columns == {"id", "name", "fields", "pdf_path", "created_at"}
+    assert columns == {
+        "id",
+        "name",
+        "description",
+        "fields",
+        "pdf_path",
+        "created_at",
+    }
 
 
 def test_formsubmission_columns(alembic_cfg, alembic_engine):
@@ -313,16 +320,21 @@ def test_downgrade_002(alembic_cfg, alembic_engine):
 
 
 def test_downgrade_003(alembic_cfg, alembic_engine):
-    """Downgrade by one step from head removes only the input_id FK/column."""
+    """Downgrading from head to 003 removes only the template description."""
     command.upgrade(alembic_cfg, "head")
     command.downgrade(alembic_cfg, "-1")
 
     inspector = inspect(alembic_engine)
-    columns = {c["name"] for c in inspector.get_columns("formsubmission")}
-    assert "input_id" not in columns
-    assert "input_text" in columns
-    tables = inspector.get_table_names()
-    assert "inputs" in tables
+
+    template_columns = {c["name"] for c in inspector.get_columns("template")}
+    assert "description" not in template_columns
+    assert "name" in template_columns
+    assert "fields" in template_columns
+
+    formsubmission_columns = {
+        c["name"] for c in inspector.get_columns("formsubmission")
+    }
+    assert "input_id" in formsubmission_columns
 
 
 def test_alembic_check_no_pending_migrations(alembic_cfg):

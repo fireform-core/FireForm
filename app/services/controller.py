@@ -7,9 +7,9 @@ class Controller:
         self.file_manipulator = FileManipulator()
         self.external_apis_coordinator = ExternalAPIsCoordinator()
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None):
-        return self.file_manipulator.fill_form(user_input, fields, pdf_form_path, model=model)
-    
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None, description: str = ""):
+        return self.file_manipulator.fill_form(user_input, fields, pdf_form_path, model=model, description=description)
+
     def prepare_fillable(self, pdf_path: str):
         return self.file_manipulator.prepare_fillable(pdf_path)
 
