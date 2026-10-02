@@ -16,6 +16,7 @@ from app.models import FormSubmission, Template
 def _seed_template(client, name="T1", pdf_path="src/inputs/t.pdf"):
     resp = client.post(f"{API_PREFIX}/templates/create", json={
         "name": name,
+        "description": "Test deletion template",
         "pdf_path": pdf_path,
         "fields": {"name": "string"},
     })

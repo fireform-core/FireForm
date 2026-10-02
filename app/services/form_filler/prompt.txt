@@ -12,6 +12,7 @@ You are a FEMA ICS form-filling engine. Extract data from the incident narrative
 9. Distinguish completed, current, and planned information according to the destination field.
 10. Follow the schema keys, nesting, types, and enums exactly. Add no extra keys.
 11. Return raw JSON only. No markdown, no explanation, no commentary.
+12. A <template_description> block, when present, says what the form is for. Use it to disambiguate narrative wording, but never treat it as output data and never echo it into a value.
 </rules>
 
-The narrative and target schema follow.
+The template description, narrative, and target schema follow.

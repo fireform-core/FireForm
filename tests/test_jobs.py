@@ -9,17 +9,36 @@ from app.models import Input
 
 
 class TestJobEndpoints:
-
-    def _seed_template(self, client):
-        resp = client.post(f"{API_PREFIX}/templates/create", json={
-            "name": "Test Template",
-            "pdf_path": "test.pdf",
-            "fields": {"name": "string"},
-        })
+    def _seed_template(
+        self,
+        client,
+        name="T1",
+        pdf_path="src/inputs/t.pdf",
+        description="Template used for job tests",
+    ):
+        resp = client.post(
+            f"{API_PREFIX}/templates/create",
+            json={
+                "name": name,
+                "description": description,
+                "pdf_path": pdf_path,
+                "fields": {"name": "string"},
+            },
+        )
+        assert resp.status_code == 200, resp.json()
         return resp.json()["id"]
 
-    def _seed_input(self, db, status=InputStatus.ready, transcript="John Doe firefighter"):
-        record = Input(input_type=InputType.text, status=status, transcript=transcript)
+    def _seed_input(
+        self,
+        db,
+        status=InputStatus.ready,
+        transcript="John Doe firefighter",
+    ):
+        record = Input(
+            input_type=InputType.text,
+            status=status,
+            transcript=transcript,
+        )
         db.add(record)
         db.commit()
         db.refresh(record)

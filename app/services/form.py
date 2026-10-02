@@ -53,6 +53,7 @@ class FormService:
             fields=template.fields,
             pdf_form_path=template.pdf_path,
             model=model,
+            description=template.description,
         )
 
         submission = FormSubmission(

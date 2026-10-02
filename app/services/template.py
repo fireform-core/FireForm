@@ -59,6 +59,7 @@ class TemplateService:
         return TemplateResponse(
             id=created.id,
             name=created.name,
+            description=created.description,
             pdf_path=created.pdf_path,
             fields=created.fields,
             field_count=_count_pdf_widgets(created.pdf_path),

@@ -35,7 +35,7 @@ class FileManipulator:
         prepare_form(pdf_path, template_path)
         return template_path
 
-    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None):
+    def fill_form(self, user_input: str, fields: list, pdf_form_path: str, model: str = None, description: str = ""):
         """
         It receives the raw data, runs the PDF filling logic,
         and returns the path to the newly created file.
@@ -57,7 +57,7 @@ class FileManipulator:
                 + datetime.now().strftime("%Y%m%d_%H%M%S")
                 + "_filled.pdf"
             )
-            filler.fill(pdf_form_path, user_input, output_name, model)
+            filler.fill(pdf_form_path, user_input, output_name, model, description)
 
             logger.info("Process complete. Output saved to: %s", output_name)
 

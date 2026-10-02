@@ -49,6 +49,11 @@ def seed_db():
             default_template = Template(
                 id=2,
                 name="Manual Test Template",
+                description=(
+                    "Employee contact and sign-off form used to manually verify that "
+                    "FireForm fills a PDF correctly. Captures who completed the form, "
+                    "their contact details, and their signature."
+                ),
                 fields=fields,
                 pdf_path=f"{DEFAULT_TEMPLATE_DIR}/file_template_manual.pdf",
                 created_at=datetime.datetime.now(datetime.timezone.utc),
