@@ -27,3 +27,16 @@ frontend/release/
 
 # Local Claude Code instructions
 CLAUDE.md
+
+*temp/
+*.env*
+!*.env.example
+
+# Local benchmark output
+reports/
+
+# Benchmark run output
+benchmark/results/
+
+# Local VS Code workspace configuration
+*.code-workspace

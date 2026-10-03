@@ -1,0 +1,125 @@
+# Layer 3 Form Fill Endpoints
+# POST /api/v1/forms/fill
+# POST /api/v1/forms/jobs
+
+fill:
+  post:
+    operationId: fillForm
+    summary: Fill a single template from a stored transcript
+    description: |
+      Takes the transcript stored on a prior input (see POST /input/text or
+      POST /input/voice) plus one template's field dictionary, sends them to
+      the local Ollama LLM to get values back field-by-field, then draws those
+      values into the template's PDF boxes. Runs synchronously: one LLM pass
+      per call. The referenced input must have status "ready".
+    tags:
+      - forms
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/form-record.yaml#/FormFillRequest"
+          example:
+            template_id: 3
+            input_id: "550e8400-e29b-41d4-a716-446655440001"
+            model: "llama3.1"
+    responses:
+      "200":
+        description: Form filled and PDF generated
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/FormFillResponse"
+            example:
+              id: 12
+              template_id: 3
+              input_text: "62 year old male, chest pain, transported to St. Mary's."
+              output_pdf_path: "output/forms/3_12.pdf"
+      "404":
+        description: Template or input not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "TEMPLATE_NOT_FOUND"
+              message: "Template not found"
+      "409":
+        description: Input exists but is not ready (still queued/transcribing, or failed)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "INPUT_NOT_READY"
+              message: "Input 550e8400-e29b-41d4-a716-446655440001 is not ready (status: transcribing)"
+              detail:
+                status: "transcribing"
+      "500":
+        description: Form fill failed (LLM or PDF generation error)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "FORM_FILL_ERROR"
+              message: "Ollama did not respond within 120 seconds"
+
+async_fill:
+  post:
+    operationId: submitAsyncFormFill
+    summary: Queue form fill jobs for one or more templates
+    description: |
+      Resolves input_id to its stored transcript up front (so a missing or
+      not-ready input fails synchronously, before any job is queued), then
+      queues one Celery job per template_id, each running that transcript
+      against that template's field dictionary. Poll GET /api/v1/jobs/{job_id}
+      on each returned poll_url for status.
+    tags:
+      - forms
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/form-record.yaml#/AsyncFormFillRequest"
+          example:
+            template_ids: [3, 7]
+            input_id: "550e8400-e29b-41d4-a716-446655440001"
+            model: "llama3.1"
+    responses:
+      "200":
+        description: Jobs queued, one per template_id
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/form-record.yaml#/AsyncFormFillResponse"
+            example:
+              jobs:
+                - job_id: "550e8400-e29b-41d4-a716-446655440098"
+                  status: "queued"
+                  poll_url: "/api/v1/jobs/550e8400-e29b-41d4-a716-446655440098"
+                - job_id: "550e8400-e29b-41d4-a716-446655440099"
+                  status: "queued"
+                  poll_url: "/api/v1/jobs/550e8400-e29b-41d4-a716-446655440099"
+      "404":
+        description: One of the requested template_ids, or the input_id, was not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "NOT_FOUND"
+              message: "Template 7 not found"
+      "409":
+        description: Input exists but is not ready (still queued/transcribing, or failed)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "INPUT_NOT_READY"
+              message: "Input 550e8400-e29b-41d4-a716-446655440001 is not ready (status: transcribing)"
+              detail:
+                status: "transcribing"

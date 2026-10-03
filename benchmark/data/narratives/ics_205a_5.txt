@@ -1,0 +1,14 @@
+### Silverwood Reservoir Crude Oil Pipeline Rupture Communications List (ICS 205A)
+
+The Communications List, designated as ICS 205A for the Silverwood Reservoir Crude Oil Pipeline Rupture incident under tracking number CalOES-EPA-R9-2026-0518, functions as the primary incident contact directory for Operational Period 1 (May 18, 2026, 18:00 hours through May 19, 2026, 06:00 hours).
+
+Basic local communications contact methods for assigned incident leadership are established as follows:
+1. Position: EPA R9 Incident Commander, Name: OSC C. Martinez, Contact Methods: Cell: 555-0501 / Radio Ch 1.
+2. Position: SBCo Fire Incident Commander, Name: Chief M. Thorne, Contact Methods: Cell: 555-0502 / Radio Ch 1 / Vehicle: FIRE-SB-1.
+3. Position: Safety Officer, Name: Captain Gregory Hall, Contact Methods: Cell: 555-0588 / Radio Ch 1.
+4. Position: Operations Section Chief, Name: Battalion Chief Kevin Ross, Contact Methods: Cell: 555-0515 / Radio Ch 1.
+5. Position: Marine Skimming Branch Director, Name: Captain B. Walsh, Contact Methods: Cell: 555-0535 / Radio Ch 3 (VHF 11) / Vessel: RV-LC-01.
+6. Position: Canyon Repair Group Supervisor, Name: Lt. J. Thorne, Contact Methods: Cell: 555-0560 / Radio Ch 4 / Vehicle: CREW-04.
+7. Position: Planning Section Chief, Name: Captain Rachel Brooks, Contact Methods: Cell: 555-0550 / CP Desk Ext: 403.
+
+This administrative contact directory serves as Page 6 of the Incident Action Plan package and was prepared by Communications Unit Leader Sgt. R. Hall on May 18, 2026, at 16:30 hours.

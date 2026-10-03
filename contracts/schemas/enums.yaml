@@ -1,0 +1,85 @@
+# Shared enums used across the FireForm API
+
+InputStatus:
+  type: string
+  enum:
+    - queued
+    - transcribing
+    - ready
+    - failed
+  description: Status of an input record
+
+ExtractionStatus:
+  type: string
+  enum:
+    - processing
+    - completed
+    - failed
+    - needs_review
+  description: Status of an AI extraction job
+
+ReportStatus:
+  type: string
+  enum:
+    - draft
+    - under_review
+    - approved
+    - submitted
+  description: Status of an incident report in the approval workflow
+
+JobStatus:
+  type: string
+  enum:
+    - queued
+    - processing
+    - completed
+    - failed
+  description: Status of any async job
+
+IncidentCategory:
+  type: string
+  enum:
+    - fire
+    - ems
+    - rescue
+    - hazardous_conditions
+    - service_call
+    - good_intent
+    - false_alarm
+    - law_enforcement
+  description: High-level incident category
+
+CauseCertainty:
+  type: string
+  enum:
+    - confirmed
+    - probable
+    - suspected
+    - undetermined
+  description: Certainty level of fire cause determination
+
+InjurySeverity:
+  type: string
+  enum:
+    - minor
+    - moderate
+    - severe
+    - fatal
+  description: Severity classification for injuries
+
+RateOfSpread:
+  type: string
+  enum:
+    - slow
+    - moderate
+    - rapid
+    - extreme
+  description: Rate of fire spread classification
+
+PeriodType:
+  type: string
+  enum:
+    - monthly
+    - quarterly
+    - annual
+  description: Reporting period type

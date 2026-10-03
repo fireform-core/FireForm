@@ -1,0 +1,11 @@
+### Whispering Pines Derailment Incident Radio Communications Plan (ICS 205)
+
+The Incident Radio Communications Plan, designated as ICS 205 for the Whispering Pines Derailment incident under tracking number US-EPA-R4-2026-0707, was prepared on July 07, 2026, at 16:00 hours. This communications blueprint governs basic radio channel assignments for Operational Period 1 (July 07, 2026, 18:00 hours through July 08, 2026, 06:00 hours).
+
+Basic radio channel allocations for this operational period are structured as follows:
+1. Channel 1 (Zone 1): Functioned for Command, channel name TAC-1, assigned to Unified Command and Section Chiefs. Operates on RX frequency 154.2800 N (Tone 156.7) and TX frequency 159.4800 N (Tone 156.7) in Analog mode (A), utilizing Repeater 1 located on Ridge Top.
+2. Channel 2 (Zone 1): Functioned for Tactical operations, channel name TAC-2, assigned to Hazmat Entry Group. Operates on RX frequency 462.5500 N (Tone 114.8) and TX frequency 467.5500 N (Tone 114.8) in Digital mode (D), utilizing an encrypted digital talkgroup.
+3. Channel 3 (Zone 1): Functioned for Tactical operations, channel name TAC-3, assigned to Fire Suppression Branch. Operates on RX frequency 153.8300 N (Tone 156.7) and TX frequency 153.8300 N (Tone 156.7) in Analog mode (A), utilizing direct tactical simplex communications.
+4. Channel 4 (Zone 1): Functioned for Support operations, channel name SUPP-1, assigned to Logistics and Decon. Operates on RX frequency 462.6250 N (Tone 123.0) and TX frequency 462.6250 N (Tone 123.0) in Analog mode (A), serving Staging Area Alpha and the decon trailer.
+
+Special instructions dictate that all emergency radio traffic must use the 'MAYDAY' call sign prefix on Channel 1. Channel 2 encryption keys must be loaded into handheld radios at Staging Area Alpha prior to Hot Zone deployment. This document serves as Page 5 of the Incident Action Plan and was prepared by Communications Unit Leader R. Lee on July 07, 2026, at 16:00 hours.

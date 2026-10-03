@@ -1,0 +1,152 @@
+# Layer 7 System Endpoints
+# GET /api/v1/health
+# GET /api/v1/schema/incident
+# GET /api/v1/schema/incident/versions
+
+health:
+  get:
+    operationId: getHealth
+    summary: System health check
+    description: |
+      Returns the health status of all FireForm components — database, Ollama LLM
+      (including loaded models, GPU status, and current load), Whisper transcription,
+      and file storage. Returns 200 even when degraded (so load balancers don't kill
+      it), 503 only if the system is truly unhealthy and cannot serve any requests.
+    tags:
+      - system
+    responses:
+      "200":
+        description: System is healthy or degraded
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/HealthStatus"
+            examples:
+              healthy:
+                summary: All systems operational
+                value:
+                  status: "healthy"
+                  version: "1.0.0"
+                  uptime_seconds: 86400
+                  components:
+                    database:
+                      status: "healthy"
+                      response_time_ms: 2
+                    ollama:
+                      status: "healthy"
+                      response_time_ms: 15
+                      model_loaded: "llama3:8b"
+                      ollama_version: "0.3.0"
+                      models_available:
+                        - name: "llama3:8b"
+                          size_gb: 4.7
+                          quantization: "Q4_K_M"
+                          loaded: true
+                        - name: "mistral:7b"
+                          size_gb: 4.1
+                          quantization: "Q4_0"
+                          loaded: false
+                      current_load:
+                        active_requests: 1
+                        queued_requests: 0
+                    whisper:
+                      status: "healthy"
+                      response_time_ms: 10
+                    storage:
+                      status: "healthy"
+                      disk_free_gb: 120.5
+              degraded:
+                summary: Some components have issues
+                value:
+                  status: "degraded"
+                  version: "1.0.0"
+                  uptime_seconds: 3600
+                  components:
+                    database:
+                      status: "healthy"
+                      response_time_ms: 2
+                    ollama:
+                      status: "degraded"
+                      response_time_ms: 5000
+                      detail: "High latency model may be loading"
+                      current_load:
+                        active_requests: 3
+                        queued_requests: 2
+                    whisper:
+                      status: "unhealthy"
+                      detail: "Whisper model not loaded"
+                    storage:
+                      status: "healthy"
+                      disk_free_gb: 120.5
+      "503":
+        description: System is unhealthy cannot serve requests
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/HealthStatus"
+            example:
+              status: "unhealthy"
+              version: "1.0.0"
+              uptime_seconds: 10
+              components:
+                database:
+                  status: "unhealthy"
+                  detail: "Connection refused"
+                ollama:
+                  status: "unhealthy"
+                  detail: "Connection refused"
+
+schema_incident:
+  get:
+    operationId: getIncidentSchema
+    summary: Get the canonical FireForm JSON Schema
+    description: |
+      Returns the full canonical FireForm incident JSON Schema (JSON Schema
+      draft-07). Clients can use this to validate incident data locally before
+      submitting. This is a schema-as-API pattern for interoperability.
+    tags:
+      - system
+    responses:
+      "200":
+        description: Full JSON Schema document
+        content:
+          application/json:
+            schema:
+              type: object
+              description: JSON Schema draft-07 document for the canonical incident model
+            example:
+              $schema: "http://json-schema.org/draft-07/schema#"
+              title: "FireForm Canonical Incident"
+              type: "object"
+              properties:
+                schema_version:
+                  type: "string"
+
+schema_versions:
+  get:
+    operationId: getSchemaVersions
+    summary: Get schema version history
+    description: |
+      Returns the version history of the canonical FireForm incident schema,
+      including changelogs and whether each version introduced breaking changes.
+      Useful for clients tracking schema evolution across FireForm updates.
+    tags:
+      - system
+    responses:
+      "200":
+        description: Schema version history
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../schemas/system.yaml#/SchemaVersion"
+            example:
+              - version: "1.1.0"
+                released_at: "2026-02-01T00:00:00Z"
+                changelog: "Added NERIS fields replacing legacy NFIRS. Added wildland.aerial_operations. Updated incident.types to include neris_code."
+                breaking_changes: true
+              - version: "1.0.0"
+                released_at: "2024-01-01T00:00:00Z"
+                changelog: "Initial canonical schema with NFIRS support."
+                breaking_changes: false

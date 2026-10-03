@@ -1,0 +1,7 @@
+target-version = "py311"
+line-length = 100
+
+[lint]
+# Pin the rule set explicitly. Ruff's defaults changed in 0.16, so relying on
+# them means a version bump silently changes what CI enforces.
+select = ["E4", "E7", "E9", "F"]

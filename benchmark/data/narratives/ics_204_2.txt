@@ -1,0 +1,14 @@
+### Blackwood Chemical Pipeline Breach Assignment List (ICS 204)
+
+The Assignment List, designated as ICS 204 for the Blackwood Chemical Pipeline Breach incident under tracking number US-EPA-R5-2026-0813, details the tactical assignments for the Hot Zone Entry Group operating within Division B under the Pipeline Isolation Branch during Operational Period 1 (August 13, 2026, 18:00 hours to August 14, 2026, 06:00 hours).
+
+Tactical leadership for this operational unit is provided by Operations Section Chief D. Kowalski (Contact: 555-0210 / Radio Ch 1), Branch Director Capt. Donald Kross (Contact: 555-0233 / Radio Ch 2), and Division/Group Supervisor Lt. R. Mendez (Contact: 555-0255 / Radio Ch 3). Tactical resources staging and deployment are managed out of Staging Area Bravo located at Westside High School.
+
+Resources assigned to the Hot Zone Entry Group for this shift include:
+1. Hazmat Unit HZM-05, led by Lt. C. Webb, staffing 5 personnel, contactable via Radio Ch 3 (467.775 MHz). Special instructions require reporting to Gate 2 by 18:15 equipped with Level A encapsulated SCBA suits, pneumatic pipe clamp, and thermal imaging camera.
+2. Fire Engine ENG-12, led by Capt. A. Ross, staffing 4 personnel, contactable via Radio Ch 2. Special instructions mandate deploying unmanned fog nozzles at 500 ft perimeter to maintain water curtains over airborne ammonia plume.
+3. Water Tender WT-03, led by Lt. M. Turner, staffing 2 personnel, contactable via Radio Ch 2. Special instructions require supplying continuous water feed to Engine 12 monitors.
+
+The specific work assignments for the Hot Zone Entry Group direct personnel to enter Hot Zone at Valve Station 14-B under Level A protection to execute manual hot-tap isolation on the 8-inch pressurized line, secure bypass manifold to stop active liquid ammonia discharge, and maintain water curtains downwind during valve mechanical manipulation.
+
+Special safety instructions mandate Level A PPE for entry team, maintaining a 2-person backup entry team in Level A at Warm Zone line, and sounding emergency withdrawal horn (3 long blasts) if ammonia concentration exceeds 300 ppm IDLH at Warm Zone baseline. Communications protocols specify Radio Ch 1 (153.830 MHz) for Command / Operations, Radio Ch 3 (467.775 MHz) for Pipeline Tactical, Cell 555-0288 for Safety Officer Line, and Radio Ch 6 (462.625 MHz) for Decon Line. This document serves as Page 4 of the Incident Action Plan and was prepared by Planning Section Chief Sarah L. Jenkins on August 13, 2026, at 16:30 hours.

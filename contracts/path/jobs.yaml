@@ -1,0 +1,79 @@
+# Layer 8 Async Job Status (Cross-cutting)
+# GET /api/v1/jobs/{job_id}
+
+job_by_id:
+  get:
+    operationId: getJobStatus
+    summary: Get async job status
+    description: |
+      Universal job status endpoint for any asynchronous operation in FireForm —
+      transcription, LLM extraction, form generation, and report generation.
+      Returns the current status, progress percentage, and a result URL when
+      the job completes. Poll this endpoint for long-running operations.
+    tags:
+      - jobs
+    parameters:
+      - name: job_id
+        in: path
+        required: true
+        description: Unique identifier of the async job
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Job status
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/Job"
+            examples:
+              queued:
+                summary: Job waiting in queue
+                value:
+                  job_id: "550e8400-e29b-41d4-a716-446655440098"
+                  job_type: "extraction"
+                  status: "queued"
+                  progress_percent: 0
+                  created_at: "2024-07-15T14:30:00Z"
+                  updated_at: "2024-07-15T14:30:00Z"
+              processing:
+                summary: Job currently processing
+                value:
+                  job_id: "550e8400-e29b-41d4-a716-446655440098"
+                  job_type: "extraction"
+                  status: "processing"
+                  progress_percent: 45
+                  created_at: "2024-07-15T14:30:00Z"
+                  updated_at: "2024-07-15T14:30:30Z"
+              completed:
+                summary: Job completed successfully
+                value:
+                  job_id: "550e8400-e29b-41d4-a716-446655440098"
+                  job_type: "extraction"
+                  status: "completed"
+                  progress_percent: 100
+                  result_url: "/api/v1/extract/550e8400-e29b-41d4-a716-446655440020"
+                  created_at: "2024-07-15T14:30:00Z"
+                  updated_at: "2024-07-15T14:31:05Z"
+              failed:
+                summary: Job failed with error
+                value:
+                  job_id: "550e8400-e29b-41d4-a716-446655440098"
+                  job_type: "extraction"
+                  status: "failed"
+                  progress_percent: 23
+                  error:
+                    error_code: "LLM_TIMEOUT"
+                    message: "Ollama did not respond within 120 seconds"
+                  created_at: "2024-07-15T14:30:00Z"
+                  updated_at: "2024-07-15T14:32:00Z"
+      "404":
+        description: Job not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "JOB_NOT_FOUND"
+              message: "Job with ID 550e8400-e29b-41d4-a716-446655440099 not found"
