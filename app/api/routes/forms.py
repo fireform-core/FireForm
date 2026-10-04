@@ -18,6 +18,14 @@ from app.services.form import FormService
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
+RECOMMENDED_MODELS = [
+    "qwen2.5:1.5b",
+    "qwen2.5:3b",
+    "qwen2.5:7b",
+    "llama3.2:3b",
+    "mistral:7b",
+]
+
 
 @router.post("/fill", response_model=FormFillResponse)
 def fill_form(form: FormFill, db: Session = Depends(get_db)):
@@ -49,24 +57,29 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
 
 @router.get("/models", response_model=ModelsResponse)
 def list_models():
-    """List the Whisper-independent extraction models available in the local
-    Ollama instance, plus the configured default. Used by the Fill Form UI's
-    model picker. Falls back to just the default if Ollama is unreachable."""
-    default_model = OLLAMA_MODEL
-
-    models: list[str] = []
+    """List recommended and installed models for the Fill Form model picker."""
+    installed_names: set[str] = set()
     try:
         response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=10)
         response.raise_for_status()
-        models = [m["name"] for m in response.json().get("models", []) if m.get("name")]
+        installed_names = {
+            model["name"]
+            for model in response.json().get("models", [])
+            if isinstance(model, dict) and model.get("name")
+        }
     except requests.exceptions.RequestException:
-        models = []
+        pass
 
-    # Always surface the configured default, even if Ollama hasn't pulled it yet.
-    if default_model not in models:
-        models.insert(0, default_model)
-
-    return ModelsResponse(models=models, default=default_model)
+    all_names = sorted(set(RECOMMENDED_MODELS) | installed_names)
+    models = [
+        {
+            "name": name,
+            "installed": name in installed_names,
+            "recommended": name in RECOMMENDED_MODELS,
+        }
+        for name in all_names
+    ]
+    return ModelsResponse(current_model=OLLAMA_MODEL, models=models)
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

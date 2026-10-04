@@ -24,9 +24,15 @@ class TranscriptionResponse(BaseModel):
     text: str
 
 
+class ModelInfo(BaseModel):
+    name: str
+    installed: bool
+    recommended: bool
+
+
 class ModelsResponse(BaseModel):
-    models: list[str]
-    default: str
+    current_model: str
+    models: list[ModelInfo]
 
 
 class AsyncFormFill(BaseModel):

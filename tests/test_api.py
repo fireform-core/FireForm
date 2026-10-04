@@ -356,35 +356,52 @@ class TestFormEndpoints:
         assert captured["params"]["output"] == "json"
 
     def test_list_models(self, client, monkeypatch):
-        ""f"{API_PREFIX}/forms/models lists Ollama models and always includes the default."""
+        """The model list includes recommended and installed Ollama models."""
         from unittest.mock import MagicMock
 
         fake_response = MagicMock()
         fake_response.json.return_value = {"models": [{"name": "qwen2.5:3b"}, {"name": "mistral:latest"}]}
         fake_response.raise_for_status.return_value = None
         monkeypatch.setattr("app.api.routes.forms.requests.get", lambda *a, **k: fake_response)
-        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+        monkeypatch.setattr("app.api.routes.forms.OLLAMA_MODEL", "qwen2.5:1.5b")
 
         resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
         body = resp.json()
-        assert body["default"] == "qwen2.5:1.5b"
-        assert "qwen2.5:1.5b" in body["models"]  # default injected even if not pulled
-        assert "qwen2.5:3b" in body["models"]
+        assert body["current_model"] == "qwen2.5:1.5b"
+        models = {model["name"]: model for model in body["models"]}
+        assert models["qwen2.5:1.5b"] == {
+            "name": "qwen2.5:1.5b",
+            "installed": False,
+            "recommended": True,
+        }
+        assert models["qwen2.5:3b"]["installed"] is True
+        assert models["qwen2.5:3b"]["recommended"] is True
+        assert models["mistral:latest"]["installed"] is True
+        assert models["mistral:latest"]["recommended"] is False
 
     def test_list_models_ollama_down(self, client, monkeypatch):
-        """If Ollama is unreachable, still return the default alone."""
+        """If Ollama is unreachable, still return all recommended models."""
         import requests
 
         def boom(*a, **k):
             raise requests.exceptions.ConnectionError("down")
 
         monkeypatch.setattr("app.api.routes.forms.requests.get", boom)
-        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 
         resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
-        assert resp.json()["models"] == ["qwen2.5:1.5b"]
+        body = resp.json()
+        assert body["current_model"] == "qwen2.5:1.5b"
+        assert [model["name"] for model in body["models"]] == [
+            "llama3.2:3b",
+            "mistral:7b",
+            "qwen2.5:1.5b",
+            "qwen2.5:3b",
+            "qwen2.5:7b",
+        ]
+        assert all(model["installed"] is False for model in body["models"])
+        assert all(model["recommended"] is True for model in body["models"])
 
     def test_fill_form_passes_model_override(self, client, mock_controller, db, tmp_path, monkeypatch):
         """A `model` in the request reaches filler.fill as a keyword argument."""
