@@ -19,6 +19,7 @@ from pypdf import PdfWriter
 from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, OLLAMA_TIMEOUT
 
 from . import template
+from .exceptions import ModelNotInstalledError
 from .geometry import CHECKBOX, RADIOBUTTON, SIGNATURE, drop_null_parents, on_state, page_widgets
 
 OPTIONS = {
@@ -94,12 +95,17 @@ def call_model(prompt, schema, model):
         "think": False,
         "options": OPTIONS,
     }
-    response = requests.post(
-        OLLAMA_HOST + "/api/generate",
-        json=payload,
-        timeout=OLLAMA_TIMEOUT,
-    )
-    response.raise_for_status()
+    try:
+        response = requests.post(
+            OLLAMA_HOST + "/api/generate",
+            json=payload,
+            timeout=OLLAMA_TIMEOUT,
+        )
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as exc:
+        if exc.response is not None and exc.response.status_code == 404:
+            raise ModelNotInstalledError(model) from exc
+        raise
     return response.json().get("response", "")
 
 

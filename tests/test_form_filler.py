@@ -8,9 +8,12 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from pypdf import PdfReader
+from requests import HTTPError
 
 from app.services.form_filler import filler, template
+from app.services.form_filler.exceptions import ModelNotInstalledError
 
 ICS_205A = str(Path(__file__).resolve().parents[1] / "benchmark/data/pdfs/ics_205a.pdf")
 TABLE = "resource_summary_0_table"
@@ -69,3 +72,14 @@ def test_fill_defaults_to_configured_model():
 
     assert call.call_args.args[2] == filler.OLLAMA_MODEL
 
+
+def test_call_model_raises_for_uninstalled_model():
+    with patch.object(filler.requests, "post") as post:
+        response = post.return_value
+        response.raise_for_status.side_effect = HTTPError(
+            response=response,
+        )
+        response.status_code = 404
+
+        with pytest.raises(ModelNotInstalledError, match="test-model"):
+            filler.call_model("prompt", {"type": "object"}, "test-model")

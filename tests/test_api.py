@@ -464,6 +464,33 @@ class TestFormEndpoints:
         call_args = mock_controller["mock_fill"].call_args
         assert call_args.kwargs.get("model") == "qwen2.5:3b" or call_args.args[3] == "qwen2.5:3b"
 
+    def test_fill_form_returns_422_for_uninstalled_model(
+        self, client, mock_controller, db, tmp_path, monkeypatch
+    ):
+        from app.services.form_filler.exceptions import ModelNotInstalledError
+
+        monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
+        pdf_file = tmp_path / "employee.pdf"
+        pdf_file.write_bytes(b"%PDF-1.4 fake")
+        tpl_id = self._seed_template_at(client, str(pdf_file.relative_to(tmp_path)))
+        input_id = self._seed_input(db, transcript="John Doe")
+        mock_controller["mock_fill"].side_effect = ModelNotInstalledError("missing-model")
+
+        resp = client.post(f"{API_PREFIX}/forms/fill", json={
+            "template_id": tpl_id,
+            "input_id": str(input_id),
+            "model": "missing-model",
+        })
+
+        assert resp.status_code == 422
+        assert resp.json() == {
+            "error_code": "MODEL_NOT_INSTALLED",
+            "message": (
+                "Model 'missing-model' is not installed in Ollama. "
+                "Pull it first via POST /forms/pull."
+            ),
+        }
+
     def test_transcribe_service_unavailable(self, client, monkeypatch):
         """A down whisper service surfaces as a 503, not a 500."""
         import io

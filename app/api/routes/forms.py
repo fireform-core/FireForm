@@ -24,6 +24,7 @@ from app.services.whisper import call_whisper_asr
 from app.core.errors.base import AppError
 from app.db.repositories import get_template, get_form_submission, delete_form_submission
 from app.services.form import FormService
+from app.services.form_filler.exceptions import ModelNotInstalledError
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
@@ -57,6 +58,12 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
             input_text=submission.input_text,
             output_pdf_path=submission.output_pdf_path,
         )
+    except ModelNotInstalledError as exc:
+        raise AppError(
+            f"{exc} Pull it first via POST /forms/pull.",
+            status_code=422,
+            error_code="MODEL_NOT_INSTALLED",
+        ) from exc
     except AppError:
         raise
     except Exception as e:
