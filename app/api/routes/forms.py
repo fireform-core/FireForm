@@ -1,16 +1,25 @@
+import json
+
 import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.forms import (
     FormFill,
     FormFillResponse,
+    ModelPullRequest,
     ModelsResponse,
     TranscriptionResponse,
 )
 from app.core import paths
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
+from app.core.config import (
+    OLLAMA_HOST,
+    OLLAMA_MODEL,
+    OLLAMA_PULL_TIMEOUT,
+    RETENTION_PERIOD_DAYS,
+)
 from app.services.whisper import call_whisper_asr
 from app.core.errors.base import AppError
 from app.db.repositories import get_template, get_form_submission, delete_form_submission
@@ -80,6 +89,33 @@ def list_models():
         for name in all_names
     ]
     return ModelsResponse(current_model=OLLAMA_MODEL, models=models)
+
+
+@router.post(
+    "/pull",
+    response_class=StreamingResponse,
+    responses={200: {"content": {"application/x-ndjson": {}}}},
+)
+def pull_model(req: ModelPullRequest):
+    """Stream pull progress from Ollama as newline-delimited JSON."""
+
+    def generate():
+        try:
+            with requests.post(
+                f"{OLLAMA_HOST}/api/pull",
+                json={"name": req.model, "stream": True},
+                stream=True,
+                timeout=OLLAMA_PULL_TIMEOUT,
+            ) as response:
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=None):
+                    if chunk:
+                        yield chunk
+            yield (json.dumps({"status": "success"}) + "\n").encode("utf-8")
+        except requests.exceptions.RequestException as exc:
+            yield (json.dumps({"error": str(exc)}) + "\n").encode("utf-8")
+
+    return StreamingResponse(generate(), media_type="application/x-ndjson")
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

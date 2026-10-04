@@ -4,6 +4,7 @@ Covers every endpoint and the full upload → template → fill pipeline.
 All heavy dependencies (LLM, commonforms, filesystem) are mocked via conftest.
 """
 
+import json
 from uuid import uuid4
 
 from sqlmodel import select
@@ -402,6 +403,49 @@ class TestFormEndpoints:
         ]
         assert all(model["installed"] is False for model in body["models"])
         assert all(model["recommended"] is True for model in body["models"])
+
+    def test_pull_model_success(self, client, monkeypatch):
+        from unittest.mock import MagicMock
+
+        fake_response = MagicMock()
+        fake_response.iter_content.return_value = [
+            b'{"status":"pulling","completed":1,"total":2}\n',
+            b'{"status":"verifying"}\n',
+        ]
+        fake_response.raise_for_status.return_value = None
+        captured = {}
+
+        def fake_post(*args, **kwargs):
+            captured["args"] = args
+            captured["kwargs"] = kwargs
+            return fake_response
+
+        monkeypatch.setattr("app.api.routes.forms.requests.post", fake_post)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+
+        assert resp.status_code == 200
+        lines = [json.loads(line) for line in resp.text.splitlines() if line.strip()]
+        assert lines[-1] == {"status": "success"}
+        assert captured["kwargs"]["json"] == {"name": "llama3.2:3b", "stream": True}
+        assert captured["kwargs"]["stream"] is True
+        assert captured["kwargs"]["timeout"] == 600
+
+    def test_pull_model_failure(self, client, monkeypatch):
+        """When Ollama is unreachable, the stream returns an error line."""
+        import requests
+
+        def boom(*args, **kwargs):
+            raise requests.exceptions.RequestException("pull failed")
+
+        monkeypatch.setattr("app.api.routes.forms.requests.post", boom)
+
+        resp = client.post(f"{API_PREFIX}/forms/pull", json={"model": "llama3.2:3b"})
+
+        assert resp.status_code == 200
+        lines = [line for line in resp.text.splitlines() if line.strip()]
+        assert lines
+        assert "error" in json.loads(lines[-1])
 
     def test_fill_form_passes_model_override(self, client, mock_controller, db, tmp_path, monkeypatch):
         """A `model` in the request reaches filler.fill as a keyword argument."""

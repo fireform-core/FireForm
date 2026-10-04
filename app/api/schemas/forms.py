@@ -35,6 +35,10 @@ class ModelsResponse(BaseModel):
     models: list[ModelInfo]
 
 
+class ModelPullRequest(BaseModel):
+    model: str
+
+
 class AsyncFormFill(BaseModel):
     template_ids: list[int]
     input_id: UUID
