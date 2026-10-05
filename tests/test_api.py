@@ -356,7 +356,7 @@ class TestFormEndpoints:
         assert captured["params"]["output"] == "json"
 
     def test_list_models(self, client, monkeypatch):
-        ""f"{API_PREFIX}/forms/models lists Ollama models and always includes the default."""
+        """API_PREFIX/forms/models lists Ollama models and always includes the default."""
         from unittest.mock import MagicMock
 
         fake_response = MagicMock()

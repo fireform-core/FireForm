@@ -21,7 +21,7 @@ def _wav_duration(path: Path) -> float | None:
     try:
         with wave.open(str(path)) as wf:
             return wf.getnframes() / wf.getframerate()
-    except Exception:
+    except (OSError, wave.Error, ValueError):
         return None
 
 

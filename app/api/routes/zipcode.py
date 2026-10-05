@@ -1,3 +1,4 @@
+# ruff: noqa: BLE001
 from fastapi import APIRouter
 
 from app.core.errors.base import AppError
