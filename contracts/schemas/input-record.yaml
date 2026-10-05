@@ -1,0 +1,138 @@
+# Input-related schemas
+
+TextInputRequest:
+  type: object
+  required:
+    - narrative
+  properties:
+    narrative:
+      type: string
+      description: Free-text incident narrative (10+ words, max 50,000 characters)
+      minLength: 20
+      maxLength: 50000
+    station_id:
+      type: string
+      description: Station identifier
+    responder_badge:
+      type: string
+      description: Badge number of the reporting responder
+    incident_date_hint:
+      type: string
+      format: date
+      description: Approximate date of the incident
+
+VoiceInputResponse:
+  type: object
+  required:
+    - input_id
+    - status
+    - input_type
+  properties:
+    input_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum:
+        - queued
+    input_type:
+      type: string
+      enum:
+        - voice
+    estimated_processing_seconds:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+    job_id:
+      type: string
+      format: uuid
+      description: Job ID for polling transcription status
+    poll_url:
+      type: string
+      description: URL to poll for input status
+
+TextInputResponse:
+  type: object
+  required:
+    - input_id
+    - status
+    - input_type
+  properties:
+    input_id:
+      type: string
+      format: uuid
+    status:
+      type: string
+      enum:
+        - ready
+    input_type:
+      type: string
+      enum:
+        - text
+    character_count:
+      type: integer
+    word_count:
+      type: integer
+    created_at:
+      type: string
+      format: date-time
+
+InputRecord:
+  type: object
+  required:
+    - input_id
+    - input_type
+    - status
+  properties:
+    input_id:
+      type: string
+      format: uuid
+    input_type:
+      type: string
+      enum:
+        - voice
+        - text
+    status:
+      $ref: "enums.yaml#/InputStatus"
+    transcript:
+      type: string
+      nullable: true
+      description: Transcribed text (for voice) or original narrative (for text). Null while transcribing.
+    original_filename:
+      type: string
+      nullable: true
+      description: Original audio filename (voice inputs only)
+    audio_duration_seconds:
+      type: number
+      nullable: true
+      description: Duration of audio in seconds (voice inputs only)
+    character_count:
+      type: integer
+      nullable: true
+    word_count:
+      type: integer
+      nullable: true
+    station_id:
+      type: string
+      nullable: true
+    responder_badge:
+      type: string
+      nullable: true
+    incident_date_hint:
+      type: string
+      format: date
+      nullable: true
+    error_detail:
+      type: string
+      nullable: true
+      description: Error message if transcription failed
+    retry_after_seconds:
+      type: integer
+      description: Polling hint present when status is queued or transcribing
+    created_at:
+      type: string
+      format: date-time
+    updated_at:
+      type: string
+      format: date-time

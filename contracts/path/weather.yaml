@@ -1,0 +1,108 @@
+forecast:
+  get:
+    summary: Fetch weather forecast
+    description: >
+      Fetch hourly weather data for the given location and date range.
+      Coordinates must be provided as decimal degrees (e.g. `40.7128` for latitude, `-74.0060` for longitude).
+    tags:
+      - weather
+    parameters:
+      - name: latitude
+        in: query
+        required: true
+        description: >
+          Latitude of the location in decimal degrees. Valid range: -90.0 to 90.0.
+          Example: `40.7128` (New York City). Do NOT use degree/minute/second notation.
+        schema:
+          type: number
+          format: float
+          minimum: -90.0
+          maximum: 90.0
+          example: 40.7128
+      - name: longitude
+        in: query
+        required: true
+        description: >
+          Longitude of the location in decimal degrees. Valid range: -180.0 to 180.0.
+          Example: `-74.0060` (New York City). Do NOT use degree/minute/second notation.
+        schema:
+          type: number
+          format: float
+          minimum: -180.0
+          maximum: 180.0
+          example: -74.0060
+      - name: start_date
+        in: query
+        required: true
+        description: >
+          Start date of the forecast period. Format: `YYYY-MM-DD` (ISO 8601).
+          Example: `2024-06-01`.
+        schema:
+          type: string
+          format: date
+          example: "2024-06-01"
+      - name: end_date
+        in: query
+        required: true
+        description: >
+          End date of the forecast period (inclusive). Format: `YYYY-MM-DD` (ISO 8601).
+          Example: `2024-06-07`. Must be >= start_date.
+        schema:
+          type: string
+          format: date
+          example: "2024-06-07"
+      - name: fields
+        in: query
+        required: false
+        description: >
+          Comma-separated list of hourly variables to include in the response.
+          When omitted, all supported variables are returned.
+          Supported values: `temperature_2m`, `relative_humidity_2m`, `rain`,
+          `apparent_temperature`, `precipitation_probability`, `precipitation`,
+          `wind_direction_10m`, `wind_speed_10m`, `soil_temperature_0cm`, `uv_index`.
+          Example: `temperature_2m,rain,wind_speed_10m`.
+        schema:
+          type: string
+          example: "temperature_2m,rain,wind_speed_10m"
+    responses:
+      '200':
+        description: Weather data retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                  description: Actual latitude used by the weather model (may differ slightly from input).
+                longitude:
+                  type: number
+                  description: Actual longitude used by the weather model.
+                elevation:
+                  type: number
+                  description: Elevation of the location in metres above sea level.
+                timezone:
+                  type: string
+                  description: Timezone name (e.g. "GMT").
+                timezone_abbreviation:
+                  type: string
+                hourly:
+                  type: object
+                  description: >
+                    Object containing hourly time series. The `date` key holds an array
+                    of ISO 8601 timestamps; all other keys correspond to the requested
+                    fields and contain arrays of the same length.
+                  properties:
+                    date:
+                      type: array
+                      items:
+                        type: string
+                        format: date-time
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: number
+      '422':
+        description: Validation error (e.g. coordinates out of range, invalid date format)
+      '500':
+        description: Internal server error

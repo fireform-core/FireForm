@@ -1,0 +1,14 @@
+### Port of Houston Sulfuric Acid Tanker Leak Communications List (ICS 205A)
+
+The Communications List, designated as ICS 205A for the Port of Houston Sulfuric Acid Tanker Leak incident under tracking number USCG-EPA-R6-2026-1014, functions as the primary incident contact directory for Operational Period 1 (October 14, 2026, 07:00 hours through October 15, 2026, 19:00 hours).
+
+Basic local communications contact methods for assigned incident leadership are established as follows:
+1. Position: USCG Unified Commander, Name: Captain H. Vance, Contact Methods: Cell: 555-0301 / VHF Ch 16 / Vessel: CG-45601.
+2. Position: EPA Co-Incident Commander, Name: OSC M. Reynolds, Contact Methods: Cell: 555-0302 / Radio Ch 1.
+3. Position: Safety Officer, Name: Commander Thomas Blake, Contact Methods: Cell: 555-0399 / VHF Ch 16.
+4. Position: Operations Section Chief, Name: Battalion Chief A. Ross, Contact Methods: Cell: 555-0312 / VHF Ch 16.
+5. Position: Vessel Salvage Branch Director, Name: Lt. J. Thorne, Contact Methods: Cell: 555-0344 / VHF Ch 11.
+6. Position: Deck Entry Supervisor, Name: Lt. S. Baker, Contact Methods: Cell: 555-0366 / Radio Ch 4 / Vehicle: HZM-PORT-1.
+7. Position: Planning Section Chief, Name: Commander Richard Croft, Contact Methods: Cell: 555-0350 / Sector Ext: 305.
+
+This administrative contact directory serves as Page 6 of the Incident Action Plan package and was prepared by Communications Unit Leader J. Myers on October 14, 2026, at 06:15 hours.

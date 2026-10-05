@@ -1,0 +1,11 @@
+### Blackwood Chemical Pipeline Breach Incident Radio Communications Plan (ICS 205)
+
+The Incident Radio Communications Plan, designated as ICS 205 for the Blackwood Chemical Pipeline Breach incident under tracking number US-EPA-R5-2026-0813, was prepared on August 13, 2026, at 16:00 hours. This communications blueprint governs basic radio channel assignments for Operational Period 1 (August 13, 2026, 18:00 hours through August 14, 2026, 06:00 hours).
+
+Basic radio channel allocations for this operational period are structured as follows:
+1. Channel 1 (Zone A): Functioned for Command, channel name STATE-CMD, assigned to Unified Command and Operations. Operates on RX frequency 153.8300 N (Tone 131.8) and TX frequency 158.9700 N (Tone 131.8) in Analog mode (A), utilizing County Repeater 4.
+2. Channel 2 (Zone A): Functioned for Tactical operations, channel name HAZ-TAC-1, assigned to Hot Zone Entry Group. Operates on RX frequency 467.7750 N (Tone D023) and TX frequency 467.7750 N (Tone D023) in Digital mode (D), restricting use strictly to intrinsically safe radios.
+3. Channel 3 (Zone A): Functioned for Tactical operations, channel name BOOM-TAC, assigned to River Booming Division. Operates on RX frequency 154.2800 N (Tone 131.8) and TX frequency 154.2800 N (Tone 131.8) in Analog mode (A), serving as a simplex marine and land communications link.
+4. Channel 4 (Zone A): Functioned for Dispatch, channel name LAW-DISP, assigned to Perimeter Evacuation and Sheriff's Office. Operates on RX frequency 460.1250 N (Tone 156.7) and TX frequency 465.1250 N (Tone 156.7) in Digital mode (D), linking to County Sheriff Dispatch.
+
+Special instructions mandate that only intrinsically safe portable radios (Class I, Div 1) are permitted inside the 500-foot Exclusion Zone. Personnel must maintain 30-minute mandatory radio check-ins. This document serves as Page 5 of the Incident Action Plan and was prepared by Communications Unit Leader K. Albright on August 13, 2026, at 16:00 hours.

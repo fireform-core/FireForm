@@ -1,0 +1,14 @@
+### Whispering Pines Derailment Assignment List (ICS 204)
+
+The Assignment List, designated as ICS 204 for the Whispering Pines Derailment incident under tracking number US-EPA-R4-2026-0707, details the tactical assignments for the Hazmat Entry Group operating within Division A under the Hazardous Materials Branch during Operational Period 1 (July 07, 2026, 18:00 hours to July 08, 2026, 06:00 hours).
+
+Tactical leadership for this operational unit is provided by Operations Section Chief B. Reynolds (Contact: 555-0192 / Radio Ch 1), Branch Director Lt. T. Kincaid (Contact: 555-0144 / Radio Ch 3), and Division/Group Supervisor Capt. P. Gomez (Contact: 555-0188 / Radio Ch 4). Tactical resources staging and deployment are managed out of Staging Area Alpha located at the County Fairgrounds.
+
+Resources assigned to the Hazmat Entry Group for this shift include:
+1. Hazmat Unit HZM-01, led by Lt. T. Kincaid, staffing 6 personnel, contactable via Radio Ch 4 (462.550 MHz). Special instructions require reporting to Hot Zone Gate 1 by 18:30 equipped with Level B SCBA chemical suits, PID air monitors, and non-sparking aluminum tools.
+2. Decontamination Trailer DECON-02, led by Lt. S. Baker, staffing 4 personnel, contactable via Radio Ch 4. Special instructions mandate establishing a wet-decontamination station at the Warm Zone boundary Gate 2 by 18:45 utilizing a decon shower trailer with lime wash solution.
+3. Fire Engine ENG-41, led by Capt. D. Ross, staffing 3 personnel, contactable via Radio Ch 2. Special instructions require positioning at the Warm Zone boundary for continuous AFFF foam blanket standby during tank car grounding operations.
+
+The specific work assignments for the Hazmat Entry Group direct personnel to execute Hot Zone entry into the rail right-of-way to secure structural stabilization straps on derailed Car #14, attach grounding cables to prevent static spark ignition, and perform real-time PID air monitoring around the breached Benzene manifold, reporting VOC concentrations to the Branch Director every 15 minutes.
+
+Special safety instructions mandate that all entry personnel wear Level B PPE with SCBA. Continuous air monitoring is strictly required; personnel must evacuate the Hot Zone immediately if PID readings exceed 5 ppm Benzene or 10% LEL. Formal decontamination shower procedures must be completed prior to exiting the Warm Zone. Communications protocols specify Radio Ch 1 (154.280 MHz) for Command, Radio Ch 4 (462.550 MHz) for Hazmat Tactical, Cell 555-0177 for Safety Officer Direct, and Radio Ch 5 / Cell 555-0199 for Medical Emergency Call. This document serves as Page 4 of the Incident Action Plan and was prepared by Planning Section Chief Marcus Vance on July 07, 2026, at 16:30 hours.

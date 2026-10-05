@@ -1,0 +1,11 @@
+### Port of Houston Sulfuric Acid Tanker Leak Incident Radio Communications Plan (ICS 205)
+
+The Incident Radio Communications Plan, designated as ICS 205 for the Port of Houston Sulfuric Acid Tanker Leak incident under tracking number USCG-EPA-R6-2026-1014, was prepared on October 14, 2026, at 05:30 hours. This communications blueprint governs basic radio channel assignments for Operational Period 1 (October 14, 2026, 07:00 hours through October 15, 2026, 19:00 hours).
+
+Basic radio channel allocations for this operational period are structured as follows:
+1. Channel 16 (Zone Port): Functioned for Command, channel name VHF 16 / CMD, assigned to USCG and Unified Command. Operates on RX frequency 156.8000 W (Tone None) and TX frequency 156.8000 W (Tone None) in Analog mode (A), serving as International Maritime Distress and Command channel.
+2. Channel 11 (Zone Port): Functioned for Tactical operations, channel name VHF 11 / OPS, assigned to Vessel Deck Entry Group. Operates on RX frequency 156.5500 W (Tone None) and TX frequency 156.5500 W (Tone None) in Analog mode (A), serving ship-to-shore deck entry operations.
+3. Channel 4 (Zone Port): Functioned for Tactical operations, channel name PORT-HAZ, assigned to Chemical Neutralization Team. Operates on RX frequency 453.2250 N (Tone 141.3) and TX frequency 458.2250 N (Tone 141.3) in Digital mode (D), utilizing Port Fire Hazmat digital system.
+4. Channel 5 (Zone Port): Functioned for Support operations, channel name MED-NET, assigned to Medical & Decon Operations. Operates on RX frequency 462.6000 N (Tone 100.0) and TX frequency 462.6000 N (Tone 100.0) in Analog mode (A), maintaining communication with decon trailer baseline.
+
+Special instructions dictate that VHF Channel 16 is reserved strictly for Command and emergency traffic. The deck entry team must maintain dual-watch monitoring on VHF Channel 11 and Port-Haz Channel 4. This document serves as Page 5 of the Incident Action Plan and was prepared by Communications Unit Leader J. Myers on October 14, 2026, at 05:30 hours.

@@ -1,0 +1,247 @@
+# Layer 1 Input Endpoints
+# POST /api/v1/input/voice, POST /api/v1/input/text, GET /api/v1/input/{input_id}
+
+voice:
+  post:
+    operationId: submitVoiceInput
+    summary: Submit a voice recording for transcription
+    description: |
+      Accepts an audio file (voice memo) from a first responder along with optional
+      incident metadata. The audio is saved and queued for transcription via Whisper
+      running on the local Ollama instance. Returns an input_id immediately the
+      transcription runs asynchronously. Poll GET /api/v1/input/{input_id} for status.
+    tags:
+      - input
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required:
+              - audio_file
+            properties:
+              audio_file:
+                type: string
+                format: binary
+                description: Audio file in wav, mp3, m4a, ogg, or webm format. Max 500MB.
+              station_id:
+                type: string
+                description: Station identifier (e.g. "STA-045")
+              responder_badge:
+                type: string
+                description: Badge number of the responder submitting the report
+              incident_date_hint:
+                type: string
+                format: date
+                description: Approximate date of the incident to aid extraction
+          example:
+            station_id: "STA-045"
+            responder_badge: "FD-7842"
+            incident_date_hint: "2024-07-15"
+    responses:
+      "201":
+        description: Voice input accepted and queued for transcription
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/input-record.yaml#/VoiceInputResponse"
+            example:
+              input_id: "550e8400-e29b-41d4-a716-446655440001"
+              status: "queued"
+              input_type: "voice"
+              estimated_processing_seconds: 30
+              created_at: "2024-07-15T14:25:00Z"
+              job_id: "550e8400-e29b-41d4-a716-446655440099"
+              poll_url: "/api/v1/input/550e8400-e29b-41d4-a716-446655440001"
+      "400":
+        description: Malformed request (missing audio file or invalid form data)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "413":
+        description: Audio file exceeds 500MB limit
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "FILE_TOO_LARGE"
+              message: "Audio file exceeds maximum size of 500MB"
+              detail:
+                max_size_bytes: 524288000
+                received_size_bytes: 600000000
+      "415":
+        description: Unsupported audio format
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "UNSUPPORTED_FORMAT"
+              message: "Audio format not supported. Accepted formats: wav, mp3, m4a, ogg, webm"
+              detail:
+                accepted_formats:
+                  - wav
+                  - mp3
+                  - m4a
+                  - ogg
+                  - webm
+      "503":
+        description: Whisper transcription service unavailable
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "STT_UNAVAILABLE"
+              message: "Whisper transcription service is not available"
+              retry_after_seconds: 30
+
+text:
+  post:
+    operationId: submitTextInput
+    summary: Submit a text narrative for processing
+    description: |
+      Accepts a free-text incident narrative from a first responder. This is
+      synchronous the text is stored immediately and the input is marked as
+      "ready" for extraction. No transcription step needed.
+    tags:
+      - input
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/input-record.yaml#/TextInputRequest"
+          example:
+            narrative: >
+              Responded to a wildfire at Bear Creek Trailhead around 1:45 PM on July 10th.
+              Lightning strike ignited timber litter in mixed conifer and chaparral. Fire
+              spread rapidly northeast driven by 15-25 mph SW winds. We deployed 18 engines,
+              6 water tenders, and 3 helicopters. 247 personnel total. One firefighter
+              treated for heat exhaustion, returned to duty July 12. 1247 acres burned across
+              federal, state, and private land. 47 structures threatened, 3 damaged, none
+              destroyed. Fire contained July 14, controlled July 15.
+            station_id: "STA-045"
+            responder_badge: "FD-7842"
+            incident_date_hint: "2024-07-10"
+    responses:
+      "201":
+        description: Text input accepted and ready for extraction
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/input-record.yaml#/TextInputResponse"
+            example:
+              input_id: "550e8400-e29b-41d4-a716-446655440001"
+              status: "ready"
+              input_type: "text"
+              character_count: 612
+              word_count: 98
+              created_at: "2024-07-15T14:25:00Z"
+      "400":
+        description: Malformed JSON request body
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+      "413":
+        description: Narrative exceeds 50,000 character limit
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "NARRATIVE_TOO_LONG"
+              message: "Narrative exceeds maximum length of 50,000 characters"
+              detail:
+                max_characters: 50000
+                received_characters: 52000
+      "422":
+        description: Validation error (empty or too-short narrative)
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "VALIDATION_ERROR"
+              message: "Narrative is too short to extract meaningful incident data"
+              validation_errors:
+                - field: "narrative"
+                  issue: "Must contain at least 10 words"
+                  value: "Fire happened"
+
+input_by_id:
+  get:
+    operationId: getInput
+    summary: Get input record by ID
+    description: |
+      Returns the full input record including the original text or transcript,
+      processing status for voice inputs, and metadata. For voice inputs, poll
+      this endpoint until status transitions from "queued"/"transcribing" to "ready".
+    tags:
+      - input
+    parameters:
+      - name: input_id
+        in: path
+        required: true
+        description: Unique identifier of the input record
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Input record found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/input-record.yaml#/InputRecord"
+            examples:
+              voice_ready:
+                summary: Voice input with completed transcription
+                value:
+                  input_id: "550e8400-e29b-41d4-a716-446655440001"
+                  input_type: "voice"
+                  status: "ready"
+                  transcript: "Responded to a wildfire at Bear Creek..."
+                  original_filename: "incident_memo.m4a"
+                  audio_duration_seconds: 180
+                  character_count: 612
+                  word_count: 98
+                  station_id: "STA-045"
+                  responder_badge: "FD-7842"
+                  incident_date_hint: "2024-07-10"
+                  created_at: "2024-07-15T14:25:00Z"
+                  updated_at: "2024-07-15T14:25:30Z"
+              voice_processing:
+                summary: Voice input still transcribing
+                value:
+                  input_id: "550e8400-e29b-41d4-a716-446655440001"
+                  input_type: "voice"
+                  status: "transcribing"
+                  transcript: null
+                  created_at: "2024-07-15T14:25:00Z"
+                  updated_at: "2024-07-15T14:25:10Z"
+                  retry_after_seconds: 5
+              text_ready:
+                summary: Text input ready for extraction
+                value:
+                  input_id: "550e8400-e29b-41d4-a716-446655440002"
+                  input_type: "text"
+                  status: "ready"
+                  transcript: "Responded to a wildfire at Bear Creek..."
+                  character_count: 612
+                  word_count: 98
+                  created_at: "2024-07-15T14:25:00Z"
+                  updated_at: "2024-07-15T14:25:00Z"
+      "404":
+        description: Input record not found
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "INPUT_NOT_FOUND"
+              message: "Input with ID 550e8400-e29b-41d4-a716-446655440099 not found"

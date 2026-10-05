@@ -39,25 +39,14 @@ If you have a great idea for FireForm, we'd love to hear it! Please open an issu
 4. Make sure your code lints.
 5. Issue that pull request!
 
+**Issues are not formally assigned.** You are free to pick any open issue, work on it, and raise a PR directly. If multiple PRs address the same issue, the first one that actually fixes it generally gets preference. To avoid duplicating someone else's work, coordinate with other contributors on our [Discord](https://discord.gg/nBv5b6kF68) before starting.
+
+## 💬 Community
+
+Join our Discord server to ask questions, discuss issues, and coordinate work with other contributors: https://discord.gg/nBv5b6kF68
+
 ## 🛠️ Local Development Setup
 
-FireForm uses Docker and Docker Compose for the backend to ensure a consistent environment.
+See the [Setup Guide](docs/1.%20SETUP.md) for the full walkthrough: prerequisites, running the backend with Docker, testing endpoints via Swagger UI, day-to-day commands, and troubleshooting.
 
-### Prerequisites
-
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- `make` (optional, but recommended)
-- [Node.js](https://nodejs.org/) 20+ (only needed for the desktop app)
-
-### Desktop App Development
-
-The frontend is a vanilla HTML/CSS/JS app wrapped in Electron. To run it locally:
-
-```bash
-cd frontend
-npm install    # one-time setup
-npm start      # launches the Electron desktop window
-```
-
-The backend (API + Ollama) must be running separately via Docker — see `make fireform`.
+Before writing code, read the [Project Structure](docs/2.%20PROJECT_STRUCTURE.md) guide — it explains how the codebase is organized and where new code should go.

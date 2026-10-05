@@ -1,0 +1,85 @@
+# Form fill related schemas
+
+FormFillRequest:
+  type: object
+  required:
+    - template_id
+    - input_id
+  properties:
+    template_id:
+      type: integer
+      description: ID of the template to fill
+    input_id:
+      type: string
+      format: uuid
+      description: ID of a stored input (see POST /input/text, POST /input/voice)
+        whose transcript is used to fill this template. The input must have
+        status "ready".
+    model:
+      type: string
+      nullable: true
+      description: Ollama model override. Defaults to the configured default model.
+
+FormFillResponse:
+  type: object
+  required:
+    - id
+    - template_id
+    - input_text
+    - output_pdf_path
+  properties:
+    id:
+      type: integer
+    template_id:
+      type: integer
+    input_text:
+      type: string
+    output_pdf_path:
+      type: string
+      description: Path to the filled PDF output file
+
+AsyncFormFillRequest:
+  type: object
+  required:
+    - template_ids
+    - input_id
+  properties:
+    template_ids:
+      type: array
+      items:
+        type: integer
+      description: IDs of the templates to fill. One job is queued per template,
+        each running the same transcript against that template's field dictionary.
+    input_id:
+      type: string
+      format: uuid
+      description: ID of a stored input (see POST /input/text, POST /input/voice)
+        whose transcript is used to fill each template. The input must have
+        status "ready".
+    model:
+      type: string
+      nullable: true
+      description: Ollama model override. Defaults to the configured default model.
+
+AsyncFormFillResponse:
+  type: object
+  required:
+    - jobs
+  properties:
+    jobs:
+      type: array
+      items:
+        type: object
+        required:
+          - job_id
+          - status
+          - poll_url
+        properties:
+          job_id:
+            type: string
+            format: uuid
+          status:
+            type: string
+          poll_url:
+            type: string
+            description: Path to poll via GET /api/v1/jobs/{job_id}

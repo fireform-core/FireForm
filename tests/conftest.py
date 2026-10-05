@@ -5,16 +5,25 @@ Uses an in-memory SQLite database and mocks the heavy dependencies
 """
 
 import io
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
-from api.main import app
-from api.deps import get_db
-from api.db.models import Template, FormSubmission  # noqa: F401 — registers tables
+from app.api.deps import get_db
+from app.main import app
+from app.models import (  # noqa: F401 — registers tables
+    Extraction,
+    Form,
+    FormSubmission,
+    Incident,
+    Input,
+    Job,
+    Report,
+    Template,
+)
 
 # ---------------------------------------------------------------------------
 # In-memory database
@@ -54,6 +63,12 @@ def db():
         yield session
 
 
+@pytest.fixture
+def test_engine():
+    """Expose the shared in-memory engine for tests that need to open extra sessions."""
+    return _engine
+
+
 # ---------------------------------------------------------------------------
 # Minimal PDF bytes (valid 1-page blank PDF)
 # ---------------------------------------------------------------------------
@@ -80,22 +95,25 @@ def pdf_upload(pdf_bytes):
 
 
 # ---------------------------------------------------------------------------
-# Controller mock — patches the heavy dependencies at the route level
+# Pipeline mock — patches the heavy dependencies (LLM + filesystem) directly
 # ---------------------------------------------------------------------------
 @pytest.fixture
 def mock_controller():
-    """Patch Controller so create_template / fill_form don't touch the FS or LLM."""
-    with patch("api.routes.templates.Controller") as tpl_cls, \
-         patch("api.routes.forms.Controller") as form_cls:
-        tpl_instance = MagicMock()
-        tpl_instance.create_template.return_value = "src/inputs/test_template.pdf"
-        tpl_cls.return_value = tpl_instance
+    """Patch filler.fill and extract_pdf_template so tests don't touch the FS or LLM."""
+    with patch("app.services.form.filler.fill") as mock_fill, \
+         patch("app.services.template.extract_pdf_template") as mock_extract:
 
-        form_instance = MagicMock()
-        form_instance.fill_form.return_value = "src/outputs/filled_output.pdf"
-        form_cls.return_value = form_instance
+        # filler.fill writes the output PDF; we return a fake relative path
+        mock_fill.return_value = None  # fill() writes to disk; path is computed in service
+
+        # extract_pdf_template returns (schema, tables, groups)
+        mock_extract.return_value = (
+            {"properties": {"field1": {"type": "string", "description": "Field 1"}}},
+            [],
+            {},
+        )
 
         yield {
-            "template_ctrl": tpl_instance,
-            "form_ctrl": form_instance,
+            "mock_fill": mock_fill,
+            "mock_extract": mock_extract,
         }
