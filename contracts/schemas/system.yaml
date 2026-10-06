@@ -7,11 +7,7 @@ HealthStatus:
     - version
   properties:
     status:
-      type: string
-      enum:
-        - healthy
-        - degraded
-        - unhealthy
+      $ref: "enums.yaml#/HealthState"
     version:
       type: string
       description: FireForm API version
@@ -35,11 +31,7 @@ ComponentHealth:
     - status
   properties:
     status:
-      type: string
-      enum:
-        - healthy
-        - degraded
-        - unhealthy
+      $ref: "enums.yaml#/HealthState"
     response_time_ms:
       type: integer
       nullable: true

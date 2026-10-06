@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 from app.api.deps import get_db
+from app.api.schemas.enums import JobStatus, JobType
 from app.api.schemas.forms import (
     AsyncFormFill,
     AsyncFormFillResponse,
@@ -47,10 +48,10 @@ def submit_async_form_fill(form: AsyncFormFill, db: Session = Depends(get_db)):
         result = fill_form_task.delay(tid, transcript, str(form.input_id), form.model)
         job = Job(
             celery_task_id=result.id,
-            job_type="form_generation",
+            job_type=JobType.form_generation,
             template_id=tid,
             input_text=transcript,
-            status="queued",
+            status=JobStatus.queued,
             model=form.model,
         )
         job = create_job(db, job)

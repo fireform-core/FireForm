@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID
 
-from app.api.schemas.enums import InputStatus
+from app.api.schemas.enums import InputStatus, JobStatus
 from app.core.celery import celery_app
 from app.core.config import AUDIO_CONTENT_TYPES
 from app.db.database import get_session
@@ -41,7 +41,7 @@ def _fail_records(
         update_input(session, record)
     job = get_job_by_uuid(session, job_id_str)
     if job:
-        job.status = "failed"
+        job.status = JobStatus.failed
         job.error = {"error_code": error_code, "message": message}
         job.updated_at = now
         update_job(session, job)
@@ -61,7 +61,7 @@ def transcribe_audio_task(input_id_str: str, audio_path: str, job_id_str: str) -
         input_record.updated_at = now
         update_input(session, input_record)
 
-        job.status = "processing"
+        job.status = JobStatus.processing
         job.updated_at = now
         update_job(session, job)
 
@@ -81,7 +81,7 @@ def transcribe_audio_task(input_id_str: str, audio_path: str, job_id_str: str) -
         input_record.updated_at = now
         update_input(session, input_record)
 
-        job.status = "completed"
+        job.status = JobStatus.completed
         job.result_url = f"/api/v1/input/{input_id_str}"
         job.updated_at = now
         update_job(session, job)

@@ -83,3 +83,19 @@ PeriodType:
     - quarterly
     - annual
   description: Reporting period type
+
+# OutputFormat:
+#   type: string
+#   enum:
+#     - pdf
+#     - json
+#     - both
+#   description: Output format for generated forms
+
+HealthState:
+  type: string
+  enum:
+    - healthy
+    - degraded
+    - unhealthy
+  description: Health status of a system component or the overall system
