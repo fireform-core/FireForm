@@ -34,8 +34,15 @@ class LLM:
         timeout = 45
         max_retries = 3
 
-        total_fields = len(self._target_fields)
-        for i, (field, field_type) in enumerate(self._target_fields.items(), 1):
+        if isinstance(self._target_fields, dict):
+            field_items = list(self._target_fields.items())
+        elif isinstance(self._target_fields, list):
+            field_items = [(f, "string") for f in self._target_fields]
+        else:
+            field_items = []
+
+        total_fields = len(field_items)
+        for i, (field, field_type) in enumerate(field_items, 1):
             prompt = self.build_prompt(field, field_type if isinstance(field_type, str) else "string")
             ollama_url = f"{OLLAMA_HOST}/api/generate"
             ollama_model = self._model or OLLAMA_MODEL
@@ -88,8 +95,12 @@ class LLM:
         if value != "-1":
             parsed_value = value
 
-        if field in self._json.keys():
-            self._json[field].append(parsed_value)
+        if field in self._json:
+            existing = self._json[field]
+            if isinstance(existing, list):
+                existing.append(parsed_value)
+            else:
+                self._json[field] = [existing, parsed_value]
         else:
             self._json[field] = parsed_value
 
