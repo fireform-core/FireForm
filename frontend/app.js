@@ -73,12 +73,25 @@ let uploadedFieldCount = null;
 // Template ids currently selected in the Fill Form tab (multi-select).
 let selectedFillIds = new Set();
 
-// Speech-to-text recording state. The MediaRecorder captures compressed audio
-// in the renderer; on stop we POST it straight to /forms/transcribe (the local
-// Whisper service handles decoding).
+// Speech-to-text recording state.
+// Batch transcription (MediaRecorder -> POST /forms/transcribe)
 let mediaRecorder = null;
 let recordedChunks = [];
 let recordingStream = null;
+
+// Real-time live transcription (Web Audio PCM 16kHz -> WS /live-transcribe) (issue #705)
+let liveWs = null;
+let liveAudioCtx = null;
+let liveProcessor = null;
+let liveSource = null;
+let liveGain = null;
+let liveStream = null;
+let isLivePaused = false;
+let isLiveStopping = false;
+let stopRequestedBeforeOpen = false;
+let liveInitialText = "";
+let liveCommittedSegments = new Map();
+let livePartialText = "";
 
 waitForBackend().then(initialize);
 
@@ -756,7 +769,7 @@ async function handleFillSubmit(event) {
   }
 }
 
-// ───────────────────────── Speech-to-text (local Whisper) ─────────────────
+// ───────────────────────── Speech-to-text (live & batch) ───────────────────
 
 function setSttStatus(message) {
   if (elements.sttStatus) {
@@ -764,8 +777,395 @@ function setSttStatus(message) {
   }
 }
 
+// ── Audio conversion & downsampling (Web Audio API -> 16 kHz mono Int16 PCM) ──
+
+/**
+ * Downsamples Float32 mono audio to 16 kHz and converts samples to signed 16-bit PCM.
+ * Handles native 16 kHz or hardware 44.1/48 kHz sample rates cleanly.
+ */
+function downsampleAndConvertToInt16(float32Buffer, sourceSampleRate, targetSampleRate = 16000) {
+  if (!float32Buffer || float32Buffer.length === 0) {
+    return new Int16Array(0);
+  }
+  if (sourceSampleRate === targetSampleRate) {
+    const int16 = new Int16Array(float32Buffer.length);
+    for (let i = 0; i < float32Buffer.length; i++) {
+      const s = Math.max(-1, Math.min(1, float32Buffer[i]));
+      int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return int16;
+  }
+
+  // Linear interpolation downsampling for 44.1kHz, 48kHz, etc.
+  const ratio = sourceSampleRate / targetSampleRate;
+  const newLength = Math.round(float32Buffer.length / ratio);
+  const int16 = new Int16Array(newLength);
+
+  for (let i = 0; i < newLength; i++) {
+    const srcIndex = i * ratio;
+    const i1 = Math.floor(srcIndex);
+    const i2 = Math.min(i1 + 1, float32Buffer.length - 1);
+    const weight = srcIndex - i1;
+    const sample = float32Buffer[i1] * (1 - weight) + float32Buffer[i2] * weight;
+    const clamped = Math.max(-1, Math.min(1, sample));
+    int16[i] = clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff;
+  }
+
+  return int16;
+}
+
+/**
+ * Extracts a single mono Float32Array from an AudioBuffer, averaging channels if stereo.
+ */
+function getMonoFloat32(inputBuffer) {
+  const numChannels = inputBuffer.numberOfChannels;
+  if (numChannels === 1) {
+    return inputBuffer.getChannelData(0);
+  }
+  const len = inputBuffer.length;
+  const mono = new Float32Array(len);
+  for (let ch = 0; ch < numChannels; ch++) {
+    const data = inputBuffer.getChannelData(ch);
+    for (let i = 0; i < len; i++) {
+      mono[i] += data[i];
+    }
+  }
+  for (let i = 0; i < len; i++) {
+    mono[i] /= numChannels;
+  }
+  return mono;
+}
+
+// ── Live transcript display management ─────────────────────────────────────
+
+/**
+ * Computes a stable segment key based on WhisperLive segment metadata.
+ * Prefers start/end timestamps (e.g. "t:0.00-2.45"), with fallback to id or normalized text.
+ */
+function getSegmentKey(seg) {
+  if (seg.start !== undefined && seg.end !== undefined && seg.start !== null && seg.end !== null) {
+    const s = Number(seg.start);
+    const e = Number(seg.end);
+    if (!Number.isNaN(s) && !Number.isNaN(e)) {
+      return `t:${s.toFixed(2)}-${e.toFixed(2)}`;
+    }
+  }
+  if (seg.id !== undefined && seg.id !== null) {
+    return `id:${seg.id}`;
+  }
+  // Safe fallback if timestamps and id are missing
+  return `txt:${(seg.text || "").trim()}`;
+}
+
+/**
+ * Updates the inputText textarea with incoming WhisperLive segments.
+ * Incomplete segments update the live partial preview; completed segments are
+ * preserved across the entire live session without duplicate appending even if
+ * WhisperLive only sends a sliding window of recent segments.
+ * Any text entered by the user prior to recording is preserved.
+ */
+function updateLiveTranscript(segments) {
+  if (!Array.isArray(segments) || segments.length === 0) {
+    return;
+  }
+
+  const partialTexts = [];
+
+  for (const seg of segments) {
+    const text = (seg.text || "").trim();
+    if (!text) continue;
+
+    if (seg.completed) {
+      const key = getSegmentKey(seg);
+      liveCommittedSegments.set(key, text);
+    } else {
+      partialTexts.push(text);
+    }
+  }
+
+  livePartialText = partialTexts.join(" ").trim();
+  const committedText = Array.from(liveCommittedSegments.values()).join(" ").trim();
+  const sessionText = [committedText, livePartialText].filter(Boolean).join(" ").trim();
+
+  const fullText = liveInitialText
+    ? (sessionText ? `${liveInitialText} ${sessionText}` : liveInitialText)
+    : sessionText;
+
+  elements.inputText.value = fullText;
+  elements.inputText.dispatchEvent(new Event("input"));
+}
+
+// ── Real-time Live Transcription (WebSocket /live-transcribe) ──────────────
+
 async function startRecording() {
+  if (liveWs || mediaRecorder) {
+    return;
+  }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    setSttStatus("Microphone capture is not available in this environment.");
+    return;
+  }
+
+  // Preserve any text user previously typed
+  liveInitialText = elements.inputText.value.trim();
+  liveCommittedSegments.clear();
+  livePartialText = "";
+  isLivePaused = false;
+  isLiveStopping = false;
+  stopRequestedBeforeOpen = false;
+
+  // Request microphone permission
+  try {
+    liveStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        sampleRate: 16000,
+        echoCancellation: true,
+        noiseSuppression: true,
+      },
+    });
+  } catch (_error) {
+    setSttStatus("Microphone permission denied.");
+    cleanupLiveAudio();
+    resetSttControls();
+    return;
+  }
+
+  // Update UI to recording state
+  elements.sttControls.classList.add("is-recording");
+  elements.sttControls.classList.remove("is-paused");
+  elements.sttRecordBtn.disabled = true;
+  elements.sttPauseBtn.disabled = false;
+  elements.sttStopBtn.disabled = false;
+  elements.sttPauseBtn.textContent = "Pause";
+  setSttStatus("Connecting to live transcription…");
+
+  // Open WebSocket to FireForm proxy
+  const wsUrl = `${API_BASE_URL.replace(/^http/, "ws")}/live-transcribe`;
+  try {
+    liveWs = new WebSocket(wsUrl);
+  } catch (error) {
+    setSttStatus(`Failed to connect to transcription service: ${error.message}`);
+    cleanupLiveAudio();
+    resetSttControls();
+    return;
+  }
+  liveWs.binaryType = "arraybuffer";
+
+  liveWs.onopen = () => {
+    if (stopRequestedBeforeOpen) {
+      finishLiveStop();
+      return;
+    }
+    setSttStatus("Recording live (transcribing)…");
+    setupLiveAudioProcessing();
+  };
+
+  liveWs.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.error) {
+        setSttStatus(`Live transcription error: ${data.error}`);
+        cleanupLiveRecording();
+        resetSttControls();
+        return;
+      }
+      if (Array.isArray(data.segments)) {
+        updateLiveTranscript(data.segments);
+        if (isLiveStopping && data.segments.length > 0 && data.segments.every((s) => s.completed)) {
+          setSttStatus("Transcription complete.");
+          cleanupLiveRecording();
+          resetSttControls();
+        }
+      }
+    } catch (_err) {
+      // Non-JSON frame ignored
+    }
+  };
+
+  liveWs.onerror = () => {
+    if (!isLiveStopping) {
+      setSttStatus("Live transcription connection error.");
+    }
+    cleanupLiveRecording();
+    resetSttControls();
+  };
+
+  liveWs.onclose = () => {
+    if (isLiveStopping) {
+      setSttStatus("Transcription complete.");
+    } else if (elements.sttControls.classList.contains("is-recording")) {
+      setSttStatus("Live transcription disconnected.");
+    }
+    cleanupLiveRecording();
+    resetSttControls();
+  };
+}
+
+function setupLiveAudioProcessing() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) {
+      setSttStatus("Web Audio API not supported in this browser.");
+      cleanupLiveRecording();
+      resetSttControls();
+      return;
+    }
+
+    liveAudioCtx = new AudioContextClass({ sampleRate: 16000 });
+    liveSource = liveAudioCtx.createMediaStreamSource(liveStream);
+
+    // Buffer size 4096 gives low-latency continuous chunks
+    liveProcessor = liveAudioCtx.createScriptProcessor(4096, 1, 1);
+    liveGain = liveAudioCtx.createGain();
+    liveGain.gain.value = 0; // Mute local playback to prevent audio feedback loop
+
+    liveProcessor.onaudioprocess = (event) => {
+      if (isLivePaused || isLiveStopping || !liveWs || liveWs.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      const monoData = getMonoFloat32(event.inputBuffer);
+      const pcm16 = downsampleAndConvertToInt16(monoData, liveAudioCtx.sampleRate, 16000);
+      if (pcm16.length > 0) {
+        liveWs.send(pcm16.buffer);
+      }
+    };
+
+    liveSource.connect(liveProcessor);
+    liveProcessor.connect(liveGain);
+    liveGain.connect(liveAudioCtx.destination);
+  } catch (error) {
+    setSttStatus(`Audio initialization error: ${error.message}`);
+    cleanupLiveRecording();
+    resetSttControls();
+  }
+}
+
+function togglePauseRecording() {
   if (mediaRecorder) {
+    toggleBatchPauseRecording();
+    return;
+  }
+  if (!liveWs) {
+    return;
+  }
+  if (!isLivePaused) {
+    isLivePaused = true;
+    elements.sttControls.classList.add("is-paused");
+    elements.sttControls.classList.remove("is-recording");
+    elements.sttPauseBtn.textContent = "Resume";
+    setSttStatus("Paused.");
+  } else {
+    isLivePaused = false;
+    elements.sttControls.classList.add("is-recording");
+    elements.sttControls.classList.remove("is-paused");
+    elements.sttPauseBtn.textContent = "Pause";
+    setSttStatus("Recording live (transcribing)…");
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder) {
+    stopBatchRecording();
+    return;
+  }
+  if (!liveWs && !liveStream) {
+    return;
+  }
+
+  isLiveStopping = true;
+  elements.sttPauseBtn.disabled = true;
+  elements.sttStopBtn.disabled = true;
+  setSttStatus("Finalizing transcription…");
+
+  // Stop microphone capture immediately so no further audio is processed
+  cleanupLiveAudio();
+
+  if (!liveWs) {
+    resetSttControls();
+    return;
+  }
+
+  if (liveWs.readyState === WebSocket.CONNECTING) {
+    stopRequestedBeforeOpen = true;
+    return;
+  }
+
+  finishLiveStop();
+}
+
+function finishLiveStop() {
+  if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+    try {
+      const marker = new TextEncoder().encode("END_OF_AUDIO");
+      liveWs.send(marker.buffer);
+    } catch (_err) {
+      cleanupLiveRecording();
+      resetSttControls();
+    }
+  } else {
+    cleanupLiveRecording();
+    resetSttControls();
+  }
+}
+
+function cleanupLiveAudio() {
+  if (liveStream) {
+    liveStream.getTracks().forEach((track) => track.stop());
+    liveStream = null;
+  }
+  if (liveProcessor) {
+    try {
+      liveProcessor.disconnect();
+    } catch (_e) {}
+    liveProcessor = null;
+  }
+  if (liveSource) {
+    try {
+      liveSource.disconnect();
+    } catch (_e) {}
+    liveSource = null;
+  }
+  if (liveGain) {
+    try {
+      liveGain.disconnect();
+    } catch (_e) {}
+    liveGain = null;
+  }
+  if (liveAudioCtx) {
+    try {
+      liveAudioCtx.close();
+    } catch (_e) {}
+    liveAudioCtx = null;
+  }
+}
+
+function cleanupLiveRecording() {
+  cleanupLiveAudio();
+  if (liveWs) {
+    try {
+      liveWs.close();
+    } catch (_e) {}
+    liveWs = null;
+  }
+  liveCommittedSegments.clear();
+  isLivePaused = false;
+  isLiveStopping = false;
+  stopRequestedBeforeOpen = false;
+}
+
+function resetSttControls() {
+  elements.sttRecordBtn.disabled = false;
+  elements.sttPauseBtn.disabled = true;
+  elements.sttStopBtn.disabled = true;
+  elements.sttPauseBtn.textContent = "Pause";
+  elements.sttControls.classList.remove("is-recording", "is-paused");
+}
+
+// ── Existing Batch Transcription (MediaRecorder -> POST /forms/transcribe) ──
+
+async function startBatchRecording() {
+  if (mediaRecorder || liveWs) {
     return;
   }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -775,7 +1175,7 @@ async function startRecording() {
 
   try {
     recordingStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch (error) {
+  } catch (_error) {
     setSttStatus("Microphone permission denied.");
     return;
   }
@@ -796,10 +1196,10 @@ async function startRecording() {
   elements.sttPauseBtn.disabled = false;
   elements.sttStopBtn.disabled = false;
   elements.sttPauseBtn.textContent = "Pause";
-  setSttStatus("Recording…");
+  setSttStatus("Recording (batch)…");
 }
 
-function togglePauseRecording() {
+function toggleBatchPauseRecording() {
   if (!mediaRecorder) {
     return;
   }
@@ -814,15 +1214,14 @@ function togglePauseRecording() {
     elements.sttControls.classList.add("is-recording");
     elements.sttControls.classList.remove("is-paused");
     elements.sttPauseBtn.textContent = "Pause";
-    setSttStatus("Recording…");
+    setSttStatus("Recording (batch)…");
   }
 }
 
-function stopRecording() {
+function stopBatchRecording() {
   if (!mediaRecorder) {
     return;
   }
-  // Lock the controls while we finalize capture and transcribe.
   elements.sttPauseBtn.disabled = true;
   elements.sttStopBtn.disabled = true;
   setSttStatus("Finishing capture…");
@@ -855,14 +1254,6 @@ async function handleRecordingStop() {
   } finally {
     resetSttControls();
   }
-}
-
-function resetSttControls() {
-  elements.sttRecordBtn.disabled = false;
-  elements.sttPauseBtn.disabled = true;
-  elements.sttStopBtn.disabled = true;
-  elements.sttPauseBtn.textContent = "Pause";
-  elements.sttControls.classList.remove("is-recording", "is-paused");
 }
 
 function stopRecordingStream() {

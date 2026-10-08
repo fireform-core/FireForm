@@ -11,3 +11,4 @@ numpy<2
 ollama
 pypdf
 python-multipart
+websockets>=11

@@ -5,11 +5,10 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 from fastapi import FastAPI
-from api.routes import templates, forms
+from fastapi.middleware.cors import CORSMiddleware
 from api.db.init_db import init_db
 from api.errors.handlers import register_exception_handlers
-from fastapi.middleware.cors import CORSMiddleware
-from api.routes import forms, templates
+from api.routes import templates, forms, live_transcribe
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -40,3 +39,4 @@ app.add_middleware(
 
 app.include_router(templates.router)
 app.include_router(forms.router)
+app.include_router(live_transcribe.router)
