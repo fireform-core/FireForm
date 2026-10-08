@@ -37,6 +37,13 @@ OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))
 WHISPER_HOST = os.getenv("WHISPER_HOST", "http://localhost:9000").rstrip("/")
+WHISPERLIVE_HOST = os.getenv("WHISPERLIVE_HOST", "ws://localhost:9090").rstrip("/")
+WHISPERLIVE_MODEL = os.getenv("WHISPERLIVE_MODEL", "small")
+WHISPERLIVE_FINALIZATION_TIMEOUT = float(os.getenv("WHISPERLIVE_FINALIZATION_TIMEOUT", "10.0"))
+
+# Real-time audio streaming privacy control: disabled by default (opt-in) to prevent
+# unconsented microphone audio streaming to external/live transcription endpoints.
+ENABLE_REALTIME_TRANSCRIPTION = os.getenv("ENABLE_REALTIME_TRANSCRIPTION", "false").lower() in ("true", "1", "yes")
 
 # --- Celery / Redis -------------------------------------------------------
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
