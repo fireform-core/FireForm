@@ -21,3 +21,4 @@ retry-requests
 pandas
 geopy
 alembic
+websockets>=11.0

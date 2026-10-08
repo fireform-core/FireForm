@@ -63,6 +63,16 @@ services:
       start_period: 60s
       start_interval: 3s
 
+  whisperlive:
+    image: ghcr.io/collabora/whisperlive-cpu:latest
+    container_name: fireform-whisperlive
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - whisperlive_models:/root/.cache/whisper
+    networks:
+      - fireform-network
+
   redis:
     image: redis:7-alpine
     container_name: fireform-redis
@@ -115,6 +125,10 @@ services:
       - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-300}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:1.5b}
       - WHISPER_HOST=${WHISPER_HOST:-http://whisper:9000}
+      - WHISPERLIVE_HOST=${WHISPERLIVE_HOST:-ws://whisperlive:9090}
+      - WHISPERLIVE_MODEL=${WHISPERLIVE_MODEL:-small}
+      - WHISPERLIVE_FINALIZATION_TIMEOUT=${WHISPERLIVE_FINALIZATION_TIMEOUT:-10.0}
+      - ENABLE_REALTIME_TRANSCRIPTION=${ENABLE_REALTIME_TRANSCRIPTION:-false}
       - FIREFORM_DATA_DIR=/data/uploads
       - FIREFORM_TEMPLATE_DIR=/data/uploads
       - FIREFORM_DB_ECHO=${FIREFORM_DB_ECHO:-true}
@@ -161,6 +175,8 @@ volumes:
   ollama_data:
     driver: local
   whisper_models:
+    driver: local
+  whisperlive_models:
     driver: local
   fireform_uploads:
     driver: local
