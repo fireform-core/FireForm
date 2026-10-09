@@ -1,8 +1,8 @@
 from pydantic import BaseModel, ConfigDict
 
-
 class TemplateCreate(BaseModel):
     name: str
+    description: str = ""
     pdf_path: str
     fields: dict = {}
 
@@ -19,6 +19,7 @@ class MakeFillableResponse(BaseModel):
 class TemplateResponse(BaseModel):
     id: int
     name: str
+    description: str
     pdf_path: str
     fields: dict
     field_count: int | None = None
@@ -39,4 +40,3 @@ class TemplateUploadResponse(BaseModel):
     fields: list[ExtractedField] = []
     schema_data: dict | None = None
     tables: list[dict] | None = None
-

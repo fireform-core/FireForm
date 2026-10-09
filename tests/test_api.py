@@ -103,6 +103,7 @@ class TestTemplateEndpoints:
     def test_create_template(self, client, mock_controller):
         payload = {
             "name": "Fire Report",
+            "description": "Fire incident report",
             "pdf_path": "src/inputs/fire_report.pdf",
             "fields": {
                 "Name": "string",
@@ -124,6 +125,7 @@ class TestTemplateEndpoints:
         """Creating a template should make it appear in the list."""
         client.post(f"{API_PREFIX}/templates/create", json={
             "name": "T1",
+            "description": "Test form template",
             "pdf_path": "a.pdf",
             "fields": {"f": "string"},
         })
@@ -183,6 +185,7 @@ class TestFormEndpoints:
         """Helper: create a template with the default stub path and return its ID."""
         resp = client.post(f"{API_PREFIX}/templates/create", json={
             "name": "Employee Form",
+            "description": "Employee information form",
             "pdf_path": "src/inputs/employee.pdf",
             "fields": {
                 "Employee's name": "string",
@@ -445,6 +448,7 @@ class TestE2EPipeline:
         # -- Step 2: Create a template (fields explicit → extract_pdf_template not called) --
         create_resp = client.post(f"{API_PREFIX}/templates/create", json={
             "name": "Incident Report",
+            "description": "Incident report form",
             "pdf_path": uploaded_path,
             "fields": {
                 "Officer name": "string",

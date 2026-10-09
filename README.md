@@ -100,6 +100,34 @@ FireForm is designed from the ground up to ensure that all generated and collect
 - **Data Storage:** User preferences and template mappings are stored locally using **SQLite**, an open-source database engine.
 - **Export Mechanism:** All structured data can be easily imported, exported, or exposed via the local FastAPI endpoints. No closed formats or proprietary databases are used.
 
+## 🧭 Template Descriptions
+
+Every template carries a **description**: a short statement of what that form is for. It is sent to the local LLM alongside the narrative each time the template is filled, so the model has context on the form's purpose before it reads a single value.
+
+This is what lets one narrative fill very different forms correctly. A narrative saying *"dispatched Unit 12 to the Blackwood Canyon fire"* is unambiguous against an incident communications plan, but ambiguous against a fire incident report or a station duty roster. The description tells the model which document it is looking at.
+
+`description` may be provided when creating a template. If omitted, it defaults to an empty string:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/templates/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ICS 205A Incident Radio Communications Plan",
+    "description": "Radio communications plan for a Type 1 ICS incident. Assigns each operational branch a talkgroup and a primary contact.",
+    "pdf_path": "src/templates/ics_205a.pdf",
+    "fields": {}
+  }'
+```
+
+### Writing a good description
+
+- **Describe the form, not the incident.** The incident comes from the narrative at fill time. "Radio communications plan for a Type 1 incident" is useful; "wildfire near Blackwood Canyon" is not - it would bias every form filled from the template.
+- **Say what kind of form it is and what it covers.** Purpose, scope, and the agency or standard it comes from are all useful signal.
+- **Keep it to a sentence or two.** This is context, not an instruction sheet. Field-level meaning is already carried by each PDF field's own description.
+- **Leave out personal data.** Template descriptions are stored in the database and replayed on every fill.
+
+An empty string is accepted for templates that need no extra context, in which case the block is omitted from the prompt entirely.
+
 ## 🔒 Privacy & Applicable Laws
 
 FireForm is built on a **local-first architecture**: all processing (including AI extraction) occurs locally on the operator's hardware and nothing is transmitted to external servers by default. However, operators should be aware of the following:

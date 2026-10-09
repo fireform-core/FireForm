@@ -85,6 +85,7 @@ class FormService:
             narrative=transcript,
             out_path=str(out_target),
             model=model,
+            description=template.description,
         )
 
         relative_out = out_target.relative_to(paths.PROJECT_ROOT).as_posix()

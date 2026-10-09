@@ -21,3 +21,4 @@ retry-requests
 pandas
 geopy
 alembic
+SQLAlchemy<2.1

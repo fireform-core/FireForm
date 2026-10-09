@@ -35,7 +35,7 @@ with open(os.path.join(os.path.dirname(__file__), "prompt.txt"), "r") as f:
     PROMPT = f.read()
 
 
-def fill(pdf_path, narrative, out_path=None, model=None):
+def fill(pdf_path, narrative, out_path=None, model=None, description=""):
     """Fill pdf_path from the narrative. Writes the PDF when out_path is given.
 
     Returns {schema, tables, groups, prompt, response_text, values}: the
@@ -45,7 +45,7 @@ def fill(pdf_path, narrative, out_path=None, model=None):
     schema, tables, groups = template.create_template(pdf_path)
     strip_empty_descriptions(schema["properties"])
 
-    prompt = build_prompt(narrative, schema)
+    prompt = build_prompt(narrative, schema, description)
     response_text = call_model(prompt, schema, model or OLLAMA_MODEL)
 
     # Tables come back as arrays of rows; map them to widget names
@@ -73,9 +73,12 @@ def strip_empty_descriptions(props):
     return props
 
 
-def build_prompt(narrative, schema):
+def build_prompt(narrative, schema, description=""):
+    # Omitted entirely when blank so the model is not handed an empty block.
+    context = f"<template_description>\n{description}\n</template_description>\n\n" if description else ""
     user_content = (
-        "<incident_narrative>\n"
+        context
+        + "<incident_narrative>\n"
         + narrative
         + "\n</incident_narrative>\n\n<target_json_schema>\n"
         + json.dumps(schema["properties"], indent=2, ensure_ascii=False)

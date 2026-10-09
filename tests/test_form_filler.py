@@ -14,6 +14,7 @@ from app.services.form_filler import filler, template
 
 ICS_205A = str(Path(__file__).resolve().parents[1] / "benchmark/data/pdfs/ics_205a.pdf")
 TABLE = "resource_summary_0_table"
+TEMPLATE_DESCRIPTION = "Wildfire incident communications plan"
 
 
 def test_template_has_geometry_table_and_tooltip_descriptions():
@@ -47,9 +48,18 @@ def test_fill_maps_rows_back_to_widgets_and_writes_pdf(tmp_path):
     out_path = tmp_path / "filled.pdf"
 
     with patch.object(filler, "call_model", return_value=json.dumps(answer)) as call:
-        result = filler.fill(ICS_205A, "Narrative text.", str(out_path), "test-model")
+        result = filler.fill(
+            ICS_205A,
+            "Narrative text.",
+            str(out_path),
+            "test-model",
+            TEMPLATE_DESCRIPTION,
+        )
 
     prompt, schema, model = call.call_args.args
+    assert (
+        f"<template_description>\n{TEMPLATE_DESCRIPTION}\n</template_description>" in prompt
+    )
     assert "<incident_narrative>\nNarrative text.\n</incident_narrative>" in prompt
     assert prompt.startswith(filler.PROMPT.rstrip())
     assert model == "test-model"
@@ -65,7 +75,7 @@ def test_fill_maps_rows_back_to_widgets_and_writes_pdf(tmp_path):
 
 def test_fill_defaults_to_configured_model():
     with patch.object(filler, "call_model", return_value="{}") as call:
-        filler.fill(ICS_205A, "Narrative text.")
+        filler.fill(ICS_205A, "Narrative text.", description=TEMPLATE_DESCRIPTION)
 
     assert call.call_args.args[2] == filler.OLLAMA_MODEL
 

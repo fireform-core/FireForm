@@ -52,6 +52,7 @@ class TemplateService:
             TemplateResponse(
                 id=t.id,
                 name=t.name,
+                description=t.description,
                 pdf_path=t.pdf_path,
                 fields=t.fields,
                 field_count=self._calculate_field_count(t.fields, t.pdf_path),
@@ -140,6 +141,7 @@ class TemplateService:
         return TemplateResponse(
             id=created.id,
             name=created.name,
+            description=created.description,
             pdf_path=created.pdf_path,
             fields=created.fields,
             field_count=self._calculate_field_count(created.fields, created.pdf_path),

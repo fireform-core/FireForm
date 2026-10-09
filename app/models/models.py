@@ -22,6 +22,7 @@ from app.api.schemas.enums import (
 class Template(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str
+    description: str = ""
     fields: dict = Field(sa_column=Column(JSON, nullable=False))
     pdf_path: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
