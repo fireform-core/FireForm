@@ -29,7 +29,7 @@ from app.models import Extraction, Form, Incident, Input, Report
 # ---------------------------------------------------------------------------
 
 def _input(db: Session, **kwargs) -> Input:
-    defaults = dict(input_type=InputType.text)
+    defaults = {"input_type": InputType.text}
     row = Input(**{**defaults, **kwargs})
     db.add(row)
     db.commit()
@@ -194,7 +194,7 @@ class TestIncidentModel:
     def _make(self, db, **kwargs):
         inp = _input(db)
         ext = _extraction(db, inp.input_id)
-        defaults = dict(extract_id=ext.extract_id)
+        defaults = {"extract_id": ext.extract_id}
         row = Incident(**{**defaults, **kwargs})
         db.add(row)
         db.commit()
@@ -246,10 +246,10 @@ class TestFormModel:
     def _make(self, db, **kwargs):
         inp = _input(db)
         ext = _extraction(db, inp.input_id)
-        defaults = dict(
-            extract_id=ext.extract_id,
-            form_type=FormType.nfirs_basic,
-        )
+        defaults = {
+            "extract_id": ext.extract_id,
+            "form_type": FormType.nfirs_basic,
+        }
         row = Form(**{**defaults, **kwargs})
         db.add(row)
         db.commit()
@@ -329,12 +329,12 @@ class TestFormModel:
 class TestReportModel:
 
     def _make(self, db, **kwargs):
-        defaults = dict(
-            period_type=PeriodType.monthly,
-            year=2026,
-            month=6,
-            output_format=OutputFormat.pdf,
-        )
+        defaults = {
+            "period_type": PeriodType.monthly,
+            "year": 2026,
+            "month": 6,
+            "output_format": OutputFormat.pdf,
+        }
         row = Report(**{**defaults, **kwargs})
         db.add(row)
         db.commit()

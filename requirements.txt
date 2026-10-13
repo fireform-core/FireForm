@@ -8,7 +8,7 @@ sqlmodel
 psycopg2-binary
 pytest
 httpx
-numpy<2
+numpy>=2.0
 ollama
 pypdf
 pdfplumber

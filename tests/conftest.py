@@ -5,7 +5,8 @@ Uses an in-memory SQLite database and mocks the heavy dependencies
 """
 
 import io
-from unittest.mock import MagicMock, patch
+from importlib import import_module
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,17 +15,6 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from app.api.deps import get_db
 from app.main import app
-from app.models import (  # noqa: F401 — registers tables
-    Extraction,
-    Form,
-    FormSubmission,
-    Incident,
-    Input,
-    Job,
-    Report,
-    Template,
-)
-
 # ---------------------------------------------------------------------------
 # In-memory database
 # ---------------------------------------------------------------------------
@@ -46,6 +36,7 @@ app.dependency_overrides[get_db] = _override_get_db
 @pytest.fixture(autouse=True)
 def _reset_tables():
     """Create tables before each test and drop them after — full isolation."""
+    import_module("app.models")
     SQLModel.metadata.create_all(_engine)
     yield
     SQLModel.metadata.drop_all(_engine)

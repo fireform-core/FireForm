@@ -37,7 +37,7 @@ def _safe_delete_file(file_path: str) -> bool:
         if candidate.exists() and candidate.is_file():
             candidate.unlink()
             return True
-    except Exception as exc:
+    except (OSError, ValueError, TypeError) as exc:
         logger.error("Failed to delete file %s: %s", file_path, exc)
     return False
 
@@ -66,9 +66,8 @@ def purge_old_submissions(retention_days: int | None = None) -> dict:
         submissions = list(session.exec(statement))
 
         for sub in submissions:
-            if sub.output_pdf_path:
-                if _safe_delete_file(sub.output_pdf_path):
-                    files_deleted += 1
+            if sub.output_pdf_path and _safe_delete_file(sub.output_pdf_path):
+                files_deleted += 1
             delete_form_submission(session, sub)
             purged_count += 1
 
@@ -83,8 +82,8 @@ def purge_old_submissions(retention_days: int | None = None) -> dict:
             "retention_days_used": days,
         }
 
-    except Exception as exc:
-        logger.exception("purge_old_submissions task failed: %s", exc)
+    except Exception:
+        logger.exception("purge_old_submissions task failed")
         raise
     finally:
         session.close()

@@ -8,9 +8,10 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-from pypdf import PdfReader
+from pypdf import PdfReader, PdfWriter
 
 from app.services.form_filler import filler, template
+from app.services.file_manipulator import FileManipulator
 
 ICS_205A = str(Path(__file__).resolve().parents[1] / "benchmark/data/pdfs/ics_205a.pdf")
 TABLE = "resource_summary_0_table"
@@ -68,4 +69,27 @@ def test_fill_defaults_to_configured_model():
         filler.fill(ICS_205A, "Narrative text.")
 
     assert call.call_args.args[2] == filler.OLLAMA_MODEL
+
+def test_file_manipulator_replaces_output_pdf_metadata(tmp_path):
+    input_path = tmp_path / "input.pdf"
+    output_path = tmp_path / "output.pdf"
+
+    writer = PdfWriter()
+    writer.add_blank_page(width=100, height=100)
+    with input_path.open("wb") as file:
+        writer.write(file)
+
+    writer = PdfWriter()
+    writer.add_blank_page(width=100, height=100)
+    writer.add_metadata({"/Title": "Sensitive title", "/Author": "Private author"})
+    with output_path.open("wb") as file:
+        writer.write(file)
+
+    manipulator = FileManipulator()
+    with patch.object(manipulator.filler, "fill_form", return_value=str(output_path)):
+        result = manipulator.fill_form("Narrative text.", {}, str(input_path))
+
+    metadata = PdfReader(result).metadata
+    assert metadata.title == "FireForm Automated Report"
+    assert metadata.author == "FireForm"
 

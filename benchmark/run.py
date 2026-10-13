@@ -34,14 +34,25 @@ import requests
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))   # so `app` imports from the repo root
 
-import config  # noqa: E402,F401  loads benchmark/.env; must come before the `app` imports
 
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL  # noqa: E402
-from app.services.form_filler import filler  # noqa: E402
-import compare  # noqa: E402
-import report  # noqa: E402
-import review_pdf  # noqa: E402
-import run_info  # noqa: E402
+def _load_dependencies_after_environment():
+    import config
+
+    config.load_env_file(config.ENV_FILE)
+
+    from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
+    from app.services.form_filler import filler
+    import compare
+    import report
+    import review_pdf
+    import run_info
+
+    return OLLAMA_HOST, OLLAMA_MODEL, filler, compare, report, review_pdf, run_info
+
+
+OLLAMA_HOST, OLLAMA_MODEL, filler, compare, report, review_pdf, run_info = (
+    _load_dependencies_after_environment()
+)
 
 DATA_DIR = os.path.join(HERE, "data")
 PDF_DIR = os.path.join(DATA_DIR, "pdfs")

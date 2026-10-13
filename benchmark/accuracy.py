@@ -83,7 +83,7 @@ def calculate_accuracy(
     if _is_unchecked_checkbox(_path, ground_truth) and _is_empty_value(extracted):
         return 1.0
 
-    if type(extracted) != type(ground_truth):
+    if type(extracted) is not type(ground_truth):
         # Allow string representations of booleans/numbers
         if isinstance(ground_truth, bool) and isinstance(extracted, str):
             extracted = extracted.lower() in ("true", "1", "yes")

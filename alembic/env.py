@@ -2,20 +2,9 @@ from logging.config import fileConfig
 
 import sqlalchemy as sa
 from sqlalchemy import engine_from_config, pool
-from sqlmodel import SQLModel
-
 from alembic import context
 from app.core.config import DATABASE_URL
-from app.models import (  # noqa: F401
-    Extraction,
-    Form,
-    FormSubmission,
-    Incident,
-    Input,
-    Job,
-    Report,
-    Template,
-)
+from app.models import Extraction
 
 config = context.config
 
@@ -25,7 +14,7 @@ if not config.get_main_option("sqlalchemy.url"):
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = SQLModel.metadata
+target_metadata = Extraction.metadata
 
 
 def compare_type(context, inspected_column, metadata_column, inspected_type, metadata_type):
