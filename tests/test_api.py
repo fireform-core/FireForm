@@ -374,7 +374,7 @@ class TestFormEndpoints:
             captured["files"] = files
             return fake_response
 
-        monkeypatch.setattr("app.api.routes.forms.requests.post", fake_post)
+        monkeypatch.setattr("app.services.whisper.requests.post", fake_post)
 
         audio = ("audio", ("recording.wav", io.BytesIO(b"RIFFfake"), "audio/wav"))
         resp = client.post(f"{API_PREFIX}/forms/transcribe", files=[audio])
@@ -386,14 +386,13 @@ class TestFormEndpoints:
         assert captured["params"]["output"] == "json"
 
     def test_list_models(self, client, monkeypatch):
-        ""f"{API_PREFIX}/forms/models lists Ollama models and always includes the default."""
-        from unittest.mock import MagicMock
+        """/forms/models lists the LLM's models and always includes the default."""
+        from app.services.llm import ModelInfo
 
-        fake_response = MagicMock()
-        fake_response.json.return_value = {"models": [{"name": "qwen2.5:3b"}, {"name": "mistral:latest"}]}
-        fake_response.raise_for_status.return_value = None
-        monkeypatch.setattr("app.api.routes.forms.requests.get", lambda *a, **k: fake_response)
-        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+        monkeypatch.setattr(
+            "app.services.llm.ollama.OllamaLLM.list_models",
+            lambda self: [ModelInfo(name="qwen2.5:3b"), ModelInfo(name="mistral:latest")],
+        )
 
         resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
@@ -402,15 +401,14 @@ class TestFormEndpoints:
         assert "qwen2.5:1.5b" in body["models"]  # default injected even if not pulled
         assert "qwen2.5:3b" in body["models"]
 
-    def test_list_models_ollama_down(self, client, monkeypatch):
-        """If Ollama is unreachable, still return the default alone."""
+    def test_list_models_llm_down(self, client, monkeypatch):
+        """If the LLM server is unreachable, still return the default alone."""
         import requests
 
         def boom(*a, **k):
             raise requests.exceptions.ConnectionError("down")
 
-        monkeypatch.setattr("app.api.routes.forms.requests.get", boom)
-        monkeypatch.setenv("OLLAMA_MODEL", "qwen2.5:1.5b")
+        monkeypatch.setattr("app.services.llm.ollama.requests.request", boom)
 
         resp = client.get(f"{API_PREFIX}/forms/models")
         assert resp.status_code == 200
@@ -442,7 +440,7 @@ class TestFormEndpoints:
         def fake_post(*args, **kwargs):
             raise requests.exceptions.ConnectionError("no service")
 
-        monkeypatch.setattr("app.api.routes.forms.requests.post", fake_post)
+        monkeypatch.setattr("app.services.whisper.requests.post", fake_post)
 
         audio = ("audio", ("recording.wav", io.BytesIO(b"data"), "audio/wav"))
         resp = client.post(f"{API_PREFIX}/forms/transcribe", files=[audio])
