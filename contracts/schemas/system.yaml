@@ -18,7 +18,7 @@ HealthStatus:
       properties:
         database:
           $ref: "#/ComponentHealth"
-        ollama:
+        llm:
           $ref: "#/ComponentHealth"
         whisper:
           $ref: "#/ComponentHealth"
@@ -38,38 +38,47 @@ ComponentHealth:
     detail:
       type: string
       nullable: true
+    provider:
+      $ref: "enums.yaml#/LLMProvider"
     model_loaded:
       type: string
       nullable: true
-      description: Currently loaded model (ollama component)
+      description: Model loaded in memory right now. Only Ollama reports this (llm component)
     disk_free_gb:
       type: number
       nullable: true
       description: Free disk space (storage component)
-    ollama_version:
+    provider_version:
       type: string
       nullable: true
-      description: Ollama server version (ollama component)
+      description: LLM server version. Only Ollama reports this (llm component)
     models_available:
       type: array
       nullable: true
-      description: All models pulled and available on the Ollama server (ollama component)
+      description: Models the LLM server offers (llm component)
       items:
         type: object
+        required:
+          - name
         properties:
           name:
             type: string
           size_gb:
             type: number
+            nullable: true
+            description: Only Ollama reports this
           quantization:
             type: string
             nullable: true
+            description: Only Ollama reports this
           loaded:
             type: boolean
+            nullable: true
+            description: Only Ollama reports this
     current_load:
       type: object
       nullable: true
-      description: Current processing load (ollama component)
+      description: Current processing load (llm component)
       properties:
         active_requests:
           type: integer

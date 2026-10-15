@@ -84,6 +84,16 @@ PeriodType:
     - annual
   description: Reporting period type
 
+LLMProvider:
+  type: string
+  enum:
+    - ollama
+    - openai
+    - gemini
+    - anthropic
+    - custom
+  description: Which LLM fills the forms. custom is any OpenAI compatible server
+
 # OutputFormat:
 #   type: string
 #   enum:

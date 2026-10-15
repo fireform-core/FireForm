@@ -8,10 +8,11 @@ health:
     operationId: getHealth
     summary: System health check
     description: |
-      Returns the health status of all FireForm components — database, Ollama LLM
-      (including loaded models, GPU status, and current load), Whisper transcription,
-      and file storage. Returns 200 even when degraded (so load balancers don't kill
-      it), 503 only if the system is truly unhealthy and cannot serve any requests.
+      Returns the health status of all FireForm components: database, the
+      configured LLM provider (Ollama, OpenAI, Gemini, Anthropic or a custom
+      OpenAI compatible server), Whisper transcription, and file storage.
+      Returns 200 even when degraded (so load balancers don't kill it), 503
+      only if the system is truly unhealthy and cannot serve any requests.
     tags:
       - system
     responses:
@@ -32,11 +33,12 @@ health:
                     database:
                       status: "healthy"
                       response_time_ms: 2
-                    ollama:
+                    llm:
                       status: "healthy"
                       response_time_ms: 15
+                      provider: "ollama"
                       model_loaded: "llama3:8b"
-                      ollama_version: "0.3.0"
+                      provider_version: "0.3.0"
                       models_available:
                         - name: "llama3:8b"
                           size_gb: 4.7
@@ -65,9 +67,10 @@ health:
                     database:
                       status: "healthy"
                       response_time_ms: 2
-                    ollama:
+                    llm:
                       status: "degraded"
                       response_time_ms: 5000
+                      provider: "ollama"
                       detail: "High latency model may be loading"
                       current_load:
                         active_requests: 3
@@ -92,8 +95,9 @@ health:
                 database:
                   status: "unhealthy"
                   detail: "Connection refused"
-                ollama:
+                llm:
                   status: "unhealthy"
+                  provider: "ollama"
                   detail: "Connection refused"
 
 schema_incident:
