@@ -10,7 +10,7 @@ psycopg2-binary
 pytest
 httpx
 numpy<2
-ollama
+openai
 pypdf
 pdfplumber
 python-multipart

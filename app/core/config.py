@@ -38,6 +38,27 @@ DB_ECHO = os.getenv("FIREFORM_DB_ECHO", "true").lower() == "true"
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))
+
+# --- LLM provider ---------------------------------------------------------
+# Which server fills the forms. Kept as raw strings, app/services/llm/factory.py
+# parses and validates them at startup. Empty means "use the provider default".
+# Documented in docker/.env.example.
+LLM_PROVIDER = (os.getenv("LLM_PROVIDER", "").strip() or "ollama").lower()
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "").strip()
+# Hosted providers read their own key. LLM_API_KEY is for a custom server, and
+# the fallback for the others.
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "").strip()
+LLM_API_KEY = os.getenv("LLM_API_KEY", "").strip()
+LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+LLM_TIMEOUT = os.getenv("LLM_TIMEOUT", str(OLLAMA_TIMEOUT)).strip()
+LLM_MAX_RETRIES = os.getenv("LLM_MAX_RETRIES", "3").strip()
+LLM_ALLOW_EXTERNAL = os.getenv("LLM_ALLOW_EXTERNAL", "false").strip()
+LLM_STRUCTURED_OUTPUT = os.getenv("LLM_STRUCTURED_OUTPUT", "").strip()
+LLM_MAX_TOKENS = os.getenv("LLM_MAX_TOKENS", "").strip()
+LLM_TEMPERATURE = os.getenv("LLM_TEMPERATURE", "0").strip()
+
 WHISPER_HOST = os.getenv("WHISPER_HOST", "http://localhost:9000").rstrip("/")
 
 # --- Celery / Redis -------------------------------------------------------
