@@ -159,6 +159,17 @@ class TestTemplateEndpoints:
         assert resp.status_code == 400
         assert "PDF" in resp.json()["detail"]
 
+    def test_upload_oversize_pdf_rejected(self, client, monkeypatch):
+        import io
+        monkeypatch.setattr("app.api.routes.templates._MAX_TEMPLATE_BYTES", 5)
+        pdf = ("file", ("big.pdf", io.BytesIO(b"%PDF-1.4"), "application/pdf"))  # 8 bytes > 5
+        resp = client.post(f"{API_PREFIX}/templates/upload", files=[pdf])
+        assert resp.status_code == 413
+        body = resp.json()
+        assert body["error_code"] == "FILE_TOO_LARGE"
+        assert body["detail"]["max_size_bytes"] == 5
+        assert body["detail"]["received_size_bytes"] == 8
+
     def test_preview_missing_file(self, client):
         resp = client.get(f"{API_PREFIX}/templates/preview", params={"path": "src/inputs/nonexistent.pdf"})
         assert resp.status_code == 404

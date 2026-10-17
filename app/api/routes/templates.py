@@ -14,10 +14,13 @@ from app.api.schemas.templates import (
     TemplateUploadResponse,
 )
 from app.core.config import DEFAULT_TEMPLATE_DIR
+from app.core.errors.base import AppError
 from app.db.repositories import get_template
 from app.services.template import TemplateService
 
 router = APIRouter(prefix="/templates", tags=["templates"])
+
+_MAX_TEMPLATE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
 @router.post("/upload", response_model=TemplateUploadResponse)
@@ -32,7 +35,22 @@ async def upload_template_pdf(
     if not filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
+    # 413 — size check: fast path via Content-Length (no read), fallback via len(bytes)
+    if file.size is not None and file.size > _MAX_TEMPLATE_BYTES:
+        raise AppError(
+            "PDF template exceeds maximum size of 10MB",
+            status_code=413,
+            error_code="FILE_TOO_LARGE",
+            detail={"max_size_bytes": _MAX_TEMPLATE_BYTES, "received_size_bytes": file.size},
+        )
     content = await file.read()
+    if len(content) > _MAX_TEMPLATE_BYTES:
+        raise AppError(
+            "PDF template exceeds maximum size of 10MB",
+            status_code=413,
+            error_code="FILE_TOO_LARGE",
+            detail={"max_size_bytes": _MAX_TEMPLATE_BYTES, "received_size_bytes": len(content)},
+        )
     return TemplateService().save_uploaded_pdf(directory, filename, content)
 
 
