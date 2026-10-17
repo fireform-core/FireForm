@@ -8,7 +8,7 @@ from sqlmodel import Session, select, text
 
 from alembic import command
 from app.db.database import engine
-from app.models import FormSubmission, Template  # noqa: F401
+from app.models import Template
 
 logger = logging.getLogger(__name__)
 

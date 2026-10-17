@@ -6,7 +6,7 @@ from sqlmodel import SQLModel
 
 from alembic import context
 from app.core.config import DATABASE_URL
-from app.models import (  # noqa: F401
+from app.models import (  # noqa: F401 — registers every table on SQLModel.metadata
     Extraction,
     Form,
     FormSubmission,

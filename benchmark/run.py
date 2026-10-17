@@ -31,18 +31,19 @@ import time
 
 import requests
 
+# so `app` imports from the repo root
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import config  # noqa: F401  imported for its side effect: loads benchmark/.env before `app`
+
+from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
+from app.services.form_filler import filler
+import compare
+import report
+import review_pdf
+import run_info
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(HERE))   # so `app` imports from the repo root
-
-import config  # noqa: E402,F401  loads benchmark/.env; must come before the `app` imports
-
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL  # noqa: E402
-from app.services.form_filler import filler  # noqa: E402
-import compare  # noqa: E402
-import report  # noqa: E402
-import review_pdf  # noqa: E402
-import run_info  # noqa: E402
-
 DATA_DIR = os.path.join(HERE, "data")
 PDF_DIR = os.path.join(DATA_DIR, "pdfs")
 NARRATIVE_DIR = os.path.join(DATA_DIR, "narratives")
