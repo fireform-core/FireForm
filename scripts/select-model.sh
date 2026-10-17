@@ -5,7 +5,7 @@ ENV_DEV="docker/.env.dev"
 COMPOSE="docker compose -f docker/dev/compose.yml --env-file $ENV_DEV"
 
 # model name | approx size
-MODELS="qwen2.5:1.5b|~1GB qwen2.5:3b|~2GB qwen2.5:7b|~4GB llama3.2:3b|~2GB mistral:7b|~4GB"
+MODELS="qwen2.5:1.5b|~1GB qwen2.5:3b|~2GB qwen2.5:7b|~4GB llama3.2:3b|~2GB"
 
 current_model=""
 if [ -f "$ENV_DEV" ]; then

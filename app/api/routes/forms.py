@@ -1,20 +1,31 @@
+import json
+
 import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
+from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
 from app.api.deps import get_db, verify_api_key
 from app.api.schemas.forms import (
     FormFill,
     FormFillResponse,
+    ModelPullRequest,
     ModelsResponse,
     TranscriptionResponse,
 )
 from app.core import paths
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
+from app.core.config import (
+    OLLAMA_HOST,
+    OLLAMA_MODEL,
+    OLLAMA_PULL_TIMEOUT,
+    RECOMMENDED_MODELS,
+    RETENTION_PERIOD_DAYS,
+)
 from app.services.whisper import call_whisper_asr
 from app.core.errors.base import AppError
 from app.db.repositories import get_template, get_form_submission, delete_form_submission
 from app.services.form import FormService
+from app.services.form_filler.exceptions import ModelNotInstalledError
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
@@ -40,6 +51,12 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
             input_text=submission.input_text,
             output_pdf_path=submission.output_pdf_path,
         )
+    except ModelNotInstalledError as exc:
+        raise AppError(
+            f"{exc} Pull it first via POST /forms/pull.",
+            status_code=422,
+            error_code="MODEL_NOT_INSTALLED",
+        ) from exc
     except AppError:
         raise
     except Exception as e:
@@ -49,24 +66,80 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
 
 @router.get("/models", response_model=ModelsResponse)
 def list_models():
-    """List the Whisper-independent extraction models available in the local
-    Ollama instance, plus the configured default. Used by the Fill Form UI's
-    model picker. Falls back to just the default if Ollama is unreachable."""
-    default_model = OLLAMA_MODEL
-
-    models: list[str] = []
+    """List recommended and installed models for the Fill Form model picker."""
+    installed_names: set[str] = set()
     try:
         response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=10)
         response.raise_for_status()
-        models = [m["name"] for m in response.json().get("models", []) if m.get("name")]
-    except requests.exceptions.RequestException:
-        models = []
+        payload = response.json()
+        if not isinstance(payload, dict) or not isinstance(payload.get("models"), list):
+            raise ValueError("Unexpected Ollama tags response")
+        for model in payload["models"]:
+            if not isinstance(model, dict) or not isinstance(model.get("name"), str):
+                raise ValueError("Unexpected Ollama tags response")
+            installed_names.add(model["name"])
+    except (requests.exceptions.RequestException, ValueError, TypeError):
+        pass
 
-    # Always surface the configured default, even if Ollama hasn't pulled it yet.
-    if default_model not in models:
-        models.insert(0, default_model)
+    all_names = sorted(set(RECOMMENDED_MODELS) | installed_names)
+    models = [
+        {
+            "name": name,
+            "installed": name in installed_names,
+            "recommended": name in RECOMMENDED_MODELS,
+        }
+        for name in all_names
+    ]
+    return ModelsResponse(current_model=OLLAMA_MODEL, models=models)
 
-    return ModelsResponse(models=models, default=default_model)
+
+@router.post(
+    "/pull",
+    response_class=StreamingResponse,
+    responses={200: {"content": {"application/x-ndjson": {}}}},
+)
+def pull_model(req: ModelPullRequest):
+    """Stream pull progress from Ollama as newline-delimited JSON."""
+
+    def generate():
+        saw_error = False
+        saw_success = False
+        buffer = ""
+
+        def inspect_lines(chunk: bytes) -> None:
+            nonlocal buffer, saw_error, saw_success
+            buffer += chunk.decode("utf-8")
+            lines = buffer.split("\n")
+            buffer = lines.pop() or ""
+            for line in lines:
+                if not line.strip():
+                    continue
+                event = json.loads(line)
+                saw_error = saw_error or "error" in event
+                saw_success = saw_success or event.get("status") == "success"
+
+        try:
+            with requests.post(
+                f"{OLLAMA_HOST}/api/pull",
+                json={"name": req.model, "stream": True},
+                stream=True,
+                timeout=(10, OLLAMA_PULL_TIMEOUT),
+            ) as response:
+                response.raise_for_status()
+                for chunk in response.iter_content(chunk_size=None):
+                    if chunk:
+                        inspect_lines(chunk)
+                        yield chunk
+            if buffer.strip():
+                event = json.loads(buffer)
+                saw_error = saw_error or "error" in event
+                saw_success = saw_success or event.get("status") == "success"
+            if not saw_error and not saw_success:
+                yield (json.dumps({"status": "success"}) + "\n").encode("utf-8")
+        except requests.exceptions.RequestException as exc:
+            yield (json.dumps({"error": str(exc)}) + "\n").encode("utf-8")
+
+    return StreamingResponse(generate(), media_type="application/x-ndjson")
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

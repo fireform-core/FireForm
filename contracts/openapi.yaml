@@ -42,6 +42,10 @@ paths:
   # ── Layer 3: Form Fill ──────────────────────────────────────────
   /api/v1/forms/fill:
     $ref: "path/forms.yaml#/fill"
+  /api/v1/forms/models:
+    $ref: "path/forms.yaml#/models"
+  /api/v1/forms/pull:
+    $ref: "path/forms.yaml#/pull"
   /api/v1/forms/jobs:
     $ref: "path/forms.yaml#/async_fill"
 

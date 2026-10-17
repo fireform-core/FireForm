@@ -4,14 +4,18 @@ FormFillRequest:
   type: object
   required:
     - template_id
-    - input_id
   properties:
     template_id:
       type: integer
       description: ID of the template to fill
+    input_text:
+      type: string
+      nullable: true
+      description: Direct narrative text to use when input_id is not provided
     input_id:
       type: string
       format: uuid
+      nullable: true
       description: ID of a stored input (see POST /input/text, POST /input/voice)
         whose transcript is used to fill this template. The input must have
         status "ready".
@@ -19,6 +23,47 @@ FormFillRequest:
       type: string
       nullable: true
       description: Ollama model override. Defaults to the configured default model.
+
+ModelInfo:
+  type: object
+  required:
+    - name
+    - installed
+    - recommended
+  properties:
+    name:
+      type: string
+      description: Ollama model name
+    installed:
+      type: boolean
+      description: Whether the model is installed in Ollama
+    recommended:
+      type: boolean
+      description: Whether FireForm recommends the model
+
+ModelsResponse:
+  type: object
+  required:
+    - current_model
+    - models
+  properties:
+    current_model:
+      type: string
+      description: Model used when no model override is supplied
+    models:
+      type: array
+      items:
+        $ref: "#/ModelInfo"
+      description: Recommended and installed Ollama models
+
+ModelPullRequest:
+  type: object
+  required:
+    - model
+  properties:
+    model:
+      type: string
+      description: Ollama model name to download
 
 FormFillResponse:
   type: object

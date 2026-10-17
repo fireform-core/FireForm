@@ -8,6 +8,7 @@ from app.core.celery import celery_app
 from app.db.database import get_session
 from app.db.repositories import get_job_by_celery_id, get_template, update_job
 from app.services.form import FormService
+from app.services.form_filler.exceptions import ModelNotInstalledError
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,15 @@ def fill_form_task(self, template_id: int, input_text: str, input_id_str: str, m
 
         return {"job_id": job.job_id, "result_url": job.result_url}
 
+    except ModelNotInstalledError as e:
+        logger.exception("fill_form_task failed")
+        job = get_job_by_celery_id(session, self.request.id)
+        if job:
+            job.status = JobStatus.failed
+            job.error = {"error_code": "MODEL_NOT_INSTALLED", "message": str(e)}
+            job.updated_at = datetime.now(timezone.utc)
+            update_job(session, job)
+        raise
     except Exception as e:
         logger.exception("fill_form_task failed")
         job = get_job_by_celery_id(session, self.request.id)

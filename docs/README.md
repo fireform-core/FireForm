@@ -12,6 +12,7 @@ It is an open-source, agnostic system built to solve administrative overhead for
 - [DATABASE](DATABASE.md): Information on database setup and management.
 - [DOCKER](DOCKER.md): Detailed guide on using Docker and Docker Compose.
 - [CONTRIBUTING](CONTRIBUTING.md): How you can help improve FireForm.
+- [MODEL SELECTION](MODEL_SELECTION.md): Discover, select, and download Ollama models.
 - [SETUP](1.%20SETUP.md): Local development setup guide.
 - [PROJECT STRUCTURE](2.%20PROJECT_STRUCTURE.md): How the codebase is organized.
 

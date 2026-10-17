@@ -1,8 +1,24 @@
+import re
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.api.schemas.enums import JobStatus, JobType
+
+_MODEL_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._\-/:]*$")
+
+
+def validate_model_name(value: str | None) -> str | None:
+    if value is None:
+        return None
+    value = value.strip()
+    if not value:
+        raise ValueError("model name cannot be empty")
+    if len(value) > 128:
+        raise ValueError("model name must be at most 128 characters")
+    if not _MODEL_NAME_PATTERN.fullmatch(value):
+        raise ValueError("model name contains invalid characters")
+    return value
 
 
 class FormFill(BaseModel):
@@ -10,6 +26,11 @@ class FormFill(BaseModel):
     input_text: str | None = None
     input_id: UUID | None = None
     model: str | None = None
+
+    @field_validator("model")
+    @classmethod
+    def _validate_model_name(cls, value: str | None) -> str | None:
+        return validate_model_name(value)
 
 
 class FormFillResponse(BaseModel):
@@ -26,9 +47,24 @@ class TranscriptionResponse(BaseModel):
     text: str
 
 
+class ModelInfo(BaseModel):
+    name: str
+    installed: bool
+    recommended: bool
+
+
 class ModelsResponse(BaseModel):
-    models: list[str]
-    default: str
+    current_model: str
+    models: list[ModelInfo]
+
+
+class ModelPullRequest(BaseModel):
+    model: str
+
+    @field_validator("model")
+    @classmethod
+    def _validate_model_name(cls, value: str) -> str:
+        return validate_model_name(value) or ""
 
 
 class AsyncFormFill(BaseModel):

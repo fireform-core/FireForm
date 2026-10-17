@@ -42,9 +42,9 @@ health:
                           size_gb: 4.7
                           quantization: "Q4_K_M"
                           loaded: true
-                        - name: "mistral:7b"
-                          size_gb: 4.1
-                          quantization: "Q4_0"
+                        - name: "qwen2.5:3b"
+                          size_gb: 2.0
+                          quantization: "Q4_K_M"
                           loaded: false
                       current_load:
                         active_requests: 1

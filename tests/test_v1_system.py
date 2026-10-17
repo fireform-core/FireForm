@@ -67,7 +67,7 @@ def _make_mock_response(json_data=None, status_code=200):
 _TAGS_RESPONSE = {
     "models": [
         {"name": "llama3:8b", "size": 5_000_000_000, "details": {"quantization_level": "Q4_K_M"}},
-        {"name": "mistral:7b", "size": 4_000_000_000, "details": {"quantization_level": "Q4_0"}},
+        {"name": "qwen2.5:3b", "size": 2_000_000_000, "details": {"quantization_level": "Q4_K_M"}},
     ]
 }
 _VERSION_RESPONSE = {"version": "0.3.0"}
@@ -228,9 +228,9 @@ class TestHealthEndpoint:
         models = resp.json()["components"]["ollama"]["models_available"]
         assert len(models) == 2
         llama = next(m for m in models if m["name"] == "llama3:8b")
-        mistral = next(m for m in models if m["name"] == "mistral:7b")
+        qwen = next(m for m in models if m["name"] == "qwen2.5:3b")
         assert llama["loaded"] is True
-        assert mistral["loaded"] is False
+        assert qwen["loaded"] is False
         assert llama["quantization"] == "Q4_K_M"
         assert llama["size_gb"] == pytest.approx(4.66, abs=0.1)
 

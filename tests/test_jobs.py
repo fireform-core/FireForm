@@ -1,13 +1,17 @@
 """Tests for async job submission and status endpoints."""
 
-from unittest.mock import ANY, patch
+from types import SimpleNamespace
+from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
+import pytest
 from sqlmodel import select
 
 from app.api.schemas.enums import InputStatus, InputType, JobStatus
 from app.core.config import API_PREFIX
 from app.models import Input, Job
+from app.services.form_filler.exceptions import ModelNotInstalledError
+from app.tasks.fill import fill_form_task
 
 
 class TestJobEndpoints:
@@ -198,3 +202,24 @@ class TestJobEndpoints:
         job = db.exec(select(Job)).one()
         assert job.status == JobStatus.failed
         assert job.error["error_code"] == "QUEUE_UNAVAILABLE"
+
+    def test_fill_task_preserves_model_not_installed_error_code(self):
+        session = MagicMock()
+        job = SimpleNamespace(status=JobStatus.queued, progress_percent=0, error=None)
+
+        with (
+            patch("app.tasks.fill.get_session", return_value=iter([session])),
+            patch("app.tasks.fill.get_job_by_celery_id", side_effect=[job, job]),
+            patch("app.tasks.fill.get_template", return_value=object()),
+            patch(
+                "app.tasks.fill.FormService.fill_and_persist",
+                side_effect=ModelNotInstalledError("missing-model"),
+            ),
+        ):
+            with pytest.raises(ModelNotInstalledError, match="missing-model"):
+                fill_form_task.run(1, "text", str(uuid4()), "missing-model")
+
+        assert job.error == {
+            "error_code": "MODEL_NOT_INSTALLED",
+            "message": "Model 'missing-model' is not installed in Ollama.",
+        }
