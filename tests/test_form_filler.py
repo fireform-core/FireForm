@@ -1,4 +1,4 @@
-"""Tests for app.services.form_filler without Ollama.
+"""Tests for app.services.form_filler without a real LLM.
 
 Uses the real ICS 205A from the benchmark data: the template is built from the
 PDF itself, the model call is patched, and the filled PDF is read back.
@@ -73,9 +73,16 @@ def test_fill_maps_rows_back_to_widgets_and_writes_pdf(tmp_path):
     assert fields["Name AlphabetizedRow3"].get("/V", "") == ""
 
 
-def test_fill_defaults_to_configured_model():
+def test_fill_without_model_lets_the_llm_pick_its_default():
     with patch.object(filler, "call_model", return_value="{}") as call:
         filler.fill(ICS_205A, "Narrative text.", description=TEMPLATE_DESCRIPTION)
 
-    assert call.call_args.args[2] == filler.OLLAMA_MODEL
+    assert call.call_args.args[2] is None
+
+
+def test_call_model_goes_through_the_configured_llm(test_llm):
+    with patch.object(test_llm, "generate_json", return_value="{}") as generate:
+        assert filler.call_model("prompt", {"type": "object"}, "m") == "{}"
+
+    generate.assert_called_once_with("prompt", {"type": "object"}, "m")
 

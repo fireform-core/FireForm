@@ -1,4 +1,3 @@
-import requests
 from fastapi import APIRouter, Depends, File, UploadFile, Query
 from sqlmodel import Session
 
@@ -10,7 +9,8 @@ from app.api.schemas.forms import (
     TranscriptionResponse,
 )
 from app.core import paths
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL, RETENTION_PERIOD_DAYS
+from app.core.config import RETENTION_PERIOD_DAYS
+from app.services import llm
 from app.services.whisper import call_whisper_asr
 from app.core.errors.base import AppError
 from app.db.repositories import get_template, get_form_submission, delete_form_submission
@@ -49,24 +49,20 @@ def fill_form(form: FormFill, db: Session = Depends(get_db)):
 
 @router.get("/models", response_model=ModelsResponse)
 def list_models():
-    """List the Whisper-independent extraction models available in the local
-    Ollama instance, plus the configured default. Used by the Fill Form UI's
-    model picker. Falls back to just the default if Ollama is unreachable."""
-    default_model = OLLAMA_MODEL
-
-    models: list[str] = []
+    """List the models the configured LLM offers, plus the configured default.
+    Used by the Fill Form UI's model picker. Falls back to just the default if
+    the LLM server is unreachable."""
+    client = llm.get_llm()
     try:
-        response = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=10)
-        response.raise_for_status()
-        models = [m["name"] for m in response.json().get("models", []) if m.get("name")]
-    except requests.exceptions.RequestException:
+        models = [m.name for m in client.list_models()]
+    except llm.LLMError:
         models = []
 
-    # Always surface the configured default, even if Ollama hasn't pulled it yet.
-    if default_model not in models:
-        models.insert(0, default_model)
+    # Always surface the configured default, even if the server doesn't list it.
+    if client.model not in models:
+        models.insert(0, client.model)
 
-    return ModelsResponse(models=models, default=default_model)
+    return ModelsResponse(models=models, default=client.model)
 
 
 @router.post("/transcribe", response_model=TranscriptionResponse)

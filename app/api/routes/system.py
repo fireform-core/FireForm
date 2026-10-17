@@ -5,6 +5,7 @@ Health contract: contracts/path/system.yaml + contracts/schemas/system.yaml
 
 import shutil
 import time
+from dataclasses import asdict
 
 import requests
 from fastapi import APIRouter
@@ -16,10 +17,10 @@ from app.api.schemas.system import (
     ComponentHealth,
     HealthComponents,
     HealthStatus,
-    ModelInfo,
 )
-from app.core.config import APP_VERSION, DATA_DIR, OLLAMA_HOST, WHISPER_HOST
+from app.core.config import APP_VERSION, DATA_DIR, WHISPER_HOST
 from app.db.database import engine
+from app.services import llm
 
 router = APIRouter(tags=["system"])
 
@@ -42,59 +43,11 @@ def _check_database() -> ComponentHealth:
         return ComponentHealth(status=HealthState.unhealthy, detail=str(exc))
 
 
-def _check_ollama() -> ComponentHealth:
-    t0 = time.monotonic()
-    try:
-        tags_resp = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=_PROBE_TIMEOUT)
-        tags_resp.raise_for_status()
-        elapsed = int((time.monotonic() - t0) * 1000)
-
-        tags_data = tags_resp.json()
-
-        ollama_version: str | None = None
-        try:
-            ver_resp = requests.get(f"{OLLAMA_HOST}/api/version", timeout=_PROBE_TIMEOUT)
-            ver_resp.raise_for_status()
-            ollama_version = ver_resp.json().get("version")
-        except Exception:
-            pass
-
-        running_names: set[str] = set()
-        model_loaded: str | None = None
-        try:
-            ps_resp = requests.get(f"{OLLAMA_HOST}/api/ps", timeout=_PROBE_TIMEOUT)
-            ps_resp.raise_for_status()
-            running = ps_resp.json().get("models", [])
-            running_names = {m.get("name", "") for m in running}
-            if running:
-                model_loaded = running[0].get("name")
-        except Exception:
-            pass
-
-        raw_models = tags_data.get("models", [])
-        models_available: list[ModelInfo] = []
-        for m in raw_models:
-            name = m.get("name", "")
-            size_gb = round(m.get("size", 0) / (1024 ** 3), 2)
-            quantization = m.get("details", {}).get("quantization_level")
-            models_available.append(
-                ModelInfo(name=name, size_gb=size_gb, quantization=quantization, loaded=name in running_names)
-            )
-
-        status = HealthState.degraded if elapsed > _SLOW_MS else HealthState.healthy
-
-        return ComponentHealth(
-            status=status,
-            response_time_ms=elapsed,
-            model_loaded=model_loaded,
-            ollama_version=ollama_version,
-            models_available=models_available if models_available else None,
-            # current_load is always None — Ollama exposes no queue-depth API;
-            # populating it would require fabricating data.
-            current_load=None,
-        )
-    except requests.exceptions.RequestException as exc:
-        return ComponentHealth(status=HealthState.unhealthy, detail=str(exc))
+def _check_llm() -> ComponentHealth:
+    health = ComponentHealth(**asdict(llm.get_llm().health()))
+    if health.status == HealthState.healthy and (health.response_time_ms or 0) > _SLOW_MS:
+        health.status = HealthState.degraded
+    return health
 
 
 def _check_whisper() -> ComponentHealth:
@@ -129,15 +82,15 @@ def _check_storage() -> ComponentHealth:
 )
 def get_health():
     database = _check_database()
-    ollama = _check_ollama()
+    llm_health = _check_llm()
     whisper = _check_whisper()
     storage = _check_storage()
 
     components = HealthComponents(
-        database=database, ollama=ollama, whisper=whisper, storage=storage
+        database=database, llm=llm_health, whisper=whisper, storage=storage
     )
 
-    statuses = {database.status, ollama.status, whisper.status, storage.status}
+    statuses = {database.status, llm_health.status, whisper.status, storage.status}
 
     if database.status == HealthState.unhealthy:
         overall = HealthState.unhealthy

@@ -24,6 +24,7 @@ from app.models import (  # noqa: F401 — registers tables
     Report,
     Template,
 )
+from app.services.llm.ollama import OllamaLLM
 
 # ---------------------------------------------------------------------------
 # In-memory database
@@ -49,6 +50,15 @@ def _reset_tables():
     SQLModel.metadata.create_all(_engine)
     yield
     SQLModel.metadata.drop_all(_engine)
+
+
+@pytest.fixture(autouse=True)
+def test_llm(monkeypatch):
+    """Pin the LLM to a plain Ollama so tests don't depend on the LLM_* settings
+    in the developer's .env. Nothing is sent: tests mock requests or the filler."""
+    llm = OllamaLLM(host="http://ollama:11434", model="qwen2.5:1.5b", timeout=5)
+    monkeypatch.setattr("app.services.llm.get_llm", lambda: llm)
+    return llm
 
 
 @pytest.fixture

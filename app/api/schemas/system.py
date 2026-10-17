@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 
-from app.api.schemas.enums import HealthState
+from app.api.schemas.enums import HealthState, LLMProvider
 
 
 class ModelInfo(BaseModel):
     name: str
-    size_gb: float
+    size_gb: float | None = None
     quantization: str | None = None
-    loaded: bool
+    loaded: bool | None = None
 
 
 class CurrentLoad(BaseModel):
@@ -19,8 +19,9 @@ class ComponentHealth(BaseModel):
     status: HealthState
     response_time_ms: int | None = None
     detail: str | None = None
+    provider: LLMProvider | None = None  # llm component only
     model_loaded: str | None = None
-    ollama_version: str | None = None
+    provider_version: str | None = None
     models_available: list[ModelInfo] | None = None
     current_load: CurrentLoad | None = None
     disk_free_gb: float | None = None
@@ -28,7 +29,7 @@ class ComponentHealth(BaseModel):
 
 class HealthComponents(BaseModel):
     database: ComponentHealth
-    ollama: ComponentHealth
+    llm: ComponentHealth
     whisper: ComponentHealth
     storage: ComponentHealth
 

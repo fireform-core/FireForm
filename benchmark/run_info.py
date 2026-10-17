@@ -17,6 +17,7 @@ import requests
 import llm_judge
 from app.core.config import OLLAMA_HOST, OLLAMA_TIMEOUT
 from app.services.form_filler import filler
+from app.services.llm.ollama import OPTIONS
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PACKAGES = ["pypdf", "pdfplumber", "requests"]
@@ -31,7 +32,7 @@ def collect(model, docs, argv):
         "model_under_test": {
             "model": model,
             **ollama_model_info(OLLAMA_HOST, model),
-            "options": filler.OPTIONS,
+            "options": OPTIONS,
             "timeout_seconds": OLLAMA_TIMEOUT,
             "prompt_file": "prompt.txt",
             "prompt_sha256": sha256(filler.PROMPT),

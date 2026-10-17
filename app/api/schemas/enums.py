@@ -116,6 +116,14 @@ class OutputFormat(str, Enum):
     both = "both"
 
 
+class LLMProvider(str, Enum):
+    ollama = "ollama"
+    openai = "openai"
+    gemini = "gemini"
+    anthropic = "anthropic"
+    custom = "custom"
+
+
 class HealthState(str, Enum):
     healthy = "healthy"
     degraded = "degraded"
