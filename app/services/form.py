@@ -46,7 +46,8 @@ class FormService:
         model: str | None = None,
     ) -> FormSubmission:
         # Before anything is stored, so a bad pick leaves no stray input behind
-        choice = llm.get_registry().resolve(provider, model)
+        registry = llm.effective_registry(session)
+        choice = registry.resolve(provider, model)
         if input_id is not None and not input_text:
             transcript = self.input_service.resolve_transcript(session, input_id)
         elif input_text:
@@ -67,7 +68,9 @@ class FormService:
                 input_id = input_record.input_id
         else:
             raise AppError("Either input_id or input_text is required", status_code=422, error_code="VALIDATION_ERROR")
-        return self.fill_and_persist(session, template, transcript, input_id, choice.model, choice.provider)
+        return self.fill_and_persist(
+            session, template, transcript, input_id, choice.model, choice.provider, registry=registry
+        )
 
     def fill_and_persist(
         self,
@@ -77,7 +80,9 @@ class FormService:
         input_id: UUID,
         model: str | None = None,
         provider: LLMProvider | None = None,
+        registry=None,
     ) -> FormSubmission:
+        registry = registry or llm.effective_registry(session)
         resolved_pdf = paths._resolve_project_file(template.pdf_path)
         if not resolved_pdf.exists():
             raise FileNotFoundError(f"PDF template not found at {template.pdf_path}")
@@ -93,6 +98,7 @@ class FormService:
             provider=provider,
             model=model,
             description=template.description,
+            registry=registry,
         )
 
         relative_out = out_target.relative_to(paths.PROJECT_ROOT).as_posix()

@@ -47,3 +47,11 @@ SPECS: dict[LLMProvider, ProviderSpec] = {
     ),
     LLMProvider.custom: ProviderSpec(LLMProvider.custom, needs_key=False),
 }
+
+DEFAULT_OLLAMA_INSTALLABLE_MODELS: tuple[str, ...] = (
+    "qwen2.5:1.5b",
+    "qwen2.5:3b",
+    "qwen2.5:7b",
+    "llama3.2:3b",
+)
+

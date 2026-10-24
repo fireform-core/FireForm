@@ -45,3 +45,6 @@ benchmark/results/
 data/inputs/*
 !data/inputs/ics_209.pdf
 !data/inputs/file_template_manual.pdf
+
+# Locally generated LLM credential-encryption key
+data/secrets/

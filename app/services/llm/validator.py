@@ -62,7 +62,12 @@ class ModelValidator:
         try:
             self.registry.client(choice.provider).generate_json(PROBE_PROMPT, PROBE_SCHEMA, choice.model)
         except LLMError as exc:
-            logger.warning("LLM test of %s %s failed: %s", choice.provider.value, choice.model, exc.message)
+            logger.warning(
+                "LLM test of %s %s failed with %s",
+                choice.provider.value,
+                choice.model,
+                exc.error_code,
+            )
             return ModelCheck(
                 choice.provider, choice.model, ok=False, latency_ms=_since(t0),
                 detail=exc.message, error_code=exc.error_code,

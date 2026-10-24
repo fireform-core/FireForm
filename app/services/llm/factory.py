@@ -10,7 +10,12 @@ from app.services.llm.settings import ProviderSettings
 def create_llm(settings: ProviderSettings) -> LLM:
     # Ollama has its own transport, every other provider speaks the OpenAI API
     if settings.provider is LLMProvider.ollama:
-        return OllamaLLM(host=settings.base_url, model=settings.default_model, timeout=settings.timeout)
+        return OllamaLLM(
+            host=settings.base_url,
+            model=settings.default_model,
+            timeout=settings.timeout,
+            pull_timeout=settings.pull_timeout,
+        )
     return OpenAICompatibleLLM(
         provider=settings.provider,
         base_url=settings.base_url,

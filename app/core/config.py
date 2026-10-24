@@ -38,6 +38,8 @@ DB_ECHO = os.getenv("FIREFORM_DB_ECHO", "true").lower() == "true"
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:1.5b")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))
+OLLAMA_PULL_TIMEOUT = int(os.getenv("OLLAMA_PULL_TIMEOUT", "120"))
+OLLAMA_INSTALLABLE_MODELS = os.getenv("OLLAMA_INSTALLABLE_MODELS", "").strip()
 
 # --- LLM providers --------------------------------------------------------
 # Every provider with a non empty <PROVIDER>_MODELS is enabled, so several can
@@ -96,6 +98,13 @@ API_PREFIX = "/api/v1"
 
 # --- Security & Access Control ---------------------------------------------
 FIREFORM_API_KEY = os.getenv("FIREFORM_API_KEY", "")
+LLM_SECRET_KEY = os.getenv("LLM_SECRET_KEY", "").strip()
+_DEFAULT_LLM_SECRET_KEY_FILE = (
+    Path("/data/secrets/llm_secret.key")
+    if Path("/data/secrets").is_dir()
+    else BASE_DIR / "data" / "secrets" / "llm_secret.key"
+)
+LLM_SECRET_KEY_FILE = Path(os.getenv("LLM_SECRET_KEY_FILE", str(_DEFAULT_LLM_SECRET_KEY_FILE))).expanduser()
 
 # --- Data Retention --------------------------------------------------------
 RETENTION_PERIOD_DAYS = int(os.getenv("RETENTION_PERIOD_DAYS", "30"))

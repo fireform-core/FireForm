@@ -47,7 +47,7 @@ def submit_async_form_fill(form: AsyncFormFill, db: Session = Depends(get_db)):
 
     transcript = InputService().resolve_transcript(db, form.input_id)
     # Checked here so a bad pick fails the request, not every queued job
-    choice = llm.get_registry().resolve(form.provider, form.model)
+    choice = llm.effective_registry(db).resolve(form.provider, form.model)
 
     jobs: list[AsyncJobSubmitResponse] = []
     for tid in form.template_ids:
@@ -100,4 +100,3 @@ def submit_async_form_fill(form: AsyncFormFill, db: Session = Depends(get_db)):
         ))
 
     return AsyncFormFillResponse(jobs=jobs)
-

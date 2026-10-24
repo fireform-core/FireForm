@@ -17,6 +17,14 @@ class ModelInfo:
     size_gb: float | None = None
     quantization: str | None = None
     loaded: bool | None = None
+    installed: bool | None = None
+    manual: bool | None = None
+
+
+@dataclass(frozen=True)
+class DownloadableModelInfo:
+    name: str
+    installed: bool = False
 
 
 @dataclass(frozen=True)

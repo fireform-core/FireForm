@@ -7,6 +7,9 @@ from app.models.models import (
     Incident,
     Input,
     Job,
+    LLMManualModel,
+    LLMProviderCredential,
+    LLMRuntimeConfig,
     Report,
     Template,
 )
@@ -18,6 +21,9 @@ __all__ = [
     "Incident",
     "Input",
     "Job",
+    "LLMManualModel",
+    "LLMProviderCredential",
+    "LLMRuntimeConfig",
     "Report",
     "Template",
 ]

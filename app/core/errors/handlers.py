@@ -36,7 +36,7 @@ def register_exception_handlers(app):
             validation_errors.append({
                 "field": field or None,
                 "issue": error.get("msg"),
-                "value": error.get("input"),
+                "value": "[redacted]" if "api_key" in field.lower() else error.get("input"),
             })
         return JSONResponse(
             status_code=422,

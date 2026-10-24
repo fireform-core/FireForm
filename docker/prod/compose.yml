@@ -68,6 +68,7 @@ services:
       # Under /app (the project root) so uploaded and filled PDFs pass the
       # "inside the project" path guard and persist across container updates.
       - fireform_uploads:/app/data
+      - llm_secrets:/data/secrets
     ports:
       - "${APP_PORT}:8000"
     # Everything in the env file reaches the container, so a new setting works
@@ -107,6 +108,7 @@ services:
     command: ["celery", "-A", "app.core.celery:celery_app", "worker", "--loglevel=info", "--concurrency=4"]
     volumes:
       - fireform_uploads:/app/data
+      - llm_secrets:/data/secrets
     # Same env file as the app, so the worker sees the same LLM providers
     env_file:
       - ../.env.prod
@@ -131,6 +133,8 @@ volumes:
   whisper_models:
     driver: local
   fireform_uploads:
+    driver: local
+  llm_secrets:
     driver: local
   redis_data:
     driver: local

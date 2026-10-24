@@ -11,6 +11,7 @@ pytest
 httpx
 numpy<2
 openai
+cryptography==50.0.2
 pypdf
 pdfplumber
 python-multipart

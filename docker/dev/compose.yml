@@ -104,6 +104,7 @@ services:
     volumes:
       - ../..:/app
       - fireform_uploads:/data/uploads
+      - llm_secrets:/data/secrets
     ports:
       - "${APP_PORT:-8000}:8000"
     # Everything in the env file reaches the container, so a new setting works
@@ -143,6 +144,7 @@ services:
     volumes:
       - ../..:/app
       - fireform_uploads:/data/uploads
+      - llm_secrets:/data/secrets
     env_file:
       - ../.env.dev
     environment:
@@ -165,6 +167,8 @@ volumes:
   whisper_models:
     driver: local
   fireform_uploads:
+    driver: local
+  llm_secrets:
     driver: local
   redis_data:
     driver: local

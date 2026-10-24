@@ -4,7 +4,7 @@ Every LLM setting, as read from the env file. Empty means unset.
 
 ## Rules
 
-- A provider is on when its `<PROVIDER>_MODELS` is not empty.
+- An environment-configured provider is on when its `<PROVIDER>_MODELS` is not empty. A provider configured through the local API is enabled from its saved key or custom URL and uses provider-discovered models.
 - Hosted providers also need their API key and `LLM_ALLOW_EXTERNAL=true`.
 - A mistake in the default provider blocks every fill until it is fixed. The app still starts and answers with `LLM_CONFIG_ERROR`.
 - A mistake in any other provider turns that provider off and logs a warning. The rest keep working.
@@ -27,7 +27,7 @@ Every LLM setting, as read from the env file. Empty means unset.
 | Setting                      | Meaning                                                                                        |
 | ---------------------------- | ---------------------------------------------------------------------------------------------- |
 | `<PREFIX>_MODELS`            | `*` for every listed model, or a comma separated list. Empty turns the provider off.           |
-| `<PREFIX>_API_KEY`           | Required for OpenAI, Gemini and Anthropic. Optional for custom. Not used by Ollama.            |
+| `<PREFIX>_API_KEY`           | Environment key: required for OpenAI, Gemini and Anthropic. A local API-saved key can be used instead. Optional for custom. Not used by Ollama. |
 | `<PREFIX>_BASE_URL`          | Overrides the provider address. Required for custom. Ollama uses `OLLAMA_HOST` instead.        |
 | `<PREFIX>_MAX_TOKENS`        | Output token cap. Empty sends none.                                                            |
 | `<PREFIX>_STRUCTURED_OUTPUT` | `true` sends the form's JSON schema as `response_format`. Turn off for servers that reject it. |
@@ -40,6 +40,18 @@ Every LLM setting, as read from the env file. Empty means unset.
 | `OLLAMA_MODELS`  | `*`                      | Every pulled model. Empty turns Ollama off.                |
 | `OLLAMA_MODEL`   | `qwen2.5:1.5b`           | Ollama's default model, and the one `make fireform` pulls. |
 | `OLLAMA_TIMEOUT` | `300`                    | Fallback for `LLM_TIMEOUT`.                                |
+| `OLLAMA_PULL_TIMEOUT` | `120`               | Inactivity timeout while streaming a pull (seconds). Not a total time limit: the connect phase uses 10 seconds; each chunk from Ollama resets the inactivity clock. |
+| `OLLAMA_INSTALLABLE_MODELS` | empty (built-in default list) | Comma-separated models users may pull when `OLLAMA_MODELS=*`. Ignored when `OLLAMA_MODELS` is an explicit list; then only names in that list can be pulled. |
+
+## Ollama model states
+
+| Term | Meaning |
+| ---- | ------- |
+| **Default model** | `OLLAMA_MODEL` or `LLM_MODEL` when Ollama is the default provider. Used when a request names no model. |
+| **Allowed model** | Named in `OLLAMA_MODELS`, or any tag when `OLLAMA_MODELS=*`. |
+| **Installed** | Present on the Ollama host (`ollama list`). Shown in `models` with `installed: true`. |
+| **Loaded** | Loaded in memory right now. Ollama adds `loaded: true` on `models`. |
+| **Downloadable** | Allowed and not yet installed. Listed under `downloadable` on `GET /system/llm/models`. With `OLLAMA_MODELS=*`, candidates come from `OLLAMA_INSTALLABLE_MODELS` (or the built-in default). With an explicit list, downloadable entries are configured names Ollama does not have yet. |
 
 ## Provider defaults
 
@@ -56,7 +68,10 @@ A URL is local when its host is `localhost`, a loopback or private IP, a bare na
 
 ## Docker
 
-Both compose files load the env file into the app and the worker, so every setting above reaches both containers. Do not repeat LLM settings under `environment:` in a compose file. Values there override the env file.
+Both compose files load the env file into the app and the worker, so every setting above reaches both containers. They also share a persistent `llm_secrets` volume for the generated master key. Do not repeat LLM settings under `environment:` in a compose file. Values there override the env file.
+
+The local provider API, credential encryption key, and single-user limitations
+are described in [User configuration](user-configuration.md).
 
 ## Removed settings
 

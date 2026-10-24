@@ -2,7 +2,7 @@ import uuid as uuid_mod
 from datetime import date, datetime, timezone
 from uuid import UUID, uuid4
 
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, UniqueConstraint
 from sqlmodel import Field, SQLModel
 from sqlmodel.sql.sqltypes import AutoString
 
@@ -57,6 +57,37 @@ class Job(SQLModel, table=True):
     provider: LLMProvider | None = Field(default=None, sa_column=Column(AutoString, nullable=True))
     model: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LLMProviderCredential(SQLModel, table=True):
+    __tablename__ = "llm_provider_credentials"
+    __table_args__ = (UniqueConstraint("provider", name="uq_llm_provider_credential_provider"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    provider: str
+    api_key_encrypted: str | None = None
+    key_hint: str | None = None
+    base_url: str | None = None
+    structured_output: bool | None = None
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LLMManualModel(SQLModel, table=True):
+    __tablename__ = "llm_manual_models"
+    __table_args__ = (UniqueConstraint("provider", "model", name="uq_llm_manual_model_provider_model"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    provider: str
+    model: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LLMRuntimeConfig(SQLModel, table=True):
+    __tablename__ = "llm_runtime_config"
+
+    id: int = Field(default=1, primary_key=True)
+    allow_external: bool = False
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

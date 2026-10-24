@@ -24,7 +24,7 @@ with open(os.path.join(os.path.dirname(__file__), "prompt.txt"), "r") as f:
     PROMPT = f.read()
 
 
-def fill(pdf_path, narrative, out_path=None, model=None, description="", provider=None):
+def fill(pdf_path, narrative, out_path=None, model=None, description="", provider=None, registry=None):
     """Fill pdf_path from the narrative. Writes the PDF when out_path is given.
 
     Returns {schema, tables, groups, prompt, response_text, values}: the
@@ -35,7 +35,7 @@ def fill(pdf_path, narrative, out_path=None, model=None, description="", provide
     strip_empty_descriptions(schema["properties"])
 
     prompt = build_prompt(narrative, schema, description)
-    response_text = call_model(prompt, schema, model, provider)
+    response_text = call_model(prompt, schema, model, provider, registry=registry)
 
     # Tables come back as arrays of rows; map them to widget names
     values = template.expand_output(json.loads(response_text), tables, groups)
@@ -76,9 +76,10 @@ def build_prompt(narrative, schema, description=""):
     return PROMPT.rstrip() + "\n\n" + user_content
 
 
-def call_model(prompt, schema, model=None, provider=None):
+def call_model(prompt, schema, model=None, provider=None, registry=None):
     """The answer as JSON text shaped by the schema. None falls back to the defaults."""
-    return llm.get_registry().generate_json(prompt, schema, provider, model)
+    active_registry = registry or llm.get_registry()
+    return active_registry.generate_json(prompt, schema, provider, model)
 
 
 def write_pdf(pdf_path, values, out_path):

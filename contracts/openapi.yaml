@@ -66,6 +66,18 @@ paths:
     $ref: "path/system.yaml#/llm_models"
   /api/v1/system/llm/test:
     $ref: "path/system.yaml#/llm_test"
+  /api/v1/system/llm/pull:
+    $ref: "path/system.yaml#/llm_pull"
+  /api/v1/system/llm/providers/config:
+    $ref: "path/system.yaml#/llm_provider_configs"
+  /api/v1/system/llm/providers/config/{provider}:
+    $ref: "path/system.yaml#/llm_provider_config"
+  /api/v1/system/llm/providers/config/{provider}/validate:
+    $ref: "path/system.yaml#/llm_provider_validation"
+  /api/v1/system/llm/providers/config/{provider}/models:
+    $ref: "path/system.yaml#/llm_manual_models"
+  /api/v1/system/llm/external-consent:
+    $ref: "path/system.yaml#/llm_external_consent"
 
   # ── Layer 8: Async Jobs ────────────────────────────────────────
   /api/v1/jobs/{job_id}:

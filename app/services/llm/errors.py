@@ -22,6 +22,20 @@ class LLMConfigError(LLMError):
     error_code = "LLM_CONFIG_ERROR"
 
 
+class LLMSecretKeyError(LLMError):
+    """The key required to encrypt provider credentials cannot be accessed."""
+
+    status_code = 503
+    error_code = "LLM_SECRET_KEY_UNAVAILABLE"
+
+
+class LLMExternalConsentError(LLMError):
+    """External processing has not been explicitly allowed."""
+
+    status_code = 422
+    error_code = "LLM_EXTERNAL_CONSENT_REQUIRED"
+
+
 class LLMNotAvailableError(LLMError):
     """The request named a provider or model that isn't enabled or offered."""
 

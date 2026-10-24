@@ -40,13 +40,14 @@ class OpenAICompatibleLLM(LLM):
     ):
         super().__init__(provider, model, timeout)
         self.base_url = base_url
+        self._secret = api_key or ""
         self.structured_output = structured_output
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.listed_id_prefix = listed_id_prefix
         self.client = openai.OpenAI(
             base_url=base_url,
-            api_key=api_key or "not-needed",
+            api_key=self._secret or "not-needed",
             timeout=timeout,
             max_retries=max_retries,
             default_headers=headers,
@@ -117,7 +118,8 @@ class OpenAICompatibleLLM(LLM):
             raise self._auth_error(exc) from exc
         except openai.RateLimitError as exc:
             raise LLMRateLimitError(
-                f"{name} is still rate limiting after retries, or the account is out of quota: {_reason(exc)}"
+                f"{name} is still rate limiting after retries, or the account is out of quota: "
+                f"{_reason(exc, self._secret)}"
             ) from exc
         except openai.APITimeoutError as exc:
             raise LLMUnavailableError(f"{name} at {self.base_url} timed out") from exc
@@ -126,7 +128,7 @@ class OpenAICompatibleLLM(LLM):
                 f"Could not reach {name} at {self.base_url}. Check {spec.setting('BASE_URL')} and the network."
             ) from exc
         except openai.APIStatusError as exc:
-            reason = _reason(exc)
+            reason = _reason(exc, self._secret)
             # Gemini answers a bad key with 400 instead of 401
             if exc.status_code == 400 and "api key" in reason.lower():
                 raise self._auth_error(exc) from exc
@@ -142,12 +144,12 @@ class OpenAICompatibleLLM(LLM):
 
     def _auth_error(self, exc: openai.APIStatusError) -> LLMAuthError:
         return LLMAuthError(
-            f"{self.provider.value} rejected the API key: {_reason(exc)}. "
+            f"{self.provider.value} rejected the API key: {_reason(exc, self._secret)}. "
             f"Check {SPECS[self.provider].setting('API_KEY')}."
         )
 
 
-def _reason(exc: openai.APIStatusError) -> str:
+def _reason(exc: openai.APIStatusError, secret: object = "") -> str:
     """The provider's own error message, without the JSON around it.
 
     Bodies differ: OpenAI sends {"error": {"message"}}, Gemini a list of those,
@@ -156,10 +158,13 @@ def _reason(exc: openai.APIStatusError) -> str:
     body = exc.body
     if isinstance(body, list) and body:
         body = body[0]
+    message = exc.message.rstrip(".")
     if isinstance(body, dict):
         error = body.get("error", body)
         if isinstance(error, dict) and error.get("message"):
-            return str(error["message"]).rstrip(".")
-        if isinstance(error, str):
-            return error.rstrip(".")
-    return exc.message.rstrip(".")
+            message = str(error["message"]).rstrip(".")
+        elif isinstance(error, str):
+            message = error.rstrip(".")
+    if isinstance(secret, str) and len(secret) >= 8 and secret != "not-needed":
+        message = message.replace(secret, "[redacted]")
+    return message

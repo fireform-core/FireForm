@@ -4,6 +4,12 @@
 # GET /api/v1/schema/incident/versions
 # GET /api/v1/system/llm/models
 # POST /api/v1/system/llm/test
+# POST /api/v1/system/llm/pull
+# GET /api/v1/system/llm/providers/config
+# PUT/DELETE /api/v1/system/llm/providers/config/{provider}
+# POST /api/v1/system/llm/providers/config/{provider}/validate
+# POST/DELETE /api/v1/system/llm/providers/config/{provider}/models
+# GET/PUT /api/v1/system/llm/external-consent
 
 health:
   get:
@@ -197,6 +203,12 @@ llm_models:
                       size_gb: 0.92
                       quantization: "Q4_K_M"
                       loaded: true
+                      installed: true
+                  downloadable:
+                    - name: "qwen2.5:3b"
+                      installed: false
+                    - name: "llama3.2:3b"
+                      installed: false
                 - provider: "gemini"
                   available: true
                   default_model: "gemini-2.5-flash"
@@ -281,3 +293,281 @@ llm_test:
             example:
               error_code: "LLM_CONFIG_ERROR"
               message: "GEMINI_API_KEY is set but GEMINI_MODELS is empty. Add GEMINI_MODELS=gemini-2.5-flash, a comma separated list, or * for every model gemini lists."
+
+llm_pull:
+  post:
+    operationId: pullLLMModel
+    summary: Pull an AI model from Ollama
+    description: |
+      Streams Ollama pull progress as newline-delimited JSON (application/x-ndjson).
+      HTTP 200 only means the stream started; a pull succeeded only when a line
+      contains `"status":"success"`. An `"error"` line or a truncated stream means
+      failure even though the response status is 200. The provider must be ollama
+      (default). The model must be allowed by OLLAMA_MODELS and, when
+      OLLAMA_MODELS=*, by OLLAMA_INSTALLABLE_MODELS. After a successful pull the
+      model catalog cache is refreshed so GET /system/llm/models lists the new
+      model without waiting for the cache TTL.
+    tags:
+      - system
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMPullRequest"
+          example:
+            provider: "ollama"
+            model: "qwen2.5:3b"
+    responses:
+      "200":
+        description: Pull stream (success or failure is in the NDJSON lines)
+        content:
+          application/x-ndjson:
+            schema:
+              type: string
+              description: One JSON object per line, as returned by Ollama /api/pull
+            examples:
+              success:
+                summary: Successful pull
+                value: |
+                  {"status": "pulling manifest"}
+                  {"status": "downloading", "completed": 50, "total": 100}
+                  {"status": "success"}
+              failed:
+                summary: Pull failed mid-stream
+                value: |
+                  {"status": "pulling manifest"}
+                  {"error": "pull access denied"}
+      "422":
+        description: Invalid model name, provider is not ollama, or model not installable
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              not_installable:
+                summary: Model not in the installable set
+                value:
+                  error_code: "LLM_NOT_AVAILABLE"
+                  message: "secret:model cannot be pulled. With OLLAMA_MODELS=*, allowed models are: qwen2.5:1.5b, qwen2.5:3b, qwen2.5:7b, llama3.2:3b."
+              validation:
+                summary: Invalid model name
+                value:
+                  error_code: "VALIDATION_ERROR"
+                  message: "Request validation failed"
+      "503":
+        description: Ollama could not be reached before the stream started
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_UNAVAILABLE"
+              message: "Could not reach Ollama at http://ollama:11434. Check OLLAMA_HOST: Connection refused"
+
+llm_provider_configs:
+  get:
+    operationId: getLLMProviderConfigs
+    summary: List provider configuration status
+    description: |
+      Returns configuration metadata for editable external providers. API keys
+      are never returned. credential_status is unavailable when a saved key
+      cannot be decrypted with the current master key.
+    tags: [system]
+    responses:
+      "200":
+        description: Provider configuration status
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMProviderCredentialList"
+
+llm_provider_config:
+  parameters:
+    - name: provider
+      in: path
+      required: true
+      schema:
+        $ref: "../schemas/enums.yaml#/LLMProvider"
+  put:
+    operationId: saveLLMProviderConfig
+    summary: Save provider credentials and custom settings
+    description: |
+      Stores API keys encrypted at rest and returns only status metadata. A
+      remote provider requires external-processing consent. The custom provider
+      may set a base URL and structured-output behavior.
+    tags: [system]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMProviderCredentialRequest"
+          example:
+            api_key: "write-only"
+    responses:
+      "200":
+        description: Saved provider status; API key is never included
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMProviderCredentialStatus"
+      "422":
+        description: Invalid provider configuration or external consent is required
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              external_consent:
+                value:
+                  error_code: "LLM_EXTERNAL_CONSENT_REQUIRED"
+                  message: "Allow external processing before configuring a provider outside the local network."
+      "503":
+        description: The master encryption key cannot be read or created
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_SECRET_KEY_UNAVAILABLE"
+              message: "LLM master key is unavailable."
+  delete:
+    operationId: deleteLLMProviderConfig
+    summary: Delete provider configuration and its manual models
+    tags: [system]
+    responses:
+      "200":
+        description: Configuration and associated manual model IDs deleted
+        content:
+          application/json:
+            example:
+              status: success
+      "422":
+        description: Provider cannot be configured through this endpoint
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+llm_provider_validation:
+  parameters:
+    - name: provider
+      in: path
+      required: true
+      schema:
+        $ref: "../schemas/enums.yaml#/LLMProvider"
+  post:
+    operationId: validateLLMProviderConfig
+    summary: Validate candidate credentials without saving them
+    description: Queries the provider's model list. Credentials in this request
+      are used only for validation and are not persisted.
+    tags: [system]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMProviderCredentialRequest"
+    responses:
+      "200":
+        description: Validation outcome; failures are returned with ok false
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMProviderValidationResult"
+      "422":
+        description: Provider is not configurable or request fields are invalid
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+llm_manual_models:
+  parameters:
+    - name: provider
+      in: path
+      required: true
+      schema:
+        $ref: "../schemas/enums.yaml#/LLMProvider"
+  post:
+    operationId: validateAndAddLLMManualModel
+    summary: Validate and save a manually entered model ID
+    description: |
+      Sends a short test generation to the selected model before saving its ID.
+      This is useful for custom OpenAI-compatible servers that do not expose a
+      model-list endpoint.
+    tags: [system]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMManualModelRequest"
+    responses:
+      "200":
+        description: Validation outcome; successful IDs are persisted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMManualModelResult"
+      "422":
+        description: Provider or model ID is invalid
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+  delete:
+    operationId: deleteLLMManualModel
+    summary: Delete a manually entered model ID
+    tags: [system]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMManualModelRequest"
+    responses:
+      "200":
+        description: Manual model ID deleted if present
+        content:
+          application/json:
+            example:
+              status: success
+      "422":
+        description: Provider or model ID is invalid
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+
+llm_external_consent:
+  get:
+    operationId: getLLMExternalConsent
+    summary: Get external processing consent
+    tags: [system]
+    responses:
+      "200":
+        description: Effective consent and its source
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMExternalConsent"
+  put:
+    operationId: setLLMExternalConsent
+    summary: Set local external processing consent
+    description: This setting is local to the installation and is not user-scoped.
+    tags: [system]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMExternalConsentRequest"
+    responses:
+      "200":
+        description: Updated consent status
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMExternalConsent"
