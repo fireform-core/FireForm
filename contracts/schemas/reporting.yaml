@@ -1,0 +1,99 @@
+# Reporting & Analytics schemas
+
+ReportSummary:
+  type: object
+  properties:
+    date_from:
+      type: string
+      format: date
+    date_to:
+      type: string
+      format: date
+    total_submissions:
+      type: integer
+      description: Total forms filled/submitted in this period
+    by_template:
+      type: object
+      additionalProperties:
+        type: integer
+      description: Form submission counts grouped by template name
+    groups:
+      type: array
+      items:
+        type: object
+        properties:
+          period:
+            type: string
+            description: Period label (e.g. "2024-07" for monthly)
+          submission_count:
+            type: integer
+
+GenerateReportRequest:
+  type: object
+  required:
+    - period_type
+    - year
+  properties:
+    period_type:
+      $ref: "../schemas/enums.yaml#/PeriodType"
+    year:
+      type: integer
+      minimum: 2000
+      maximum: 2100
+    month:
+      type: integer
+      minimum: 1
+      maximum: 12
+      description: Required when period_type is "monthly"
+    quarter:
+      type: integer
+      minimum: 1
+      maximum: 4
+      description: Required when period_type is "quarterly"
+    format:
+      $ref: "../schemas/enums.yaml#/OutputFormat"
+
+SubmissionSummaryItem:
+  type: object
+  properties:
+    id:
+      type: integer
+    template_id:
+      type: integer
+    template_name:
+      type: string
+      nullable: true
+    input_text:
+      type: string
+      nullable: true
+    output_pdf_path:
+      type: string
+    pdf_url:
+      type: string
+      nullable: true
+      description: Relative link to view or download the filled PDF
+    created_at:
+      type: string
+      format: date-time
+      nullable: true
+
+PeriodicReport:
+  type: object
+  properties:
+    report_id:
+      type: string
+      format: uuid
+    period_type:
+      $ref: "../schemas/enums.yaml#/PeriodType"
+    period_label:
+      type: string
+      description: Human-readable period (e.g. "July 2024", "Q3 2024", "2024")
+    generated_at:
+      type: string
+      format: date-time
+    summary:
+      $ref: "#/ReportSummary"
+    submissions:
+      type: array
+      items:
+        $ref: "#/SubmissionSummaryItem"

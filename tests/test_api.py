@@ -11,9 +11,8 @@ import pytest
 from sqlmodel import select
 
 from app.api.schemas.enums import InputStatus, InputType
-from app.models import Template, FormSubmission, Input
 from app.core.config import API_PREFIX
-from app.models import FormSubmission, Template
+from app.models import FormSubmission, Input, Template
 
 # ═══════════════════════════════════════════════════════════════════════════
 # DB model sanity
@@ -375,6 +374,7 @@ class TestFormEndpoints:
                 "input_text": "Command uses channel 3 for the Oak Ridge fire.",
             },
         )
+        assert resp.status_code == 200
     def test_fill_form_uses_description_from_create(self, client, mock_controller, tmp_path, monkeypatch):
         """The description given to POST /templates/create reaches the filler."""
         monkeypatch.setattr("app.core.paths.PROJECT_ROOT", tmp_path)
