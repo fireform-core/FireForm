@@ -168,6 +168,7 @@ def test_inputs_columns(alembic_cfg, alembic_engine):
         "error_detail",
         "created_at",
         "updated_at",
+            "profile_id",
     }
 
 
