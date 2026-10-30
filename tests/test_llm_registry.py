@@ -1066,3 +1066,159 @@ class TestPullEndpoint:
         lines = [json.loads(line) for line in resp.text.strip().split("\n") if line.strip()]
         assert any("error" in p for p in lines)
         assert not any(p.get("status") == "success" for p in lines)
+
+
+class TestDeleteEndpoint:
+
+    _DELETE = f"{API_PREFIX}/system/llm/models"
+
+    def test_delete_success_refreshes_catalog(self, client, test_llm, monkeypatch):
+        offered = ["qwen2.5:1.5b", "qwen2.5:3b"]
+        monkeypatch.setattr(
+            test_llm,
+            "list_models",
+            lambda: [ModelInfo(name=name, installed=True) for name in offered],
+        )
+
+        before = client.get(f"{API_PREFIX}/system/llm/models")
+        assert before.status_code == 200
+        before_models = before.json()["providers"][0]["models"]
+        assert any(model["name"] == "qwen2.5:3b" for model in before_models)
+
+        deleted = []
+
+        def delete_model(model):
+            deleted.append(model)
+            offered.remove(model)
+
+        monkeypatch.setattr(test_llm, "delete_model", delete_model)
+        response = client.request("DELETE", self._DELETE, json={"model": "qwen2.5:3b"})
+
+        assert response.status_code == 200
+        assert response.json() == {"model": "qwen2.5:3b", "deleted": True}
+        assert deleted == ["qwen2.5:3b"]
+        after = client.get(f"{API_PREFIX}/system/llm/models").json()["providers"][0]
+        assert not any(model["name"] == "qwen2.5:3b" for model in after["models"])
+        assert any(
+            model["name"] == "qwen2.5:3b" and model["installed"] is False
+            for model in after["downloadable"]
+        )
+
+    def test_delete_rejects_invalid_model_name(self, client):
+        response = client.request("DELETE", self._DELETE, json={"model": "bad model!"})
+
+        assert response.status_code == 422
+        assert response.json()["error_code"] == "VALIDATION_ERROR"
+
+    def test_delete_rejects_non_ollama_provider(self, client):
+        response = client.request(
+            "DELETE",
+            self._DELETE,
+            json={"provider": "gemini", "model": "gemini-2.5-flash"},
+        )
+
+        assert response.status_code == 422
+        assert response.json()["error_code"] == "LLM_NOT_AVAILABLE"
+
+    def test_delete_rejects_when_ollama_disabled(self, client, monkeypatch):
+        settings = LLMSettings(
+            providers={GEMINI: _provider(GEMINI, "g1", "g1")},
+            default_provider=GEMINI,
+        )
+        disabled_registry = LLMRegistry(settings, {GEMINI: FakeLLM(GEMINI, ["g1"])})
+        monkeypatch.setattr(
+            "app.api.routes.llm.llm.effective_registry",
+            lambda _db: disabled_registry,
+        )
+
+        response = client.request("DELETE", self._DELETE, json={"model": "qwen2.5:3b"})
+
+        assert response.status_code == 422
+        assert response.json()["error_code"] == "LLM_NOT_AVAILABLE"
+
+    def test_delete_rejects_model_outside_ollama_models(self, client):
+        response = client.request("DELETE", self._DELETE, json={"model": "secret:model"})
+
+        assert response.status_code == 422
+        assert response.json()["error_code"] == "LLM_NOT_AVAILABLE"
+
+    def test_delete_returns_not_installed_for_missing_model(self, client, test_llm, monkeypatch):
+        monkeypatch.setattr(
+            test_llm,
+            "list_models",
+            lambda: [
+                ModelInfo(name="qwen2.5:1.5b", installed=True),
+                ModelInfo(name="qwen2.5:3b", manual=True),
+            ],
+        )
+        delete = MagicMock()
+        monkeypatch.setattr(test_llm, "delete_model", delete)
+
+        response = client.request("DELETE", self._DELETE, json={"model": "qwen2.5:3b"})
+
+        assert response.status_code == 404
+        assert response.json()["error_code"] == "LLM_MODEL_NOT_INSTALLED"
+        delete.assert_not_called()
+
+    def test_delete_rejects_global_default_model(self, client, test_llm, monkeypatch):
+        monkeypatch.setattr(
+            test_llm,
+            "list_models",
+            lambda: [ModelInfo(name="qwen2.5:1.5b", installed=True)],
+        )
+
+        response = client.request("DELETE", self._DELETE, json={"model": "qwen2.5:1.5b"})
+
+        assert response.status_code == 409
+        assert response.json()["error_code"] == "LLM_MODEL_IN_USE"
+        assert "global default" in response.json()["message"]
+
+    def test_delete_rejects_ollama_provider_default(self, client, test_registry, test_llm, monkeypatch):
+        settings = LLMSettings(
+            providers={
+                OLLAMA: test_registry.settings.providers[OLLAMA],
+                GEMINI: _provider(GEMINI, "g1", "g1"),
+            },
+            default_provider=GEMINI,
+        )
+        registry = LLMRegistry(
+            settings,
+            {OLLAMA: test_llm, GEMINI: FakeLLM(GEMINI, ["g1"])},
+        )
+        monkeypatch.setattr(
+            "app.api.routes.llm.llm.effective_registry",
+            lambda _db: registry,
+        )
+        monkeypatch.setattr(
+            test_llm,
+            "list_models",
+            lambda: [ModelInfo(name="qwen2.5:1.5b", installed=True)],
+        )
+
+        response = client.request("DELETE", self._DELETE, json={"model": "qwen2.5:1.5b"})
+
+        assert response.status_code == 409
+        assert response.json()["error_code"] == "LLM_MODEL_IN_USE"
+        assert "Ollama provider default" in response.json()["message"]
+
+    def test_delete_rejects_model_with_active_pull(self, client, test_llm, monkeypatch):
+        from app.services.llm.ollama import _register_active_pull, _unregister_active_pull
+
+        model = "qwen2.5:3b"
+        monkeypatch.setattr(
+            test_llm,
+            "list_models",
+            lambda: [
+                ModelInfo(name="qwen2.5:1.5b", installed=True),
+                ModelInfo(name=model, installed=True),
+            ],
+        )
+        _register_active_pull(model)
+        try:
+            response = client.request("DELETE", self._DELETE, json={"model": model})
+        finally:
+            _unregister_active_pull(model)
+
+        assert response.status_code == 409
+        assert response.json()["error_code"] == "LLM_MODEL_IN_USE"
+        assert "download is currently active" in response.json()["message"]
