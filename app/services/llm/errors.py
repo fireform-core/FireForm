@@ -68,6 +68,20 @@ class LLMModelNotFoundError(LLMError):
     error_code = "LLM_MODEL_NOT_FOUND"
 
 
+class LLMModelNotInstalledError(LLMError):
+    """Ollama does not have the requested model installed."""
+
+    status_code = 404
+    error_code = "LLM_MODEL_NOT_INSTALLED"
+
+
+class LLMModelInUseError(LLMError):
+    """The model cannot be deleted while it is a default or a pull is active."""
+
+    status_code = 409
+    error_code = "LLM_MODEL_IN_USE"
+
+
 class LLMResponseError(LLMError):
     """The server answered, but not with a usable JSON object."""
 
