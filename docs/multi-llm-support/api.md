@@ -88,6 +88,41 @@ If Ollama cannot be reached before the stream opens, the API returns **503** wit
 
 After a successful pull, the server refreshes the Ollama catalog cache, so the new model shows up on `GET /system/llm/models` immediately (no need to wait 60 seconds or pass `refresh=true`).
 
+Closing or cancelling the client's pull request cancels the upstream Ollama
+request, closes its connection, and does not emit a success line or refresh the
+catalog. Whether Ollama removes or reuses files from an interrupted download
+has not been verified and remains to be checked.
+
+## Delete an Ollama model
+
+`DELETE /api/v1/system/llm/models`
+
+```json
+{ "model": "qwen2.5:3b" }
+```
+
+`provider` is optional and defaults to `ollama`. The model must pass the same
+name and installable-model checks as a pull, and it must currently be installed.
+The global default model, Ollama's provider default model, and a model with an
+active pull cannot be deleted.
+
+Success returns `200` and refreshes the Ollama catalog cache:
+
+```json
+{ "model": "qwen2.5:3b", "deleted": true }
+```
+
+The endpoint returns `404` (`LLM_MODEL_NOT_INSTALLED`) when Ollama does not
+have the model, `409` (`LLM_MODEL_IN_USE`) when it is a default or its pull is
+active, and `422` (`LLM_NOT_AVAILABLE`) for an invalid provider or model that
+the server does not allow. Ollama connection failures and server errors return
+`503` (`LLM_UNAVAILABLE`); other unexpected Ollama responses return
+`502` (`LLM_BAD_RESPONSE`).
+
+Active pull tracking is held in a lock-protected in-process set. In deployments
+with multiple API processes, it is process-local and therefore only
+authoritative for pulls handled by the same process.
+
 ## Test a model
 
 `POST /api/v1/system/llm/test`
@@ -134,6 +169,8 @@ The pair is checked before anything is stored or queued. For jobs, the provider 
 | `LLM_CONFIG_ERROR`    | 500  | The LLM settings are wrong. The message names the setting and the fix. |
 | `LLM_AUTH_FAILED`     | 502  | The provider rejected the API key.                                     |
 | `LLM_MODEL_NOT_FOUND` | 502  | The provider has no such model.                                        |
+| `LLM_MODEL_NOT_INSTALLED` | 404 | Ollama does not have the requested model installed. |
+| `LLM_MODEL_IN_USE` | 409 | The Ollama model is a configured default or has an active pull. |
 | `LLM_BAD_RESPONSE`    | 502  | The provider refused the request or did not return JSON.               |
 | `LLM_UNAVAILABLE`     | 503  | Could not reach the provider, or it timed out.                         |
 | `LLM_RATE_LIMITED`    | 503  | Still rate limited after retries, or out of quota.                     |
