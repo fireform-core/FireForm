@@ -90,8 +90,9 @@ After a successful pull, the server refreshes the Ollama catalog cache, so the n
 
 Closing or cancelling the client's pull request cancels the upstream Ollama
 request, closes its connection, and does not emit a success line or refresh the
-catalog. Whether Ollama removes or reuses files from an interrupted download
-has not been verified and remains to be checked.
+catalog. Cancelling a pull means closing the request. Ollama keeps the partial
+download, so pulling the same model again resumes from where it stopped (checked
+with the bundled Ollama; it may vary between Ollama versions).
 
 ## Delete an Ollama model
 
