@@ -1,0 +1,112 @@
+# Reporting & Analytics schemas
+
+ReportSummary:
+  type: object
+  properties:
+    date_from:
+      type: string
+      format: date
+    date_to:
+      type: string
+      format: date
+    total_incidents:
+      type: integer
+    by_type:
+      type: object
+      additionalProperties:
+        type: integer
+      description: Incident counts grouped by category
+    by_status:
+      type: object
+      additionalProperties:
+        type: integer
+      description: Incident counts grouped by report status
+    forms_generated:
+      type: integer
+    avg_completeness_score:
+      type: number
+    avg_processing_time_seconds:
+      type: number
+    groups:
+      type: array
+      items:
+        type: object
+        properties:
+          period:
+            type: string
+            description: Period label (e.g. "2024-07" for monthly, "fire" for by type)
+          incident_count:
+            type: integer
+          forms_generated:
+            type: integer
+
+GenerateReportRequest:
+  type: object
+  required:
+    - period_type
+    - year
+  properties:
+    period_type:
+      $ref: "../schemas/enums.yaml#/PeriodType"
+    year:
+      type: integer
+      minimum: 2000
+      maximum: 2100
+    month:
+      type: integer
+      minimum: 1
+      maximum: 12
+      description: Required when period_type is "monthly"
+    quarter:
+      type: integer
+      minimum: 1
+      maximum: 4
+      description: Required when period_type is "quarterly"
+    format:
+      $ref: "../schemas/enums.yaml#/OutputFormat"
+
+PeriodicReport:
+  type: object
+  properties:
+    report_id:
+      type: string
+      format: uuid
+    period_type:
+      $ref: "../schemas/enums.yaml#/PeriodType"
+    period_label:
+      type: string
+      description: Human-readable period (e.g. "July 2024", "Q3 2024", "2024")
+    generated_at:
+      type: string
+      format: date-time
+    summary:
+      $ref: "#/ReportSummary"
+    incidents:
+      type: array
+      items:
+        type: object
+        properties:
+          incident_id:
+            type: string
+            format: uuid
+          incident_number:
+            type: string
+          incident_date:
+            type: string
+            format: date
+          incident_type:
+            type: string
+          status:
+            type: string
+          forms_generated:
+            type: integer
+    compliance:
+      type: object
+      properties:
+        neris_submission_rate:
+          type: number
+          description: Percentage of incidents with NERIS submitted
+        average_submission_delay_days:
+          type: number
+        overdue_incidents:
+          type: integer

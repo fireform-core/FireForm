@@ -41,6 +41,7 @@ class AsyncJobResponse(BaseModel):
     status: JobStatus
     estimated_seconds: int | None = None
     poll_url: str | None = None
+    report_id: str | None = None
 
 
 class Job(BaseModel):

@@ -84,6 +84,15 @@ PeriodType:
     - annual
   description: Reporting period type
 
+OutputFormat:
+  type: string
+  enum:
+    - pdf
+    - json
+    - both
+  default: pdf
+  description: Output format for generated reports
+
 LLMProvider:
   type: string
   enum:

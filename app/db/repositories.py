@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime, timezone
 from uuid import UUID
 
+from sqlalchemy import and_, or_
 from sqlmodel import Session, select
 
-from app.models import FormSubmission, Input, Job, Template
+from app.models import Extraction, Form, FormSubmission, Incident, Input, Job, Report, Template
 
 
 # Templates
@@ -127,4 +128,62 @@ def update_input(session: Session, input_obj: Input) -> Input:
     session.commit()
     session.refresh(input_obj)
     return input_obj
+
+
+# Reports
+def create_report(session: Session, report: Report) -> Report:
+    session.add(report)
+    session.commit()
+    session.refresh(report)
+    return report
+
+
+def get_report(session: Session, report_id: UUID) -> Report | None:
+    return session.get(Report, report_id)
+
+
+def update_report(session: Session, report: Report) -> Report:
+    session.add(report)
+    session.commit()
+    session.refresh(report)
+    return report
+
+
+# Incidents & Forms for Reporting
+def get_incidents_in_date_range(session: Session, start_date: date, end_date: date) -> list[Incident]:
+    statement = (
+        select(Incident)
+        .where(
+            Incident.deleted_at.is_(None),
+            or_(
+                Incident.incident_date.between(start_date, end_date),
+                and_(
+                    Incident.incident_date.is_(None),
+                    Incident.created_at >= datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc),
+                    Incident.created_at <= datetime.combine(end_date, datetime.max.time(), tzinfo=timezone.utc),
+                ),
+            ),
+        )
+        .order_by(Incident.incident_date.asc(), Incident.created_at.asc())
+    )
+    return list(session.exec(statement).all())
+
+
+def get_forms_for_incident(session: Session, incident_id: UUID) -> list[Form]:
+    statement = select(Form).where(Form.incident_id == incident_id)
+    return list(session.exec(statement).all())
+
+
+def get_forms_for_incidents(session: Session, incident_ids: list[UUID]) -> list[Form]:
+    if not incident_ids:
+        return []
+    statement = select(Form).where(Form.incident_id.in_(incident_ids))
+    return list(session.exec(statement).all())
+
+
+def get_extractions_by_ids(session: Session, extract_ids: list[UUID]) -> list[Extraction]:
+    if not extract_ids:
+        return []
+    statement = select(Extraction).where(Extraction.extract_id.in_(extract_ids))
+    return list(session.exec(statement).all())
 

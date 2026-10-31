@@ -115,6 +115,9 @@ RETENTION_PERIOD_DAYS = int(os.getenv("RETENTION_PERIOD_DAYS", "30"))
 # Voice input audio files land here: {AUDIO_DIR}/{input_id}.{ext}
 AUDIO_DIR = DATA_DIR / "audio"
 
+# Generated periodic reports land here: {REPORTS_DIR}/{filename}
+REPORTS_DIR = DATA_DIR / "reports"
+
 # Advisory estimate returned in VoiceInputResponse.estimated_processing_seconds.
 ESTIMATED_TRANSCRIPTION_SECONDS = int(os.getenv("ESTIMATED_TRANSCRIPTION_SECONDS", "30"))
 
