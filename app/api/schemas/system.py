@@ -103,6 +103,21 @@ class LLMPullRequest(BaseModel):
         return validate_model_name(value)
 
 
+class LLMModelDeleteRequest(BaseModel):
+    model: str
+    provider: str | None = "ollama"
+
+    @field_validator("model")
+    @classmethod
+    def _validate_model_name(cls, value: str) -> str:
+        return validate_model_name(value)
+
+
+class LLMModelDeleteResult(BaseModel):
+    model: str
+    deleted: bool
+
+
 class LLMTestRequest(BaseModel):
     provider: LLMProvider | None = None
     model: str | None = None
