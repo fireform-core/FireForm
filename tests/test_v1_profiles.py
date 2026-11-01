@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 from uuid import UUID
@@ -44,6 +45,37 @@ def test_profile_crud(client: TestClient, db: Session):
     # 4. Verify it actually saved to the database (UUID cast fixes the SQLite string quirk)
     db_profile = db.exec(select(Profile).where(Profile.profile_id == UUID(profile_id))).first()
     assert db_profile.role == "Battalion Chief"
+
+
+
+@pytest.mark.parametrize("field", ["name", "profession", "role"])
+def test_profile_patch_rejects_null_required_field(client: TestClient, field):
+    """An explicit null for a NOT NULL column is a 422, not a 500, and changes nothing."""
+    payload = {"name": "Jane Doe", "profession": "Firefighter", "role": "Captain"}
+    profile_id = client.post("/api/v1/profiles/", json=payload).json()["profile_id"]
+
+    response = client.patch(f"/api/v1/profiles/{profile_id}", json={field: None})
+    assert response.status_code == 422
+    body = response.json()
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["validation_errors"][0]["field"] == field
+
+    assert client.get(f"/api/v1/profiles/{profile_id}").json()[field] == payload[field]
+
+
+def test_profile_patch_allows_null_optional_fields(client: TestClient):
+    """description and custom_fields are nullable, and omitted fields are left alone."""
+    payload = {"name": "Jane Doe", "profession": "Firefighter", "role": "Captain", "description": "Station 42"}
+    profile_id = client.post("/api/v1/profiles/", json=payload).json()["profile_id"]
+
+    response = client.patch(
+        f"/api/v1/profiles/{profile_id}", json={"description": None, "custom_fields": None}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["description"] is None
+    assert data["custom_fields"] is None
+    assert data["name"] == "Jane Doe"
 
 
 def test_append_profile_context():
