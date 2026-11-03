@@ -84,8 +84,14 @@ class FormService:
     ) -> FormSubmission:
         registry = registry or llm.effective_registry(session)
         resolved_pdf = paths._resolve_project_file(template.pdf_path)
-        if not resolved_pdf.exists():
-            raise FileNotFoundError(f"PDF template not found at {template.pdf_path}")
+        if not resolved_pdf.is_file():
+            # The template row is there but its PDF was moved or deleted on disk
+            raise AppError(
+                f"PDF for template {template.id} not found at {template.pdf_path}",
+                status_code=404,
+                error_code="TEMPLATE_PDF_NOT_FOUND",
+                detail={"template_id": template.id, "pdf_path": template.pdf_path},
+            )
 
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         out_name = f"{resolved_pdf.stem}_{timestamp}_filled.pdf"
