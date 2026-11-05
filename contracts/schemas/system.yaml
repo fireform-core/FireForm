@@ -296,6 +296,33 @@ LLMPullRequest:
       default: ollama
       description: Must be ollama; other providers are rejected
 
+LLMModelDeleteRequest:
+  type: object
+  required:
+    - model
+  properties:
+    model:
+      type: string
+      maxLength: 128
+      pattern: "^[A-Za-z0-9][A-Za-z0-9._\\-/:]*$"
+      description: Ollama model tag to delete
+    provider:
+      type: string
+      nullable: true
+      default: ollama
+      description: Must be ollama; other providers are rejected
+
+LLMModelDeleteResult:
+  type: object
+  required:
+    - model
+    - deleted
+  properties:
+    model:
+      type: string
+    deleted:
+      type: boolean
+
 LLMModels:
   type: object
   required:

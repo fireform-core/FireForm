@@ -6,6 +6,7 @@ context size or the seed. Large forms need the 32k context, so we stay native.
 
 import json
 import logging
+import threading
 import time
 from collections.abc import Callable, Iterator
 
@@ -13,9 +14,85 @@ import requests
 
 from app.api.schemas.enums import HealthState, LLMProvider
 from app.services.llm.base import LLM, PROBE_TIMEOUT_SECONDS, LLMHealth, ModelInfo
-from app.services.llm.errors import LLMError, LLMModelNotFoundError, LLMResponseError, LLMUnavailableError
+from app.services.llm.errors import (
+    LLMError,
+    LLMModelNotFoundError,
+    LLMModelNotInstalledError,
+    LLMResponseError,
+    LLMUnavailableError,
+)
 
 logger = logging.getLogger(__name__)
+
+_ACTIVE_PULL_MODELS: set[str] = set()
+_ACTIVE_PULL_COUNTS: dict[str, int] = {}
+_ACTIVE_PULL_LOCK = threading.Lock()
+
+
+def _register_active_pull(model: str) -> None:
+    with _ACTIVE_PULL_LOCK:
+        _ACTIVE_PULL_COUNTS[model] = _ACTIVE_PULL_COUNTS.get(model, 0) + 1
+        _ACTIVE_PULL_MODELS.add(model)
+
+
+def _unregister_active_pull(model: str) -> None:
+    with _ACTIVE_PULL_LOCK:
+        count = _ACTIVE_PULL_COUNTS.get(model, 0)
+        if count <= 1:
+            _ACTIVE_PULL_COUNTS.pop(model, None)
+            _ACTIVE_PULL_MODELS.discard(model)
+        else:
+            _ACTIVE_PULL_COUNTS[model] = count - 1
+
+
+class _PullStream(Iterator[str]):
+    def __init__(self, response: requests.Response, iterator: Iterator[str], model: str):
+        self._response = response
+        self._iterator = iterator
+        self._model = model
+        self._started = False
+        self._finished = False
+        self._closed = False
+
+    def __iter__(self) -> "_PullStream":
+        return self
+
+    def __next__(self) -> str:
+        if self._closed:
+            raise StopIteration
+        self._started = True
+        try:
+            return next(self._iterator)
+        except StopIteration:
+            self._finished = True
+            self.close()
+            raise
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self) -> None:
+        if self._closed:
+            return
+        self._closed = True
+        try:
+            close = getattr(self._iterator, "close", None)
+            if close:
+                close()
+        finally:
+            try:
+                self._response.close()
+            finally:
+                _unregister_active_pull(self._model)
+                if not self._started and not self._finished:
+                    logger.info("pull of %s cancelled by the client", self._model)
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            logger.exception("Failed to close Ollama pull stream for %s", self._model)
+
 
 OPTIONS = {
     "num_ctx": 32768,
@@ -95,14 +172,58 @@ class OllamaLLM(LLM):
             if m.get("name")
         ]
 
-    def pull_model(self, model: str, on_success: Callable[[], None] | None = None) -> Iterator[str]:
+    def pull_model(self, model: str, on_success: Callable[[], None] | None = None) -> "_PullStream":
         """Stream pull progress from Ollama as newline-delimited JSON.
 
         Opens the connection before returning the generator so a down Ollama raises
         LLMUnavailableError (HTTP 503) instead of committing a 200 response.
         """
-        response = self._open_pull_stream(model)
-        return self._stream_pull(response, on_success=on_success)
+        _register_active_pull(model)
+        try:
+            response = self._open_pull_stream(model)
+        except BaseException:
+            _unregister_active_pull(model)
+            raise
+        try:
+            return self._stream_pull(response, on_success=on_success, model=model)
+        except BaseException:
+            try:
+                response.close()
+            finally:
+                _unregister_active_pull(model)
+            raise
+
+    @staticmethod
+    def is_model_pulling(model: str) -> bool:
+        with _ACTIVE_PULL_LOCK:
+            return model in _ACTIVE_PULL_MODELS
+
+    def delete_model(self, model: str) -> None:
+        """Delete an installed model from Ollama."""
+        try:
+            response = requests.delete(
+                self.host + "/api/delete",
+                json={"model": model},
+                timeout=PROBE_TIMEOUT_SECONDS,
+            )
+        except requests.Timeout as exc:
+            raise LLMUnavailableError(f"Ollama at {self.host} timed out deleting {model}") from exc
+        except requests.RequestException as exc:
+            raise LLMUnavailableError(f"Could not reach Ollama at {self.host}. Check OLLAMA_HOST: {exc}") from exc
+
+        try:
+            if response.status_code == 404:
+                raise LLMModelNotInstalledError(f"Ollama does not have model {model} installed.")
+            if response.status_code >= 500:
+                raise LLMUnavailableError(
+                    f"Ollama had a server error {response.status_code}: {_reason(response)}"
+                )
+            if not 200 <= response.status_code < 300:
+                raise LLMResponseError(
+                    f"Ollama refused to delete {model} with {response.status_code}: {_reason(response)}"
+                )
+        finally:
+            response.close()
 
     def _open_pull_stream(self, model: str) -> requests.Response:
         url = self.host + "/api/pull"
@@ -121,7 +242,15 @@ class OllamaLLM(LLM):
             raise LLMUnavailableError(f"Could not reach Ollama at {self.host}. Check OLLAMA_HOST: {exc}") from exc
 
     def _stream_pull(
-        self, response: requests.Response, on_success: Callable[[], None] | None = None
+        self, response: requests.Response, on_success: Callable[[], None] | None = None, model: str = ""
+    ) -> _PullStream:
+        return _PullStream(response, self._iterate_pull(response, on_success, model), model)
+
+    def _iterate_pull(
+        self,
+        response: requests.Response,
+        on_success: Callable[[], None] | None = None,
+        model: str = "",
     ) -> Iterator[str]:
         saw_error = False
         success_line: str | None = None
@@ -164,6 +293,9 @@ class OllamaLLM(LLM):
                 if buffer.strip():
                     if not inspect_line(buffer):
                         yield buffer.strip() + "\n"
+        except GeneratorExit:
+            logger.info("pull of %s cancelled by the client", model)
+            raise
         except requests.RequestException as exc:
             saw_error = True
             yield json.dumps({"error": str(exc)}) + "\n"

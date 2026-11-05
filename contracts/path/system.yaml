@@ -5,6 +5,7 @@
 # GET /api/v1/system/llm/models
 # POST /api/v1/system/llm/test
 # POST /api/v1/system/llm/pull
+# DELETE /api/v1/system/llm/models
 # GET /api/v1/system/llm/providers/config
 # PUT/DELETE /api/v1/system/llm/providers/config/{provider}
 # POST /api/v1/system/llm/providers/config/{provider}/validate
@@ -230,6 +231,89 @@ llm_models:
             example:
               error_code: "LLM_CONFIG_ERROR"
               message: "GEMINI_API_KEY is set but GEMINI_MODELS is empty. Add GEMINI_MODELS=gemini-2.5-flash, a comma separated list, or * for every model gemini lists."
+  delete:
+    operationId: deleteLLMModel
+    summary: Delete an installed Ollama model
+    description: |
+      Deletes an installed Ollama model. Only Ollama is supported, and the model
+      must be permitted by OLLAMA_MODELS (and OLLAMA_INSTALLABLE_MODELS when
+      OLLAMA_MODELS=*). The global default model, Ollama's provider default, and
+      models with an active pull cannot be deleted. A successful deletion
+      refreshes the Ollama catalog cache.
+    tags:
+      - system
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/system.yaml#/LLMModelDeleteRequest"
+          example:
+            provider: "ollama"
+            model: "qwen2.5:3b"
+    responses:
+      "200":
+        description: The Ollama model was deleted
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/system.yaml#/LLMModelDeleteResult"
+            example:
+              model: "qwen2.5:3b"
+              deleted: true
+      "404":
+        description: Ollama does not have the model installed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_MODEL_NOT_INSTALLED"
+              message: "Ollama does not have model qwen2.5:3b installed."
+      "409":
+        description: The model is a default or currently being pulled
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            examples:
+              default:
+                summary: Model is configured as a default
+                value:
+                  error_code: "LLM_MODEL_IN_USE"
+                  message: "Cannot delete qwen2.5:1.5b: it is the Ollama provider default model."
+              active_pull:
+                summary: Model is currently being downloaded
+                value:
+                  error_code: "LLM_MODEL_IN_USE"
+                  message: "Cannot delete qwen2.5:3b: a download is currently active."
+      "422":
+        description: Invalid model name, provider is not Ollama, Ollama is disabled, or model is not allowed
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_NOT_AVAILABLE"
+              message: "mistral:7b is not in OLLAMA_MODELS."
+      "502":
+        description: Ollama returned an unexpected response
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_BAD_RESPONSE"
+              message: "Ollama refused to delete qwen2.5:3b with 400."
+      "503":
+        description: Ollama could not be reached
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/common.yaml#/ErrorResponse"
+            example:
+              error_code: "LLM_UNAVAILABLE"
+              message: "Could not reach Ollama at http://ollama:11434. Check OLLAMA_HOST."
 
 llm_test:
   post:

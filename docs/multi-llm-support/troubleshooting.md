@@ -23,6 +23,8 @@ Check `make logs-app` for the app and `make logs-worker` for queued fills. Every
 | --------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `LLM_AUTH_FAILED`     | Wrong or expired key                                  | Replace `<PREFIX>_API_KEY`, then `make up`.                                      |
 | `LLM_MODEL_NOT_FOUND` | Typo, retired model, or not pulled in Ollama          | Pick a model from `GET /api/v1/system/llm/models`. If it appears under `downloadable`, install it with `POST /api/v1/system/llm/pull` (when the server allows that model), or run `ollama pull <model>` on the host. |
+| `LLM_MODEL_NOT_INSTALLED` | Ollama does not have the model being deleted       | Install it first, or choose a model shown as installed in `GET /api/v1/system/llm/models`. |
+| `LLM_MODEL_IN_USE` | The model is a default or has an active pull              | Change the configured default or wait for/cancel the pull, then retry `DELETE /api/v1/system/llm/models`. |
 | `LLM_UNAVAILABLE`     | Server down, wrong URL, or timeout                    | Check `<PREFIX>_BASE_URL` or `OLLAMA_HOST`. Raise `LLM_TIMEOUT` for slow models. |
 | `LLM_RATE_LIMITED`    | Provider quota or rate limit                          | Wait, or check the plan on the provider side.                                    |
 | `LLM_BAD_RESPONSE`    | Server rejected an option, or the answer was cut off  | Set `<PREFIX>_STRUCTURED_OUTPUT=false`, or raise `<PREFIX>_MAX_TOKENS`.          |

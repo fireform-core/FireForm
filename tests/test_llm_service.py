@@ -866,6 +866,7 @@ class _FakeStreamResponse:
         self._raise_at = raise_at  # raise raise_exc after this many chunks
         self._raise_exc = raise_exc
         self.status_code = 200
+        self.closed = False
 
     def raise_for_status(self):
         pass
@@ -881,6 +882,9 @@ class _FakeStreamResponse:
 
     def __exit__(self, *a):
         pass
+
+    def close(self):
+        self.closed = True
 
 
 def _pull_llm(pull_timeout=30):
@@ -908,6 +912,147 @@ class TestOllamaPull:
         assert parsed[0]["status"] == "pulling manifest"
         assert parsed[-1]["status"] == "success"
         assert fired == [1]
+
+    def test_client_cancellation_closes_response_and_cleans_active_pull(self, monkeypatch, caplog):
+        from app.services.llm.ollama import _ACTIVE_PULL_MODELS
+
+        model = "qwen2.5:3b"
+        response = _FakeStreamResponse([
+            b'{"status": "downloading"}\n',
+            b'{"status": "success"}\n',
+        ])
+        monkeypatch.setattr("app.services.llm.ollama.requests.post", lambda *a, **k: response)
+        fired = []
+        stream = _pull_llm().pull_model(model, on_success=lambda: fired.append(True))
+
+        assert model in _ACTIVE_PULL_MODELS
+        assert next(stream) == '{"status": "downloading"}\n'
+        stream.close()
+
+        assert response.closed
+        assert fired == []
+        assert model not in _ACTIVE_PULL_MODELS
+        with pytest.raises(StopIteration):
+            next(stream)
+        assert [record.getMessage() for record in caplog.records].count(
+            f"pull of {model} cancelled by the client"
+        ) == 1
+
+    def test_uniterated_client_cancellation_closes_response_and_cleans_active_pull(self, monkeypatch):
+        from app.services.llm.ollama import _ACTIVE_PULL_MODELS
+
+        model = "qwen2.5:3b"
+        response = _FakeStreamResponse([b'{"status": "success"}\n'])
+        monkeypatch.setattr("app.services.llm.ollama.requests.post", lambda *a, **k: response)
+        fired = []
+        stream = _pull_llm().pull_model(model, on_success=lambda: fired.append(True))
+
+        assert model in _ACTIVE_PULL_MODELS
+        stream.close()
+
+        assert response.closed
+        assert fired == []
+        assert model not in _ACTIVE_PULL_MODELS
+
+    def test_completed_pull_cleans_active_model(self, monkeypatch):
+        from app.services.llm.ollama import _ACTIVE_PULL_MODELS
+
+        model = "qwen2.5:3b"
+        response = _FakeStreamResponse([b'{"status": "success"}\n'])
+        monkeypatch.setattr("app.services.llm.ollama.requests.post", lambda *a, **k: response)
+
+        assert list(_pull_llm().pull_model(model)) == ['{"status": "success"}\n']
+
+        assert response.closed
+        assert model not in _ACTIVE_PULL_MODELS
+
+    def test_failed_pull_open_cleans_active_model(self, monkeypatch):
+        from app.services.llm.ollama import _ACTIVE_PULL_MODELS
+
+        model = "qwen2.5:3b"
+        monkeypatch.setattr(
+            "app.services.llm.ollama.requests.post",
+            lambda *a, **k: (_ for _ in ()).throw(requests.exceptions.ConnectionError("down")),
+        )
+
+        with pytest.raises(LLMUnavailableError):
+            _pull_llm().pull_model(model)
+
+        assert model not in _ACTIVE_PULL_MODELS
+
+
+class _FakeDeleteResponse:
+    def __init__(self, status_code, body=None):
+        self.status_code = status_code
+        self._body = body or {}
+        self.text = str(self._body)
+        self.closed = False
+
+    def json(self):
+        return self._body
+
+    def close(self):
+        self.closed = True
+
+
+class TestOllamaDelete:
+
+    def test_delete_model_sends_ollama_request(self, monkeypatch):
+        response = _FakeDeleteResponse(200)
+        calls = []
+
+        def fake_delete(url, **kwargs):
+            calls.append((url, kwargs))
+            return response
+
+        monkeypatch.setattr("app.services.llm.ollama.requests.delete", fake_delete)
+        _pull_llm().delete_model("qwen2.5:3b")
+
+        assert calls == [(
+            "http://ollama:11434/api/delete",
+            {"json": {"model": "qwen2.5:3b"}, "timeout": 5},
+        )]
+        assert response.closed
+
+    def test_delete_model_reports_not_installed(self, monkeypatch):
+        from app.services.llm import LLMModelNotInstalledError
+
+        response = _FakeDeleteResponse(404, {"error": "model not found"})
+        monkeypatch.setattr("app.services.llm.ollama.requests.delete", lambda *a, **k: response)
+
+        with pytest.raises(LLMModelNotInstalledError) as info:
+            _pull_llm().delete_model("missing:1b")
+
+        assert info.value.status_code == 404
+        assert info.value.error_code == "LLM_MODEL_NOT_INSTALLED"
+        assert response.closed
+
+    def test_delete_model_maps_unreachable_ollama_to_unavailable(self, monkeypatch):
+        monkeypatch.setattr(
+            "app.services.llm.ollama.requests.delete",
+            lambda *a, **k: (_ for _ in ()).throw(requests.exceptions.ConnectionError("down")),
+        )
+
+        with pytest.raises(LLMUnavailableError):
+            _pull_llm().delete_model("qwen2.5:3b")
+
+    def test_delete_model_maps_server_error_to_unavailable(self, monkeypatch):
+        response = _FakeDeleteResponse(500, {"error": "server failed"})
+        monkeypatch.setattr("app.services.llm.ollama.requests.delete", lambda *a, **k: response)
+
+        with pytest.raises(LLMUnavailableError, match="server error 500"):
+            _pull_llm().delete_model("qwen2.5:3b")
+
+        assert response.closed
+
+    def test_delete_model_maps_unexpected_response(self, monkeypatch):
+        response = _FakeDeleteResponse(400, {"error": "bad request"})
+        monkeypatch.setattr("app.services.llm.ollama.requests.delete", lambda *a, **k: response)
+
+        with pytest.raises(LLMResponseError, match="refused to delete"):
+            _pull_llm().delete_model("qwen2.5:3b")
+
+        assert response.closed
 
     def test_error_after_success_suppresses_success_and_callback(self, monkeypatch):
         """An error anywhere in the stream prevents success, even after Ollama's success line."""

@@ -6,6 +6,7 @@ Contract: contracts/path/system.yaml + contracts/schemas/system.yaml
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask
 from sqlmodel import Session
 
 from app.api.deps import get_db
@@ -13,6 +14,8 @@ from app.api.schemas.enums import LLMProvider
 from app.api.schemas.system import (
     DownloadableModel,
     LLMModelChoice,
+    LLMModelDeleteRequest,
+    LLMModelDeleteResult,
     LLMModels,
     LLMProviderModels,
     LLMPullRequest,
@@ -21,7 +24,11 @@ from app.api.schemas.system import (
     ModelInfo,
 )
 from app.services import llm
-from app.services.llm.errors import LLMNotAvailableError
+from app.services.llm.errors import (
+    LLMModelInUseError,
+    LLMModelNotInstalledError,
+    LLMNotAvailableError,
+)
 from app.services.llm.ollama import OllamaLLM
 
 router = APIRouter(prefix="/system/llm", tags=["system"])
@@ -96,4 +103,50 @@ def pull_llm_model(req: LLMPullRequest, db: Session = Depends(get_db)):
         req.model,
         on_success=lambda: registry.provider_catalog(LLMProvider.ollama, refresh=True),
     )
-    return StreamingResponse(stream, media_type="application/x-ndjson")
+    return StreamingResponse(
+        stream,
+        media_type="application/x-ndjson",
+        background=BackgroundTask(stream.close),
+    )
+
+
+@router.delete(
+    "/models",
+    response_model=LLMModelDeleteResult,
+    responses={
+        404: {"description": "Ollama does not have the model installed"},
+        409: {"description": "The model is a default or currently being pulled"},
+        422: {"description": "Invalid request or model is not allowed"},
+        502: {"description": "Ollama returned an unexpected response"},
+        503: {"description": "Ollama service unavailable"},
+    },
+    summary="Delete an installed Ollama model",
+)
+def delete_llm_model(req: LLMModelDeleteRequest, db: Session = Depends(get_db)):
+    registry = llm.effective_registry(db)
+    registry.validate_pull(req.provider, req.model)
+
+    client = registry.client(LLMProvider.ollama)
+    if not isinstance(client, OllamaLLM):
+        raise LLMNotAvailableError("Model deletion is only supported for Ollama.")
+
+    catalog = registry.provider_catalog(LLMProvider.ollama, refresh=True)
+    if catalog.error:
+        raise type(catalog.error)(catalog.error.message)
+    if not any(model.name == req.model and model.installed is True for model in catalog.models):
+        raise LLMModelNotInstalledError(f"Ollama does not have model {req.model} installed.")
+
+    ollama_default = registry.settings.providers[LLMProvider.ollama].default_model
+    if (
+        registry.default.provider is LLMProvider.ollama
+        and registry.default.model == req.model
+    ):
+        raise LLMModelInUseError(f"Cannot delete {req.model}: it is the global default model.")
+    if ollama_default == req.model:
+        raise LLMModelInUseError(f"Cannot delete {req.model}: it is the Ollama provider default model.")
+    if client.is_model_pulling(req.model):
+        raise LLMModelInUseError(f"Cannot delete {req.model}: a download is currently active.")
+
+    client.delete_model(req.model)
+    registry.provider_catalog(LLMProvider.ollama, refresh=True)
+    return LLMModelDeleteResult(model=req.model, deleted=True)
