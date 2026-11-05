@@ -39,6 +39,11 @@ class ProviderSpec:
 
 SPECS: dict[LLMProvider, ProviderSpec] = {
     LLMProvider.ollama: ProviderSpec(LLMProvider.ollama, needs_key=False),
+    LLMProvider.llama_cpp: ProviderSpec(
+        LLMProvider.llama_cpp,
+        "http://127.0.0.1:8080/v1",
+        needs_key=False,
+    ),
     LLMProvider.openai: ProviderSpec(
         LLMProvider.openai,
         "https://api.openai.com/v1",
