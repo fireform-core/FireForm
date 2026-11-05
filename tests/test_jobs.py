@@ -3,10 +3,12 @@
 from unittest.mock import ANY, patch
 from uuid import uuid4
 
+import pytest
 from sqlmodel import select
 
 from app.api.schemas.enums import InputStatus, InputType, JobStatus
 from app.core.config import API_PREFIX
+from app.core.errors.base import AppError
 from app.models import Input, Job
 from app.services.llm import ModelInfo
 
@@ -202,3 +204,29 @@ class TestJobEndpoints:
         job = db.exec(select(Job)).one()
         assert job.status == JobStatus.failed
         assert job.error["error_code"] == "QUEUE_UNAVAILABLE"
+
+    def test_task_records_missing_template_pdf(self, client, db):
+        """A queued job whose template PDF is gone fails with a code the UI can show."""
+        from sqlmodel import Session
+
+        from app.tasks.fill import fill_form_task
+
+        tpl_id = self._seed_template(client)
+        input_id = self._seed_input(db)
+        job = Job(job_type="form_generation", template_id=tpl_id, input_text="John Doe firefighter")
+        job.celery_task_id = job.job_id
+        db.add(job)
+        db.commit()
+
+        # Run the task body in-process, as the worker would, without a broker
+        fill_form_task.push_request(id=job.celery_task_id)
+        try:
+            with patch("app.tasks.fill.get_session", lambda: iter([Session(db.get_bind())])):
+                with pytest.raises(AppError):
+                    fill_form_task.run(tpl_id, "John Doe firefighter", str(input_id))
+        finally:
+            fill_form_task.pop_request()
+
+        db.refresh(job)
+        assert job.status == JobStatus.failed
+        assert job.error["error_code"] == "TEMPLATE_PDF_NOT_FOUND"
