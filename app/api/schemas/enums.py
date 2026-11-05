@@ -118,6 +118,7 @@ class OutputFormat(str, Enum):
 
 class LLMProvider(str, Enum):
     ollama = "ollama"
+    llama_cpp = "llama_cpp"
     openai = "openai"
     gemini = "gemini"
     anthropic = "anthropic"
