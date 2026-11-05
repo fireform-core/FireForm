@@ -29,17 +29,15 @@ CreateProfileRequest:
 
 UpdateProfileRequest:
   type: object
-  description: Only the keys sent are changed.
+  description: Only the keys sent are changed. name, profession and role
+    can be left out but not set to null.
   properties:
     name:
       type: string
-      nullable: true
     profession:
       type: string
-      nullable: true
     role:
       type: string
-      nullable: true
     description:
       type: string
       nullable: true

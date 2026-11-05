@@ -445,7 +445,7 @@ class TestFormEndpoints:
         assert body["detail"]["status"] == "failed"
 
     def test_fill_form_template_file_not_found(self, client, mock_controller, db):
-        # Template with a non-existent PDF path → service raises FileNotFoundError
+        # Template with a non-existent PDF path → 404 naming the missing file
         tpl_id = self._seed_template(client, mock_controller)
         input_id = self._seed_input(db)
 
@@ -454,8 +454,11 @@ class TestFormEndpoints:
             "input_id": str(input_id),
         })
         # The service detects the missing PDF before calling filler.fill
-        assert resp.status_code == 500
-        assert resp.json()["error_code"] == "FORM_FILL_ERROR"
+        assert resp.status_code == 404
+        body = resp.json()
+        assert body["error_code"] == "TEMPLATE_PDF_NOT_FOUND"
+        assert body["detail"] == {"template_id": tpl_id, "pdf_path": "src/inputs/employee.pdf"}
+        mock_controller["mock_fill"].assert_not_called()
 
     def test_fill_form_validates_body(self, client):
         """Missing required fields → 422 with contract envelope."""

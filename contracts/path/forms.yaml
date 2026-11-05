@@ -48,7 +48,9 @@ fill:
               input_text: "62 year old male, chest pain, transported to St. Mary's."
               output_pdf_path: "output/forms/3_12.pdf"
       "404":
-        description: Template or input not found
+        description: Template or input not found (TEMPLATE_NOT_FOUND,
+          INPUT_NOT_FOUND), or the template's PDF is no longer on disk
+          (TEMPLATE_PDF_NOT_FOUND)
         content:
           application/json:
             schema:
