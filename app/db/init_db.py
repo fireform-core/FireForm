@@ -7,13 +7,13 @@ from alembic.util import CommandError
 from sqlmodel import Session, select, text
 
 from alembic import command
-from app.core.config import SEED_TEMPLATE_PDF_PATH
+from app.core.config import BASE_DIR, SEED_TEMPLATE_PDF_PATH
 from app.db.database import engine
 from app.models import Template
 
 logger = logging.getLogger(__name__)
 
-ALEMBIC_INI = str(Path(__file__).resolve().parents[2] / "alembic.ini")
+ALEMBIC_INI = str(BASE_DIR / "alembic.ini")
 
 
 def _alembic_cfg() -> Config:

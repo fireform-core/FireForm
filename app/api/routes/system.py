@@ -18,7 +18,7 @@ from app.api.schemas.system import (
     HealthComponents,
     HealthStatus,
 )
-from app.core.config import APP_VERSION, DATA_DIR, WHISPER_HOST
+from app.core.config import APP_VERSION, DATA_DIR, WHISPER_ENABLED, WHISPER_HOST
 from app.db.database import engine
 from app.services import llm
 
@@ -56,6 +56,8 @@ def _check_llm() -> ComponentHealth:
 
 
 def _check_whisper() -> ComponentHealth:
+    if not WHISPER_ENABLED:
+        return ComponentHealth(status=HealthState.healthy, detail="Whisper disabled")
     # The onerahmet/openai-whisper-asr-webservice image does not expose /health.
     # Both compose files probe /docs (a FastAPI auto-endpoint always present).
     t0 = time.monotonic()

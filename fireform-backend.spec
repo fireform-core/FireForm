@@ -1,0 +1,108 @@
+# -*- mode: python ; coding: utf-8 -*-
+from pathlib import Path
+import sys
+
+block_cipher = None
+
+datas = [
+    ("alembic.ini", "."),
+    ("alembic", "alembic"),
+    ("data/inputs/file_template_manual.pdf", "data/inputs"),
+    ("app/services/form_filler/prompt.txt", "app/services/form_filler"),
+]
+
+hiddenimports = [
+    "uvicorn",
+    "uvicorn.logging",
+    "uvicorn.loops",
+    "uvicorn.loops.auto",
+    "uvicorn.protocols",
+    "uvicorn.protocols.http",
+    "uvicorn.protocols.http.auto",
+    "uvicorn.protocols.websockets",
+    "uvicorn.protocols.websockets.auto",
+    "uvicorn.lifespans",
+    "uvicorn.lifespans.on",
+    "fastapi",
+    "sqlmodel",
+    "sqlalchemy",
+    "sqlalchemy.dialects.sqlite",
+    "alembic",
+    "alembic.runtime.migration",
+    "alembic.operations",
+    "celery",
+    "celery.fixups",
+    "celery.fixups.django",
+    "kombu",
+    "kombu.transport.memory",
+    "pdfrw",
+    "openai",
+    "httpx",
+    "requests",
+    "cryptography",
+    "pypdf",
+    "pdfplumber",
+    "app.api.routes.forms",
+    "app.api.routes.input",
+    "app.api.routes.jobs",
+    "app.api.routes.llm",
+    "app.api.routes.llm_config",
+    "app.api.routes.profiles",
+    "app.api.routes.system",
+    "app.api.routes.templates",
+    "app.api.routes.weather",
+    "app.api.routes.zipcode",
+    "app.models.models",
+    "app.tasks.fill",
+    "app.tasks.purge",
+    "app.tasks.transcribe",
+]
+
+a = Analysis(
+    ["app/desktop.py"],
+    pathex=["."],
+    binaries=[],
+    datas=datas,
+    hiddenimports=hiddenimports,
+    hookspath=[],
+    hooksconfig={},
+    runtime_hooks=[],
+    excludes=[
+        "tkinter",
+        "matplotlib",
+        "torch",
+        "torchvision",
+        "ultralytics",
+        "cv2",
+        "scipy",
+        "pytest",
+        "IPython",
+    ],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name="api-backend",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
