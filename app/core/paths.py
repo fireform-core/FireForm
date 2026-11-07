@@ -2,9 +2,14 @@ from pathlib import Path
 
 from fastapi import HTTPException
 
-from app.core.config import BASE_DIR, DEFAULT_TEMPLATE_DIR
+from app.core.config import BASE_DIR, DATA_DIR, DEFAULT_TEMPLATE_DIR
 
 PROJECT_ROOT = BASE_DIR
+
+
+def _is_allowed_path(candidate: Path) -> bool:
+    allowed = (PROJECT_ROOT, DATA_DIR)
+    return any(candidate == root or root in candidate.parents for root in allowed)
 
 
 def _resolve_target_directory(directory: str) -> Path:
@@ -18,8 +23,8 @@ def _resolve_target_directory(directory: str) -> Path:
     else:
         candidate = candidate.resolve()
 
-    if candidate != PROJECT_ROOT and PROJECT_ROOT not in candidate.parents:
-        raise HTTPException(status_code=400, detail="Directory must be inside the project.")
+    if not _is_allowed_path(candidate):
+        raise HTTPException(status_code=400, detail="Directory must be inside the project or data directory.")
 
     return candidate
 
@@ -35,7 +40,7 @@ def _resolve_project_file(file_path: str) -> Path:
     else:
         candidate = candidate.resolve()
 
-    if candidate != PROJECT_ROOT and PROJECT_ROOT not in candidate.parents:
-        raise HTTPException(status_code=400, detail="Path must be inside the project.")
+    if not _is_allowed_path(candidate):
+        raise HTTPException(status_code=400, detail="Path must be inside the project or data directory.")
 
     return candidate

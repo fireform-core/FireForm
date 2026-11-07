@@ -6,20 +6,28 @@ of calling os.getenv() in scattered places.
 """
 
 import os
+import sys
 from pathlib import Path
 
-# Repo root. config.py lives at app/core/config.py -> parents[2] is the repo root.
-BASE_DIR = Path(__file__).resolve().parents[2]
+# Repo root or PyInstaller bundle root.
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    BASE_DIR = Path(sys._MEIPASS).resolve()
+else:
+    BASE_DIR = Path(__file__).resolve().parents[2]
 
 # --- App metadata ---------------------------------------------------------
 APP_TITLE = "FireForm API"
 APP_VERSION = "1.1.0"
+
+# --- Desktop Mode ---------------------------------------------------------
+FIREFORM_DESKTOP = os.getenv("FIREFORM_DESKTOP", "false").lower() in ("true", "1", "yes")
 
 # --- Runtime data paths ---------------------------------------------------
 # Uploaded templates and generated PDFs. Project-relative paths the API echoes
 # back to the client are resolved against BASE_DIR (the "inside the project"
 # guard in the templates routes). Override the data dir with FIREFORM_DATA_DIR.
 DATA_DIR = Path(os.getenv("FIREFORM_DATA_DIR", BASE_DIR / "data")).resolve()
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Directory new uploads land in, as a project-relative string (was "src/inputs"
 # before the restructure). Override with FIREFORM_TEMPLATE_DIR.
@@ -28,13 +36,15 @@ DEFAULT_TEMPLATE_DIR = os.getenv("FIREFORM_TEMPLATE_DIR", "data/inputs")
 SEED_TEMPLATE_PDF_PATH = "data/inputs/file_template_manual.pdf"
 
 # --- Database -------------------------------------------------------------
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+psycopg2://fireform:fireform@localhost:5432/fireform",
+_DEFAULT_DATABASE_URL = (
+    f"sqlite:///{DATA_DIR / 'fireform.db'}"
+    if FIREFORM_DESKTOP
+    else "postgresql+psycopg2://fireform:fireform@localhost:5432/fireform"
 )
+DATABASE_URL = os.getenv("DATABASE_URL", _DEFAULT_DATABASE_URL)
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
-DB_ECHO = os.getenv("FIREFORM_DB_ECHO", "true").lower() == "true"
+DB_ECHO = os.getenv("FIREFORM_DB_ECHO", "false" if FIREFORM_DESKTOP else "true").lower() == "true"
 
 # --- External services ----------------------------------------------------
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/")
@@ -73,10 +83,12 @@ LLM_PROVIDER_ENV = {
 }
 
 WHISPER_HOST = os.getenv("WHISPER_HOST", "http://localhost:9000").rstrip("/")
+WHISPER_ENABLED = os.getenv("WHISPER_ENABLED", "false" if FIREFORM_DESKTOP else "true").lower() in ("true", "1", "yes")
 
 # --- Celery / Redis -------------------------------------------------------
-CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+_DEFAULT_CELERY_BROKER = "" if FIREFORM_DESKTOP else "redis://localhost:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", _DEFAULT_CELERY_BROKER)
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", _DEFAULT_CELERY_BROKER)
 
 # --- CORS -----------------------------------------------------------------
 _DEFAULT_ORIGINS = "http://127.0.0.1:5173,http://localhost:5173"

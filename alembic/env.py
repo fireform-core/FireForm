@@ -56,11 +56,13 @@ def compare_type(context, inspected_column, metadata_column, inspected_type, met
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
+    is_sqlite = bool(url and url.startswith("sqlite"))
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         compare_type=compare_type,
+        render_as_batch=is_sqlite,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -80,6 +82,7 @@ def run_migrations_online():
                 connection=connection,
                 target_metadata=target_metadata,
                 compare_type=compare_type,
+                render_as_batch=connection.dialect.name == "sqlite",
             )
             with context.begin_transaction():
                 context.run_migrations()
@@ -88,6 +91,7 @@ def run_migrations_online():
             connection=connectable,
             target_metadata=target_metadata,
             compare_type=compare_type,
+            render_as_batch=connectable.dialect.name == "sqlite",
         )
         with context.begin_transaction():
             context.run_migrations()

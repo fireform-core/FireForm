@@ -1,0 +1,64 @@
+name: Build Desktop Binaries
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build-binaries:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            artifact_name: api-backend-macos
+            binary_src: dist/api-backend
+            binary_dest: dist/api-backend-macos
+          - os: ubuntu-latest
+            artifact_name: api-backend-linux
+            binary_src: dist/api-backend
+            binary_dest: dist/api-backend-linux
+          - os: windows-latest
+            artifact_name: api-backend-windows.exe
+            binary_src: dist/api-backend.exe
+            binary_dest: dist/api-backend-windows.exe
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: pyinstaller --clean -y fireform-backend.spec
+
+      - name: Prepare binary artifact
+        shell: bash
+        run: |
+          mv "${{ matrix.binary_src }}" "${{ matrix.binary_dest }}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.binary_dest }}
+
+      - name: Attach to GitHub Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.binary_dest }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

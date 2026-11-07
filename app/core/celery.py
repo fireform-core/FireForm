@@ -1,13 +1,15 @@
 from celery import Celery
-from app.core.config import CELERY_BROKER_URL, CELERY_RESULT_BACKEND
+from app.core.config import CELERY_BROKER_URL, CELERY_RESULT_BACKEND, FIREFORM_DESKTOP
 # Optional Celery Beat schedule — runs purge_old_submissions once a day.
 # Enable by running: celery -A app.core.celery beat
 from celery.schedules import crontab
 
+is_in_process = FIREFORM_DESKTOP or not CELERY_BROKER_URL
+
 celery_app = Celery(
     "fireform",
-    broker=CELERY_BROKER_URL,
-    backend=CELERY_RESULT_BACKEND,
+    broker=CELERY_BROKER_URL if not is_in_process else "memory://",
+    backend=CELERY_RESULT_BACKEND if not is_in_process else "cache+memory://",
 )
 
 celery_app.conf.update(
@@ -17,6 +19,12 @@ celery_app.conf.update(
     task_track_started=True,
     result_expires=86400,
 )
+
+if is_in_process:
+    celery_app.conf.update(
+        task_always_eager=True,
+        task_eager_propagates=False,
+    )
 
 celery_app.conf.include = ["app.tasks.fill", "app.tasks.purge", "app.tasks.transcribe"]
 

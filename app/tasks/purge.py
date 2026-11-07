@@ -11,7 +11,7 @@ from pathlib import Path
 from sqlmodel import select
 
 from app.core.celery import celery_app
-from app.core.config import RETENTION_PERIOD_DAYS
+from app.core.config import DATA_DIR, RETENTION_PERIOD_DAYS
 from app.core.paths import PROJECT_ROOT
 from app.db.database import get_session
 from app.db.repositories import delete_form_submission
@@ -29,9 +29,10 @@ def _safe_delete_file(file_path: str) -> bool:
         else:
             candidate = candidate.resolve()
 
-        # Safety: must stay inside project root
-        if candidate != PROJECT_ROOT and PROJECT_ROOT not in candidate.parents:
-            logger.warning("Skipping file outside project root: %s", candidate)
+        # Safety: must stay inside project root or data directory
+        allowed = (PROJECT_ROOT, DATA_DIR)
+        if not any(candidate == root or root in candidate.parents for root in allowed):
+            logger.warning("Skipping file outside project root / data dir: %s", candidate)
             return False
 
         if candidate.exists() and candidate.is_file():

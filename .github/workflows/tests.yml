@@ -10,20 +10,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: fireform
-          POSTGRES_PASSWORD: fireform
-          POSTGRES_DB: fireform
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U fireform"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    # Tests use SQLite in-memory via conftest.py — no external database service needed.
 
     steps:
       - uses: actions/checkout@v4
@@ -45,10 +32,10 @@ jobs:
         run: |
           python -m pytest tests/ -v --tb=short
 
-      - name: Check for un-migrated model changes
+      - name: Check for un-migrated model changes (SQLite)
         env:
           PYTHONPATH: .
-          DATABASE_URL: postgresql://fireform:fireform@localhost:5432/fireform
+          DATABASE_URL: sqlite:///ci_migration_check.db
         run: |
           python -m alembic upgrade head
           python -m alembic check
