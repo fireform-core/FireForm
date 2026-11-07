@@ -18,7 +18,12 @@ celery_app.conf.update(
     result_expires=86400,
 )
 
-celery_app.conf.include = ["app.tasks.fill", "app.tasks.purge", "app.tasks.transcribe"]
+celery_app.conf.include = [
+    "app.tasks.fill",
+    "app.tasks.purge",
+    "app.tasks.transcribe",
+    "app.tasks.report",
+]
 
 
 celery_app.conf.beat_schedule = {

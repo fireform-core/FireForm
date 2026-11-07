@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime, timezone
 from uuid import UUID
 
 from sqlmodel import Session, select
 
-from app.models import FormSubmission, Input, Job, Template
+from app.models import FormSubmission, Input, Job, Report, Template
 
 
 # Templates
@@ -127,4 +127,42 @@ def update_input(session: Session, input_obj: Input) -> Input:
     session.commit()
     session.refresh(input_obj)
     return input_obj
+
+
+# Reports
+def create_report(session: Session, report: Report) -> Report:
+    session.add(report)
+    session.commit()
+    session.refresh(report)
+    return report
+
+
+def get_report(session: Session, report_id: UUID) -> Report | None:
+    return session.get(Report, report_id)
+
+
+def update_report(session: Session, report: Report) -> Report:
+    session.add(report)
+    session.commit()
+    session.refresh(report)
+    return report
+
+
+# Submissions for Reporting
+def get_submissions_in_date_range(
+    session: Session, start_date: date, end_date: date
+) -> list[tuple[FormSubmission, str | None]]:
+    start_dt = datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc)
+    end_dt = datetime.combine(end_date, datetime.max.time(), tzinfo=timezone.utc)
+    statement = (
+        select(FormSubmission, Template.name)
+        .join(Template, FormSubmission.template_id == Template.id, isouter=True)
+        .where(
+            FormSubmission.created_at >= start_dt,
+            FormSubmission.created_at <= end_dt,
+        )
+        .order_by(FormSubmission.created_at.asc(), FormSubmission.id.asc())
+    )
+    return list(session.exec(statement).all())
+
 

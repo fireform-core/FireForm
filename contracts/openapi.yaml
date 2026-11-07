@@ -31,6 +31,8 @@ tags:
     description: Address and postal code geocoding via external API
   - name: profiles
     description: Profile of the person filling forms
+  - name: reporting
+    description: Periodic aggregate report generation and statistics
 
 paths:
   # ── Layer 1: Input ──────────────────────────────────────────────
@@ -58,6 +60,12 @@ paths:
     $ref: "path/forms.yaml#/purge"
   /api/v1/forms/{submission_id}:
     $ref: "path/forms.yaml#/submission_by_id"
+
+  # ── Layer 4: Reporting ──────────────────────────────────────────
+  /api/v1/reports/generate:
+    $ref: "path/reporting.yaml#/generate"
+  /api/v1/reports/{report_id}:
+    $ref: "path/reporting.yaml#/report_by_id"
 
   # ── Layer 6: Templates & Configuration ─────────────────────────
   /api/v1/templates:
