@@ -5,7 +5,6 @@ Enables FIREFORM_DESKTOP mode by default.
 """
 
 import os
-import sys
 
 # Ensure FIREFORM_DESKTOP is enabled when running via desktop binary
 os.environ.setdefault("FIREFORM_DESKTOP", "true")

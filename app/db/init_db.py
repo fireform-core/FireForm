@@ -1,6 +1,5 @@
 import datetime
 import logging
-from pathlib import Path
 
 from alembic.config import Config
 from alembic.util import CommandError
